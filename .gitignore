@@ -5,3 +5,41 @@
 /.vs/
 *.user
 *.log
+__pycache__/
+
+# Generated / private media must not be added to the source repository.
+# Case-insensitive patterns also cover camera originals named *.MOV / *.MP4.
+/private-media/
+*.[mM][oO][vV]
+*.[mM][pP]4
+*.[mM]4[vV]
+*.[mM][kK][vV]
+*.[aA][vV][iI]
+*.[mM][xX][fF]
+*.[wW][eE][bB][mM]
+*.[mM][tT][sS]
+*.[mM]2[tT][sS]
+*.[wW][aA][vV]
+*.[aA][iI][fF]
+*.[aA][iI][fF][fF]
+*.[pP][cC][mM]
+*.[yY][uU][vV]
+*.[rR][gG][bB]
+*.[rR][aA][wW]
+*.gbrpf32le
+*.validation.json
+*.gui-test.json
+*.[mM][oO][vV].png
+
+# Local preferences, validation caches and build products are never source.
+settings.json
+settings-*.tmp
+*.partial.mov
+*.exe
+*.dll
+*.pdb
+*.obj
+*.lib
+*.ilk
+*.zip
+*.7z

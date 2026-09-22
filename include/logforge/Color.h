@@ -1,4 +1,7 @@
 #pragma once
+#include <array>
+#include <cstdint>
+#include <limits>
 #include <span>
 
 namespace logforge {
@@ -21,9 +24,30 @@ struct HLG {
     static double EncodeSceneLinear(double linear) noexcept;
 };
 
-// Exposure convention: 75% HLG signal = a 90% diffuse reflecting reference.
-// This is a declared workflow assumption, not a recovered camera exposure.
+// ITU-R BT.2408 reference: 75% HLG = 100% reflecting diffuse white.
+// Applying the nominal reference to footage does not recover camera exposure.
 double HLGToReflectanceScale() noexcept;
+void ValidateExposureStops(double stops);
 double HLGToAppleLog(double encoded, double exposureStops = 0.0) noexcept;
-void TransformHLGToAppleLog(std::span<float> planarRgb, double exposureStops = 0.0);
+
+// Optional creative rendering, independent of the Apple Log transfer function.
+// Positive shadowStops lifts shadows; positive highlightStops lowers highlights.
+struct ToneAdjustments {
+    bool enabled = false;
+    double shadowStops = 3.0;
+    double highlightStops = 1.0;
+    double saturation = 0.85;
+};
+void ValidateToneAdjustments(const ToneAdjustments& tone);
+std::array<double, 3> AdjustSceneLinearBT2020(const std::array<double, 3>& rgb,
+                                              const ToneAdjustments& tone) noexcept;
+struct SignalStatistics {
+    uint64_t samples = 0, appleFloorClipped = 0, aboveNominalWhite = 0;
+    double inputMinimum = std::numeric_limits<double>::infinity();
+    double inputMaximum = -std::numeric_limits<double>::infinity();
+    double outputMinimum = std::numeric_limits<double>::infinity();
+    double outputMaximum = -std::numeric_limits<double>::infinity();
+};
+void TransformHLGToAppleLog(std::span<float> planarRgb, double exposureStops = 0.0,
+                            const ToneAdjustments& tone = {}, SignalStatistics* statistics = nullptr);
 } // namespace logforge

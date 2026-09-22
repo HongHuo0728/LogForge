@@ -1,8 +1,10 @@
 #include <windows.h>
-1 RT_MANIFEST "LogForge.manifest"
+#include "VersionResource.h"
+1 RT_MANIFEST LF_MANIFEST_PATH
+101 ICON LF_ICON_PATH
 1 VERSIONINFO
-FILEVERSION 0,1,0,0
-PRODUCTVERSION 0,1,0,0
+FILEVERSION LF_FILE_VERSION
+PRODUCTVERSION LF_FILE_VERSION
 FILEFLAGSMASK 0x3fL
 FILEOS VOS_NT_WINDOWS32
 FILETYPE VFT_APP
@@ -13,11 +15,15 @@ BEGIN
   BEGIN
    VALUE "CompanyName", "LogForge Contributors"
    VALUE "FileDescription", "LogForge HLG to Apple Log transcoder"
-   VALUE "FileVersion", "0.1.0"
+   VALUE "FileVersion", LF_VERSION_STRING
    VALUE "InternalName", "LogForge"
+#ifdef LOGFORGE_CLI
+   VALUE "OriginalFilename", "LogForge-cli.exe"
+#else
    VALUE "OriginalFilename", "LogForge.exe"
+#endif
    VALUE "ProductName", "LogForge"
-   VALUE "ProductVersion", "0.1.0"
+   VALUE "ProductVersion", LF_VERSION_STRING
    VALUE "LegalCopyright", "Copyright (c) 2026 LogForge Contributors"
   END
  END

@@ -19,6 +19,14 @@ The checksum was retrieved from the provider over HTTPS and the downloaded archi
 
 FFmpeg.org's download page links to Gyan's Windows builds. FFmpeg.org itself distributes source releases, not this Windows executable. The essentials build includes `libzimg`/`zscale` and `prores_ks`; LogForge also checks those at runtime instead of assuming that any file called ffmpeg.exe is suitable.
 
+## Automatic discovery
+
+Before offering installation, LogForge checks its managed tool location, a saved manual choice, the cached automatic choice, PATH and common locations. It then searches accessible local fixed/removable volumes, including mounted folders. A candidate needs both executables and must pass version, feature and actual ProRes/float tests. Discovery stops at the first verified pair and caches it for the next launch; cached files are revalidated.
+
+Scanning is read-only apart from LogForge's local logs/cache and capability-test temporary files. It never changes PATH or deletes another installation. The UI reports actual directory/candidate counts and supports cancellation. Inaccessible, unavailable and offline locations are skipped; reparse subdirectories, recycle bins and protected restore data are excluded. Remote network drives are not scanned. This is a search of accessible local storage, not a guarantee about unreadable or disconnected disks.
+
+Only after this search completes unsuccessfully do **Download FFmpeg** and **Locate FFmpeg...** appear. Both disappear when a compatible installation is ready. A cancelled scan offers **Search drives again** without falsely claiming a complete search.
+
 ## Installation mechanics
 
 `FFmpegBuildProvider` supplies a `DownloadSpec`; `GyanReleaseProvider` implements the current spec. `FFmpegDownloader` handles transport, SHA-256 verification and installation independently of the provider.

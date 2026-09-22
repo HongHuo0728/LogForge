@@ -1,21 +1,22 @@
 #include "logforge/Transcode.h"
-#include <commctrl.h>
-#include <dwmapi.h>
+#include "logforge/Ui.h"
+#include <algorithm>
+#include <cmath>
 #include <iomanip>
+#include <map>
 #include <memory>
 #include <shellapi.h>
 #include <shlobj.h>
 #include <shobjidl.h>
 #include <sstream>
 #include <thread>
-#include <uxtheme.h>
-#include <wincodec.h>
 #include <wrl/client.h>
 
 namespace logforge {
 using Microsoft::WRL::ComPtr;
 namespace {
 constexpr UINT EventMessage = WM_APP + 1;
+constexpr double ExposureValues[]{-4, -3, -2, -1, -.5, 0, .5, 1, 2, 3, 4};
 enum Control {
     Open = 101,
     ChooseOutput,
@@ -29,82 +30,40 @@ enum Control {
     StageText,
     ToolText,
     ProgressBar,
-    DropZone
+    DropZone,
+    Exposure,
+    SettingsButton,
+    DetailsButton,
+    RescanButton
 };
-enum class Kind { Progress, Detect, Probe, Convert, Install, Failure };
+enum class Kind { Progress, Discovery, Detect, Probe, Convert, Install, Failure };
 struct Event {
     Kind kind;
     JobProgress progress;
+    DiscoveryProgress discovery;
     std::optional<FFmpegInstallation> tools;
     std::optional<MediaInfo> media;
-    std::string error;
+    Message error{TextId::Unexpected, {"Unknown error"}};
+    std::vector<Message> details;
+    std::optional<ValidationReport> validation;
 };
-std::wstring ControlText(HWND h) {
-    int n = GetWindowTextLengthW(h);
-    std::wstring s(n + 1, 0);
-    GetWindowTextW(h, s.data(), n + 1);
-    s.resize(n);
-    return s;
-}
-bool SaveWindowSnapshot(HWND window, const fs::path& destination) {
-    // A test-only capture of this application's own window, including child controls.
-    RECT rect{};
-    GetClientRect(window, &rect);
-    HDC screen = GetDC(window);
-    if (!screen)
-        return false;
-    HDC memory = CreateCompatibleDC(screen);
-    HBITMAP bitmap = CreateCompatibleBitmap(screen, rect.right - rect.left, rect.bottom - rect.top);
-    HGDIOBJ previous = SelectObject(memory, bitmap);
-    RedrawWindow(window, nullptr, nullptr, RDW_INVALIDATE | RDW_ALLCHILDREN | RDW_UPDATENOW);
-    DwmFlush();
-    BOOL painted = PrintWindow(window, memory, 3);
-    SelectObject(memory, previous);
-    DeleteDC(memory);
-    ReleaseDC(window, screen);
-    ComPtr<IWICImagingFactory> factory;
-    ComPtr<IWICBitmap> image;
-    ComPtr<IWICStream> stream;
-    ComPtr<IWICBitmapEncoder> encoder;
-    ComPtr<IWICBitmapFrameEncode> frame;
-    HRESULT hr =
-        CoCreateInstance(CLSID_WICImagingFactory, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&factory));
-    if (SUCCEEDED(hr))
-        hr = factory->CreateBitmapFromHBITMAP(bitmap, nullptr, WICBitmapIgnoreAlpha, &image);
-    if (SUCCEEDED(hr))
-        hr = factory->CreateStream(&stream);
-    if (SUCCEEDED(hr))
-        hr = stream->InitializeFromFilename(destination.c_str(), GENERIC_WRITE);
-    if (SUCCEEDED(hr))
-        hr = factory->CreateEncoder(GUID_ContainerFormatPng, nullptr, &encoder);
-    if (SUCCEEDED(hr))
-        hr = encoder->Initialize(stream.Get(), WICBitmapEncoderNoCache);
-    if (SUCCEEDED(hr))
-        hr = encoder->CreateNewFrame(&frame, nullptr);
-    if (SUCCEEDED(hr))
-        hr = frame->Initialize(nullptr);
-    if (SUCCEEDED(hr))
-        hr = frame->WriteSource(image.Get(), nullptr);
-    if (SUCCEEDED(hr))
-        hr = frame->Commit();
-    if (SUCCEEDED(hr))
-        hr = encoder->Commit();
-    DeleteObject(bitmap);
-    return painted && SUCCEEDED(hr);
-}
-std::optional<fs::path> SelectFile(HWND owner, bool save, bool executable, const fs::path& defaultPath = {}) {
+std::optional<fs::path> SelectFile(HWND owner, bool save, bool executable, Language language,
+                                   const fs::path& defaultPath = {}) {
     ComPtr<IFileDialog> dialog;
     HRESULT hr =
         save ? CoCreateInstance(CLSID_FileSaveDialog, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&dialog))
              : CoCreateInstance(CLSID_FileOpenDialog, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&dialog));
     if (FAILED(hr))
-        throw std::runtime_error("无法打开 Windows 文件选择器。");
+        throw AppError(TextId::DialogOpenFailed);
     DWORD flags = 0;
     dialog->GetOptions(&flags);
     dialog->SetOptions(flags | FOS_FORCEFILESYSTEM | (save ? FOS_PATHMUSTEXIST : FOS_FILEMUSTEXIST));
-    const COMDLG_FILTERSPEC movie[] = {{L"QuickTime / 视频文件", L"*.mov;*.mp4;*.mxf"},
-                                       {L"所有文件", L"*.*"}};
-    const COMDLG_FILTERSPEC exe[] = {{L"FFmpeg executable", L"ffmpeg.exe"}};
+    const auto movieLabel = TranslateWide(TextId::VideoFiles, language),
+               allLabel = TranslateWide(TextId::AllFiles, language);
+    const COMDLG_FILTERSPEC movie[] = {{movieLabel.c_str(), L"*.mov;*.mp4;*.mxf"},
+                                       {allLabel.c_str(), L"*.*"}};
+    const auto executableLabel = TranslateWide(TextId::FFmpegExecutable, language);
+    const COMDLG_FILTERSPEC exe[] = {{executableLabel.c_str(), L"ffmpeg.exe"}};
     const COMDLG_FILTERSPEC mov[] = {{L"QuickTime MOV", L"*.mov"}};
     dialog->SetFileTypes(executable ? 1 : save ? 1 : 2, executable ? exe : save ? mov : movie);
     if (save)
@@ -116,19 +75,21 @@ std::optional<fs::path> SelectFile(HWND owner, bool save, bool executable, const
                                                   IID_PPV_ARGS(&folder))))
             dialog->SetFolder(folder.Get());
     }
-    dialog->SetTitle(executable ? L"选择 ffmpeg.exe（同目录必须有 ffprobe.exe）"
-                     : save     ? L"保存 Apple Log ProRes MOV"
-                                : L"打开 BT.2020 HLG ProRes 视频");
+    dialog->SetTitle(TranslateWide(executable ? TextId::SelectFFmpeg
+                                   : save     ? TextId::SaveVideo
+                                              : TextId::OpenVideo,
+                                   language)
+                         .c_str());
     hr = dialog->Show(owner);
     if (hr == HRESULT_FROM_WIN32(ERROR_CANCELLED))
         return {};
     if (FAILED(hr))
-        throw std::runtime_error("Windows 文件选择器失败。");
+        throw AppError(TextId::DialogFailed);
     ComPtr<IShellItem> item;
     dialog->GetResult(&item);
     PWSTR name = nullptr;
     if (FAILED(item->GetDisplayName(SIGDN_FILESYSPATH, &name)))
-        throw std::runtime_error("无法读取文件路径。");
+        throw AppError(TextId::PathReadFailed);
     fs::path result(name);
     CoTaskMemFree(name);
     return result;
@@ -136,268 +97,388 @@ std::optional<fs::path> SelectFile(HWND owner, bool save, bool executable, const
 } // namespace
 class MainWindow {
   public:
-    HWND window{};
+    HWND window{}, panel{};
     Logger logger;
+    AppSettings settings = SettingsStore::Load();
+    UiStyle style;
+    std::map<int, HWND> controls;
     std::jthread worker;
     std::atomic_bool cancelled = false;
     std::optional<FFmpegInstallation> tools;
     std::optional<MediaInfo> source;
-    fs::path selected;
-    bool busy = false, closing = false, smoke = false, smokeStarted = false;
-    fs::path smokeInput, smokeOutput;
-    int smokeResult = 1;
-    HFONT font{}, titleFont{}, smallFont{};
-    HBRUSH background = CreateSolidBrush(RGB(244, 247, 250)), white = CreateSolidBrush(RGB(255, 255, 255));
-    int dpi = 96;
+    fs::path selected, smokeInput, smokeOutput, uiDirectory;
+    bool busy = false, closing = false, detectionComplete = false, smoke = false, smokeStarted = false;
+    bool uiTest = false, missingScenario = false, settingsExercised = false, lastSignalWarning = false;
+    bool conversionTone = false, layingOut = false;
+    Kind active = Kind::Detect;
+    int dpi = 96, testDpi = 0, scroll = 0, footerTop = 0, exposureIndex = 5, exitCode = 0;
+    Message stage{TextId::Starting};
+    std::vector<Message> details;
+    std::wstring rawDetails;
+    JobProgress currentProgress;
+    DiscoveryProgress discovery;
     ~MainWindow() {
         cancelled = true;
         if (worker.joinable())
             worker.join();
-        if (font)
-            DeleteObject(font);
-        if (titleFont)
-            DeleteObject(titleFont);
-        if (smallFont)
-            DeleteObject(smallFont);
-        DeleteObject(background);
-        DeleteObject(white);
     }
-    int S(int v) const {
-        return MulDiv(v, dpi, 96);
+    int S(int value) const {
+        return style.Scale(value);
     }
-    HWND ControlH(int id) const {
-        return GetDlgItem(window, id);
+    std::wstring T(const Message& m) const {
+        return TranslateWide(m, settings.language);
+    }
+    HWND H(int id) const {
+        auto it = controls.find(id);
+        return it == controls.end() ? nullptr : it->second;
     }
     void Text(int id, const std::wstring& value) {
-        SetWindowTextW(ControlH(id), value.c_str());
+        SetWindowTextW(H(id), value.c_str());
     }
-    void Post(Event e) {
-        auto p = std::make_unique<Event>(std::move(e));
-        if (PostMessageW(window, EventMessage, 0, reinterpret_cast<LPARAM>(p.get())))
-            p.release();
+    void Post(Event event) {
+        auto value = std::make_unique<Event>(std::move(event));
+        if (PostMessageW(window, EventMessage, 0, reinterpret_cast<LPARAM>(value.get())))
+            value.release();
     }
-    template <class F> void Start(F fn) {
+    template <class F> void Start(Kind kind, F work) {
         if (busy)
             return;
         if (worker.joinable())
             worker.join();
         busy = true;
+        active = kind;
         cancelled = false;
+        details.clear();
+        rawDetails.clear();
+        currentProgress = {};
         Buttons();
-        worker = std::jthread([this, fn = std::move(fn)] {
+        Layout();
+        worker = std::jthread([this, work = std::move(work)] {
             try {
-                fn();
-            } catch (const std::exception& e) {
-                logger.Write(std::string("ERROR: ") + e.what());
-                Post(Event{Kind::Failure, {}, {}, {}, e.what()});
+                work();
+            } catch (const AppError& error) {
+                logger.Write(std::string("ERROR[") + MessageKey(error.message.id) + "] " + error.what());
+                Event event{Kind::Failure};
+                event.error = error.message;
+                event.details = error.details;
+                Post(std::move(event));
+            } catch (const std::exception& error) {
+                logger.Write(std::string("ERROR: ") + error.what());
+                Event event{Kind::Failure};
+                event.error = {TextId::Unexpected, {error.what()}};
+                Post(std::move(event));
             } catch (...) {
-                Post(Event{Kind::Failure, {}, {}, {}, "Unexpected error. See the local log."});
+                Event event{Kind::Failure};
+                event.error = {TextId::Unexpected, {"Unknown exception"}};
+                Post(std::move(event));
             }
         });
     }
+    void Stage(Message value) {
+        stage = std::move(value);
+        RefreshStatus();
+    }
+    void RefreshStatus() {
+        std::wostringstream s;
+        s << T(stage);
+        if (busy && currentProgress.fraction >= 0) {
+            s << L"\r\n" << std::fixed << std::setprecision(1) << currentProgress.fraction * 100 << L"%";
+            if (currentProgress.frame)
+                s << L" · " << T({TextId::Frames, {std::to_string(currentProgress.frame)}});
+            if (currentProgress.speed > 0 && currentProgress.seconds > 2 && source &&
+                active == Kind::Convert) {
+                const double remaining =
+                    (source->videoDuration - currentProgress.seconds) / currentProgress.speed;
+                if (remaining > 0 && remaining < 86400)
+                    s << L" · " << T({TextId::ETA, {std::to_string(static_cast<int>(remaining))}});
+            }
+        }
+        Text(StageText, s.str());
+        Text(ToolText, T(tools                            ? TextId::ToolsReady
+                         : busy && active == Kind::Detect ? TextId::Detecting
+                                                          : TextId::NeedTools) +
+                           L"\r\n" + T(settings.tone.enabled ? TextId::GradeOn : TextId::GradeOff));
+        EnableWindow(H(DetailsButton), !details.empty() || !rawDetails.empty());
+    }
     void Buttons() {
-        for (int id : {Open, Manual, Install, ChooseOutput, OutputEdit})
-            EnableWindow(ControlH(id), !busy);
-        EnableWindow(ControlH(Cancel), busy);
-        EnableWindow(ControlH(Convert), !busy && tools && source && source->UnsupportedReasons().empty());
-        ShowWindow(ControlH(Install), tools ? SW_HIDE : SW_SHOW);
+        for (int id : {Open, ChooseOutput, OutputEdit, Exposure, SettingsButton})
+            EnableWindow(H(id), !busy);
+        EnableWindow(H(Convert), !busy && tools && source && source->UnsupportedReasons().empty());
+        EnableWindow(H(Cancel), busy);
+        // Installation is a fallback only after full accessible-drive discovery finishes.
+        const bool fallback = !tools && detectionComplete && !busy;
+        for (int id : {Install, Manual}) {
+            ShowWindow(H(id), fallback ? SW_SHOW : SW_HIDE);
+            EnableWindow(H(id), fallback);
+        }
+        ShowWindow(H(RescanButton), !tools && !busy ? SW_SHOW : SW_HIDE);
+        EnableWindow(H(RescanButton), !busy);
+        RefreshStatus();
     }
     void Detect() {
-        Text(StageText, L"正在检测 FFmpeg 并运行编码能力测试…");
-        Start([this] {
-            auto found = FFmpegManager(logger).Detect(cancelled);
+        detectionComplete = false;
+        Stage(TextId::Detecting);
+        Start(Kind::Detect, [this] {
+            auto found = FFmpegManager(logger).Detect(cancelled, [this](const DiscoveryProgress& p) {
+                Event e{Kind::Discovery};
+                e.discovery = p;
+                Post(std::move(e));
+            });
             Event e{Kind::Detect};
             e.tools = std::move(found);
             Post(std::move(e));
         });
     }
-    void ProbeInput(const fs::path& p) {
-        if (busy)
+    void ProbeInput(const fs::path& path) {
+        if (busy && active != Kind::Detect)
             return;
-        selected = p;
+        selected = path;
         source.reset();
-        Text(DropZone, p.filename().wstring());
-        Text(SourceText, L"正在读取视频参数…");
-        Buttons();
-        if (!tools) {
-            Text(SourceText, L"请先安装或选择 FFmpeg，然后重新打开视频。");
+        Text(DropZone, path.filename().wstring());
+        Text(SourceText, T(TextId::ReadingMedia));
+        Text(OutputEdit, (path.parent_path() / (path.stem().wstring() + L"_AppleLog.mov")).wstring());
+        if (!tools || busy) {
+            Stage(TextId::NeedTools);
+            Buttons();
             return;
         }
-        Text(OutputEdit, (p.parent_path() / (p.stem().wstring() + L"_AppleLog.mov")).wstring());
-        Start([this, p] {
-            auto m = Probe(tools->ffprobe, p, &cancelled);
-            logger.Write("Selected input: " + m.raw.dump());
+        Stage(TextId::ReadingMedia);
+        Start(Kind::Probe, [this, path] {
+            auto media = Probe(tools->ffprobe, path, &cancelled);
+            logger.Write("Selected input: " + media.raw.dump());
             Event e{Kind::Probe};
-            e.media = std::move(m);
+            e.media = std::move(media);
             Post(std::move(e));
         });
     }
     void BeginConvert() {
         if (!source || !tools)
             return;
-        auto path = fs::path(ControlText(ControlH(OutputEdit)));
-        if (smoke)
-            path = smokeOutput;
-        Start([this, path] {
-            TranscodeJob::Run(*tools, *source, path, logger, cancelled, [this](const JobProgress& p) {
-                Event e{Kind::Progress};
-                e.progress = p;
-                Post(std::move(e));
-            });
-            Post(Event{Kind::Convert});
+        const auto path = smoke ? smokeOutput : fs::path(WindowText(H(OutputEdit)));
+        const auto index = SendMessageW(H(Exposure), CB_GETCURSEL, 0, 0);
+        if (index < 0 || index >= static_cast<LRESULT>(std::size(ExposureValues)))
+            throw AppError(TextId::InvalidExposureChoice);
+        exposureIndex = static_cast<int>(index);
+        TranscodeOptions options{ExposureValues[index], settings.tone};
+        conversionTone = options.tone.enabled;
+        Stage(TextId::VerifyTiming);
+        Start(Kind::Convert, [this, path, options] {
+            auto report = TranscodeJob::Run(
+                *tools, *source, path, logger, cancelled,
+                [this](const JobProgress& p) {
+                    Event e{Kind::Progress};
+                    e.progress = p;
+                    Post(std::move(e));
+                },
+                options);
+            Event e{Kind::Convert};
+            e.validation = std::move(report);
+            Post(std::move(e));
         });
     }
-    HWND Add(int id, const wchar_t* klass, const wchar_t* text, DWORD style = 0) {
-        HWND h = CreateWindowExW(klass == std::wstring(L"EDIT") ? WS_EX_CLIENTEDGE : 0, klass, text,
-                                 WS_CHILD | WS_VISIBLE | style, 0, 0, 10, 10, window,
-                                 reinterpret_cast<HMENU>(static_cast<INT_PTR>(id)), GetModuleHandleW(nullptr),
-                                 nullptr);
-        SendMessageW(h, WM_SETFONT, reinterpret_cast<WPARAM>(font), TRUE);
-        return h;
+    void Add(HWND parent, int id, const wchar_t* type, const std::wstring& label, DWORD flags = 0,
+             bool compact = false) {
+        controls[id] = MakeControl(parent, id, type, label, flags, style, compact);
+    }
+    void ApplyAppearance() {
+        style.Apply(settings.theme, settings.language, dpi);
+        style.Window(window);
+        for (auto [id, h] : controls)
+            style.Control(h, id == ToolText || id == StageText);
+        for (auto [id, key] : {std::pair{Open, TextId::Open},
+                               {ChooseOutput, TextId::ChooseOutput},
+                               {Convert, TextId::Convert},
+                               {Cancel, TextId::Cancel},
+                               {Install, TextId::Install},
+                               {Manual, TextId::Manual},
+                               {Logs, TextId::Logs},
+                               {SettingsButton, TextId::Settings},
+                               {DetailsButton, TextId::Details},
+                               {RescanButton, TextId::Rescan}})
+            Text(id, T(key));
+        Text(DropZone, selected.empty() ? T(TextId::Drop) : selected.filename().wstring());
+        Text(SourceText, source ? source->Summary(settings.language) : T(TextId::AwaitInput));
+        std::vector<std::wstring> exposure;
+        for (double ev : ExposureValues) {
+            std::wostringstream s;
+            s << (ev > 0 ? L"+" : L"") << ev << L" EV";
+            exposure.push_back(ev == 0 ? T(TextId::DefaultEV) : s.str());
+        }
+        SetCombo(H(Exposure), exposure, exposureIndex);
+        SetWindowTextW(window, (L"LogForge " + Wide(DisplayVersion)).c_str());
+        RefreshStatus();
+        Layout();
+        RedrawWindow(window, nullptr, nullptr, RDW_INVALIDATE | RDW_ALLCHILDREN);
     }
     void Create() {
-        dpi = static_cast<int>(GetDpiForWindow(window));
-        Fonts();
-        Add(DropZone, L"STATIC", L"拖入一个 HLG ProRes 视频\r\n或使用右侧“打开文件”",
-            SS_CENTER | SS_CENTERIMAGE | SS_NOPREFIX);
-        Add(Open, L"BUTTON", L"打开文件…", WS_TABSTOP | BS_PUSHBUTTON);
-        Add(SourceText, L"STATIC",
-            L"等待输入\r\n支持 ProRes 422 / 422 HQ · 10-bit · BT.2020 · HLG\r\nV1 "
-            L"仅接受经过时间戳检查的固定帧率素材。",
-            SS_NOPREFIX);
-        Add(OutputEdit, L"EDIT", L"", WS_TABSTOP | ES_AUTOHSCROLL);
-        Add(ChooseOutput, L"BUTTON", L"选择位置…", WS_TABSTOP);
-        Add(StageText, L"STATIC", L"正在启动…", SS_NOPREFIX);
-        Add(ProgressBar, PROGRESS_CLASSW, L"", PBS_SMOOTH);
-        SetWindowTheme(ControlH(ProgressBar), L"", L"");
-        SendMessageW(ControlH(ProgressBar), PBM_SETRANGE32, 0, 1000);
-        SendMessageW(ControlH(ProgressBar), PBM_SETBARCOLOR, 0, RGB(0, 127, 126));
-        Add(Convert, L"BUTTON", L"转换为 Apple Log", WS_TABSTOP | BS_DEFPUSHBUTTON);
-        Add(Cancel, L"BUTTON", L"取消转换", WS_TABSTOP);
-        Add(ToolText, L"STATIC", L"FFmpeg: 检测中…", SS_NOPREFIX);
-        Add(Install, L"BUTTON", L"一键安装 FFmpeg", WS_TABSTOP);
-        Add(Manual, L"BUTTON", L"手动选择 FFmpeg", WS_TABSTOP);
-        Add(Logs, L"BUTTON", L"查看日志", WS_TABSTOP);
-        DragAcceptFiles(window, TRUE);
-        Layout();
+        dpi = testDpi ? testDpi : static_cast<int>(GetDpiForWindow(window));
+        style.Apply(settings.theme, settings.language, dpi);
+        if (testDpi)
+            SetPropW(window, L"test-dpi", reinterpret_cast<HANDLE>(static_cast<INT_PTR>(testDpi)));
+        WNDCLASSEXW c{sizeof(c)};
+        c.hInstance = GetModuleHandleW(nullptr);
+        c.lpfnWndProc = PanelProc;
+        c.hCursor = LoadCursorW(nullptr, IDC_ARROW);
+        c.lpszClassName = L"LogForge.Content";
+        RegisterClassExW(&c);
+        panel = CreateWindowExW(WS_EX_CONTROLPARENT, c.lpszClassName, L"",
+                                WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_CLIPCHILDREN, 0, 0, 10, 10, window,
+                                nullptr, c.hInstance, this);
+        if (!panel)
+            throw AppError(TextId::DialogOpenFailed);
+        Add(panel, DropZone, L"STATIC", L"", SS_CENTER | SS_CENTERIMAGE | SS_NOPREFIX | SS_PATHELLIPSIS);
+        Add(panel, SourceText, L"STATIC", L"", SS_NOPREFIX);
+        Add(panel, OutputEdit, L"EDIT", L"", WS_TABSTOP | WS_BORDER | ES_AUTOHSCROLL);
+        Add(panel, Exposure, L"COMBOBOX", L"",
+            WS_TABSTOP | CBS_DROPDOWNLIST | CBS_OWNERDRAWFIXED | CBS_HASSTRINGS | WS_VSCROLL);
+        Add(panel, ProgressBar, PROGRESS_CLASSW, L"", PBS_SMOOTH);
+        SendMessageW(H(ProgressBar), PBM_SETRANGE32, 0, 1000);
+        for (int id : {Open, ChooseOutput, Convert, Cancel})
+            Add(panel, id, L"BUTTON", L"", WS_TABSTOP | BS_OWNERDRAW);
+        SetPropW(H(Convert), L"primary", reinterpret_cast<HANDLE>(1));
+        for (int id : {SettingsButton, Install, Manual, Logs, DetailsButton, RescanButton})
+            Add(window, id, L"BUTTON", L"", WS_TABSTOP | BS_OWNERDRAW);
+        Add(window, ToolText, L"STATIC", L"", SS_NOPREFIX, true);
+        Add(window, StageText, L"STATIC", L"", SS_NOPREFIX, true);
+        ApplyAppearance();
         Buttons();
-        Detect();
+        if (uiTest && missingScenario) {
+            detectionComplete = true;
+            Stage(TextId::ToolsMissing);
+            Buttons();
+            SetTimer(window, 9002, 300, nullptr);
+        } else
+            Detect();
     }
-    void Fonts() {
-        if (font)
-            DeleteObject(font);
-        if (titleFont)
-            DeleteObject(titleFont);
-        if (smallFont)
-            DeleteObject(smallFont);
-        font =
-            CreateFontW(-S(15), 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS,
-                        CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, DEFAULT_PITCH, L"Microsoft YaHei UI");
-        titleFont = CreateFontW(-S(28), 0, 0, 0, FW_SEMIBOLD, FALSE, FALSE, FALSE, DEFAULT_CHARSET,
-                                OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, DEFAULT_PITCH,
-                                L"Segoe UI");
-        smallFont =
-            CreateFontW(-S(13), 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS,
-                        CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, DEFAULT_PITCH, L"Microsoft YaHei UI");
+    std::wstring RightFooter() const {
+        return T(TextId::Devices) + L"\r\n\r\n" + T(TextId::FormatRequired) + L"\r\n" +
+               T(TextId::ResolutionChoice) + L"\r\n\r\n" + T(TextId::EditorHint);
     }
     void Layout() {
+        if (layingOut || !panel)
+            return;
+        layingOut = true;
         RECT r{};
         GetClientRect(window, &r);
-        int w = MulDiv(r.right, 96, dpi);
-        auto place = [&](int id, int x, int y, int cw, int ch) {
-            MoveWindow(ControlH(id), S(x), S(y), S(cw), S(ch), TRUE);
+        const int width = MulDiv(r.right, 96, dpi), height = MulDiv(r.bottom, 96, dpi),
+                  column = (width - 88) / 2;
+        HDC dc = GetDC(window);
+        auto old = SelectObject(dc, style.compact);
+        RECT measured{0, 0, S(column), 0};
+        const auto copy = RightFooter();
+        DrawTextW(dc, copy.c_str(), -1, &measured, DT_CALCRECT | DT_WORDBREAK | DT_NOPREFIX);
+        SelectObject(dc, old);
+        ReleaseDC(window, dc);
+        const int footerHeight = std::max(238, MulDiv(measured.bottom, 96, dpi) + 36);
+        footerTop = std::max(100, height - footerHeight);
+        MoveWindow(panel, S(24), S(78), S(width - 48), S(std::max(22, footerTop - 90)), TRUE);
+        MoveWindow(H(SettingsButton), S(width - 144), S(23), S(116), S(36), TRUE);
+        auto place = [&](int id, int x, int y, int w, int h) {
+            MoveWindow(H(id), S(x), S(y), S(w), S(h), TRUE);
         };
-        place(DropZone, 44, 106, w - 258, 68);
-        place(Open, w - 192, 120, 140, 40);
-        place(SourceText, 44, 230, w - 88, 102);
-        place(OutputEdit, 44, 461, w - 246, 34);
-        place(ChooseOutput, w - 186, 460, 142, 36);
-        place(ProgressBar, 44, 551, w - 88, 13);
-        place(StageText, 44, 577, w - 385, 44);
-        place(Convert, w - 326, 577, 180, 42);
-        place(Cancel, w - 134, 577, 90, 42);
-        place(ToolText, 32, 656, w - 460, 44);
-        place(Install, w - 438, 654, 154, 36);
-        place(Manual, w - 274, 654, 156, 36);
-        place(Logs, w - 108, 654, 82, 36);
+        place(ToolText, 32, footerTop + 14, column, 46);
+        place(StageText, 32, footerTop + 64, column, 46);
+        place(Logs, 32, footerTop + 112, 104, 30);
+        place(DetailsButton, 144, footerTop + 112, 90, 30);
+        place(RescanButton, 244, footerTop + 112, std::max(110, column - 212), 30);
+        place(Install, 32, footerTop + 150, (column - 8) / 2, 32);
+        place(Manual, 40 + (column - 8) / 2, footerTop + 150, (column - 8) / 2, 32);
+        LayoutPanel();
+        layingOut = false;
         InvalidateRect(window, nullptr, TRUE);
+    }
+    void LayoutPanel() {
+        if (!panel || controls.empty())
+            return;
+        RECT r{};
+        GetClientRect(panel, &r);
+        const int width = MulDiv(r.right, 96, dpi), height = MulDiv(r.bottom, 96, dpi), content = 418;
+        scroll = std::clamp(scroll, 0, std::max(0, content - height));
+        SCROLLINFO si{sizeof(si),  SIF_RANGE | SIF_PAGE | SIF_POS, 0,
+                      content - 1, static_cast<UINT>(height),      scroll};
+        SetScrollInfo(panel, SB_VERT, &si, TRUE);
+        auto place = [&](int id, int x, int y, int w, int h) {
+            MoveWindow(H(id), S(x), S(y - scroll), S(w), S(h), TRUE);
+        };
+        place(DropZone, 20, 20, width - 200, 34);
+        place(Open, width - 158, 18, 138, 38);
+        place(SourceText, 20, 92, width - 40, 86);
+        place(OutputEdit, 20, 258, width - 198, 34);
+        place(ChooseOutput, width - 166, 258, 146, 34);
+        place(Exposure, 108, 304, 152, 220);
+        place(ProgressBar, 20, 380, width - 342, 12);
+        place(Convert, width - 306, 365, 184, 42);
+        place(Cancel, width - 112, 365, 92, 42);
+        InvalidateRect(panel, nullptr, TRUE);
     }
     void Paint() {
         PAINTSTRUCT ps{};
-        HDC dc = BeginPaint(window, &ps);
-        RECT client{};
-        GetClientRect(window, &client);
-        FillRect(dc, &client, background);
+        auto dc = BeginPaint(window, &ps);
+        RECT r{};
+        GetClientRect(window, &r);
+        FillRect(dc, &r, style.background);
+        const int width = MulDiv(r.right, 96, dpi), height = MulDiv(r.bottom, 96, dpi),
+                  column = (width - 88) / 2;
+        auto icon = static_cast<HICON>(LoadImageW(GetModuleHandleW(nullptr), MAKEINTRESOURCEW(101),
+                                                  IMAGE_ICON, S(42), S(42), LR_SHARED));
+        DrawIconEx(dc, S(28), S(20), icon, S(42), S(42), 0, nullptr, DI_NORMAL);
+        auto old = SelectObject(dc, style.title);
+        SetTextColor(dc, style.colors.text);
         SetBkMode(dc, TRANSPARENT);
-        int w = MulDiv(client.right, 96, dpi);
-        auto label = [&](const wchar_t* t, int x, int y, int cw, int ch, HFONT f, COLORREF color) {
-            SelectObject(dc, f);
-            SetTextColor(dc, color);
-            RECT r{S(x), S(y), S(x + cw), S(y + ch)};
-            DrawTextW(dc, t, -1, &r, DT_LEFT | DT_WORDBREAK | DT_NOPREFIX);
-        };
-        label(L"LogForge", 28, 19, 210, 40, titleFont, RGB(18, 40, 56));
-        label(L"HLG → Apple Log  /  0.1.0", 240, 32, 480, 30, font, RGB(80, 99, 113));
-        auto card = [&](int y, int h) {
-            HGDIOBJ oldBrush = SelectObject(dc, white);
-            HPEN pen = CreatePen(PS_SOLID, 1, RGB(220, 228, 234));
-            HGDIOBJ oldPen = SelectObject(dc, pen);
-            RoundRect(dc, S(24), S(y), S(w - 24), S(y + h), S(12), S(12));
-            SelectObject(dc, oldPen);
-            SelectObject(dc, oldBrush);
-            DeleteObject(pen);
-        };
-        card(84, 110);
-        card(210, 135);
-        card(361, 150);
-        card(527, 108);
-        label(L"SOURCE COLOR", 44, 211, 250, 22, smallFont, RGB(0, 116, 114));
-        label(L"OUTPUT", 44, 373, 160, 22, smallFont, RGB(0, 116, 114));
-        label(L"Apple Log  ·  BT.2020  ·  ProRes 422 HQ  ·  10-bit 4:2:2  ·  MOV", 44, 396, w - 88, 24, font,
-              RGB(18, 40, 56));
-        label(L"曝光约定：75% HLG → 90% 反射率。调色软件中请手动指定 Apple Log / Rec.2020。", 44, 427, w - 88,
-              27, smallFont, RGB(85, 101, 114));
-        label(L"重新编码已有信号；不会恢复过曝、死黑或 ISP 已丢失的信息。所有处理均在本机完成。", 32, 713,
-              w - 64, 30, smallFont, RGB(87, 102, 115));
+        RECT brand{S(82), S(19), S(240), S(58)};
+        DrawTextW(dc, L"LogForge", -1, &brand, DT_LEFT | DT_SINGLELINE | DT_VCENTER);
+        SelectObject(dc, old);
+        style.Text(dc, Wide(DisplayVersion), {S(252), S(31), S(width - 164), S(55)}, true);
+        HPEN pen = CreatePen(PS_SOLID, 1, style.colors.border);
+        old = SelectObject(dc, pen);
+        MoveToEx(dc, S(24), S(footerTop), nullptr);
+        LineTo(dc, S(width - 24), S(footerTop));
+        SelectObject(dc, old);
+        DeleteObject(pen);
+        style.Text(dc, RightFooter(), {S(56 + column), S(footerTop + 16), S(width - 32), S(height - 12)},
+                   true, true);
+        style.Text(dc, T(TextId::License), {S(32), S(height - 48), S(32 + column), S(height - 30)}, true,
+                   true);
+        style.Text(dc, T(TextId::Privacy), {S(32), S(height - 29), S(32 + column), S(height - 2)}, true,
+                   true);
         EndPaint(window, &ps);
     }
-    void FinishSmoke(bool passed, const std::string& detail) {
-        smokeResult = passed ? 0 : 1;
-        auto png = smokeOutput;
-        png += L".png";
-        const bool captured = SaveWindowSnapshot(window, png);
-        Json result{{"passed", passed},
-                    {"detail", detail},
-                    {"window_created", IsWindow(window) != FALSE},
-                    {"drop_input_loaded", source.has_value()},
-                    {"snapshot_saved", captured},
-                    {"convert_enabled", IsWindowEnabled(ControlH(Convert)) != FALSE},
-                    {"cancel_enabled", IsWindowEnabled(ControlH(Cancel)) != FALSE},
-                    {"output", PathText(smokeOutput)}};
-        auto p = smokeOutput;
-        p += L".gui-test.json";
-        std::ofstream f(p);
-        f << result.dump(2);
-        f.close();
-        PostMessageW(window, WM_CLOSE, 0, 0);
+    void PaintPanel() {
+        PAINTSTRUCT ps{};
+        auto dc = BeginPaint(panel, &ps);
+        RECT r{};
+        GetClientRect(panel, &r);
+        FillRect(dc, &r, style.background);
+        const int width = MulDiv(r.right, 96, dpi);
+        auto rect = [&](int x, int y, int w, int h) {
+            return RECT{S(x), S(y - scroll), S(x + w), S(y + h - scroll)};
+        };
+        style.Card(dc, rect(0, 4, width, 184));
+        style.Card(dc, rect(0, 202, width, 146));
+        style.Text(dc, T(TextId::Source), rect(20, 67, width - 40, 22), true, true);
+        style.Text(dc, T(TextId::Output), rect(20, 214, 150, 20), true, true);
+        style.Text(dc, L"Apple Log · BT.2020 · ProRes 422 HQ · 10-bit 4:2:2 · MOV",
+                   rect(20, 234, width - 40, 24));
+        style.Text(dc, T(TextId::Exposure), rect(20, 309, 84, 24), true, true);
+        EndPaint(panel, &ps);
     }
     void OnEvent(std::unique_ptr<Event> e) {
         if (e->kind == Kind::Progress) {
-            auto p = e->progress;
-            std::wostringstream s;
-            s << p.stage;
-            if (p.fraction >= 0) {
-                SendMessageW(ControlH(ProgressBar), PBM_SETPOS, static_cast<WPARAM>(p.fraction * 1000), 0);
-                s << L"  " << std::fixed << std::setprecision(1) << p.fraction * 100 << L"%";
-                if (p.frame)
-                    s << L" · " << p.frame << L" frames";
-                if (p.speed > 0 && p.seconds > 2 && source) {
-                    double remaining = (source->videoDuration - p.seconds) / p.speed;
-                    if (remaining > 0 && remaining < 86400)
-                        s << L" · 约 " << static_cast<int>(remaining) << L" s";
-                }
-            }
-            Text(StageText, s.str());
+            currentProgress = e->progress;
+            stage = e->progress.stage;
+            SendMessageW(H(ProgressBar), PBM_SETPOS,
+                         static_cast<WPARAM>(std::clamp(e->progress.fraction, 0.0, 1.0) * 1000), 0);
+            RefreshStatus();
+            return;
+        }
+        if (e->kind == Kind::Discovery) {
+            discovery = e->discovery;
+            if (discovery.phase == DiscoveryPhase::ScanningDrive)
+                Stage({TextId::Scanning,
+                       {PathText(discovery.drive), std::to_string(discovery.directories),
+                        std::to_string(discovery.candidates), std::to_string(discovery.skipped)}});
+            else if (discovery.phase == DiscoveryPhase::CheckingCandidate)
+                Stage({TextId::CheckingCandidate, {PathText(discovery.drive)}});
             return;
         }
         busy = false;
@@ -408,40 +489,44 @@ class MainWindow {
             return;
         }
         if (e->kind == Kind::Failure) {
-            Text(StageText, cancelled ? L"已取消" : L"操作失败 · 查看详细日志");
+            details = e->details;
+            details.insert(details.begin(), e->error);
+            Stage(cancelled ? TextId::Cancelled : TextId::Failed);
             Buttons();
-            if (smoke) {
-                FinishSmoke(false, e->error);
-                return;
-            }
-            if (!cancelled) {
-                auto msg = Wide(e->error) + L"\r\n\r\n点击“查看日志”可查看详细信息。";
-                MessageBoxW(window, msg.c_str(), L"LogForge", MB_OK | MB_ICONWARNING);
-            }
+            if (smoke || uiTest)
+                Finish(false, Translate(e->error));
             return;
         }
         if (e->kind == Kind::Detect || e->kind == Kind::Install) {
             tools = std::move(e->tools);
-            Text(ToolText, tools ? L"FFmpeg 已就绪\r\nProRes HQ · 10-bit · 浮点处理已验证"
-                                 : L"未检测到 FFmpeg\r\n可一键安装（约 105 MB，GPLv3）");
-            Text(StageText, tools ? L"就绪 · 请选择 HLG ProRes 视频" : L"先安装或手动选择 FFmpeg");
+            detectionComplete = true;
+            if (discovery.skipped)
+                details.emplace_back(TextId::ScanSkipped);
+            if (settings.recoveredDefaults)
+                details.emplace_back(TextId::SettingsRecovered);
+            Stage(tools ? TextId::Ready : TextId::ToolsMissing);
             Buttons();
-            if (smoke && !tools) {
-                FinishSmoke(false, "FFmpeg not available for GUI smoke test.");
+            Layout();
+            if (uiTest) {
+                SetTimer(window, 9002, 300, nullptr);
                 return;
             }
-            if (smoke && tools) {
-                auto name = smokeInput.wstring();
-                HGLOBAL block = GlobalAlloc(GHND, sizeof(DROPFILES) + (name.size() + 2) * sizeof(wchar_t));
-                if (!block)
-                    throw std::runtime_error("Cannot create GUI drag-drop test payload.");
-                auto drop = static_cast<DROPFILES*>(GlobalLock(block));
+            if (smoke) {
+                if (!tools) {
+                    Finish(false, "FFmpeg unavailable");
+                    return;
+                }
+                const auto name = smokeInput.wstring();
+                auto memory = GlobalAlloc(GHND, sizeof(DROPFILES) + (name.size() + 2) * sizeof(wchar_t));
+                if (!memory)
+                    throw std::bad_alloc();
+                auto drop = static_cast<DROPFILES*>(GlobalLock(memory));
                 drop->pFiles = sizeof(DROPFILES);
                 drop->fWide = TRUE;
                 memcpy(reinterpret_cast<unsigned char*>(drop) + sizeof(DROPFILES), name.c_str(),
                        (name.size() + 1) * sizeof(wchar_t));
-                GlobalUnlock(block);
-                SendMessageW(window, WM_DROPFILES, reinterpret_cast<WPARAM>(block), 0);
+                GlobalUnlock(memory);
+                SendMessageW(window, WM_DROPFILES, reinterpret_cast<WPARAM>(memory), 0);
                 return;
             }
             if (!selected.empty() && tools)
@@ -450,77 +535,98 @@ class MainWindow {
         }
         if (e->kind == Kind::Probe) {
             source = std::move(e->media);
-            Text(SourceText, source->Summary());
-            auto errors = source->UnsupportedReasons();
-            Text(StageText,
-                 errors.empty() ? L"素材参数符合要求 · 转换前将检查完整时间戳" : Wide(errors.front()));
+            Text(SourceText, source->Summary(settings.language));
+            details = source->UnsupportedReasons();
+            Stage(details.empty() ? Message(TextId::InputReady) : details.front());
             Buttons();
             if (smoke && !smokeStarted) {
                 smokeStarted = true;
                 Text(OutputEdit, smokeOutput.wstring());
-                if (errors.empty())
+                if (details.empty())
                     BeginConvert();
                 else
-                    FinishSmoke(false, errors.front());
+                    Finish(false, Translate(details.front()));
             }
             return;
         }
         if (e->kind == Kind::Convert) {
-            Text(StageText, L"完成 · 格式、音频和时长验证通过\r\n请在编辑器中指定 Apple Log / Rec.2020");
-            SendMessageW(ControlH(ProgressBar), PBM_SETPOS, 1000, 0);
+            lastSignalWarning = e->validation && e->validation->signalWarning;
+            details = e->validation ? e->validation->warnings : std::vector<Message>{};
+            Stage(lastSignalWarning ? TextId::CompleteWarning
+                  : conversionTone  ? TextId::CompleteCreative
+                                    : TextId::CompleteStandard);
+            SendMessageW(H(ProgressBar), PBM_SETPOS, 1000, 0);
             Buttons();
-            if (smoke) {
-                // Let native controls finish their visual state transition before the QA snapshot.
-                SetTimer(window, 9001, 250, nullptr);
-            }
-            return;
+            if (smoke)
+                SetTimer(window, 9001, 300, nullptr);
         }
     }
+    void Failure(const AppError& e) {
+        details = e.details;
+        details.insert(details.begin(), e.message);
+        Stage(TextId::Failed);
+        Buttons();
+    }
     void Command(int id) {
+        if (id == Cancel) {
+            cancelled = true;
+            Stage(TextId::Cancelling);
+            return;
+        }
         if (id == Logs) {
             ShellExecuteW(window, L"open", logger.Path().c_str(), nullptr, nullptr, SW_SHOWNORMAL);
             return;
         }
-        if (id == Cancel) {
-            cancelled = true;
-            Text(StageText, L"正在取消并关闭子进程…");
+        if (id == DetailsButton) {
+            std::wstring text;
+            for (const auto& message : details)
+                text += T(message) + L"\r\n\r\n";
+            text += rawDetails;
+            ShowDetails(window, T(TextId::Details), text, settings);
             return;
         }
         if (busy)
             return;
-        if (id == Open) {
-            if (auto p = SelectFile(window, false, false))
-                ProbeInput(*p);
+        if (id == SettingsButton) {
+            exposureIndex = static_cast<int>(SendMessageW(H(Exposure), CB_GETCURSEL, 0, 0));
+            if (ShowSettings(window, settings))
+                ApplyAppearance();
+        } else if (id == Open) {
+            if (auto path = SelectFile(window, false, false, settings.language))
+                ProbeInput(*path);
         } else if (id == ChooseOutput) {
-            if (auto p = SelectFile(window, true, false, fs::path(ControlText(ControlH(OutputEdit)))))
-                Text(OutputEdit, p->wstring());
+            if (auto path =
+                    SelectFile(window, true, false, settings.language, fs::path(WindowText(H(OutputEdit)))))
+                Text(OutputEdit, path->wstring());
         } else if (id == Convert)
             BeginConvert();
+        else if (id == RescanButton)
+            Detect();
         else if (id == Manual) {
-            if (auto p = SelectFile(window, false, true)) {
-                Start([this, p = *p] {
-                    FFmpegManager m(logger);
-                    auto checked = m.Check(p, cancelled);
-                    m.SaveManual(p);
+            if (auto path = SelectFile(window, false, true, settings.language)) {
+                Stage(TextId::Detecting);
+                Start(Kind::Detect, [this, path = *path] {
+                    FFmpegManager manager(logger);
+                    auto checked = manager.Check(path, cancelled);
+                    manager.SaveManual(path);
                     Event e{Kind::Detect};
                     e.tools = std::move(checked);
                     Post(std::move(e));
                 });
             }
         } else if (id == Install) {
-            Start([this] {
+            Stage(TextId::Downloading);
+            Start(Kind::Install, [this] {
                 GyanReleaseProvider provider;
                 auto installed = FFmpegDownloader::Install(
                     provider, logger, cancelled,
-                    [this, last = uint64_t{0}](uint64_t n, uint64_t total,
-                                               const std::wstring& phase) mutable {
+                    [this, last = uint64_t{0}](uint64_t n, uint64_t total, const Message& phase) mutable {
                         if (total && n != total && n > last && n - last < 262144)
                             return;
                         last = n;
                         Event e{Kind::Progress};
                         e.progress.stage = phase;
-                        e.progress.fraction =
-                            total ? static_cast<double>(n) / static_cast<double>(total) : -1;
+                        e.progress.fraction = total ? static_cast<double>(n) / total : -1;
                         Post(std::move(e));
                     });
                 Event e{Kind::Install};
@@ -529,163 +635,328 @@ class MainWindow {
             });
         }
     }
-    static LRESULT CALLBACK Proc(HWND h, UINT msg, WPARAM w, LPARAM l) {
+    void Finish(bool passed, const std::string& note) {
+        exitCode = passed ? 0 : 1;
+        const auto image = uiTest ? uiDirectory / L"main.png" : fs::path(smokeOutput.wstring() + L".png");
+        const bool captured = SaveWindowSnapshot(window, image);
+        Json report{{"passed", passed && captured},
+                    {"detail", note},
+                    {"version", Version},
+                    {"build", BuildNumber},
+                    {"language", settings.language == Language::English ? "en" : "zh-CN"},
+                    {"theme", settings.theme == Theme::Dark ? "dark" : "light"},
+                    {"dpi", dpi},
+                    {"snapshot_saved", captured},
+                    {"window_created", IsWindow(window) != FALSE},
+                    {"output", PathText(smokeOutput)},
+                    {"convert_enabled", IsWindowEnabled(H(Convert)) != FALSE},
+                    {"cancel_enabled", IsWindowEnabled(H(Cancel)) != FALSE},
+                    {"install_visible", IsWindowVisible(H(Install)) != FALSE},
+                    {"manual_visible", IsWindowVisible(H(Manual)) != FALSE},
+                    {"settings_exercised", settingsExercised},
+                    {"signal_warning", lastSignalWarning},
+                    {"creative_enabled", settings.tone.enabled},
+                    {"ui_only", uiTest},
+                    {"missing_scenario_injected", missingScenario}};
+        const auto path =
+            uiTest ? uiDirectory / L"ui-test.json" : fs::path(smokeOutput.wstring() + L".gui-test.json");
+        std::ofstream file(path);
+        file << report.dump(2);
+        file.close();
+        if (!captured || !file)
+            exitCode = 1;
+        PostMessageW(window, WM_CLOSE, 0, 0);
+    }
+    void UiTest() {
+        const auto original = settings;
+        if (!ShowSettings(window, settings, uiDirectory / L"settings.png", true)) {
+            Finish(false, "Settings Save did not run");
+            return;
+        }
+        ApplyAppearance();
+        const auto loaded = SettingsStore::Load();
+        settingsExercised = loaded.language != original.language && loaded.theme != original.theme &&
+                            loaded.tone.enabled == original.tone.enabled &&
+                            loaded.manualFFmpeg == original.manualFFmpeg;
+        SaveWindowSnapshot(window, uiDirectory / L"switched.png");
+        const bool cancelApplied =
+            ShowSettings(window, settings, uiDirectory / L"settings-cancel.png", false);
+        const auto afterCancel = SettingsStore::Load();
+        settingsExercised = settingsExercised && !cancelApplied && afterCancel.language == loaded.language &&
+                            afterCancel.theme == loaded.theme &&
+                            afterCancel.tone.enabled == loaded.tone.enabled &&
+                            afterCancel.tone.shadowStops == loaded.tone.shadowStops &&
+                            afterCancel.tone.highlightStops == loaded.tone.highlightStops &&
+                            afterCancel.tone.saturation == loaded.tone.saturation &&
+                            afterCancel.manualFFmpeg == loaded.manualFFmpeg &&
+                            afterCancel.detectedFFmpeg == loaded.detectedFFmpeg;
+        settings = original;
+        SettingsStore::SavePreferences(settings);
+        ApplyAppearance();
+        Buttons();
+        const bool visibility = missingScenario
+                                    ? IsWindowVisible(H(Install)) && IsWindowVisible(H(Manual))
+                                    : tools && !IsWindowVisible(H(Install)) && !IsWindowVisible(H(Manual));
+        Finish(settingsExercised && visibility,
+               "Native settings Save/Cancel and FFmpeg fallback visibility exercised");
+    }
+    static LRESULT CALLBACK PanelProc(HWND h, UINT m, WPARAM w, LPARAM l) {
         auto self = reinterpret_cast<MainWindow*>(GetWindowLongPtrW(h, GWLP_USERDATA));
-        if (msg == WM_NCCREATE) {
-            auto cs = reinterpret_cast<CREATESTRUCTW*>(l);
-            self = static_cast<MainWindow*>(cs->lpCreateParams);
+        if (m == WM_NCCREATE) {
+            self = static_cast<MainWindow*>(reinterpret_cast<CREATESTRUCTW*>(l)->lpCreateParams);
+            SetWindowLongPtrW(h, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(self));
+        }
+        if (!self)
+            return DefWindowProcW(h, m, w, l);
+        switch (m) {
+        case WM_PAINT:
+            if (self->panel)
+                self->PaintPanel();
+            else
+                return DefWindowProcW(h, m, w, l);
+            return 0;
+        case WM_ERASEBKGND:
+            return 1;
+        case WM_COMMAND:
+        case WM_DRAWITEM:
+        case WM_MEASUREITEM:
+            return SendMessageW(self->window, m, w, l);
+        case WM_CTLCOLORSTATIC:
+        case WM_CTLCOLOREDIT:
+        case WM_CTLCOLORLISTBOX:
+        case WM_CTLCOLORBTN:
+            return self->style.Color(m, w, l, true);
+        case WM_MOUSEWHEEL:
+            self->scroll -= GET_WHEEL_DELTA_WPARAM(w) / WHEEL_DELTA * 48;
+            self->LayoutPanel();
+            return 0;
+        case WM_VSCROLL: {
+            SCROLLINFO si{sizeof(si), SIF_ALL};
+            GetScrollInfo(h, SB_VERT, &si);
+            if (LOWORD(w) == SB_THUMBTRACK)
+                self->scroll = si.nTrackPos;
+            else if (LOWORD(w) == SB_LINEUP)
+                self->scroll -= 24;
+            else if (LOWORD(w) == SB_LINEDOWN)
+                self->scroll += 24;
+            else if (LOWORD(w) == SB_PAGEUP)
+                self->scroll -= static_cast<int>(si.nPage);
+            else if (LOWORD(w) == SB_PAGEDOWN)
+                self->scroll += static_cast<int>(si.nPage);
+            self->LayoutPanel();
+            return 0;
+        }
+        }
+        return DefWindowProcW(h, m, w, l);
+    }
+    static LRESULT CALLBACK Proc(HWND h, UINT m, WPARAM w, LPARAM l) {
+        auto self = reinterpret_cast<MainWindow*>(GetWindowLongPtrW(h, GWLP_USERDATA));
+        if (m == WM_NCCREATE) {
+            self = static_cast<MainWindow*>(reinterpret_cast<CREATESTRUCTW*>(l)->lpCreateParams);
             self->window = h;
             SetWindowLongPtrW(h, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(self));
         }
         if (!self)
-            return DefWindowProcW(h, msg, w, l);
+            return DefWindowProcW(h, m, w, l);
         try {
-            switch (msg) {
+            switch (m) {
             case WM_CREATE:
                 self->Create();
                 return 0;
             case WM_PAINT:
                 self->Paint();
                 return 0;
+            case WM_ERASEBKGND:
+                return 1;
             case WM_SIZE:
                 self->Layout();
                 return 0;
+            case WM_DRAWITEM:
+                self->style.DrawItem(*reinterpret_cast<DRAWITEMSTRUCT*>(l));
+                return TRUE;
+            case WM_MEASUREITEM:
+                reinterpret_cast<MEASUREITEMSTRUCT*>(l)->itemHeight = self->S(25);
+                return TRUE;
+            case WM_CTLCOLORSTATIC:
+            case WM_CTLCOLOREDIT:
+            case WM_CTLCOLORLISTBOX:
+            case WM_CTLCOLORBTN:
+                return self->style.Color(m, w, l);
             case WM_GETMINMAXINFO: {
-                auto m = reinterpret_cast<MINMAXINFO*>(l);
-                m->ptMinTrackSize = {self->S(900), self->S(805)};
+                auto info = reinterpret_cast<MINMAXINFO*>(l);
+                MONITORINFO monitor{sizeof(monitor)};
+                GetMonitorInfoW(MonitorFromWindow(h, MONITOR_DEFAULTTONEAREST), &monitor);
+                info->ptMinTrackSize = {
+                    std::min(self->S(820), static_cast<int>(monitor.rcWork.right - monitor.rcWork.left)),
+                    std::min(self->S(620), static_cast<int>(monitor.rcWork.bottom - monitor.rcWork.top))};
                 return 0;
             }
             case WM_DPICHANGED: {
+                self->exposureIndex = static_cast<int>(SendMessageW(self->H(Exposure), CB_GETCURSEL, 0, 0));
                 self->dpi = HIWORD(w);
-                self->Fonts();
-                EnumChildWindows(
-                    h,
-                    [](HWND child, LPARAM f) -> BOOL {
-                        SendMessageW(child, WM_SETFONT, static_cast<WPARAM>(f), TRUE);
-                        return TRUE;
-                    },
-                    reinterpret_cast<LPARAM>(self->font));
+                self->ApplyAppearance();
                 auto r = reinterpret_cast<RECT*>(l);
                 SetWindowPos(h, nullptr, r->left, r->top, r->right - r->left, r->bottom - r->top,
                              SWP_NOZORDER | SWP_NOACTIVATE);
-                self->Layout();
                 return 0;
-            }
-            case WM_CTLCOLORSTATIC: {
-                auto dc = reinterpret_cast<HDC>(w);
-                SetTextColor(dc, RGB(33, 51, 66));
-                int id = GetDlgCtrlID(reinterpret_cast<HWND>(l));
-                bool card = id == DropZone || id == SourceText || id == StageText;
-                SetBkColor(dc, card ? RGB(255, 255, 255) : RGB(244, 247, 250));
-                return reinterpret_cast<LRESULT>(card ? self->white : self->background);
             }
             case WM_COMMAND:
                 if (HIWORD(w) == BN_CLICKED)
                     self->Command(LOWORD(w));
                 return 0;
-            case WM_TIMER:
-                if (w == 9001 && self->smoke) {
-                    KillTimer(h, 9001);
-                    self->FinishSmoke(
-                        true, "Native window, drag-drop, asynchronous probe and conversion completed.");
-                }
+            case EventMessage:
+                self->OnEvent(std::unique_ptr<Event>(reinterpret_cast<Event*>(l)));
                 return 0;
             case WM_DROPFILES: {
                 auto drop = reinterpret_cast<HDROP>(w);
-                UINT count = DragQueryFileW(drop, 0xFFFFFFFF, nullptr, 0);
-                std::wstring p;
+                const auto count = DragQueryFileW(drop, 0xffffffff, nullptr, 0);
+                std::wstring name;
                 if (count == 1) {
-                    UINT n = DragQueryFileW(drop, 0, nullptr, 0);
-                    p.resize(n + 1);
-                    DragQueryFileW(drop, 0, p.data(), n + 1);
-                    p.resize(n);
+                    const auto size = DragQueryFileW(drop, 0, nullptr, 0);
+                    name.resize(size + 1);
+                    DragQueryFileW(drop, 0, name.data(), size + 1);
+                    name.resize(size);
                 }
                 DragFinish(drop);
-                if (count == 1 && !self->busy)
-                    self->ProbeInput(p);
-                else if (count > 1)
-                    MessageBoxW(h, L"V1 每次处理一个视频。", L"LogForge", MB_OK);
+                if (count == 1)
+                    self->ProbeInput(name);
+                else
+                    self->Stage(TextId::OneFile);
                 return 0;
             }
-            case EventMessage:
-                self->OnEvent(std::unique_ptr<Event>(reinterpret_cast<Event*>(l)));
+            case WM_TIMER:
+                KillTimer(h, w);
+                if (w == 9001)
+                    self->Finish(true, "Native drop/probe/convert/validation completed");
+                else if (w == 9002)
+                    self->UiTest();
                 return 0;
             case WM_CLOSE:
                 if (self->busy) {
                     self->closing = true;
                     self->cancelled = true;
-                    self->Text(StageText, L"正在停止后台任务…");
-                    return 0;
-                }
-                DestroyWindow(h);
+                    self->Stage(TextId::Stopping);
+                    EnableWindow(h, FALSE);
+                } else
+                    DestroyWindow(h);
                 return 0;
             case WM_DESTROY:
-                PostQuitMessage(self->smoke ? self->smokeResult : 0);
+                PostQuitMessage(self->exitCode);
                 return 0;
             }
+        } catch (const AppError& e) {
+            self->logger.Write(e.what());
+            if (m == WM_CREATE)
+                return -1;
+            self->Failure(e);
+            if (self->uiTest || self->smoke)
+                self->Finish(false, e.what());
         } catch (const std::exception& e) {
-            if (self->smoke)
-                self->FinishSmoke(false, e.what());
-            else
-                MessageBoxW(h, Wide(e.what()).c_str(), L"LogForge", MB_OK | MB_ICONERROR);
+            self->logger.Write(e.what());
+            if (m == WM_CREATE)
+                return -1;
+            self->Failure(AppError({TextId::Unexpected, {e.what()}}));
+            if (self->uiTest || self->smoke)
+                self->Finish(false, e.what());
         }
-        return DefWindowProcW(h, msg, w, l);
+        return DefWindowProcW(h, m, w, l);
     }
 };
-int RunGui(HINSTANCE instance, const std::vector<std::wstring>& args) {
+int Run(HINSTANCE instance) {
     MainWindow app;
-    if (args.size() == 3 && args[0] == L"--smoke-test") {
+    int argc = 0;
+    auto argv = CommandLineToArgvW(GetCommandLineW(), &argc);
+    std::vector<std::wstring> args;
+    for (int i = 1; i < argc; ++i)
+        args.emplace_back(argv[i]);
+    LocalFree(argv);
+    size_t option = 0;
+    if (args.size() >= 3 && args[0] == L"--smoke-test") {
         app.smoke = true;
         app.smokeInput = args[1];
         app.smokeOutput = args[2];
+        option = 3;
+        if (option < args.size() && !args[option].starts_with(L"--")) {
+            const double value = std::stod(args[option++]);
+            const auto it = std::find(std::begin(ExposureValues), std::end(ExposureValues), value);
+            if (it == std::end(ExposureValues))
+                throw AppError(TextId::InvalidExposureChoice);
+            app.exposureIndex = static_cast<int>(it - std::begin(ExposureValues));
+        }
+    } else if (args.size() >= 2 && args[0] == L"--ui-test") {
+        app.uiTest = true;
+        app.uiDirectory = args[1];
+        fs::create_directories(app.uiDirectory);
+        option = 2;
     }
-    WNDCLASSEXW wc{sizeof(wc)};
-    wc.style = CS_HREDRAW | CS_VREDRAW;
-    wc.lpfnWndProc = MainWindow::Proc;
-    wc.hInstance = instance;
-    wc.hCursor = LoadCursorW(nullptr, IDC_ARROW);
-    wc.hIcon = LoadIconW(nullptr, IDI_APPLICATION);
-    wc.lpszClassName = L"LogForge.MainWindow";
-    RegisterClassExW(&wc);
-    int dpi = static_cast<int>(GetDpiForSystem());
-    HWND window = CreateWindowExW(WS_EX_ACCEPTFILES, wc.lpszClassName, L"LogForge · HLG → Apple Log",
-                                  WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, MulDiv(1000, dpi, 96),
-                                  MulDiv(825, dpi, 96), nullptr, nullptr, instance, &app);
+    for (; option < args.size(); ++option) {
+        if (args[option] == L"--tone")
+            app.settings.tone.enabled = true;
+        else if (args[option] == L"--missing-ffmpeg" && app.uiTest)
+            app.missingScenario = true;
+        else if (args[option] == L"--language" && option + 1 < args.size()) {
+            const auto v = args[++option];
+            if (v != L"en" && v != L"zh-CN")
+                throw AppError(TextId::CLILanguage);
+            app.settings.language = v == L"en" ? Language::English : Language::SimplifiedChinese;
+        } else if (args[option] == L"--theme" && option + 1 < args.size()) {
+            const auto v = args[++option];
+            if (v != L"dark" && v != L"light")
+                throw AppError(TextId::CLICommand);
+            app.settings.theme = v == L"dark" ? Theme::Dark : Theme::Light;
+        } else if (args[option] == L"--dpi" && app.uiTest && option + 1 < args.size()) {
+            app.testDpi = std::stoi(args[++option]);
+            if (app.testDpi < 96 || app.testDpi > 288)
+                throw AppError(TextId::CLICommand);
+        } else
+            throw AppError(TextId::CLICommand);
+    }
+    WNDCLASSEXW c{sizeof(c)};
+    c.style = CS_HREDRAW | CS_VREDRAW;
+    c.lpfnWndProc = MainWindow::Proc;
+    c.hInstance = instance;
+    c.hCursor = LoadCursorW(nullptr, IDC_ARROW);
+    c.hIcon = LoadIconW(instance, MAKEINTRESOURCEW(101));
+    c.hIconSm = c.hIcon;
+    c.lpszClassName = L"LogForge.MainWindow";
+    RegisterClassExW(&c);
+    const auto dpi = app.testDpi ? app.testDpi : static_cast<int>(GetDpiForSystem());
+    RECT work{};
+    SystemParametersInfoW(SPI_GETWORKAREA, 0, &work, 0);
+    const int width = std::min(MulDiv(1020, dpi, 96), static_cast<int>(work.right - work.left) - 24);
+    const int height = std::min(MulDiv(840, dpi, 96), static_cast<int>(work.bottom - work.top) - 24);
+    auto window = CreateWindowExW(
+        WS_EX_ACCEPTFILES | WS_EX_CONTROLPARENT, c.lpszClassName, L"LogForge",
+        WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN, work.left + (work.right - work.left - width) / 2,
+        work.top + (work.bottom - work.top - height) / 2, width, height, nullptr, nullptr, instance, &app);
     if (!window)
-        throw std::runtime_error("Cannot create LogForge window.");
-    ShowWindow(window, SW_SHOW);
+        throw AppError(TextId::DialogOpenFailed);
+    ShowWindow(window, app.uiTest || app.smoke ? SW_SHOWNOACTIVATE : SW_SHOW);
     UpdateWindow(window);
-    MSG msg{};
-    while (GetMessageW(&msg, nullptr, 0, 0) > 0) {
-        if (!IsDialogMessageW(window, &msg)) {
-            TranslateMessage(&msg);
-            DispatchMessageW(&msg);
+    MSG message{};
+    while (GetMessageW(&message, nullptr, 0, 0) > 0) {
+        if (!IsDialogMessageW(window, &message)) {
+            TranslateMessage(&message);
+            DispatchMessageW(&message);
         }
     }
-    // Drain any progress messages queued during shutdown without leaking payloads.
-    const int exitCode = static_cast<int>(msg.wParam);
-    while (PeekMessageW(&msg, window, EventMessage, EventMessage, PM_REMOVE))
-        delete reinterpret_cast<Event*>(msg.lParam);
-    return exitCode;
+    while (PeekMessageW(&message, window, EventMessage, EventMessage, PM_REMOVE))
+        delete reinterpret_cast<Event*>(message.lParam);
+    return app.exitCode;
 }
 } // namespace logforge
 int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int) {
     SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
-    CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
+    const auto com = CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
     INITCOMMONCONTROLSEX controls{sizeof(controls), ICC_STANDARD_CLASSES | ICC_PROGRESS_CLASS};
     InitCommonControlsEx(&controls);
     int result = 1;
     try {
-        int count{};
-        LPWSTR* argv = CommandLineToArgvW(GetCommandLineW(), &count);
-        std::vector<std::wstring> args;
-        for (int i = 1; i < count; ++i)
-            args.emplace_back(argv[i]);
-        LocalFree(argv);
-        result = logforge::RunGui(instance, args);
+        result = logforge::Run(instance);
     } catch (const std::exception& e) {
-        MessageBoxW(nullptr, logforge::Wide(e.what()).c_str(), L"LogForge 启动失败", MB_OK | MB_ICONERROR);
+        MessageBoxW(nullptr, logforge::Wide(e.what()).c_str(), L"LogForge", MB_OK | MB_ICONERROR);
     }
-    CoUninitialize();
+    if (SUCCEEDED(com))
+        CoUninitialize();
     return result;
 }

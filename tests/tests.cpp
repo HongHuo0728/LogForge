@@ -40,6 +40,13 @@ void MediaTests() {
     auto vfr = j;
     vfr["streams"][0]["avg_frame_rate"] = "25/1";
     check(!MediaInfo::Parse(vfr).UnsupportedReasons().empty(), "VFR accepted");
+    auto cameraRate = j;
+    cameraRate["streams"][0]["r_frame_rate"] = "24/1";
+    cameraRate["streams"][0]["avg_frame_rate"] = "83360/3473";
+    auto camera = MediaInfo::Parse(cameraRate);
+    check(camera.UnsupportedReasons().empty(), "Small camera clock correction rejected");
+    Near(camera.fps.Value(), 24, 0, "Camera nominal rate must remain 24 fps");
+    Near(camera.averageFps.Value(), 83360.0 / 3473, 1e-12, "Raw average rate must remain inspectable");
     auto rotated = j;
     rotated["streams"][0]["side_data_list"] = Json::array({{{"rotation", -90}}});
     Near(MediaInfo::Parse(rotated).rotation, -90, 0, "Rotation parser");
@@ -74,6 +81,28 @@ void MediaTests() {
     auto wrongAudio = output;
     wrongAudio["streams"][1]["sample_rate"] = "44100";
     check(!ValidateOutput(m, MediaInfo::Parse(wrongAudio), 30).passed, "Changed sample rate validated");
+    for (auto [key, value] : std::vector<std::pair<std::string, Json>>{
+             {"codec_name", "pcm_s16le"}, {"channels", 1}, {"channel_layout", "downmix"}}) {
+        auto bad = output;
+        bad["streams"][1][key] = value;
+        check(!ValidateOutput(m, MediaInfo::Parse(bad), 30).passed, "Changed audio format validated");
+    }
+    auto unlabelledInput = j, unlabelledOutput = output;
+    unlabelledInput["streams"][1].erase("channel_layout");
+    unlabelledOutput["streams"][1].erase("channel_layout");
+    const auto unlabelled = MediaInfo::Parse(unlabelledInput);
+    check(ValidateOutput(unlabelled, MediaInfo::Parse(unlabelledOutput), 30).passed,
+          "Preserved unlabelled audio rejected");
+    const auto inventedLayout = ValidateOutput(unlabelled, MediaInfo::Parse(output), 30);
+    check(!inventedLayout.passed && inventedLayout.errors.size() == 1 &&
+              inventedLayout.errors[0].id == TextId::AudioLayoutChanged,
+          "Invented layout must produce a specific diagnostic");
+    check(!ValidateOutput(m, MediaInfo::Parse(unlabelledOutput), 30).passed,
+          "Lost explicit channel layout validated");
+    auto driftingOutput = output;
+    driftingOutput["streams"][0]["avg_frame_rate"] = "29971/1000";
+    check(!ValidateOutput(m, MediaInfo::Parse(driftingOutput), 30).passed,
+          "Output average-rate drift hidden by nominal rate");
     auto metadata = AppleLogMetadataWriter::Arguments(m);
     check(std::find(metadata.begin(), metadata.end(), L"2") != metadata.end(),
           "Unspecified transfer missing");
@@ -171,7 +200,30 @@ int main(int argc, char** argv) {
         }
         Near(logforge::HLG::DecodeToSceneLinear(0.5), 1.0 / 12, 1e-12, "HLG knee");
         Near(logforge::HLG::DecodeToSceneLinear(1), 1, 3e-8, "HLG peak (published rounded constants)");
-        Near(logforge::HLGToAppleLog(0.75), A::EncodeLinearToAppleLog(0.9), 1e-12, "Diffuse white policy");
+        Near(logforge::HLGToAppleLog(0.75), A::EncodeLinearToAppleLog(1.0), 1e-12,
+             "BT.2408 75% HLG is 100% reference white");
+        // 18% gray is derived from the 100% reference white in BT.2408 Table 1.
+        const double hlgGray =
+            logforge::HLG::EncodeSceneLinear(0.18 * logforge::HLG::DecodeToSceneLinear(0.75));
+        Near(hlgGray, 0.3782588830779046, 1e-14, "Independent BT.2408 gray reference");
+        Near(logforge::HLGToAppleLog(hlgGray), A::EncodeLinearToAppleLog(0.18), 1e-12,
+             "BT.2408 gray must land at Apple reference gray");
+        for (double ev : {-2.0, -0.5, 0.0, 0.5, 2.0}) {
+            Near(A::DecodeAppleLogToLinear(logforge::HLGToAppleLog(hlgGray, ev)), 0.18 * std::exp2(ev), 1e-12,
+                 "Exposure is a scene-linear gain");
+            Near(logforge::HLGToAppleLog(0, ev), A::EncodeLinearToAppleLog(0), 1e-12,
+                 "Exposure must not lift the encoded black floor");
+        }
+        for (double ev :
+             {-9.0, 9.0, std::numeric_limits<double>::infinity(), std::numeric_limits<double>::quiet_NaN()}) {
+            bool badExposure = false;
+            try {
+                logforge::ValidateExposureStops(ev);
+            } catch (...) {
+                badExposure = true;
+            }
+            check(badExposure, "Invalid exposure accepted");
+        }
         Near(A::EncodeLinearToAppleLog(0.18), 0.4882724585268676, 1e-14, "Independent double gray reference");
         Near(A::EncodeLinearToAppleLog(0.0), 0.1504764523009125, 1e-14, "Independent double black reference");
         Near(A::EncodeLinearToAppleLog(0.01), A::Pt, 2e-8,
@@ -188,6 +240,71 @@ int main(int argc, char** argv) {
             rejected = true;
         }
         check(rejected, "Non-finite pixel accepted");
+        // Creative rendering is independently tested; it must never change the
+        // published Apple Log curve or the disabled conversion path.
+        logforge::ToneAdjustments tone;
+        const std::array<double, 3> color{0.08, 0.2, 0.4};
+        check(logforge::AdjustSceneLinearBT2020(color, tone) == color, "Disabled tone is not exact identity");
+        tone.enabled = true;
+        const auto luma = [](const std::array<double, 3>& rgb) {
+            return .2627 * rgb[0] + .678 * rgb[1] + .0593 * rgb[2];
+        };
+        for (double strength : {0.0, 1.0, 3.0}) {
+            tone.shadowStops = tone.highlightStops = strength;
+            double last = -1;
+            for (int i = 0; i <= 10000; ++i) {
+                const double y = .18 * std::exp2(-24 + 48.0 * i / 10000);
+                const auto out = logforge::AdjustSceneLinearBT2020({y, y, y}, tone);
+                check(out[0] > last, "Creative luminance curve lost monotonicity");
+                Near(out[0], out[1], 1e-9, "Creative curve tints neutrals");
+                Near(out[1], out[2], 1e-9, "Creative curve tints neutrals");
+                last = out[0];
+            }
+            Near(logforge::AdjustSceneLinearBT2020({.18, .18, .18}, tone)[0], .18, 1e-14,
+                 "Creative curve moved reference gray");
+            Near(logforge::AdjustSceneLinearBT2020({0, 0, 0}, tone)[0], 0, 0,
+                 "Creative curve invents signal at black");
+        }
+        tone = {true, 3, 1, 1};
+        Near(logforge::AdjustSceneLinearBT2020({.001, .001, .001}, tone)[0], .008, 1e-15,
+             "Deep shadows should receive 3 stops");
+        Near(logforge::AdjustSceneLinearBT2020({12, 12, 12}, tone)[0], 6, 1e-12,
+             "High highlights should lose 1 stop");
+        const auto unchangedSaturation = logforge::AdjustSceneLinearBT2020(color, tone);
+        tone.saturation = .85;
+        const auto desaturated = logforge::AdjustSceneLinearBT2020(color, tone);
+        Near(luma(unchangedSaturation), luma(desaturated), 1e-14, "Saturation altered scene luminance");
+        Near(desaturated[2] - desaturated[0], .85 * (unchangedSaturation[2] - unchangedSaturation[0]), 1e-14,
+             "Saturation is not linear chroma scaling");
+        tone.saturation = 0;
+        const auto mono = logforge::AdjustSceneLinearBT2020(color, tone);
+        Near(mono[0], mono[1], 0, "Zero saturation is not monochrome");
+        Near(mono[1], mono[2], 0, "Zero saturation is not monochrome");
+        for (const auto bad :
+             {logforge::ToneAdjustments{true, 3.1, 1, 1}, logforge::ToneAdjustments{false, 0, -1, 1},
+              logforge::ToneAdjustments{true, 0, 0, 1.51},
+              logforge::ToneAdjustments{true, 0, 0, std::numeric_limits<double>::quiet_NaN()}}) {
+            bool refused = false;
+            try {
+                logforge::ValidateToneAdjustments(bad);
+            } catch (...) {
+                refused = true;
+            }
+            check(refused, "Invalid creative parameters accepted");
+        }
+        float baseline[]{.02f, .1f, .02f, .1f, .02f, .1f};
+        float disabled[]{.02f, .1f, .02f, .1f, .02f, .1f};
+        logforge::TransformHLGToAppleLog(baseline);
+        logforge::TransformHLGToAppleLog(disabled, 0, {false, 0, 3, 0});
+        check(std::equal(std::begin(baseline), std::end(baseline), std::begin(disabled)),
+              "Disabled adjustments changed pixels");
+        logforge::SignalStatistics signal;
+        float extremes[]{-.5f, 0, 1.5f};
+        logforge::TransformHLGToAppleLog(extremes, 0, {}, &signal);
+        check(signal.samples == 3 && signal.appleFloorClipped == 1 && signal.aboveNominalWhite == 1,
+              "Signal range counters failed");
+        Near(signal.inputMinimum, -.5, 0, "Input range counter");
+        Near(signal.outputMinimum, 0, 0, "Output range counter");
         std::cout << "PASS: Apple reference points, 100001 Apple/HLG round trips, normalization\n";
         if (group == "all") {
             MediaTests();

@@ -1,4 +1,5 @@
 #pragma once
+#include "logforge/Version.h"
 #include <atomic>
 #include <filesystem>
 #include <fstream>
@@ -10,7 +11,6 @@
 
 namespace logforge {
 namespace fs = std::filesystem;
-inline constexpr char Version[] = "0.1.0";
 std::wstring Wide(const std::string& text);
 std::string Utf8(const std::wstring& text);
 std::string PathText(const fs::path& path);

@@ -1,4 +1,5 @@
 #include "logforge/Platform.h"
+#include "logforge/Localization.h"
 #include <array>
 #include <bcrypt.h>
 #include <chrono>
@@ -15,7 +16,7 @@ std::wstring Wide(const std::string& s) {
     const int n =
         MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, s.data(), static_cast<int>(s.size()), nullptr, 0);
     if (!n)
-        throw std::runtime_error("Invalid UTF-8 text.");
+        throw AppError(TextId::Utf8Invalid);
     std::wstring out(n, 0);
     MultiByteToWideChar(CP_UTF8, 0, s.data(), static_cast<int>(s.size()), out.data(), n);
     return out;
@@ -48,7 +49,7 @@ fs::path DataDirectory() {
         return fs::path(overrideDir);
     PWSTR p = nullptr;
     if (FAILED(SHGetKnownFolderPath(FOLDERID_LocalAppData, 0, nullptr, &p)))
-        throw std::runtime_error("Cannot locate LocalAppData.");
+        throw AppError(TextId::LocalDataUnavailable);
     fs::path dir(p);
     CoTaskMemFree(p);
     return dir / L"LogForge";
@@ -99,8 +100,8 @@ Logger::Logger() {
     path_ = dir / name;
     file_.open(path_, std::ios::app);
     if (!file_)
-        throw std::runtime_error("Cannot create local log file.");
-    Write(std::string("LogForge ") + Version + "; Windows x64");
+        throw AppError(TextId::LogCreate);
+    Write(std::string("LogForge ") + DisplayVersion + "; Windows x64");
     using RtlGetVersionFn = LONG(WINAPI*)(OSVERSIONINFOW*);
     auto fn =
         reinterpret_cast<RtlGetVersionFn>(GetProcAddress(GetModuleHandleW(L"ntdll.dll"), "RtlGetVersion"));
@@ -123,11 +124,11 @@ FFmpegProcess::FFmpegProcess(const fs::path& exe, const std::vector<std::wstring
     HANDLE a{}, b{};
     auto make = [&](Handle& parent, Handle& child, bool readParent) {
         if (!CreatePipe(&a, &b, &sa, 1 << 20))
-            throw std::runtime_error("Cannot create process pipe: " + Utf8(WinError()));
+            throw AppError(Message(TextId::PipeCreate, {Utf8(WinError())}));
         parent.reset(readParent ? a : b);
         child.reset(readParent ? b : a);
         if (!SetHandleInformation(parent.get(), HANDLE_FLAG_INHERIT, 0))
-            throw std::runtime_error("Cannot protect process pipe.");
+            throw AppError(TextId::PipeProtect);
     };
     Handle childIn, childOut, childErr;
     make(output_, childOut, true);
@@ -138,19 +139,19 @@ FFmpegProcess::FFmpegProcess(const fs::path& exe, const std::vector<std::wstring
         childIn.reset(CreateFileW(L"NUL", GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, &sa,
                                   OPEN_EXISTING, 0, nullptr));
     if (!childIn)
-        throw std::runtime_error("Cannot open process input.");
+        throw AppError(TextId::ProcessInput);
     job_.reset(CreateJobObjectW(nullptr, nullptr));
     JOBOBJECT_EXTENDED_LIMIT_INFORMATION limits{};
     limits.BasicLimitInformation.LimitFlags = JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;
     if (!job_ ||
         !SetInformationJobObject(job_.get(), JobObjectExtendedLimitInformation, &limits, sizeof(limits)))
-        throw std::runtime_error("Cannot create child process job.");
+        throw AppError(TextId::ProcessJob);
     SIZE_T size = 0;
     InitializeProcThreadAttributeList(nullptr, 1, 0, &size);
     std::vector<unsigned char> storage(size);
     auto attributes = reinterpret_cast<LPPROC_THREAD_ATTRIBUTE_LIST>(storage.data());
     if (!InitializeProcThreadAttributeList(attributes, 1, 0, &size))
-        throw std::runtime_error("Cannot initialize process attributes.");
+        throw AppError(TextId::ProcessAttributes);
     struct Cleanup {
         LPPROC_THREAD_ATTRIBUTE_LIST p;
         ~Cleanup() {
@@ -160,7 +161,7 @@ FFmpegProcess::FFmpegProcess(const fs::path& exe, const std::vector<std::wstring
     HANDLE inherited[]{childIn.get(), childOut.get(), childErr.get()};
     if (!UpdateProcThreadAttribute(attributes, 0, PROC_THREAD_ATTRIBUTE_HANDLE_LIST, inherited,
                                    sizeof(inherited), nullptr, nullptr))
-        throw std::runtime_error("Cannot restrict inherited handles.");
+        throw AppError(TextId::ProcessHandles);
     STARTUPINFOEXW si{};
     si.StartupInfo.cb = sizeof(si);
     si.StartupInfo.dwFlags = STARTF_USESTDHANDLES;
@@ -173,16 +174,16 @@ FFmpegProcess::FFmpegProcess(const fs::path& exe, const std::vector<std::wstring
     if (!CreateProcessW(exe.c_str(), cmd.data(), nullptr, nullptr, TRUE,
                         CREATE_NO_WINDOW | CREATE_SUSPENDED | EXTENDED_STARTUPINFO_PRESENT, nullptr, nullptr,
                         &si.StartupInfo, &pi))
-        throw std::runtime_error("Cannot start " + PathText(exe) + ": " + Utf8(WinError()));
+        throw AppError(Message(TextId::ProcessStart, {PathText(exe), Utf8(WinError())}));
     process_.reset(pi.hProcess);
     Handle thread(pi.hThread);
     if (!AssignProcessToJobObject(job_.get(), process_.get())) {
         TerminateProcess(process_.get(), 1);
-        throw std::runtime_error("Cannot supervise child process.");
+        throw AppError(TextId::ProcessSupervise);
     }
     if (ResumeThread(thread.get()) == static_cast<DWORD>(-1)) {
         Terminate();
-        throw std::runtime_error("Cannot resume child process.");
+        throw AppError(TextId::ProcessResume);
     }
 }
 FFmpegProcess::~FFmpegProcess() {
@@ -195,7 +196,7 @@ size_t FFmpegProcess::Read(void* data, size_t bytes) {
     DWORD got = 0;
     if (!ReadFile(output_.get(), data, static_cast<DWORD>(std::min<size_t>(bytes, 1 << 20)), &got, nullptr)) {
         if (GetLastError() != ERROR_BROKEN_PIPE)
-            throw std::runtime_error("Cannot read child process output.");
+            throw AppError(TextId::ProcessRead);
     }
     return got;
 }
@@ -205,7 +206,7 @@ void FFmpegProcess::Write(const void* data, size_t bytes) {
         DWORD n{};
         if (!WriteFile(input_.get(), p, static_cast<DWORD>(std::min<size_t>(bytes, 1 << 20)), &n, nullptr) ||
             !n)
-            throw std::runtime_error("Encoder closed its input pipe. See the detailed log.");
+            throw AppError(TextId::EncoderPipe);
         p += n;
         bytes -= n;
     }
@@ -259,7 +260,7 @@ ProcessResult RunProcess(const fs::path& exe, const std::vector<std::wstring>& a
                 if (result.output.size() + n <= 32 * 1024 * 1024)
                     result.output.append(b.data(), n);
                 else if (!fn)
-                    throw std::runtime_error("Process output exceeded 32 MB safety limit.");
+                    throw AppError(TextId::ProcessOutputLimit);
                 if (fn) {
                     pending.append(b.data(), n);
                     size_t pos;
@@ -302,16 +303,16 @@ ProcessResult RunProcess(const fs::path& exe, const std::vector<std::wstring>& a
     if (readError)
         std::rethrow_exception(readError);
     if (cancel && cancel->load())
-        throw std::runtime_error("用户取消。");
+        throw AppError(TextId::Cancelled);
     if (timedOut)
-        throw std::runtime_error("External process timed out: " + PathText(exe));
+        throw AppError(Message(TextId::ProcessTimeout, {PathText(exe)}));
     return result;
 }
 std::string SHA256(const fs::path& path) {
     BCRYPT_ALG_HANDLE alg{};
     BCRYPT_HASH_HANDLE hash{};
     if (BCryptOpenAlgorithmProvider(&alg, BCRYPT_SHA256_ALGORITHM, nullptr, 0) < 0)
-        throw std::runtime_error("SHA-256 initialization failed.");
+        throw AppError(TextId::HashInit);
     struct Cleanup {
         BCRYPT_ALG_HANDLE& a;
         BCRYPT_HASH_HANDLE& h;
@@ -323,21 +324,21 @@ std::string SHA256(const fs::path& path) {
         }
     } cleanup{alg, hash};
     if (BCryptCreateHash(alg, &hash, nullptr, 0, nullptr, 0, 0) < 0)
-        throw std::runtime_error("SHA-256 initialization failed.");
+        throw AppError(TextId::HashInit);
     std::ifstream file(path, std::ios::binary);
     if (!file)
-        throw std::runtime_error("Cannot read file for SHA-256 verification.");
+        throw AppError(TextId::HashRead);
     std::array<unsigned char, 65536> b{};
     while (file) {
         file.read(reinterpret_cast<char*>(b.data()), b.size());
         if (BCryptHashData(hash, b.data(), static_cast<ULONG>(file.gcount()), 0) < 0)
-            throw std::runtime_error("SHA-256 failed.");
+            throw AppError(TextId::HashFailed);
     }
     if (!file.eof())
-        throw std::runtime_error("Cannot finish reading checksum input.");
+        throw AppError(TextId::HashIncomplete);
     std::array<unsigned char, 32> digest{};
     if (BCryptFinishHash(hash, digest.data(), 32, 0) < 0)
-        throw std::runtime_error("SHA-256 failed.");
+        throw AppError(TextId::HashFailed);
     std::ostringstream s;
     for (auto v : digest)
         s << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(v);

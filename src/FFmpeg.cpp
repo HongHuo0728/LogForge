@@ -1,4 +1,5 @@
 #include "logforge/FFmpeg.h"
+#include "logforge/Settings.h"
 #include <array>
 #include <set>
 #include <sstream>
@@ -27,27 +28,27 @@ std::vector<std::string> FFmpegManager::MissingCapabilities(const std::string& d
 FFmpegInstallation FFmpegManager::Check(const fs::path& exe, const std::atomic_bool& cancel, bool smoke) {
     fs::path ff = fs::absolute(exe), probe = ff.parent_path() / L"ffprobe.exe";
     if (!fs::is_regular_file(ff) || !fs::is_regular_file(probe))
-        throw std::runtime_error("需要同一目录中的 ffmpeg.exe 和 ffprobe.exe。");
+        throw AppError(TextId::FFmpegPair);
     auto run = [&](const std::vector<std::wstring>& args) {
         auto r = RunProcess(ff, args, &cancel);
         if (r.exitCode)
-            throw std::runtime_error("FFmpeg capability check failed: " + r.error);
+            throw AppError(Message(TextId::FFmpegCapability, {r.error}));
         return r.output + r.error;
     };
     auto version = run({L"-version"});
     auto pv = RunProcess(probe, {L"-version"}, &cancel);
     if (version.find("ffmpeg version ") != 0 || pv.exitCode || pv.output.find("ffprobe version ") != 0)
-        throw std::runtime_error("FFmpeg / ffprobe 版本检测失败。");
+        throw AppError(TextId::FFmpegVersion);
     const auto decoder = run({L"-hide_banner", L"-decoders"});
     const auto encoder = run({L"-hide_banner", L"-h", L"encoder=prores_ks"});
     const auto filters = run({L"-hide_banner", L"-filters"});
     const auto formats = run({L"-hide_banner", L"-pix_fmts"});
     auto missing = MissingCapabilities(decoder, encoder, filters, formats);
     if (!missing.empty()) {
-        std::string message = "FFmpeg 缺少所需功能：";
+        std::string message;
         for (const auto& m : missing)
             message += m + "; ";
-        throw std::runtime_error(message);
+        throw AppError(Message(TextId::FFmpegMissingFeatures, {message}));
     }
     logger_.Write("FFmpeg path: " + PathText(ff) + "\n" + version);
     logger_.Write("ffprobe: " + pv.output);
@@ -89,7 +90,7 @@ FFmpegInstallation FFmpegManager::Check(const fs::path& exe, const std::atomic_b
              path.wstring()});
         auto m = Probe(probe, path, &cancel);
         if (m.codec != "prores" || m.profile != "HQ" || m.bitDepth != 10 || m.pixelFormat != "yuv422p10le")
-            throw std::runtime_error("ProRes HQ 10-bit 编码实测失败。");
+            throw AppError(TextId::FFmpegSmokeFailed);
         run({L"-hide_banner", L"-v", L"error", L"-nostdin", L"-i", path.wstring(), L"-vf",
              L"zscale=matrixin=2020_ncl:matrix=gbr:rangein=limited:range=full:transferin=arib-std-b67:"
              L"transfer=arib-std-b67:primariesin=2020:primaries=2020,format=gbrpf32le",
@@ -100,25 +101,15 @@ FFmpegInstallation FFmpegManager::Check(const fs::path& exe, const std::atomic_b
     return {ff, probe, version.substr(0, version.find('\n'))};
 }
 void FFmpegManager::SaveManual(const fs::path& executable) {
-    fs::create_directories(DataDirectory());
-    std::ofstream f(DataDirectory() / L"settings.json");
-    if (!f)
-        throw std::runtime_error("Cannot save FFmpeg setting.");
-    f << Json{{"ffmpeg", PathText(fs::absolute(executable))}}.dump(2);
+    SettingsStore::SaveFFmpeg(executable, false);
 }
-std::optional<FFmpegInstallation> FFmpegManager::Detect(const std::atomic_bool& cancel) {
+std::optional<FFmpegInstallation> FFmpegManager::Detect(const std::atomic_bool& cancel,
+                                                        const DiscoveryCallback& progress) {
     std::vector<fs::path> candidates{ManagedExecutable(),
                                      ExecutableDirectory() / L"tools" / L"ffmpeg" / L"bin" / L"ffmpeg.exe"};
-    try {
-        std::ifstream f(DataDirectory() / L"settings.json");
-        if (f) {
-            Json j;
-            f >> j;
-            candidates.push_back(Wide(j.value("ffmpeg", std::string())));
-        }
-    } catch (const std::exception& e) {
-        logger_.Write(std::string("Settings ignored: ") + e.what());
-    }
+    const auto settings = SettingsStore::Load();
+    candidates.push_back(settings.manualFFmpeg);
+    candidates.push_back(settings.detectedFFmpeg);
     wchar_t path[32768]{};
     GetEnvironmentVariableW(L"PATH", path, 32768);
     std::wstringstream split(path);
@@ -137,31 +128,69 @@ std::optional<FFmpegInstallation> FFmpegManager::Detect(const std::atomic_bool& 
     candidates.push_back(fs::path(user) / L"scoop/apps/ffmpeg/current/bin/ffmpeg.exe");
     auto packages = DataDirectory().parent_path() / L"Microsoft/WinGet/Packages";
     std::error_code ec;
-    for (fs::directory_iterator i(packages, ec), end; i != end && !ec; i.increment(ec))
-        if (i->is_directory() && i->path().filename().wstring().find(L"FFmpeg") != std::wstring::npos) {
+    for (fs::directory_iterator i(packages, ec), end; i != end && !ec; i.increment(ec)) {
+        if (cancel.load())
+            throw AppError(TextId::Cancelled);
+        if (i->is_directory(ec) && i->path().filename().wstring().find(L"FFmpeg") != std::wstring::npos) {
             for (fs::recursive_directory_iterator
                      k(i->path(), fs::directory_options::skip_permission_denied, ec),
                  ke;
                  k != ke && !ec; k.increment(ec)) {
+                if (cancel.load())
+                    throw AppError(TextId::Cancelled);
                 if (k.depth() > 3)
                     k.disable_recursion_pending();
                 if (k->path().filename() == L"ffmpeg.exe")
                     candidates.push_back(k->path());
             }
         }
-    std::set<fs::path> visited;
-    for (const auto& p : candidates) {
+    }
+    std::set<std::wstring> visited;
+    std::optional<FFmpegInstallation> found;
+    const auto check = [&](const fs::path& p) {
         if (cancel.load())
-            throw std::runtime_error("用户取消。");
-        if (p.empty() || !fs::is_regular_file(p, ec) || !visited.insert(p).second)
-            continue;
+            throw AppError(TextId::Cancelled);
+        if (p.empty())
+            return false;
+        auto key = fs::absolute(p).lexically_normal().wstring();
+        for (auto& c : key)
+            c = static_cast<wchar_t>(towlower(c));
+        if (!visited.insert(key).second || !fs::is_regular_file(p, ec))
+            return false;
         try {
-            return Check(p, cancel);
+            found = Check(p, cancel);
+            try {
+                SettingsStore::SaveFFmpeg(found->ffmpeg, true);
+            } catch (const std::exception& e) {
+                logger_.Write(std::string("Discovery cache not saved: ") + e.what());
+            }
+            return true;
         } catch (const std::exception& e) {
+            if (cancel.load())
+                throw AppError(TextId::Cancelled);
             logger_.Write("Rejected FFmpeg " + PathText(p) + ": " + e.what());
         }
+        return false;
+    };
+    if (progress)
+        progress({DiscoveryPhase::CheckingPaths});
+    for (const auto& p : candidates) {
+        if (check(p))
+            return found;
     }
-    return {};
+    const bool background = SetThreadPriority(GetCurrentThread(), THREAD_MODE_BACKGROUND_BEGIN) != FALSE;
+    struct RestorePriority {
+        bool active;
+        ~RestorePriority() {
+            if (active)
+                SetThreadPriority(GetCurrentThread(), THREAD_MODE_BACKGROUND_END);
+        }
+    } restore{background};
+    const auto report = SearchFFmpegDirectories(LocalDriveRoots(), cancel, check, progress);
+    logger_.Write("Local-drive FFmpeg search: folders=" + std::to_string(report.directories) +
+                  ", candidates=" + std::to_string(report.candidates) +
+                  ", skipped=" + std::to_string(report.skipped) + ", verified=" + (found ? "yes" : "no"));
+    return found;
 }
 DownloadSpec GyanReleaseProvider::Release() const {
     return {L"Gyan.dev essentials",
@@ -194,11 +223,12 @@ void download(const std::wstring& url, const fs::path& file, const std::atomic_b
     parts.dwUrlPathLength = static_cast<DWORD>(-1);
     parts.dwExtraInfoLength = static_cast<DWORD>(-1);
     if (!WinHttpCrackUrl(url.c_str(), 0, 0, &parts) || parts.nScheme != INTERNET_SCHEME_HTTPS)
-        throw std::runtime_error("FFmpeg download requires HTTPS.");
-    InternetHandle session(WinHttpOpen(L"LogForge/0.1.0", WINHTTP_ACCESS_TYPE_AUTOMATIC_PROXY,
-                                       WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, 0));
+        throw AppError(TextId::HttpsRequired);
+    InternetHandle session(WinHttpOpen(Wide(std::string("LogForge/") + Version).c_str(),
+                                       WINHTTP_ACCESS_TYPE_AUTOMATIC_PROXY, WINHTTP_NO_PROXY_NAME,
+                                       WINHTTP_NO_PROXY_BYPASS, 0));
     if (!session.h)
-        throw std::runtime_error("无法初始化 HTTPS 下载。");
+        throw AppError(TextId::HttpsInit);
     WinHttpSetTimeouts(session, 15000, 15000, 15000, 15000);
     InternetHandle connection(WinHttpConnect(
         session, std::wstring(parts.lpszHostName, parts.dwHostNameLength).c_str(), parts.nPort, 0));
@@ -209,17 +239,17 @@ void download(const std::wstring& url, const fs::path& file, const std::atomic_b
                                               WINHTTP_NO_REFERER, WINHTTP_DEFAULT_ACCEPT_TYPES,
                                               WINHTTP_FLAG_SECURE));
     if (!request.h)
-        throw std::runtime_error("无法建立 HTTPS 请求。");
+        throw AppError(TextId::HttpsRequest);
     DWORD redirects = WINHTTP_OPTION_REDIRECT_POLICY_DISALLOW_HTTPS_TO_HTTP;
     WinHttpSetOption(request, WINHTTP_OPTION_REDIRECT_POLICY, &redirects, sizeof(redirects));
     if (!WinHttpSendRequest(request, WINHTTP_NO_ADDITIONAL_HEADERS, 0, nullptr, 0, 0, 0) ||
         !WinHttpReceiveResponse(request, nullptr))
-        throw std::runtime_error("FFmpeg 下载连接失败：" + Utf8(WinError()));
+        throw AppError(Message(TextId::DownloadConnect, {Utf8(WinError())}));
     DWORD status = 0, len = sizeof(status);
     WinHttpQueryHeaders(request, WINHTTP_QUERY_STATUS_CODE | WINHTTP_QUERY_FLAG_NUMBER,
                         WINHTTP_HEADER_NAME_BY_INDEX, &status, &len, WINHTTP_NO_HEADER_INDEX);
     if (status != 200)
-        throw std::runtime_error("FFmpeg 下载 HTTP " + std::to_string(status));
+        throw AppError(Message(TextId::DownloadHttp, {std::to_string(status)}));
     wchar_t length[64]{};
     len = sizeof(length);
     uint64_t total = 0;
@@ -228,31 +258,31 @@ void download(const std::wstring& url, const fs::path& file, const std::atomic_b
         total = _wcstoui64(length, nullptr, 10);
     constexpr uint64_t limit = 512ull * 1024 * 1024;
     if (total > limit)
-        throw std::runtime_error("FFmpeg archive exceeds the download size limit.");
+        throw AppError(TextId::ArchiveLimit);
     std::ofstream out(file, std::ios::binary | std::ios::trunc);
     if (!out)
-        throw std::runtime_error("无法创建下载文件。");
+        throw AppError(TextId::DownloadCreate);
     std::array<char, 65536> b{};
     uint64_t received = 0;
     for (;;) {
         if (cancel.load())
-            throw std::runtime_error("用户取消。");
+            throw AppError(TextId::Cancelled);
         DWORD got{};
         if (!WinHttpReadData(request, b.data(), static_cast<DWORD>(b.size()), &got))
-            throw std::runtime_error("FFmpeg 下载中断：" + Utf8(WinError()));
+            throw AppError(Message(TextId::DownloadInterrupted, {Utf8(WinError())}));
         if (!got)
             break;
         received += got;
         if (received > limit)
-            throw std::runtime_error("FFmpeg archive exceeds the download size limit.");
+            throw AppError(TextId::ArchiveLimit);
         out.write(b.data(), got);
         if (!out)
-            throw std::runtime_error("磁盘空间不足或下载文件无法写入。");
-        progress(received, total, L"下载 FFmpeg 8.1.2");
+            throw AppError(TextId::DownloadWrite);
+        progress(received, total, Message(TextId::Downloading));
     }
     out.close();
     if (total && total != received)
-        throw std::runtime_error("FFmpeg 下载不完整。");
+        throw AppError(TextId::DownloadIncomplete);
 }
 } // namespace
 FFmpegInstallation FFmpegDownloader::Install(const FFmpegBuildProvider& provider, Logger& log,
@@ -264,7 +294,7 @@ FFmpegInstallation FFmpegDownloader::Install(const FFmpegBuildProvider& provider
     if (fs::is_regular_file(root / spec.archiveRoot / L"bin/ffmpeg.exe")) {
         try {
             auto current = FFmpegManager(log).Check(root / spec.archiveRoot / L"bin/ffmpeg.exe", cancel);
-            progress(1, 1, L"FFmpeg 已安装并通过验证");
+            progress(1, 1, Message(TextId::Installed));
             return current;
         } catch (const std::exception& e) {
             if (cancel.load())
@@ -273,7 +303,7 @@ FFmpegInstallation FFmpegDownloader::Install(const FFmpegBuildProvider& provider
         }
     }
     if (fs::space(root).available < 1024ull * 1024 * 1024)
-        throw std::runtime_error("磁盘空间不足：FFmpeg 安装至少需要 1 GB 临时空间。");
+        throw AppError(TextId::DownloadSpace);
     auto staging = root / (L"install-" + std::to_wstring(GetCurrentProcessId()) + L"-" +
                            std::to_wstring(GetTickCount64()));
     fs::create_directories(staging);
@@ -289,19 +319,19 @@ FFmpegInstallation FFmpegDownloader::Install(const FFmpegBuildProvider& provider
             log.Write("Download attempt " + std::to_string(attempt) + ": " + e.what());
             if (cancel.load() || attempt == 3)
                 throw;
-            progress(0, 0, L"下载失败，正在重试…");
+            progress(0, 0, Message(TextId::DownloadRetry));
         }
     }
-    progress(0, 0, L"校验 SHA-256…");
+    progress(0, 0, Message(TextId::CheckingHash));
     if (SHA256(zip) != spec.sha256)
-        throw std::runtime_error("SHA-256 不匹配：已拒绝安装，未运行下载内容。");
+        throw AppError(TextId::DownloadHash);
     if (cancel.load())
-        throw std::runtime_error("用户取消。");
-    progress(0, 0, L"解压 FFmpeg…");
+        throw AppError(TextId::Cancelled);
+    progress(0, 0, Message(TextId::Extracting));
     auto tar = SystemExecutable(L"tar.exe");
     auto listing = RunProcess(tar, {L"-tf", zip.wstring()}, &cancel, 60);
     if (listing.exitCode)
-        throw std::runtime_error("无法读取已验证的 FFmpeg ZIP。");
+        throw AppError(TextId::DownloadArchive);
     std::istringstream lines(listing.output);
     std::string entry;
     while (std::getline(lines, entry)) {
@@ -311,11 +341,11 @@ FFmpegInstallation FFmpegDownloader::Install(const FFmpegBuildProvider& provider
         if (p.is_absolute() || entry.find("..") != std::string::npos ||
             entry.find(':') != std::string::npos || entry.front() == '/' || entry.front() == '\\' ||
             !entry.starts_with(Utf8(spec.archiveRoot) + "/"))
-            throw std::runtime_error("Unsafe path in FFmpeg ZIP.");
+            throw AppError(TextId::ArchivePath);
     }
     auto extracted = RunProcess(tar, {L"-xf", zip.wstring(), L"-C", staging.wstring()}, &cancel, 120);
     if (extracted.exitCode)
-        throw std::runtime_error("FFmpeg 解压失败：" + extracted.error);
+        throw AppError(Message(TextId::DownloadExtractFailed, {extracted.error}));
     FFmpegManager manager(log);
     auto found = manager.Check(staging / spec.archiveRoot / L"bin/ffmpeg.exe", cancel);
     auto target = root / spec.archiveRoot;
@@ -323,7 +353,7 @@ FFmpegInstallation FFmpegDownloader::Install(const FFmpegBuildProvider& provider
         try {
             auto existing = manager.Check(target / L"bin/ffmpeg.exe", cancel);
             fs::remove(zip);
-            progress(1, 1, L"FFmpeg 已安装并通过验证");
+            progress(1, 1, Message(TextId::Installed));
             return existing;
         } catch (const std::exception&) {
             if (cancel.load())
@@ -336,7 +366,7 @@ FFmpegInstallation FFmpegDownloader::Install(const FFmpegBuildProvider& provider
     fs::rename(staging / spec.archiveRoot, target);
     fs::remove(zip);
     fs::remove(staging);
-    progress(1, 1, L"FFmpeg 安装完成");
+    progress(1, 1, Message(TextId::Installed));
     return manager.Check(target / L"bin/ffmpeg.exe", cancel);
 }
 } // namespace logforge

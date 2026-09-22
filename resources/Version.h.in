@@ -1,0 +1,6 @@
+#pragma once
+namespace logforge {
+inline constexpr char Version[] = "@PROJECT_VERSION@";
+inline constexpr char BuildNumber[] = "@LOGFORGE_BUILD_NUMBER@";
+inline constexpr char DisplayVersion[] = "@PROJECT_VERSION@ (@LOGFORGE_BUILD_NUMBER@)";
+}

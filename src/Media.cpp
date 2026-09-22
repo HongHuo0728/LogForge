@@ -56,7 +56,7 @@ Rational Rational::Parse(const std::string& value) {
 }
 MediaInfo MediaInfo::Parse(const Json& j, const fs::path& path) {
     if (!j.is_object() || !j.contains("streams") || !j["streams"].is_array())
-        throw std::runtime_error("ffprobe did not return a media stream list.");
+        throw AppError(TextId::ProbeStreams);
     MediaInfo m;
     m.path = path;
     m.raw = j;
@@ -84,8 +84,14 @@ MediaInfo MediaInfo::Parse(const Json& j, const fs::path& path) {
             m.fieldOrder = str(s, "field_order");
             m.chromaLocation = str(s, "chroma_location");
             m.sampleAspect = str(s, "sample_aspect_ratio");
-            m.fps = Rational::Parse(str(s, "avg_frame_rate"));
+            m.averageFps = Rational::Parse(str(s, "avg_frame_rate"));
             m.nominalFps = Rational::Parse(str(s, "r_frame_rate"));
+            m.fps = m.averageFps;
+            // Camera clock quantization can make the mean differ slightly from the
+            // capture rate. This candidate is verified against EVERY packet below.
+            if (m.nominalFps.Value() > 0 && m.averageFps.Value() > 0 &&
+                std::abs(m.nominalFps.Value() - m.averageFps.Value()) <= m.averageFps.Value() * 0.001)
+                m.fps = m.nominalFps;
             m.timeBase = Rational::Parse(str(s, "time_base"));
             m.frames = static_cast<int64_t>(number(s, "nb_frames"));
             m.videoDuration = number(s, "duration", m.duration);
@@ -108,54 +114,56 @@ MediaInfo MediaInfo::Parse(const Json& j, const fs::path& path) {
         m.timecode = str(m.tags, "timecode");
     return m;
 }
-std::vector<std::string> MediaInfo::UnsupportedReasons() const {
-    std::vector<std::string> e;
+std::vector<Message> MediaInfo::UnsupportedReasons() const {
+    std::vector<Message> e;
     if (videoStreams != 1)
-        e.push_back("V1 需要恰好一个视频流。");
+        e.emplace_back(TextId::InputVideoCount);
     if (codec != "prores")
-        e.push_back("输入不是 ProRes。");
+        e.emplace_back(TextId::InputCodec);
     if (profile != "Standard" && profile != "HQ")
-        e.push_back("V1 只支持 ProRes 422 / 422 HQ。");
+        e.emplace_back(TextId::InputProfile);
     if (bitDepth != 10 || pixelFormat != "yuv422p10le")
-        e.push_back("输入不是 10-bit 4:2:2。");
+        e.emplace_back(TextId::InputDepth);
     if (primaries != "bt2020")
-        e.push_back("输入没有明确标记为 BT.2020 色域。");
+        e.emplace_back(TextId::InputPrimaries);
     if (transfer != "arib-std-b67")
-        e.push_back("输入没有明确标记为 HLG。");
+        e.emplace_back(TextId::InputTransfer);
     if (matrix != "bt2020nc")
-        e.push_back("V1 要求 BT.2020 non-constant-luminance YCbCr 矩阵。");
+        e.emplace_back(TextId::InputMatrix);
     if (range != "tv" && range != "pc")
-        e.push_back("输入色彩范围未知，无法安全解码。");
+        e.emplace_back(TextId::InputRange);
     if (width <= 0 || height <= 0 || width % 2 || width > 8192 || height > 8192)
-        e.push_back("不支持的分辨率（需要偶数宽度，最大 8192 × 8192）。");
+        e.emplace_back(TextId::InputResolution);
     if (fps.Value() <= 0 || fps.Value() > 120 || timeBase.Value() <= 0 || videoDuration <= 0)
-        e.push_back("帧率、时间基准或时长无效。");
+        e.emplace_back(TextId::InputTiming);
     if (fieldOrder != "progressive" && fieldOrder != "unknown" && !fieldOrder.empty())
-        e.push_back("V1 仅支持逐行扫描视频。");
+        e.emplace_back(TextId::InputProgressive);
     if (!sampleAspect.empty() && sampleAspect != "1:1" && sampleAspect != "0:1" && sampleAspect != "N/A")
-        e.push_back("V1 仅支持方形像素；不支持变形宽银幕像素比例。");
-    if (fps.Value() > 0 && nominalFps.Value() > 0 &&
-        std::abs(fps.Value() - nominalFps.Value()) > fps.Value() * 0.001)
-        e.push_back("V1 仅支持固定帧率；检测到帧率不一致。");
+        e.emplace_back(TextId::InputAspect);
+    if (averageFps.Value() > 0 && nominalFps.Value() > 0 &&
+        std::abs(averageFps.Value() - nominalFps.Value()) > averageFps.Value() * 0.001)
+        e.emplace_back(TextId::InputCFR);
     return e;
 }
-std::wstring MediaInfo::Summary() const {
+std::wstring MediaInfo::Summary(Language language) const {
     std::wostringstream s;
     s << (codec == "prores" ? L"ProRes" : Wide(codec)) << L" " << Wide(profile) << L"   ·   " << width
       << L" × " << height << L"   ·   " << std::fixed << std::setprecision(3) << fps.Value() << L" fps\r\n";
     s << (pixelFormat == "yuv422p10le" ? L"10-bit 4:2:2" : Wide(pixelFormat)) << L"   ·   "
       << (primaries == "bt2020" ? L"BT.2020" : Wide(primaries)) << L" / "
       << (transfer == "arib-std-b67" ? L"HLG" : Wide(transfer)) << L" / "
-      << (matrix == "bt2020nc" ? L"BT.2020 NCL" : Wide(matrix)) << L"   ·   Range: " << Wide(range)
-      << L"\r\n";
-    s << L"Duration: " << std::setprecision(2) << videoDuration << L" s   ·   Audio: ";
+      << (matrix == "bt2020nc" ? L"BT.2020 NCL" : Wide(matrix)) << L"   ·   "
+      << TranslateWide(TextId::RangeLabel, language) << L": " << Wide(range) << L"\r\n";
+    s << TranslateWide(TextId::Duration, language) << L": " << std::setprecision(2) << videoDuration
+      << L" s   ·   " << TranslateWide(TextId::Audio, language) << L": ";
     if (audio.empty())
-        s << L"None";
+        s << TranslateWide(TextId::NoAudio, language);
     else
         for (const auto& a : audio)
             s << Wide(a.codec) << L" " << a.channels << L" ch / " << a.sampleRate << L" Hz  ";
-    s << L"\r\nTimecode: " << (timecode.empty() ? L"—" : Wide(timecode)) << L"   ·   Rotation: " << rotation
-      << L"°";
+    s << L"\r\n"
+      << TranslateWide(TextId::Timecode, language) << L": " << (timecode.empty() ? L"—" : Wide(timecode))
+      << L"   ·   " << TranslateWide(TextId::Rotation, language) << L": " << rotation << L"°";
     return s.str();
 }
 MediaInfo Probe(const fs::path& ffprobe, const fs::path& path, const std::atomic_bool* cancel) {
@@ -163,15 +171,15 @@ MediaInfo Probe(const fs::path& ffprobe, const fs::path& path, const std::atomic
         ffprobe, {L"-v", L"error", L"-show_format", L"-show_streams", L"-of", L"json", path.wstring()},
         cancel, 60);
     if (r.exitCode)
-        throw std::runtime_error("无法分析视频：" + r.error);
+        throw AppError(Message(TextId::ProbeFailed, {r.error}));
     try {
         return MediaInfo::Parse(Json::parse(r.output), path);
     } catch (const Json::exception& e) {
-        throw std::runtime_error(std::string("Invalid ffprobe JSON: ") + e.what());
+        throw AppError(Message(TextId::ProbeJson, {e.what()}));
     }
 }
 int64_t VerifyConstantFrameRate(const fs::path& ffprobe, const MediaInfo& m, const std::atomic_bool& cancel) {
-    int64_t count = 0, previous = 0;
+    int64_t count = 0, previous = 0, first = 0;
     bool good = true;
     const double expected = 1.0 / m.fps.Value() / m.timeBase.Value();
     auto r =
@@ -187,10 +195,17 @@ int64_t VerifyConstantFrameRate(const fs::path& ffprobe, const MediaInfo& m, con
                        try {
                            int64_t pts = std::stoll(line.substr(0, c));
                            int64_t dur = std::stoll(line.substr(c + 1));
+                           if (count == 0)
+                               first = pts;
                            if (dur <= 0 || std::abs(static_cast<double>(dur) - expected) > 1.05)
                                good = false;
                            if (count && (pts <= previous ||
                                          std::abs(static_cast<double>(pts - previous) - expected) > 1.05))
+                               good = false;
+                           // Bound total phase error too: per-frame tolerance alone
+                           // can hide VFR or a small rate mismatch accumulating over time.
+                           if (std::abs((static_cast<double>(pts) - static_cast<double>(first)) -
+                                        static_cast<double>(count) * expected) > 1.05)
                                good = false;
                            previous = pts;
                            ++count;
@@ -199,18 +214,33 @@ int64_t VerifyConstantFrameRate(const fs::path& ffprobe, const MediaInfo& m, con
                        }
                    });
     if (r.exitCode || !good || count == 0)
-        throw std::runtime_error("输入时间戳不是完整的固定帧率序列；V1 拒绝重建或猜测 VFR 时间戳。");
+        throw AppError(TextId::InputCadence);
     if (std::abs(static_cast<double>(count) / m.fps.Value() - m.videoDuration) >
         std::max(0.05, 2.0 / m.fps.Value()))
-        throw std::runtime_error("输入帧数与视频时长不一致。");
+        throw AppError(TextId::InputFrameDuration);
     return count;
 }
 Json ValidationReport::ToJson() const {
-    return {{"passed", passed}, {"errors", errors}, {"warnings", warnings}};
+    Json e = Json::array(), w = Json::array(), codes = Json::array(), warningCodes = Json::array();
+    for (const auto& m : errors) {
+        e.push_back(Translate(m));
+        codes.push_back(MessageKey(m.id));
+    }
+    for (const auto& m : warnings) {
+        w.push_back(Translate(m));
+        warningCodes.push_back(MessageKey(m.id));
+    }
+    return {{"passed", passed},
+            {"errors", e},
+            {"warnings", w},
+            {"error_codes", codes},
+            {"warning_codes", warningCodes},
+            {"signal_warning", signalWarning},
+            {"signal", signal}};
 }
 ValidationReport ValidateOutput(const MediaInfo& in, const MediaInfo& out, int64_t frames) {
     ValidationReport r;
-    auto require = [&](bool ok, const char* msg) {
+    auto require = [&](bool ok, const Message& msg) {
         if (!ok) {
             r.passed = false;
             r.errors.push_back(msg);
@@ -218,60 +248,90 @@ ValidationReport ValidateOutput(const MediaInfo& in, const MediaInfo& out, int64
     };
     require(out.container.find("mov") != std::string::npos &&
                 out.tags.value("major_brand", std::string()) == "qt  ",
-            "Output is not QuickTime MOV.");
-    require(out.codec == "prores" && out.profile == "HQ", "Output is not ProRes 422 HQ.");
-    require(out.pixelFormat == "yuv422p10le" && out.bitDepth == 10, "Output is not 10-bit 4:2:2.");
-    require(out.width == in.width && out.height == in.height, "Resolution changed.");
-    require(std::abs(out.fps.Value() - in.fps.Value()) < 0.00001, "Frame rate changed.");
-    require(out.frames == frames, "Output frame count differs from processed frame count.");
-    require(out.primaries == "bt2020" && out.matrix == "bt2020nc",
-            "Output BT.2020 primaries or matrix are wrong.");
+            TextId::OutputMov);
+    require(out.codec == "prores" && out.profile == "HQ", TextId::OutputCodec);
+    require(out.pixelFormat == "yuv422p10le" && out.bitDepth == 10, TextId::OutputDepth);
+    require(out.width == in.width && out.height == in.height, TextId::OutputResolution);
+    require(std::abs(out.fps.Value() - in.fps.Value()) < 0.00001, TextId::OutputRate);
+    require(std::abs(out.averageFps.Value() - in.fps.Value()) < 0.00001, TextId::OutputAverageRate);
+    require(out.frames == frames, TextId::OutputFrames);
+    require(out.primaries == "bt2020" && out.matrix == "bt2020nc", TextId::OutputGamut);
     require(out.transfer.empty() || out.transfer == "unknown" || out.transfer == "unspecified",
-            "Conflicting output transfer metadata.");
-    require(out.tags.value("logforge.transfer", std::string()) == "Apple Log",
-            "LogForge Apple Log declaration missing.");
-    require(out.range == "tv", "Output is not video range.");
+            TextId::OutputTransfer);
+    require(out.tags.value("logforge.transfer", std::string()) == "Apple Log", TextId::OutputDeclaration);
+    require(out.range == "tv", TextId::OutputRange);
     const double tolerance = std::max(0.05, 2.0 / in.fps.Value());
-    require(std::abs(out.videoDuration - in.videoDuration) <= tolerance, "Video duration changed.");
-    require(std::abs(out.duration - in.duration) <= std::max(0.1, tolerance), "Container duration changed.");
-    require(out.audio.size() == in.audio.size(), "Audio stream count changed.");
+    require(std::abs(out.videoDuration - in.videoDuration) <= tolerance, TextId::OutputVideoDuration);
+    require(std::abs(out.duration - in.duration) <= std::max(0.1, tolerance),
+            TextId::OutputContainerDuration);
+    require(out.audio.size() == in.audio.size(), TextId::OutputAudioCount);
     for (size_t i = 0; i < std::min(in.audio.size(), out.audio.size()); ++i) {
         const auto& a = in.audio[i];
         const auto& b = out.audio[i];
-        require(a.codec == b.codec && a.channels == b.channels && a.sampleRate == b.sampleRate &&
-                    a.layout == b.layout,
-                "Audio format changed.");
+        const auto index = std::to_string(i + 1);
+        require(a.codec == b.codec, {TextId::AudioCodecChanged, {index, a.codec, b.codec}});
+        require(a.channels == b.channels, {TextId::AudioChannelsChanged,
+                                           {index, std::to_string(a.channels), std::to_string(b.channels)}});
+        require(
+            a.sampleRate == b.sampleRate,
+            {TextId::AudioRateChanged, {index, std::to_string(a.sampleRate), std::to_string(b.sampleRate)}});
+        require(a.layout == b.layout, {TextId::AudioLayoutChanged,
+                                       {index, a.layout.empty() ? "(unspecified)" : a.layout,
+                                        b.layout.empty() ? "(unspecified)" : b.layout}});
         if (a.duration > 0 && b.duration > 0)
-            require(std::abs(a.duration - b.duration) < 0.1, "Audio duration changed.");
+            require(std::abs(a.duration - b.duration) < 0.1, TextId::OutputAudioDuration);
         require(std::abs((a.start - in.startTime) - (b.start - out.startTime)) < 0.05,
-                "Audio/video start offset changed.");
+                TextId::OutputAudioOffset);
     }
-    require(std::abs(std::remainder(out.rotation - in.rotation, 360.0)) < 0.1, "Rotation changed.");
+    require(std::abs(std::remainder(out.rotation - in.rotation, 360.0)) < 0.1, TextId::OutputRotation);
     if (!in.timecode.empty())
-        require(in.timecode == out.timecode, "Timecode changed or is missing.");
+        require(in.timecode == out.timecode, TextId::OutputTimecode);
     for (const auto& [k, v] : in.tags.items()) {
         if (k == "creation_time" || k == "com.apple.quicktime.make" || k == "com.apple.quicktime.model" ||
             k == "com.apple.quicktime.creationdate")
             if (!out.tags.contains(k) || out.tags[k] != v)
-                r.warnings.push_back("Metadata not preserved exactly: " + k);
+                r.warnings.emplace_back(TextId::MetadataChanged, std::initializer_list<std::string>{k});
     }
-    r.warnings.push_back("Apple Log pixels; nclc transfer=2 (unspecified). Assign Apple Log / Rec.2020 "
-                         "manually in your editor. Automatic Apple identification is not certified.");
+    r.warnings.emplace_back(TextId::IdentificationNotice);
     return r;
 }
-std::vector<std::wstring> AppleLogMetadataWriter::Arguments(const MediaInfo& in) {
+std::vector<std::wstring> AppleLogMetadataWriter::Arguments(const MediaInfo& in, double exposureStops,
+                                                            const ToneAdjustments& tone) {
     std::vector<std::wstring> args{
-        L"-map_metadata",       L"1",
-        L"-map_metadata:s:v:0", L"1:s:v:0",
-        L"-color_primaries",    L"bt2020",
-        L"-color_trc",          L"2",
-        L"-colorspace",         L"bt2020nc",
-        L"-color_range",        L"tv",
-        L"-movflags",           L"+write_colr+use_metadata_tags",
-        L"-metadata",           L"logforge.transfer=Apple Log",
-        L"-metadata",           L"logforge.reference=HLG75pct_to_90pct_reflectance",
-        L"-metadata",           L"logforge.version=0.1.0",
-        L"-metadata:s:v:0",     L"encoder=LogForge / FFmpeg prores_ks"};
+        L"-map_metadata",
+        L"1",
+        L"-map_metadata:s:v:0",
+        L"1:s:v:0",
+        L"-color_primaries",
+        L"bt2020",
+        L"-color_trc",
+        L"2",
+        L"-colorspace",
+        L"bt2020nc",
+        L"-color_range",
+        L"tv",
+        L"-movflags",
+        L"+write_colr+use_metadata_tags",
+        L"-metadata",
+        L"logforge.transfer=Apple Log",
+        L"-metadata",
+        L"logforge.reference=BT2408_HLG75pct_to_100pct_reflectance",
+        L"-metadata",
+        L"logforge.exposure_ev=" + std::to_wstring(exposureStops),
+        L"-metadata",
+        tone.enabled ? L"logforge.rendering=creative-luma-v1" : L"logforge.rendering=standard",
+        L"-metadata",
+        L"logforge.shadow_lift_ev=" + std::to_wstring(tone.enabled ? tone.shadowStops : 0.0),
+        L"-metadata",
+        L"logforge.highlight_compression_ev=" + std::to_wstring(tone.enabled ? tone.highlightStops : 0.0),
+        L"-metadata",
+        L"logforge.saturation=" + std::to_wstring(tone.enabled ? tone.saturation : 1.0),
+        L"-metadata",
+        L"logforge.version=" + Wide(Version),
+        L"-metadata",
+        L"logforge.build=" + Wide(BuildNumber),
+        L"-metadata:s:v:0",
+        L"encoder=LogForge / FFmpeg prores_ks"};
     // Drop source HDR declarations which no longer describe the encoded pixels.
     for (const auto& [key, value] : in.tags.items()) {
         std::string lower = key;
@@ -300,15 +360,15 @@ uint64_t be64(const unsigned char* p) {
 }
 void atoms(std::ifstream& f, uint64_t begin, uint64_t end, const std::string& parent, Json& list, int depth) {
     if (depth > 20)
-        throw std::runtime_error("MOV nesting limit exceeded.");
+        throw AppError(TextId::MovNesting);
     for (uint64_t pos = begin; pos + 8 <= end;) {
         if (list.size() > 100000)
-            throw std::runtime_error("MOV atom count limit exceeded.");
+            throw AppError(TextId::MovCount);
         std::array<unsigned char, 96> b{};
         f.seekg(static_cast<std::streamoff>(pos));
         f.read(reinterpret_cast<char*>(b.data()), 8);
         if (!f)
-            throw std::runtime_error("Truncated MOV atom.");
+            throw AppError(TextId::MovTruncated);
         uint64_t size = be32(b.data()), header = 8;
         std::string type;
         for (size_t k = 4; k < 8; ++k) {
@@ -323,17 +383,17 @@ void atoms(std::ifstream& f, uint64_t begin, uint64_t end, const std::string& pa
         }
         if (size == 1) {
             if (end - pos < 16)
-                throw std::runtime_error("Truncated extended MOV atom header.");
+                throw AppError(TextId::MovExtended);
             f.read(reinterpret_cast<char*>(b.data() + 8), 8);
             if (!f)
-                throw std::runtime_error("Truncated extended MOV atom header.");
+                throw AppError(TextId::MovExtended);
             size = be64(b.data() + 8);
             header = 16;
         }
         if (size == 0)
             size = end - pos;
         if (size < header || size > end - pos)
-            throw std::runtime_error("Invalid MOV atom size.");
+            throw AppError(TextId::MovSize);
         std::string path = parent + "/" + type;
         Json item{{"path", path}, {"offset", pos}, {"size", size}, {"type", type}};
         if (type == "colr" && size >= header + 10) {
@@ -367,7 +427,7 @@ void atoms(std::ifstream& f, uint64_t begin, uint64_t end, const std::string& pa
 Json ReferenceMovAnalyzer::Analyze(const fs::path& path) {
     std::ifstream f(path, std::ios::binary);
     if (!f)
-        throw std::runtime_error("Cannot read MOV.");
+        throw AppError(TextId::MovRead);
     Json list = Json::array();
     atoms(f, 0, fs::file_size(path), "", list, 0);
     return {{"atoms", list}, {"bytes", fs::file_size(path)}};

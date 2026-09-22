@@ -10,6 +10,7 @@ Reviewed 2026-09-22. Conclusions are limited to the versions and interfaces belo
 2. **Apple Log Profile White Paper**, September 2023, official developer download index:
    https://developer.apple.com/download/all/?q=Apple%20log%20profile
    This is the official publication reference. The index was not accessible through the research client; a guessed direct PDF URL returned 404. We do not claim to have retrieved a public standalone Apple-hosted PDF. The executable mathematical reference was independently obtained from Apple's vendor-supplied ACES transform above. The hard-coded test numbers are calculated from those constants.
+   During the 0.1.2 audit, a third-party text mirror of the September 2023 paper was also inspected: https://www.scribd.com/document/695704838/Apple-Log-Profile-White-Paper . Its constants and BT.2020 NCL matrix agree with the independently retrieved references. This is corroboration from a secondary host, not authenticated evidence of a camera file's MOV serialization or range flags.
 3. **AVCaptureColorSpace.appleLog**:
    https://developer.apple.com/documentation/avfoundation/avcapturecolorspace/applelog
    Its official Markdown endpoint was retrieved: https://developer.apple.com/documentation/avfoundation/avcapturecolorspace/applelog.md
@@ -22,7 +23,7 @@ Reviewed 2026-09-22. Conclusions are limited to the versions and interfaces belo
    Establishes scene-light HLG OETF, constants and distinction from the OOTF / display EOTF. LogForge uses the inverse OETF only.
 5. **ITU-R BT.2408-6**, operational HDR production guidance, scene-referred mapping sections:
    https://www.itu.int/dms_pub/itu-r/opb/rep/R-REP-BT.2408-6-2023-PDF-E.pdf
-   Supports the 75% HLG reference-white convention. It does not establish the exposure of arbitrary iPhone clips. The 90% reflectance anchor is an explicit LogForge workflow assumption.
+   Section 2.1 and Table 1 define 75% HLG as **100%** reflecting reference white; 90% reflecting white is approximately 73% HLG. Version 0.1.2 corrects the earlier project-specific 90% anchor to this nominal reference. It does not establish the exposure of arbitrary iPhone clips. Sections 2.1/2.2 also distinguish reference alignment from camera painting and creative exposure.
 6. **ITU-R BT.2020-2**, color primaries and non-constant-luminance matrix:
    https://www.itu.int/rec/R-REC-BT.2020
    BT.2020/D65 is maintained throughout the pipeline.
@@ -61,6 +62,8 @@ Reviewed 2026-09-22. Conclusions are limited to the versions and interfaces belo
 15. **FFmpeg progress and timestamp controls**:
     https://ffmpeg.org/ffmpeg.html
     `-progress pipe:1`, `-fps_mode passthrough`, `-copyts`, `-display_rotation`, audio stream copy. Actual output frame count is also used where progress timestamps are temporarily zero.
+    Audio layout policy: https://ffmpeg.org/ffmpeg.html#Advanced-Audio-options documents `-guess_layout_max 0` to disable inferred layouts. LogForge applies it when copying audio, including a rotation remux.
+    Timing fields: https://ffmpeg.org/doxygen/8.1/structAVStream.html defines `avg_frame_rate` as a mean and cautions that `r_frame_rate` is a guess. LogForge checks the candidate against all packet timestamps, including cumulative phase, before using it.
 
 ## Downloads, licenses and dependencies
 
@@ -71,3 +74,18 @@ Reviewed 2026-09-22. Conclusions are limited to the versions and interfaces belo
 20. **nlohmann/json v3.12.0 / MIT**: https://github.com/nlohmann/json/tree/v3.12.0
 
 The installed archive, runtime version, encoder/filter capabilities, image data and audio payload were checked locally. A future provider update must repeat those checks. See `VALIDATION.md` for measured results and explicitly unverified claims.
+
+## Project-defined creative rendering
+
+The optional 0.1.3 `creative-luma-v1` curve is a LogForge creative adjustment requested separately from standard conversion. Its full equation, parameter limits and monotonicity bound are documented in `CREATIVE_ADJUSTMENTS.md`. It is not attributed to Apple, ITU or a camera vendor. Apple's published transfer function is applied unchanged after this adjustment. Unit and integer-YCbCr codec tests establish that the declared equations are implemented; they do not establish a native-camera appearance match.
+
+## Windows application resources and discovery
+
+21. **Microsoft VERSIONINFO resource**: https://learn.microsoft.com/en-us/windows/win32/menurc/versioninfo-resource
+    Numeric four-part Windows versions are distinct from the application build display. CMake generates both resource and C++ definitions from one source.
+22. **Microsoft DWM window attributes**: https://learn.microsoft.com/en-us/windows/win32/api/dwmapi/ne-dwmapi-dwmwindowattribute
+    Documented caption theme/color attributes are requested when available. The content palette and controls are drawn independently; unsupported caption attributes do not prevent the app from running.
+23. **Microsoft volume path enumeration**: https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-getvolumepathnamesforvolumenamew
+    Local mount paths supplement ordinary drive letters. Remote, unavailable and unreadable locations are not asserted to have been searched.
+24. **Microsoft directory enumeration**: https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-findfirstfileexw
+    Discovery uses explicit enumeration and reparse/offline exclusions, with cancellation and actual counts.

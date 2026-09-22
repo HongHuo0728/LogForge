@@ -1,4 +1,5 @@
 #pragma once
+#include "Discovery.h"
 #include "Media.h"
 #include <optional>
 
@@ -10,7 +11,8 @@ struct FFmpegInstallation {
 class FFmpegManager {
   public:
     explicit FFmpegManager(Logger& logger) : logger_(logger) {}
-    std::optional<FFmpegInstallation> Detect(const std::atomic_bool& cancel);
+    std::optional<FFmpegInstallation> Detect(const std::atomic_bool& cancel,
+                                             const DiscoveryCallback& progress = {});
     FFmpegInstallation Check(const fs::path& executable, const std::atomic_bool& cancel, bool smoke = true);
     void SaveManual(const fs::path& executable);
     static fs::path ManagedExecutable();
@@ -35,7 +37,7 @@ class GyanReleaseProvider final : public FFmpegBuildProvider {
   public:
     DownloadSpec Release() const override;
 };
-using DownloadProgress = std::function<void(uint64_t, uint64_t, const std::wstring&)>;
+using DownloadProgress = std::function<void(uint64_t, uint64_t, const Message&)>;
 class FFmpegDownloader {
   public:
     static FFmpegInstallation Install(const FFmpegBuildProvider& provider, Logger& logger,

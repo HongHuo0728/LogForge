@@ -44,6 +44,11 @@ jobs:
             if ($env:GITHUB_REF_NAME -ne "v$($Matches[1])") { throw 'Tag and CMake project version differ' }
           }
           cpack --config build/CPackConfig.cmake -C Release -B dist
+          if ($LASTEXITCODE -ne 0) { throw 'Packaging failed' }
+      - name: Audit portable contents
+        run: |
+          $package = Get-ChildItem dist/LogForge-*-Windows-x64.zip | Select-Object -First 1
+          python tests/package_audit.py --zip $package.FullName --exe build/Release/LogForge.exe
       - uses: actions/upload-artifact@v4
         with:
           name: LogForge-Windows-x64
@@ -56,4 +61,5 @@ jobs:
           path: |
             build/Testing/Temporary/LastTest.log
             build/integration/integration-report.json
+            build/signal-test/signal-report.json
           if-no-files-found: ignore

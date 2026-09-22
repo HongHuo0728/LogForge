@@ -78,7 +78,7 @@ def main():
     a=.17883277; b=1-4*a; c=.5-a*math.log(4*a)
     def inverse_hlg(v):
         return -v*v/3 if v<0 else v*v/3 if v<=.5 else (math.exp((v-c)/a)+b)/12
-    scale=.9/inverse_hlg(.75)
+    scale=1/inverse_hlg(.75)
     def apple(r):
         return .08550479*math.log2(r+.00964052)+.69336945 if r>=.01 else 47.28711236*(r+.05641088)**2 if r>=-.05641088 else 0
     errors, changes = [], []
@@ -94,10 +94,55 @@ def main():
     assert mae<.003, ('Pixel mean absolute error',mae)
     assert maximum<.025, ('Pixel peak absolute error away from discontinuities',maximum)
     assert sum(changes)/len(changes)>.06, 'Pixels did not change enough: possible metadata-only conversion'
+    assert info['format']['tags']['logforge.reference']=='BT2408_HLG75pct_to_100pct_reflectance'
+    assert float(info['format']['tags']['logforge.exposure_ev'])==0
+    # Independently verify the user exposure option in actual codec pixels.
+    exposure_output=work/'exposure-plus1.mov'
+    if exposure_output.exists():exposure_output.unlink()
+    run([args.cli.resolve(),'--convert',source,exposure_output,'--ffmpeg',ff,'--exposure-ev','1'],env=env)
+    exposed=decode(exposure_output)
+    exposure_errors=[]
+    for plane in range(3):
+        for y in (16,52,88):  # neutral ramps, well clear of chroma discontinuities
+            for x in range(6,width-6):
+                i=plane*width*height+y*width+x
+                exposure_errors.append(abs(exposed[i]-apple(inverse_hlg(before[i])*scale*2)))
+    assert sum(exposure_errors)/len(exposure_errors)<.003
+    exposure_info=json.loads(run([probe,'-v','error','-show_format','-of','json',exposure_output]))
+    assert float(exposure_info['format']['tags']['logforge.exposure_ev'])==1
+    for invalid_exposure in ('nan','9','1oops'):
+        bad_exposure=work/'bad-exposure-must-not-exist.mov'
+        rejected_exposure=subprocess.run([str(args.cli.resolve()),'--convert',str(source),str(bad_exposure),
+                                          '--ffmpeg',str(ff),'--exposure-ev',invalid_exposure],env=env,capture_output=True)
+        assert rejected_exposure.returncode!=0 and not bad_exposure.exists(), 'Invalid exposure accepted'
     hashes=[]
     for p in (source,output):
         hashes.append(run([ff,'-v','error','-i',p,'-map','0:a:0','-c','copy','-f','hash','-hash','sha256','-']).strip())
     assert hashes[0]==hashes[1], 'Audio payload changed'
+    # A camera can supply two unlabelled PCM channels. With FFmpeg's default
+    # layout guessing, stream copy invents "stereo" and the strict validator fails.
+    # Generate this case without retaining any private camera media in the repo.
+    pcm16=work/'pcm16-labelled.mov'
+    run([ff,'-v','error','-y','-i',source,'-map','0:v:0','-map','0:a:0','-c:v','copy','-c:a','pcm_s16le',pcm16])
+    audio_layout_cases=[]
+    for rotation in (0,90):
+        unknown=work/f'pcm16-unlabelled-{rotation}.mov'
+        target=work/f'pcm16-unlabelled-{rotation}-AppleLog.mov'
+        run([ff,'-v','error','-y','-ch_layout:a','2C','-guess_layout_max','0',
+             '-display_rotation:v:0',str(rotation),'-i',pcm16,'-map','0:v:0','-map','0:a:0','-c','copy',unknown])
+        unknown_info=json.loads(run([probe,'-v','error','-select_streams','a','-show_streams','-of','json',unknown]))['streams'][0]
+        assert not unknown_info.get('channel_layout'), 'Regression fixture must have no layout declaration'
+        assert unknown_info['codec_name']=='pcm_s16le' and unknown_info['channels']==2
+        if target.exists():target.unlink()
+        run([args.cli.resolve(),'--convert',unknown,target,'--ffmpeg',ff],env=env)
+        target_info=json.loads(run([probe,'-v','error','-select_streams','a','-show_streams','-of','json',target]))['streams'][0]
+        assert not target_info.get('channel_layout'), 'A layout was invented for unlabelled channels'
+        for key in ('codec_name','channels','sample_rate','bits_per_sample'):
+            assert target_info[key]==unknown_info[key], f'Unlabelled audio {key} changed'
+        payload=[run([ff,'-v','error','-guess_layout_max','0','-i',p,'-map','0:a:0','-c','copy','-f','hash','-hash','sha256','-']).strip()
+                 for p in (unknown,target)]
+        assert payload[0]==payload[1], 'Unlabelled audio payload changed'
+        audio_layout_cases.append({'rotation':rotation,'payload_sha256':payload[0].decode(),'layout_preserved':True})
     bad = work/'unsupported-rec709.mov'
     run([ff,'-v','error','-y','-i',source,'-map','0','-c','copy','-color_primaries','bt709','-movflags','+write_colr',bad])
     rejected=subprocess.run([str(args.cli.resolve()),'--convert',str(bad),str(work/'must-not-exist.mov'),'--ffmpeg',str(ff)],env=env,capture_output=True)
@@ -129,6 +174,30 @@ def main():
     if four_k_out.exists():four_k_out.unlink()
     run([args.cli.resolve(),'--convert',four_k,four_k_out,'--ffmpeg',ff],env=env)
     variants.append('3840x2160-3frames')
+    # A single 1/480-second camera clock correction must not turn 24 fps into
+    # an arbitrary rational mean rate. Sustained clock drift is still refused.
+    clock=work/'camera-clock.mov';clock_out=work/'camera-clock-AppleLog.mov'
+    run([ff,'-v','error','-y','-stream_loop','1','-i',source,'-map','0:v:0','-an',
+         '-vf',r'fps=24,settb=1/480,setpts=N*20-gte(N\,30)',
+         '-enc_time_base','1:480','-fps_mode','passthrough','-video_track_timescale','480',
+         '-c:v','prores_ks','-profile:v','3','-pix_fmt','yuv422p10le',clock])
+    clock_info=json.loads(run([probe,'-v','error','-select_streams','v','-show_streams','-of','json',clock]))['streams'][0]
+    assert clock_info['r_frame_rate']=='24/1' and clock_info['avg_frame_rate']!='24/1'
+    if clock_out.exists():clock_out.unlink()
+    run([args.cli.resolve(),'--convert',clock,clock_out,'--ffmpeg',ff],env=env)
+    clock_after=json.loads(run([probe,'-v','error','-select_streams','v','-show_streams','-of','json',clock_out]))['streams'][0]
+    assert clock_after['avg_frame_rate']=='24/1' and clock_after['nb_frames']==clock_info['nb_frames']
+    variants.append('camera-clock-correction-24fps')
+    drift=work/'cumulative-drift.mov';drift_out=work/'drift-must-not-exist.mov'
+    run([ff,'-v','error','-y','-stream_loop','3','-i',source,'-map','0:v:0','-an',
+         '-vf','fps=24,settb=1/480,setpts=N*20-floor(N/64)',
+         '-enc_time_base','1:480','-fps_mode','passthrough','-video_track_timescale','480',
+         '-c:v','prores_ks','-profile:v','3','-pix_fmt','yuv422p10le',drift])
+    # Metadata alone looks close enough; rejection must come from packet phase.
+    run([args.cli.resolve(),'--probe',drift,'--ffmpeg',ff],env=env)
+    drift_refused=subprocess.run([str(args.cli.resolve()),'--convert',str(drift),str(drift_out),'--ffmpeg',str(ff)],env=env,capture_output=True)
+    assert drift_refused.returncode!=0 and not drift_out.exists(), 'Accumulated timestamp drift accepted'
+    assert b'InputCadence' in drift_refused.stderr, 'Drift was not refused by packet validation'
     # A VFR file with deliberate gaps must be refused even if its color tags are valid.
     vfr=work/'vfr.mov'
     run([ff,'-v','error','-y','-i',source,'-map','0:v:0','-vf',"setpts=PTS+floor(N/10)*1001",'-fps_mode','vfr',
@@ -143,7 +212,7 @@ def main():
     cancellation=subprocess.run([str(args.cli.resolve()),'--convert',str(source),str(cancelled_output),'--ffmpeg',str(ff),'--cancel-after-frames','1'],env=env,capture_output=True,timeout=20)
     assert cancellation.returncode==130 and not cancelled_output.exists(), 'Cancellation published output'
     assert not list(work.glob('*.partial.mov')), 'Incomplete files were not cleaned up'
-    report={'passed':True,'frames':frames,'pixel_mae':mae,'pixel_max_error':maximum,'samples':len(errors),'audio_sha256':hashes[0].decode(),'variants':variants,'vfr_rejected':True,'overwrite_refused':True,'cancel_cleanup':True,'output':str(output),'source':str(source)}
+    report={'passed':True,'frames':frames,'pixel_mae':mae,'pixel_max_error':maximum,'samples':len(errors),'audio_sha256':hashes[0].decode(),'unlabelled_audio':audio_layout_cases,'variants':variants,'vfr_rejected':True,'overwrite_refused':True,'cancel_cleanup':True,'output':str(output),'source':str(source)}
     (work/'integration-report.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
     print(json.dumps(report,indent=2))
 

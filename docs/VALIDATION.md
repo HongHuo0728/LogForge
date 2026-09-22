@@ -1,6 +1,54 @@
-# Validation record — 0.1.0 preview
+# Validation record — 1.0.0 (26922A)
 
 Local verification date: 2026-09-22. Results below are observations from this development machine, not claims of device or editor certification.
+
+## 1.0.0 application changes
+
+The current release adds a compiled multiresolution icon, unified version resources,
+English/Chinese localization, dark/light themes, persisted settings and automatic
+local-drive FFmpeg discovery. The standard and optional creative color equations
+are unchanged from the prior color audit. Historical sections below retain their
+original version labels; they are not new native-camera tests.
+
+- The Release GUI and CLI resources report numeric version **1.0.0.0**, property
+  text **1.0.0**, and display **1.0.0 (26922A)**. Resource group 101 contains all
+  nine icon sizes.
+- New automated tests cover catalog completeness/placeholder consistency,
+  English/dark/off defaults, migration of legacy FFmpeg preferences, settings
+  round trips, disabled creative-value retention, unrelated-field preservation,
+  corrupt/invalid JSON recovery and refusal of invalid adjustment values.
+- Disk-discovery fixtures cover multiple roots, empty/missing roots, Unicode and
+  mixed-case executable names, trailing root separators, duplicate roots,
+  excluded directories, rejected candidates, cancellation and real local-volume
+  enumeration. A real FFmpeg/ffprobe pair passes the actual ProRes capability
+  test after invalid candidates; cached rediscovery avoids a drive scan. The
+  reparse-loop fixture passed in the full test run; it is conditionally skipped
+  on restricted Windows tokens that cannot create links.
+- Native windows passed **14 UI scenarios**: both languages × both themes ×
+  96/144/192 DPI, plus two explicitly injected missing-FFmpeg states. Save changes
+  language/theme; Cancel discards a changed draft. Preferences survive reload.
+  Valid FFmpeg hides both fallback buttons; the injected missing state shows both.
+  Injection tests visibility only, not an assertion that the host lacks FFmpeg.
+- Standard and enabled-creative generated-video GUI conversions exercised the
+  actual drop handler, asynchronous ffprobe, color transform, encode and automatic
+  validation. Controls return to an enabled Convert / disabled Cancel state.
+- At high DPI on a small work area, the central content and Settings can scroll.
+  DPI cases are produced with the app's explicit layout test override; a physical
+  multi-monitor DPI transition and Windows 10 boot test remain unverified.
+- The README screenshot is an English/dark empty workspace with no personal
+  media or filenames. Private reference media is not needed by any current test.
+
+The final Release build passed all **9 CTest groups**. The ZIP was audited to
+contain exactly **14 allowed files**, with an EXE identical to the tested build.
+The executable extracted into `dist/portable` then passed all 14 UI scenarios
+and both generated-video GUI conversions using the per-user FFmpeg installation.
+The full installer download was previously verified; this release reuses and
+revalidates the installed tool instead of repeating the 105 MiB download.
+
+Reproduction: build and run CTest as described in the README. Use
+`tests/gui_smoke.py` on an interactive Windows desktop, and
+`tests/package_audit.py` on the CPack ZIP. Test settings/logs/reports remain in the
+ignored build directory; generated media can be removed after verification.
 
 ## Build and host
 
@@ -17,7 +65,12 @@ Local verification date: 2026-09-22. Results below are observations from this de
 | `color_math` | Apple Log reference points, knee/floor, 100,001 Apple Log round trips and 100,001 HLG round trips, normalization, finite float handling |
 | `media_metadata_validation` | ffprobe parser, malformed/missing values, wrong codec/profile/depth/gamut/transfer/range, output frame/rate/audio/color validation |
 | `ffmpeg_platform` | Missing binary rejection, capability parser, Unicode argument quoting, SHA-256 standard vector, MOV `colr` parsing, pinned provider, supervised process cancellation |
+| `application_preferences` | Bilingual catalog, default/legacy/corrupt settings, preservation and reload |
+| `ffmpeg_disk_discovery` | Local-volume discovery, root handling, exclusions, candidates and cancellation |
+| `application_resources` | Actual GUI/CLI VERSIONINFO and nine embedded icon sizes |
+| `ffmpeg_discovery_capabilities` | Real ProRes/float check through discovery and verified cache reuse |
 | `media_pipeline` | Generated high-precision media converted through actual FFmpeg and production C++ code; real output metadata and decoded pixels checked |
+| `color_signal` | Independent integer-YCbCr fixtures and scalar matrix reference; dark/super-white/color patches, standard and creative modes, range warnings and invalid controls |
 
 Integration media: 320 × 180, 60 frames, 30000/1001 fps, 10-bit HLG BT.2020 ProRes HQ, 48 kHz stereo PCM 24-bit audio, timecode `10:20:30:00`, synthetic original Make/Model and creation date.
 
@@ -27,8 +80,8 @@ Measured on 122,304 RGB samples away from discontinuity borders:
 
 | Metric | Result | Acceptance |
 | --- | --- | --- |
-| Mean absolute normalized RGB error against independent equations | 0.0003907838039660831 | < 0.003 |
-| Maximum absolute error in measured regions | 0.01238918955373558 | < 0.025 |
+| Mean absolute normalized RGB error against independent equations | 0.00043347373910234966 | < 0.003 |
+| Maximum absolute error in measured regions | 0.01275258321150774 | < 0.025 |
 | Output frame count | 60 | exactly 60 |
 | Audio compressed/PCM packet payload hash | unchanged | exact SHA-256 match |
 | Output sample entry | `apch` / ProRes HQ | exact |
@@ -43,6 +96,8 @@ Additional generated-media cases passed:
 - +90° and -90° rotation preservation.
 - Silent footage.
 - AAC audio copy and timing validation.
+- Unlabelled 48 kHz, two-channel PCM 16-bit audio, both without rotation and with +90° rotation: no guessed channel-layout tag, original codec/count/rate/bit depth, exact audio SHA-256 match. The unlabelled-audio case reproduced the 0.1.0 failure before the fix.
+- A 24 fps sequence with one 1/480-second clock correction: output stays 24 fps with the same frame count. A sequence whose nominal/average rates are close but whose cumulative phase drifts beyond one tick is refused by packet validation.
 - **3840 × 2160, three ProRes frames** through the actual float pipeline.
 - Rec.709 and deliberately VFR inputs refused.
 - Existing output not overwritten, verified by unchanged file hash.
@@ -59,9 +114,68 @@ Additional generated-media cases passed:
 - The ZIP was extracted to a separate portable directory. That exact packaged executable passed the same native drag/drop-to-output test against the per-user installed FFmpeg. Final controls were verified enabled for a new conversion and disabled for cancellation.
 - `ReferenceMovAnalyzer` compared the generated HLG and Apple Log files and emitted a nonempty structural diff, including source `colr` 9/18/9 and output 9/2/9. This is a tool test, not a real iPhone reference comparison.
 
+## 0.1.1 real-camera regression
+
+A user-supplied recording identifying its camera as iPhone 13 Pro and its recorder as Blackmagic Cam exposed a 0.1.0 failure: the original had no audio channel-layout declaration, FFmpeg guessed `stereo` during stream copy, and the strict post-conversion check rejected the resulting label difference. Version 0.1.1 disables that guess, including during rotation remuxes, and reports individual audio fields when validation fails.
+
+The full recording was converted using the **0.1.1 portable GUI executable**, exercising the native window, drop handler, asynchronous probe, conversion and validation. Observed results:
+
+| Check | Result |
+| --- | --- |
+| Input / output raster | 3840 × 2160 |
+| Frame count | 521 input, 521 output, all 521 output frames independently decoded |
+| Output | ProRes 422 HQ, `yuv422p10le`, BT.2020, Apple Log pixel encoding, `nclc 9/2/9` |
+| Output frame rate | 24/1; source packet cadence verified at 24 fps with one 1/480-second correction |
+| Video duration | 21.706250 s input, 21.708333 s output; the 2.083 ms difference is the documented one-tick normalization |
+| Audio | PCM 16-bit, 48 kHz, two channels; absent layout stays absent; exact duration/start preserved |
+| Complete audio payload SHA-256 | Exact input/output match; private-media fingerprint omitted |
+| Timecode / GUI / output validator | Passed |
+
+The private recording is not distributed. Its local test derivatives, extracted frames/audio and raw metadata/logs have been deleted from the project after verification. The automated regression suite recreates the relevant properties with synthetic media. This verifies this particular recording, not every device/application combination or editor's Apple Log recognition.
+
+## 0.1.2 color and exposure audit
+
+- Corrected the nominal HLG reference to BT.2408 §2.1/Table 1: 75% HLG = 100% reflecting diffuse white. The older 90% project policy was 0.152003 EV darker. The Apple Log encoding formula is unchanged.
+- Reference tests now check HLG 0.3782588830779046 → 18% reflectance → Apple Log 0.4882724585268676, along with reference white, exposure gains, invariant black, and rejection of invalid offsets.
+- All four CTest groups passed. The generated-media integration test checks +1 EV against independently calculated output pixels, the saved exposure metadata, invalid CLI values, and all retained audio/timing/cancellation cases.
+- The native GUI's +1 EV selection completed a real conversion with rotation and unlabelled PCM audio. ffprobe confirmed `logforge.exposure_ev=1.000000`; the window and controls were visually inspected.
+- A 12-frame 3840 × 2160 excerpt of the same private HLG recording was converted at 0 EV and +1 EV. Its first decoded frame was compared against an independent calculation using constants extracted from the retrieved Apple-supplied ACES IDT. The 96,078-sample grid includes actual scene edges and chroma detail.
+- The complete recording was also converted through the 0.1.2 portable GUI at the default 0 EV: 3840 × 2160, 24 fps, all 521 output frames independently decoded, original timecode retained, and the entire audio payload hash matched the 0.1.1 real-camera record above. The video duration remained 21.708333 s under the documented timing normalization. This is an end-to-end conversion result, not a native-Apple-Log appearance certification.
+
+| Actual-camera encoded-RGB audit | Mean absolute error | 99th-percentile error |
+| --- | --- | --- |
+| 0.1.1, previous reference | 0.00107810 | 0.00502431 |
+| 0.1.2, standard reference, 0 EV | 0.00110587 | 0.00516923 |
+| 0.1.2, standard reference, +1 EV | 0.00125960 | 0.00646609 |
+
+These errors include ProRes compression and chroma resampling. They check that the intended mathematics reached the file, **not** that the image matches a native Apple Log recording. The comparison PNGs were unmanaged, 16-bit previews of encoded RGB with explicit YCbCr matrix/range decoding. They used no viewing LUT, did not change the conversion pipeline, and were deleted after verification. No native Apple Log reference was available, so native-camera appearance and PotPlayer's color handling are not certified.
+
+## 0.1.3 creative rendering and signal audit
+
+The optional grade was explicitly requested after inspection of particular shadow/highlight regions. It is not presented as a correction to Apple's transfer function. The standard path remains unchanged; turning off the adjustment is tested for exact float-output identity.
+
+- Release build passed. All **five CTest groups passed** in one final run (28.22 seconds on this machine).
+- Unit tests check reference-gray/black invariance, 30,003 ordered neutral samples across three tone strengths, linear-chroma saturation scaling, disabled identity, invalid controls, finite output and signal counters.
+- The new independent test generates **28 flat 10-bit YCbCr patches**, including below-black excursions, deep shadows, gray, white, above-white signals and BT.2020 colors. Neither fixture construction nor reference matrix calculations use `zscale`. Maximum error of the **mean patch-center Y/Cb/Cr codes** against the scalar reference was **0.211127 code** for standard conversion and **0.253078 code** for the enabled default grade; acceptance is below 3 codes. This is a patch-center measurement, not a bound on every pixel at chroma discontinuities.
+- GUI tests with the actual portable executable verified enabled adjustment, disabled adjustment with disabled dependent controls, and a range-warning path at +4 EV. The enabled case also preserved a 90-degree rotation and unlabelled PCM audio. The current screenshot shows the synthetic enabled case.
+- The user's full 3840 × 2160 recording was converted through the **0.1.3 portable GUI**, at 24 fps and 0 EV, with +3-stop shadow lift / 1-stop highlight compression / 85% saturation. All **521 output frames** independently decoded. Original timecode and audio parameters were preserved; the entire audio payload SHA-256 matched the source (private-media fingerprint omitted). Output video duration was 21.708333 s versus 21.706250 s input under the existing clock policy.
+- The complete float-stage signal accounting covered **12,964,147,200 RGB components**. None exceeded normalized Apple Log 1. **Six negative components** fell below Apple's linear-domain floor and were encoded as zero by the published curve; the warning is retained. This is about 0.0000000463% of components, but it is not silently rounded to zero or called lossless. The counters precede final codec quantization.
+- The full conversion took approximately **8 minutes 30 seconds** on this development machine, including the GUI workflow. CPU color processing is currently serial; this measurement is not a performance promise for another host.
+
+Two selected frames were independently decoded from the finished MOV. A common explicit BT.2020 matrix and video-level interpretation were used, with no display LUT. Region medians below are normalized encoded RGB component medians, not luminance, nits or recovered dynamic range:
+
+| Selected region | Standard encoded median | Adjusted encoded median | Adjusted frame RGB range |
+| --- | --- | --- | --- |
+| Dark region at frame 60 (2.5 s) | 0.158287 | 0.225630 | 0.103998–0.669426 |
+| Bright region at frame 360 (15 s) | 0.818997 | 0.757170 | 0.144347–0.779497 |
+
+No component in either selected decoded frame reached 0 or 1. The adjusted output's mean absolute error against an independent implementation of the declared grade followed by Apple's formula was 0.001787 and 0.000731, respectively, on an 8-pixel grid including scene edges. The corresponding 99th-percentile errors were 0.011440 and 0.003513. Codec and chroma reconstruction error are included.
+
+Before enabling the creative grade, the two selected standard-output regions were also decoded back into HLG for a fair spatial-detail comparison. Luma correlations with the source were **0.995483** (dark region) and **0.999978** (bright region). This does not prove lossless conversion, but did not support a claim that either region had been uniformly clipped. Very dark detail is visually compressed near the Apple Log toe; lifting it also exposes the source noise. The private test outputs, crops, comparisons and raw metadata were deleted from the project; only anonymized numerical results are retained here. PotPlayer's actual display processing remains unverified.
+
 ## Not yet verified
 
-- Genuine iPhone 13/14 Pro HLG recordings and a genuine iPhone 15 Pro Apple Log reference sample.
+- Other iPhone 13/14 Pro HLG recordings, Apple Camera recordings, and a genuine iPhone 15 Pro Apple Log reference sample. The specific Blackmagic Cam / iPhone 13 Pro recording above has passed.
 - Apple private Log transfer serialization, camera-specific MOV atoms and automatic Apple Log detection.
 - Apple official or third-party LUT behavior inside Resolve / Premiere / Final Cut. Pixel math and video-level normalization have been checked independently; commercial-editor interoperability is still a separate validation task.
 - Long-form 4K/8K workloads, unusual multichannel audio/edit lists, arbitrary non-rotation display transforms, and every user's proxy/TLS configuration.
