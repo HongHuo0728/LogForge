@@ -1,0 +1,59 @@
+name: Windows build and tests
+
+on:
+  push:
+    branches: ['**']
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows-x64:
+    runs-on: windows-2022
+    env:
+      LOGFORGE_DATA_DIR: ${{ github.workspace }}\build\ci-data
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Configure
+        run: cmake -S . -B build -G "Visual Studio 17 2022" -A x64
+      - name: Release build
+        run: cmake --build build --config Release --parallel
+      - name: Core tests
+        run: ctest --test-dir build -C Release --output-on-failure
+      - name: Install pinned verified FFmpeg for tests
+        run: |
+          & .\build\Release\LogForge-cli.exe --install-ffmpeg
+          if ($LASTEXITCODE -ne 0) { throw 'FFmpeg installation failed' }
+      - name: Enable generated-media integration tests
+        run: |
+          $ffmpeg = Join-Path $env:LOGFORGE_DATA_DIR 'tools\ffmpeg\ffmpeg-8.1.2-essentials_build\bin\ffmpeg.exe'
+          cmake -S . -B build "-DLOGFORGE_TEST_FFMPEG=$ffmpeg"
+      - name: All tests including actual transcode
+        run: ctest --test-dir build -C Release --output-on-failure
+      - name: Portable release package without FFmpeg
+        run: |
+          if ($env:GITHUB_REF_TYPE -eq 'tag') {
+            $projectText = Get-Content CMakeLists.txt -Raw
+            if ($projectText -notmatch 'project\(LogForge VERSION ([0-9.]+)') { throw 'Missing project version' }
+            if ($env:GITHUB_REF_NAME -ne "v$($Matches[1])") { throw 'Tag and CMake project version differ' }
+          }
+          cpack --config build/CPackConfig.cmake -C Release -B dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: LogForge-Windows-x64
+          path: dist/LogForge-*-Windows-x64.zip
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: validation-reports
+          path: |
+            build/Testing/Temporary/LastTest.log
+            build/integration/integration-report.json
+          if-no-files-found: ignore

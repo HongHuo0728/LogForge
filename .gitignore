@@ -1,0 +1,7 @@
+/build*/
+/dist/
+/.research/
+/test-output/
+/.vs/
+*.user
+*.log

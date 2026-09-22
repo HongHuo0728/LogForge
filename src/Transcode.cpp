@@ -1,0 +1,346 @@
+#include "logforge/Transcode.h"
+#include "logforge/Color.h"
+#include <array>
+#include <cmath>
+#include <sstream>
+#include <thread>
+
+namespace logforge {
+namespace {
+std::string joinReasons(const std::vector<std::string>& reasons) {
+    std::string text;
+    for (const auto& s : reasons)
+        text += s + "\n";
+    return text;
+}
+void logCommand(Logger& log, const fs::path& exe, const std::vector<std::wstring>& args) {
+    log.Write("Command: " + Utf8(CommandLine(exe, args)));
+}
+} // namespace
+ValidationReport TranscodeJob::Run(const FFmpegInstallation& tools, const MediaInfo& m,
+                                   const fs::path& output, Logger& log, const std::atomic_bool& cancel,
+                                   const JobCallback& progress) {
+    if (cancel.load())
+        throw std::runtime_error("用户取消。");
+    if (auto errors = m.UnsupportedReasons(); !errors.empty())
+        throw std::runtime_error(joinReasons(errors));
+    const auto dest = fs::absolute(output);
+    if (dest.extension() != L".mov" && dest.extension() != L".MOV")
+        throw std::runtime_error("输出文件扩展名必须为 .mov。");
+    if (fs::exists(dest))
+        throw std::runtime_error("输出文件已存在。请选择新文件名；LogForge 不会覆盖原文件。");
+    if (!fs::is_directory(dest.parent_path()))
+        throw std::runtime_error("输出目录不存在。");
+    // Conservative practical estimate, not an assertion of exact ProRes bitrate.
+    const auto estimate = static_cast<uint64_t>(m.width) * m.height *
+                              static_cast<uint64_t>(std::ceil(m.fps.Value() * m.videoDuration)) * 2ull +
+                          256ull * 1024 * 1024;
+    if (fs::space(dest.parent_path()).available < estimate)
+        throw std::runtime_error("磁盘空间不足：请为 ProRes HQ 输出预留更多空间。");
+    fs::path partial =
+        dest.parent_path() / (dest.stem().wstring() + L".logforge-" + std::to_wstring(GetCurrentProcessId()) +
+                              L"-" + std::to_wstring(GetTickCount64()) + L".partial.mov");
+    Handle reservation(
+        CreateFileW(partial.c_str(), GENERIC_WRITE, 0, nullptr, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, nullptr));
+    if (!reservation)
+        throw std::runtime_error("输出文件无法创建：" + Utf8(WinError()));
+    reservation.reset();
+    struct PartialGuard {
+        fs::path p;
+        bool keep = false;
+        ~PartialGuard() {
+            if (!keep) {
+                std::error_code ec;
+                fs::remove(p, ec);
+            }
+        }
+    } guard{partial};
+    progress({L"验证输入时间戳…"});
+    log.Write("Input media: " + m.raw.dump());
+    const auto expectedFrames = VerifyConstantFrameRate(tools.ffprobe, m, cancel);
+    log.Write("CFR timestamps verified: " + std::to_string(expectedFrames) +
+              " frames. HLG75% -> 90% reflectance; scale=" + std::to_string(HLGToReflectanceScale()));
+    const std::wstring range = m.range == "pc" ? L"full" : L"limited";
+    std::wstring decodeFilter = L"zscale=matrixin=2020_ncl:matrix=gbr:rangein=" + range +
+                                L":range=full:transferin=arib-std-b67:transfer=arib-std-b67:primariesin=2020:"
+                                L"primaries=2020:filter=spline36,format=gbrpf32le";
+    std::vector<std::wstring> decode{L"-hide_banner",
+                                     L"-loglevel",
+                                     L"warning",
+                                     L"-nostdin",
+                                     L"-threads",
+                                     L"4",
+                                     L"-noautorotate",
+                                     L"-i",
+                                     m.path.wstring(),
+                                     L"-map",
+                                     L"0:v:0",
+                                     L"-an",
+                                     L"-sn",
+                                     L"-dn",
+                                     L"-vf",
+                                     decodeFilter,
+                                     L"-fps_mode",
+                                     L"passthrough",
+                                     L"-f",
+                                     L"rawvideo",
+                                     L"-pix_fmt",
+                                     L"gbrpf32le",
+                                     L"pipe:1"};
+    // Equal input/output transfer tags on zscale make it a matrix/range/resampler ONLY.
+    // Apple Log math is already applied to float samples by LogForge.
+    const std::wstring encodeFilter =
+        L"zscale=matrixin=gbr:matrix=2020_ncl:rangein=full:range=limited:transferin=linear:transfer=linear:"
+        L"primariesin=2020:primaries=2020:chromal=left:filter=spline36:dither=error_diffusion,format="
+        L"yuv422p10le,setparams=color_primaries=bt2020:color_trc=unknown:colorspace=bt2020nc:range=limited";
+    std::vector<std::wstring> encode{L"-hide_banner",
+                                     L"-loglevel",
+                                     L"warning",
+                                     L"-nostdin",
+                                     L"-y",
+                                     L"-copyts",
+                                     L"-f",
+                                     L"rawvideo",
+                                     L"-pixel_format",
+                                     L"gbrpf32le",
+                                     L"-video_size",
+                                     std::to_wstring(m.width) + L"x" + std::to_wstring(m.height),
+                                     L"-framerate",
+                                     m.fps.Text(),
+                                     L"-i",
+                                     L"pipe:0",
+                                     L"-itsoffset",
+                                     std::to_wstring(-m.startTime),
+                                     L"-noautorotate",
+                                     L"-i",
+                                     m.path.wstring(),
+                                     L"-map",
+                                     L"0:v:0",
+                                     L"-map",
+                                     L"1:a?",
+                                     L"-map_chapters",
+                                     L"-1",
+                                     L"-vf",
+                                     encodeFilter,
+                                     L"-c:v",
+                                     L"prores_ks",
+                                     L"-profile:v",
+                                     L"3",
+                                     L"-pix_fmt",
+                                     L"yuv422p10le",
+                                     L"-threads:v",
+                                     L"4",
+                                     L"-fps_mode",
+                                     L"passthrough",
+                                     L"-c:a",
+                                     L"copy",
+                                     L"-avoid_negative_ts",
+                                     L"disabled",
+                                     L"-progress",
+                                     L"pipe:1",
+                                     L"-stats_period",
+                                     L"0.25",
+                                     L"-nostats"};
+    const auto metadata = AppleLogMetadataWriter::Arguments(m);
+    encode.insert(encode.end(), metadata.begin(), metadata.end());
+    encode.push_back(partial.wstring());
+    logCommand(log, tools.ffmpeg, decode);
+    logCommand(log, tools.ffmpeg, encode);
+    FFmpegProcess decoder(tools.ffmpeg, decode), encoder(tools.ffmpeg, encode, true);
+    std::string decoderError, encoderError;
+    std::exception_ptr progressError;
+    std::jthread readDecoderError([&] {
+        ReadLines(decoder.ErrorPipe(), [&](const auto& line) {
+            log.Write("decode: " + line);
+            if (decoderError.size() < 65536)
+                decoderError += line + '\n';
+        });
+    });
+    std::jthread readEncoderError([&] {
+        ReadLines(encoder.ErrorPipe(), [&](const auto& line) {
+            log.Write("encode: " + line);
+            if (encoderError.size() < 65536)
+                encoderError += line + '\n';
+        });
+    });
+    std::jthread progressReader([&] {
+        try {
+            std::array<char, 8192> b{};
+            std::string pending;
+            JobProgress p{L"正在转换 HLG → Apple Log"};
+            size_t got;
+            while ((got = encoder.Read(b.data(), b.size()))) {
+                pending.append(b.data(), got);
+                size_t pos;
+                while ((pos = pending.find('\n')) != std::string::npos) {
+                    auto line = pending.substr(0, pos);
+                    pending.erase(0, pos + 1);
+                    auto equal = line.find('=');
+                    if (equal == std::string::npos)
+                        continue;
+                    auto key = line.substr(0, equal), value = line.substr(equal + 1);
+                    try {
+                        if (key == "frame")
+                            p.frame = std::stoll(value);
+                        else if (key == "fps")
+                            p.fps = std::stod(value);
+                        else if (key == "out_time_us")
+                            p.seconds = std::stod(value) / 1000000;
+                        else if (key == "speed")
+                            p.speed = std::stod(value);
+                        else if (key == "progress") {
+                            p.seconds = std::max(p.seconds, static_cast<double>(p.frame) / m.fps.Value());
+                            p.fraction = std::clamp(p.seconds / m.videoDuration, 0.0, 1.0);
+                            progress(p);
+                        }
+                    } catch (const std::invalid_argument&) {
+                    } catch (const std::out_of_range&) {
+                    }
+                }
+            }
+        } catch (...) {
+            progressError = std::current_exception();
+            decoder.Terminate();
+            encoder.Terminate();
+        }
+    });
+    std::jthread cancellation([&](std::stop_token stop) {
+        while (!stop.stop_requested()) {
+            if (cancel.load()) {
+                decoder.Terminate();
+                encoder.Terminate();
+                break;
+            }
+            std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        }
+    });
+    int64_t frames = 0;
+    int decodeExit = -1, encodeExit = -1;
+    std::exception_ptr workError;
+    try {
+        std::vector<float> frame(static_cast<size_t>(m.width) * m.height * 3);
+        const size_t bytes = frame.size() * sizeof(float);
+        progress({L"正在解码并计算浮点 Apple Log…", 0});
+        while (!cancel.load()) {
+            size_t filled = 0;
+            while (filled < bytes) {
+                auto got =
+                    decoder.Read(reinterpret_cast<unsigned char*>(frame.data()) + filled, bytes - filled);
+                if (!got)
+                    break;
+                filled += got;
+            }
+            if (filled == 0)
+                break;
+            if (filled != bytes)
+                throw std::runtime_error("解码器返回不完整的视频帧。");
+            TransformHLGToAppleLog(frame);
+            encoder.Write(frame.data(), bytes);
+            ++frames;
+        }
+        encoder.CloseInput();
+        decodeExit = decoder.Wait();
+        encodeExit = encoder.Wait();
+    } catch (...) {
+        workError = std::current_exception();
+        decoder.Terminate();
+        encoder.Terminate();
+        decoder.Wait();
+        encoder.Wait();
+    }
+    cancellation.request_stop();
+    cancellation.join();
+    readDecoderError.join();
+    readEncoderError.join();
+    progressReader.join();
+    log.Write("Decoder exit=" + std::to_string(decodeExit) + "; encoder exit=" + std::to_string(encodeExit) +
+              "; processed frames=" + std::to_string(frames));
+    if (cancel.load())
+        throw std::runtime_error("用户取消，已清理未完成输出。");
+    if (progressError)
+        std::rethrow_exception(progressError);
+    if (workError) {
+        try {
+            std::rethrow_exception(workError);
+        } catch (const std::exception& e) {
+            throw std::runtime_error(std::string("视频处理失败：") + e.what() + "\n" + encoderError +
+                                     decoderError);
+        }
+    }
+    if (decodeExit || encodeExit || frames != expectedFrames)
+        throw std::runtime_error("FFmpeg 转码失败或帧数不符。" + encoderError + decoderError);
+    // rawvideo has no orientation field. Remux from our encoded file to apply the
+    // original display rotation using FFmpeg's documented display_rotation option.
+    if (std::abs(m.rotation) > 0.01) {
+        progress({L"保留画面旋转信息…"});
+        auto rotated = partial;
+        rotated += L".rotated.mov";
+        PartialGuard rotatedGuard{rotated};
+        std::vector<std::wstring> args{L"-hide_banner",
+                                       L"-v",
+                                       L"error",
+                                       L"-nostdin",
+                                       L"-display_rotation:v:0",
+                                       std::to_wstring(m.rotation),
+                                       L"-i",
+                                       partial.wstring(),
+                                       L"-map",
+                                       L"0",
+                                       L"-c",
+                                       L"copy",
+                                       L"-movflags",
+                                       L"+write_colr+use_metadata_tags",
+                                       L"-y",
+                                       rotated.wstring()};
+        logCommand(log, tools.ffmpeg, args);
+        auto r = RunProcess(tools.ffmpeg, args, &cancel, 0);
+        if (r.exitCode)
+            throw std::runtime_error("无法保留旋转信息：" + r.error);
+        fs::remove(partial);
+        fs::rename(rotated, partial);
+    }
+    progress({L"自动验证输出格式、音频和时长…"});
+    const auto out = Probe(tools.ffprobe, partial, &cancel);
+    auto report = ValidateOutput(m, out, frames);
+    const auto atomReport = ReferenceMovAnalyzer::Analyze(partial);
+    bool correctColr = false;
+    for (const auto& a : atomReport["atoms"])
+        if (a.value("type", std::string()) == "colr" && a.value("color_type", std::string()) == "nclc" &&
+            a.value("primaries", 0) == 9 && a.value("transfer", 0) == 2 && a.value("matrix", 0) == 9)
+            correctColr = true;
+    if (!correctColr) {
+        report.passed = false;
+        report.errors.push_back("MOV colr nclc 9/2/9 verification failed.");
+    }
+    Json full{{"version", Version},
+              {"validation", report.ToJson()},
+              {"input", m.raw},
+              {"output", out.raw},
+              {"output_atoms", atomReport},
+              {"processed_frames", frames},
+              {"color",
+               {{"transform", "inverse HLG OETF -> reflectance scale -> Apple Log"},
+                {"scale", HLGToReflectanceScale()},
+                {"intermediate", "gbrpf32le"},
+                {"math", "double"},
+                {"range", "video (Y 64..940; C 64..960)"}}}};
+    auto reportPath =
+        DataDirectory() / L"logs" /
+        (dest.filename().wstring() + L"-" + std::to_wstring(GetTickCount64()) + L".validation.json");
+    std::ofstream file(reportPath);
+    file << full.dump(2);
+    file.close();
+    if (!file)
+        throw std::runtime_error("无法保存输出验证报告。请检查日志目录的可写权限和剩余空间。");
+    log.Write("Validation report: " + PathText(reportPath) + "\n" + report.ToJson().dump());
+    if (!report.passed)
+        throw std::runtime_error("输出验证失败：\n" + joinReasons(report.errors));
+    if (cancel.load())
+        throw std::runtime_error("用户取消。");
+    // Same-volume rename publishes only a fully validated file, with no overwrite.
+    fs::rename(partial, dest);
+    guard.keep = true;
+    progress({L"完成 · 输出验证通过（请手动指定 Apple Log）", 1.0, m.videoDuration, 0, 0, frames});
+    return report;
+}
+} // namespace logforge
