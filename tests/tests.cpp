@@ -22,7 +22,17 @@ logforge::Json Fixture() {
 void MediaTests() {
     using namespace logforge;
     auto j = Fixture();
+    j["streams"][0]["chroma_location"] = "left";
     auto m = MediaInfo::Parse(j);
+    std::vector<VideoPacketTiming> timing;
+    for (int i = 0; i < 30; ++i)
+        timing.push_back({i * 1001, 1001});
+    m.cadence = AnalyzeCadence(timing, m);
+    auto validated = [&](const Json& json) {
+        auto media = MediaInfo::Parse(json);
+        media.cadence = AnalyzeCadence(timing, media);
+        return media;
+    };
     check(m.UnsupportedReasons().empty(), "Valid HLG ProRes rejected");
     check(m.width == 1920 && m.height == 1080 && m.bitDepth == 10, "Media dimensions/depth parser");
     Near(m.fps.Value(), 30000.0 / 1001, 1e-10, "Rational fps parser");
@@ -39,7 +49,8 @@ void MediaTests() {
     check(!MediaInfo::Parse(missing).UnsupportedReasons().empty(), "Missing HLG tag accepted");
     auto vfr = j;
     vfr["streams"][0]["avg_frame_rate"] = "25/1";
-    check(!MediaInfo::Parse(vfr).UnsupportedReasons().empty(), "VFR accepted");
+    check(MediaInfo::Parse(vfr).UnsupportedReasons().empty(),
+          "Rate tags must not decide VFR before packet verification");
     auto cameraRate = j;
     cameraRate["streams"][0]["r_frame_rate"] = "24/1";
     cameraRate["streams"][0]["avg_frame_rate"] = "83360/3473";
@@ -63,7 +74,7 @@ void MediaTests() {
     auto output = j;
     output["streams"][0].erase("color_transfer");
     output["format"]["tags"]["logforge.transfer"] = "Apple Log";
-    check(ValidateOutput(m, MediaInfo::Parse(output), 30).passed, "Valid output rejected");
+    check(ValidateOutput(m, validated(output), 30).passed, "Valid output rejected");
     for (auto [key, value] : std::vector<std::pair<std::string, Json>>{{"pix_fmt", "yuv420p"},
                                                                        {"codec_name", "h264"},
                                                                        {"color_primaries", "bt709"},
@@ -73,39 +84,76 @@ void MediaTests() {
                                                                        {"nb_frames", "29"}}) {
         auto bad = output;
         bad["streams"][0][key] = value;
-        check(!ValidateOutput(m, MediaInfo::Parse(bad), 30).passed, "Incorrect output validated");
+        check(!ValidateOutput(m, validated(bad), 30).passed, "Incorrect output validated");
     }
     auto noAudio = output;
     noAudio["streams"].erase(1);
-    check(!ValidateOutput(m, MediaInfo::Parse(noAudio), 30).passed, "Lost audio validated");
+    check(!ValidateOutput(m, validated(noAudio), 30).passed, "Lost audio validated");
     auto wrongAudio = output;
     wrongAudio["streams"][1]["sample_rate"] = "44100";
-    check(!ValidateOutput(m, MediaInfo::Parse(wrongAudio), 30).passed, "Changed sample rate validated");
+    check(!ValidateOutput(m, validated(wrongAudio), 30).passed, "Changed sample rate validated");
     for (auto [key, value] : std::vector<std::pair<std::string, Json>>{
              {"codec_name", "pcm_s16le"}, {"channels", 1}, {"channel_layout", "downmix"}}) {
         auto bad = output;
         bad["streams"][1][key] = value;
-        check(!ValidateOutput(m, MediaInfo::Parse(bad), 30).passed, "Changed audio format validated");
+        check(!ValidateOutput(m, validated(bad), 30).passed, "Changed audio format validated");
     }
     auto unlabelledInput = j, unlabelledOutput = output;
     unlabelledInput["streams"][1].erase("channel_layout");
     unlabelledOutput["streams"][1].erase("channel_layout");
-    const auto unlabelled = MediaInfo::Parse(unlabelledInput);
-    check(ValidateOutput(unlabelled, MediaInfo::Parse(unlabelledOutput), 30).passed,
+    const auto unlabelled = validated(unlabelledInput);
+    check(ValidateOutput(unlabelled, validated(unlabelledOutput), 30).passed,
           "Preserved unlabelled audio rejected");
-    const auto inventedLayout = ValidateOutput(unlabelled, MediaInfo::Parse(output), 30);
+    const auto inventedLayout = ValidateOutput(unlabelled, validated(output), 30);
     check(!inventedLayout.passed && inventedLayout.errors.size() == 1 &&
               inventedLayout.errors[0].id == TextId::AudioLayoutChanged,
           "Invented layout must produce a specific diagnostic");
-    check(!ValidateOutput(m, MediaInfo::Parse(unlabelledOutput), 30).passed,
+    check(!ValidateOutput(m, validated(unlabelledOutput), 30).passed,
           "Lost explicit channel layout validated");
     auto driftingOutput = output;
     driftingOutput["streams"][0]["avg_frame_rate"] = "29971/1000";
-    check(!ValidateOutput(m, MediaInfo::Parse(driftingOutput), 30).passed,
+    check(!ValidateOutput(m, validated(driftingOutput), 30).passed,
           "Output average-rate drift hidden by nominal rate");
     auto metadata = AppleLogMetadataWriter::Arguments(m);
     check(std::find(metadata.begin(), metadata.end(), L"2") != metadata.end(),
           "Unspecified transfer missing");
+    for (const auto* chroma : {"left", "center"}) {
+        auto supported = j;
+        supported["streams"][0]["chroma_location"] = chroma;
+        check(MediaInfo::Parse(supported).UnsupportedReasons().empty(), "Supported chroma rejected");
+    }
+    auto unknown = j;
+    unknown["streams"][0]["chroma_location"] = "unknown";
+    check(!MediaInfo::Parse(unknown).UnsupportedReasons().empty(), "Unknown chroma silently guessed");
+    auto explicitSiting = MediaInfo::Parse(unknown);
+    explicitSiting.inputChromaOverride = "center";
+    check(explicitSiting.UnsupportedReasons().empty() && explicitSiting.EffectiveChromaLocation() == "center",
+          "Explicit siting failed");
+    explicitSiting.chromaLocation = "topleft";
+    check(!explicitSiting.UnsupportedReasons().empty(),
+          "Override replaced an unsupported native declaration");
+    auto wrongChroma = output;
+    wrongChroma["streams"][0]["chroma_location"] = "center";
+    check(!ValidateOutput(m, validated(wrongChroma), 30).passed, "Wrong output chroma validated");
+    for (const auto* key :
+         {"com.apple.proapps.customgamma", "HLG", "HDR_format", "DolbyVision", "PQ_transfer", "colorspace"}) {
+        auto conflict = output;
+        conflict["streams"][0]["tags"][key] = "stale";
+        check(!ValidateOutput(m, validated(conflict), 30).passed, "Stream color conflict accepted");
+        conflict = output;
+        conflict["format"]["tags"][key] = "stale";
+        check(!ValidateOutput(m, validated(conflict), 30).passed, "Format color conflict accepted");
+    }
+    auto safe = m;
+    safe.videoTags["com.apple.proapps.customgamma"] = "HLG";
+    safe.tags["private_unknown"] = "do not copy";
+    const auto plan = AppleLogMetadataWriter::CopyPlan(safe);
+    check(plan["removed"].size() >= 3 && !plan["preserved"].empty(), "Whitelist copy plan missing");
+    const auto args = AppleLogMetadataWriter::Arguments(safe);
+    check(std::find(args.begin(), args.end(), L"com.apple.proapps.customgamma=HLG") == args.end(),
+          "Custom gamma copied");
+    check(std::find(args.begin(), args.end(), L"private_unknown=do not copy") == args.end(),
+          "Unknown metadata copied");
     std::cout << "PASS: media parser, unsupported inputs, output validation, metadata policy\n";
 }
 void PlatformTests() {

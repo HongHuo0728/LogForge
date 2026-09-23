@@ -7,6 +7,14 @@
 #include <winhttp.h>
 
 namespace logforge {
+Json VerifyFFmpegNumerics(const fs::path&, const std::atomic_bool&, Logger&);
+Json FFmpegInstallation::ToJson() const {
+    auto result = lease ? lease->identity.ToJson() : Json::object();
+    result["version"] = version;
+    result["verification"] = numericallyVerified ? "Verified FFmpeg" : "Compatible but unverified FFmpeg";
+    result["reference_signal"] = numeric;
+    return result;
+}
 fs::path FFmpegManager::ManagedExecutable() {
     return DataDirectory() / L"tools" / L"ffmpeg" / L"ffmpeg-8.1.2-essentials_build" / L"bin" / L"ffmpeg.exe";
 }
@@ -29,6 +37,11 @@ FFmpegInstallation FFmpegManager::Check(const fs::path& exe, const std::atomic_b
     fs::path ff = fs::absolute(exe), probe = ff.parent_path() / L"ffprobe.exe";
     if (!fs::is_regular_file(ff) || !fs::is_regular_file(probe))
         throw AppError(TextId::FFmpegPair);
+    auto lease = ToolTrust::Acquire(ff);
+    // Execute the resolved pair whose images are locked and hashed, not the
+    // discovery alias (whose sibling ffprobe may be an unrelated executable).
+    ff = lease->identity.ffmpeg;
+    probe = lease->identity.ffprobe;
     auto run = [&](const std::vector<std::wstring>& args) {
         auto r = RunProcess(ff, args, &cancel);
         if (r.exitCode)
@@ -98,13 +111,40 @@ FFmpegInstallation FFmpegManager::Check(const fs::path& exe, const std::atomic_b
         logger_.Write(
             "Capability smoke test passed: ProRes HQ encode, ffprobe, ProRes decode and float RGB zscale.");
     }
-    return {ff, probe, version.substr(0, version.find('\n'))};
+    FFmpegInstallation installation{ff, probe, version.substr(0, version.find_first_of("\r\n")),
+                                    std::move(lease), false};
+    if (smoke) {
+        installation.numeric = VerifyFFmpegNumerics(ff, cancel, logger_);
+        installation.numericallyVerified = true;
+        logger_.Write("Verified FFmpeg: " + installation.ToJson().dump());
+    }
+    return installation;
 }
 void FFmpegManager::SaveManual(const fs::path& executable) {
     SettingsStore::SaveFFmpeg(executable, false);
 }
+bool FFmpegManager::DiscoverCandidate(const fs::path& p, const std::atomic_bool& cancel,
+                                      std::optional<FFmpegInstallation>& found) {
+    if (!ToolTrust::HasApproval(p)) {
+        unapproved_.push_back(p);
+        logger_.Write("Discovered, NOT EXECUTED (no approval): " + PathText(p));
+        return false;
+    }
+    try {
+        found = Check(p, cancel);
+        SettingsStore::SaveFFmpeg(found->ffmpeg, true);
+        return true;
+    } catch (const std::exception& e) {
+        if (cancel.load())
+            throw AppError(TextId::Cancelled);
+        unapproved_.push_back(p);
+        logger_.Write("Approved candidate unavailable; requires review: " + PathText(p) + ": " + e.what());
+        return false;
+    }
+}
 std::optional<FFmpegInstallation> FFmpegManager::Detect(const std::atomic_bool& cancel,
                                                         const DiscoveryCallback& progress) {
+    unapproved_.clear();
     std::vector<fs::path> candidates{ManagedExecutable(),
                                      ExecutableDirectory() / L"tools" / L"ffmpeg" / L"bin" / L"ffmpeg.exe"};
     const auto settings = SettingsStore::Load();
@@ -157,20 +197,7 @@ std::optional<FFmpegInstallation> FFmpegManager::Detect(const std::atomic_bool& 
             c = static_cast<wchar_t>(towlower(c));
         if (!visited.insert(key).second || !fs::is_regular_file(p, ec))
             return false;
-        try {
-            found = Check(p, cancel);
-            try {
-                SettingsStore::SaveFFmpeg(found->ffmpeg, true);
-            } catch (const std::exception& e) {
-                logger_.Write(std::string("Discovery cache not saved: ") + e.what());
-            }
-            return true;
-        } catch (const std::exception& e) {
-            if (cancel.load())
-                throw AppError(TextId::Cancelled);
-            logger_.Write("Rejected FFmpeg " + PathText(p) + ": " + e.what());
-        }
-        return false;
+        return DiscoverCandidate(p, cancel, found);
     };
     if (progress)
         progress({DiscoveryPhase::CheckingPaths});
@@ -347,7 +374,11 @@ FFmpegInstallation FFmpegDownloader::Install(const FFmpegBuildProvider& provider
     if (extracted.exitCode)
         throw AppError(Message(TextId::DownloadExtractFailed, {extracted.error}));
     FFmpegManager manager(log);
-    auto found = manager.Check(staging / spec.archiveRoot / L"bin/ffmpeg.exe", cancel);
+    const auto stagedExe = staging / spec.archiveRoot / L"bin/ffmpeg.exe";
+    ToolTrust::RecordDownload(stagedExe, spec.sha256);
+    {
+        auto checked = manager.Check(stagedExe, cancel);
+    }
     auto target = root / spec.archiveRoot;
     if (fs::exists(target)) {
         try {
@@ -364,6 +395,7 @@ FFmpegInstallation FFmpegDownloader::Install(const FFmpegBuildProvider& provider
         }
     }
     fs::rename(staging / spec.archiveRoot, target);
+    ToolTrust::RecordDownload(target / L"bin/ffmpeg.exe", spec.sha256);
     fs::remove(zip);
     fs::remove(staging);
     progress(1, 1, Message(TextId::Installed));

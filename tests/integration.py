@@ -28,6 +28,7 @@ def main():
     probe = ff.with_name('ffprobe.exe')
     env = {k.upper(): v for k, v in os.environ.items()}
     env['LOGFORGE_DATA_DIR'] = str(work / 'appdata')
+    run([args.cli.resolve(),'--approve-ffmpeg','--ffmpeg',ff],env=env)
     width, height, frames = 320, 180, 60
     source, output = work / 'HLG 测试 input.mov', work / 'Apple Log output.mov'
     raw = work / 'patterns.gbrpf32le'
@@ -60,13 +61,17 @@ def main():
          '-metadata','com.apple.quicktime.make=Apple','-metadata','com.apple.quicktime.model=iPhone 13 Pro','-movflags','+write_colr+use_metadata_tags',source])
     if output.exists():
         output.unlink()  # only the exact generated test output
-    converted = run([args.cli.resolve(),'--convert',source,output,'--ffmpeg',ff], env=env)
+    converted = run([args.cli.resolve(),'--convert',source,output,'--ffmpeg',ff,'--input-chroma-location','left'], env=env)
     print(converted.decode('utf-8','replace'))
     info = json.loads(run([probe,'-v','error','-show_format','-show_streams','-of','json',output]))
     video = next(s for s in info['streams'] if s['codec_type']=='video')
     assert video['codec_name']=='prores' and video['profile']=='HQ'
     assert video['pix_fmt']=='yuv422p10le' and int(video['nb_frames'])==frames
     assert video['color_primaries']=='bt2020' and video['color_space']=='bt2020nc'
+    atoms = json.loads(run([args.cli.resolve(), '--analyze', output, '--ffmpeg', ff], env=env))
+    logs = [a for a in atoms['atoms'] if a['type'] == 'logs']
+    assert len(logs) == 1 and logs[0]['log_transfer_function'] == 'com.apple.rec2020.apple-log'
+    assert '/apch[0]/logs[0]' in logs[0]['path'] and logs[0]['size'] == 35
     assert info['format']['tags']['com.apple.quicktime.model']=='iPhone 13 Pro'
     assert video['tags']['timecode']=='10:20:30:00'
     def decode(path):
@@ -99,7 +104,7 @@ def main():
     # Independently verify the user exposure option in actual codec pixels.
     exposure_output=work/'exposure-plus1.mov'
     if exposure_output.exists():exposure_output.unlink()
-    run([args.cli.resolve(),'--convert',source,exposure_output,'--ffmpeg',ff,'--exposure-ev','1'],env=env)
+    run([args.cli.resolve(),'--convert',source,exposure_output,'--ffmpeg',ff,'--input-chroma-location','left','--exposure-ev','1'],env=env)
     exposed=decode(exposure_output)
     exposure_errors=[]
     for plane in range(3):
@@ -113,7 +118,7 @@ def main():
     for invalid_exposure in ('nan','9','1oops'):
         bad_exposure=work/'bad-exposure-must-not-exist.mov'
         rejected_exposure=subprocess.run([str(args.cli.resolve()),'--convert',str(source),str(bad_exposure),
-                                          '--ffmpeg',str(ff),'--exposure-ev',invalid_exposure],env=env,capture_output=True)
+                                          '--ffmpeg',str(ff),'--input-chroma-location','left','--exposure-ev',invalid_exposure],env=env,capture_output=True)
         assert rejected_exposure.returncode!=0 and not bad_exposure.exists(), 'Invalid exposure accepted'
     hashes=[]
     for p in (source,output):
@@ -134,7 +139,7 @@ def main():
         assert not unknown_info.get('channel_layout'), 'Regression fixture must have no layout declaration'
         assert unknown_info['codec_name']=='pcm_s16le' and unknown_info['channels']==2
         if target.exists():target.unlink()
-        run([args.cli.resolve(),'--convert',unknown,target,'--ffmpeg',ff],env=env)
+        run([args.cli.resolve(),'--convert',unknown,target,'--ffmpeg',ff,'--input-chroma-location','left'],env=env)
         target_info=json.loads(run([probe,'-v','error','-select_streams','a','-show_streams','-of','json',target]))['streams'][0]
         assert not target_info.get('channel_layout'), 'A layout was invented for unlabelled channels'
         for key in ('codec_name','channels','sample_rate','bits_per_sample'):
@@ -145,13 +150,15 @@ def main():
         audio_layout_cases.append({'rotation':rotation,'payload_sha256':payload[0].decode(),'layout_preserved':True})
     bad = work/'unsupported-rec709.mov'
     run([ff,'-v','error','-y','-i',source,'-map','0','-c','copy','-color_primaries','bt709','-movflags','+write_colr',bad])
-    rejected=subprocess.run([str(args.cli.resolve()),'--convert',str(bad),str(work/'must-not-exist.mov'),'--ffmpeg',str(ff)],env=env,capture_output=True)
+    rejected=subprocess.run([str(args.cli.resolve()),'--convert',str(bad),str(work/'must-not-exist.mov'),'--ffmpeg',str(ff),'--input-chroma-location','left'],env=env,capture_output=True)
     assert rejected.returncode!=0 and not (work/'must-not-exist.mov').exists(), 'Unsupported input accepted'
     # Original image orientation, codec Standard, silent footage, and AAC are separate cases.
     variants = []
     for name, options in [
         ('rotation-90', ['-display_rotation:v:0','90']),
         ('rotation-minus90', ['-display_rotation:v:0','-90']),
+        ('rotation-180', ['-display_rotation:v:0','180']),
+        ('rotation-270', ['-display_rotation:v:0','270']),
         ('silent', []),
         ('aac', []),
         ('standard', []),
@@ -165,14 +172,42 @@ def main():
         cmd+=['-movflags','+write_colr+use_metadata_tags',variant]
         run(cmd)
         if target.exists():target.unlink()
-        run([args.cli.resolve(),'--convert',variant,target,'--ffmpeg',ff],env=env)
+        run([args.cli.resolve(),'--convert',variant,target,'--ffmpeg',ff,'--input-chroma-location','left'],env=env)
         variants.append(name)
+    # Two independently mapped audio streams and real drop-frame punctuation.
+    multi=work/'multi-audio-drop-frame.mov';multi_out=work/'multi-audio-drop-frame-AppleLog.mov'
+    run([ff,'-v','error','-y','-i',source,'-map','0:v:0','-map','0:a:0','-map','0:a:0','-c','copy',
+         '-timecode','01:23:45;12','-metadata:s:a:0','language=eng','-metadata:s:a:1','language=zho',
+         '-metadata','com.apple.proapps.customgamma=HLG','-metadata','HDR_transfer=PQ',
+         '-metadata','unknown_private=should be removed','-movflags','+use_metadata_tags',multi])
+    if multi_out.exists():multi_out.unlink()
+    run([args.cli.resolve(),'--convert',multi,multi_out,'--ffmpeg',ff,'--input-chroma-location','left'],env=env)
+    multi_info=json.loads(run([probe,'-v','error','-show_streams','-show_format','-of','json',multi_out]))
+    assert [s['tags']['timecode'] for s in multi_info['streams'] if s['codec_type']=='video']==['01:23:45;12']
+    assert len([s for s in multi_info['streams'] if s['codec_type']=='audio'])==2
+    for i in range(2):
+        assert run([ff,'-v','error','-i',multi,'-map',f'0:a:{i}','-c','copy','-f','hash','-hash','sha256','-'])==run(
+            [ff,'-v','error','-i',multi_out,'-map',f'0:a:{i}','-c','copy','-f','hash','-hash','sha256','-'])
+    assert not {'com.apple.proapps.customgamma','HDR_transfer','unknown_private'} & multi_info['format']['tags'].keys()
+    variants.append('multi-audio-drop-frame-whitelist')
+    for rate in ('2999/100','2998/100','299701/10000'):
+        name=rate.replace('/','-');exact=work/f'cfr-{name}.mov';target=work/f'cfr-{name}-AppleLog.mov'
+        run([ff,'-v','error','-y','-f','lavfi','-i',f'testsrc2=size=128x64:rate={rate}',
+             '-frames:v','90','-vf','format=yuv422p10le,setparams=color_primaries=bt2020:color_trc=arib-std-b67:colorspace=bt2020nc:range=limited',
+             '-c:v','prores_ks','-profile:v','3','-pix_fmt','yuv422p10le',
+             '-color_primaries','bt2020','-color_trc','arib-std-b67','-colorspace','bt2020nc',exact])
+        if target.exists():target.unlink()
+        run([args.cli.resolve(),'--convert',exact,target,'--ffmpeg',ff,'--input-chroma-location','left'],env=env)
+        after=json.loads(run([probe,'-v','error','-show_streams','-of','json',target]))['streams'][0]
+        from fractions import Fraction
+        assert Fraction(after['avg_frame_rate'])==Fraction(rate) and int(after['nb_frames'])==90
+        variants.append(f'exact-CFR-{rate}')
     # Full 4K raster through the production float bridge, three real ProRes frames.
     four_k=work/'4k-HLG.mov';four_k_out=work/'4k-AppleLog.mov'
     run([ff,'-v','error','-y','-i',source,'-an','-frames:v','3','-vf','zscale=w=3840:h=2160,format=yuv422p10le',
          '-c:v','prores_ks','-profile:v','3','-threads:v','4',four_k])
     if four_k_out.exists():four_k_out.unlink()
-    run([args.cli.resolve(),'--convert',four_k,four_k_out,'--ffmpeg',ff],env=env)
+    run([args.cli.resolve(),'--convert',four_k,four_k_out,'--ffmpeg',ff,'--input-chroma-location','left'],env=env)
     variants.append('3840x2160-3frames')
     # A single 1/480-second camera clock correction must not turn 24 fps into
     # an arbitrary rational mean rate. Sustained clock drift is still refused.
@@ -184,7 +219,7 @@ def main():
     clock_info=json.loads(run([probe,'-v','error','-select_streams','v','-show_streams','-of','json',clock]))['streams'][0]
     assert clock_info['r_frame_rate']=='24/1' and clock_info['avg_frame_rate']!='24/1'
     if clock_out.exists():clock_out.unlink()
-    run([args.cli.resolve(),'--convert',clock,clock_out,'--ffmpeg',ff],env=env)
+    run([args.cli.resolve(),'--convert',clock,clock_out,'--ffmpeg',ff,'--input-chroma-location','left'],env=env)
     clock_after=json.loads(run([probe,'-v','error','-select_streams','v','-show_streams','-of','json',clock_out]))['streams'][0]
     assert clock_after['avg_frame_rate']=='24/1' and clock_after['nb_frames']==clock_info['nb_frames']
     variants.append('camera-clock-correction-24fps')
@@ -194,22 +229,22 @@ def main():
          '-enc_time_base','1:480','-fps_mode','passthrough','-video_track_timescale','480',
          '-c:v','prores_ks','-profile:v','3','-pix_fmt','yuv422p10le',drift])
     # Metadata alone looks close enough; rejection must come from packet phase.
-    run([args.cli.resolve(),'--probe',drift,'--ffmpeg',ff],env=env)
-    drift_refused=subprocess.run([str(args.cli.resolve()),'--convert',str(drift),str(drift_out),'--ffmpeg',str(ff)],env=env,capture_output=True)
+    run([args.cli.resolve(),'--probe',drift,'--ffmpeg',ff,'--input-chroma-location','left'],env=env)
+    drift_refused=subprocess.run([str(args.cli.resolve()),'--convert',str(drift),str(drift_out),'--ffmpeg',str(ff),'--input-chroma-location','left'],env=env,capture_output=True)
     assert drift_refused.returncode!=0 and not drift_out.exists(), 'Accumulated timestamp drift accepted'
     assert b'InputCadence' in drift_refused.stderr, 'Drift was not refused by packet validation'
     # A VFR file with deliberate gaps must be refused even if its color tags are valid.
     vfr=work/'vfr.mov'
     run([ff,'-v','error','-y','-i',source,'-map','0:v:0','-vf',"setpts=PTS+floor(N/10)*1001",'-fps_mode','vfr',
          '-c:v','prores_ks','-profile:v','2','-pix_fmt','yuv422p10le','-color_primaries','bt2020','-color_trc','arib-std-b67','-colorspace','bt2020nc',vfr])
-    refused=subprocess.run([str(args.cli.resolve()),'--convert',str(vfr),str(work/'vfr-must-not-exist.mov'),'--ffmpeg',str(ff)],env=env,capture_output=True)
+    refused=subprocess.run([str(args.cli.resolve()),'--convert',str(vfr),str(work/'vfr-must-not-exist.mov'),'--ffmpeg',str(ff),'--input-chroma-location','left'],env=env,capture_output=True)
     assert refused.returncode!=0 and not (work/'vfr-must-not-exist.mov').exists(), 'VFR accepted'
     # Overwrite is refused, and a requested cancellation cannot publish a partial movie.
     original_output_hash=__import__('hashlib').sha256(output.read_bytes()).hexdigest()
-    overwrite=subprocess.run([str(args.cli.resolve()),'--convert',str(source),str(output),'--ffmpeg',str(ff)],env=env,capture_output=True)
+    overwrite=subprocess.run([str(args.cli.resolve()),'--convert',str(source),str(output),'--ffmpeg',str(ff),'--input-chroma-location','left'],env=env,capture_output=True)
     assert overwrite.returncode!=0 and __import__('hashlib').sha256(output.read_bytes()).hexdigest()==original_output_hash
     cancelled_output=work/'cancelled.mov'
-    cancellation=subprocess.run([str(args.cli.resolve()),'--convert',str(source),str(cancelled_output),'--ffmpeg',str(ff),'--cancel-after-frames','1'],env=env,capture_output=True,timeout=20)
+    cancellation=subprocess.run([str(args.cli.resolve()),'--convert',str(source),str(cancelled_output),'--ffmpeg',str(ff),'--input-chroma-location','left','--cancel-after-frames','1'],env=env,capture_output=True,timeout=20)
     assert cancellation.returncode==130 and not cancelled_output.exists(), 'Cancellation published output'
     assert not list(work.glob('*.partial.mov')), 'Incomplete files were not cleaned up'
     report={'passed':True,'frames':frames,'pixel_mae':mae,'pixel_max_error':maximum,'samples':len(errors),'audio_sha256':hashes[0].decode(),'unlabelled_audio':audio_layout_cases,'variants':variants,'vfr_rejected':True,'overwrite_refused':True,'cancel_cleanup':True,'output':str(output),'source':str(source)}

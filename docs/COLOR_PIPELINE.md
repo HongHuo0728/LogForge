@@ -67,8 +67,8 @@ Published constants are rounded. The two branches differ very slightly at their 
 ## Actual implementation
 
 1. FFmpeg decodes ProRes to its native 10-bit 4:2:2 representation.
-2. `zscale` explicitly applies the BT.2020 NCL matrix and input range, reconstructs chroma with spline36, and produces full-range `gbrpf32le` HLG-coded RGB. Its input and output transfer are the same, so it performs no transfer conversion or OOTF.
-3. LogForge transports one planar float frame through supervised pipes. Each component is promoted to double for inverse HLG, reference scaling, any explicitly enabled creative adjustment, and Apple Log encoding; only the result is stored as float. There is no LUT, no 3D gamut transform and no 8-bit intermediate.
+2. `zscale` explicitly applies the BT.2020 NCL matrix, input range and verified/explicitly declared chromalin, reconstructs chroma with spline36, and produces full-range `gbrpf32le` HLG-coded RGB. Its input and output transfer are the same, so it performs no transfer conversion or OOTF.
+3. LogForge streams bounded planar float chunks through supervised pipes in standard mode; creative mode uses one frame with parallel RGB tiles. Each component is promoted to double for inverse HLG, reference scaling, any explicitly enabled creative adjustment, and Apple Log encoding; only the result is stored as float. There is no LUT, no 3D gamut transform and no 8-bit intermediate.
 4. A second FFmpeg process receives float Apple Log RGB. Its `zscale` stage has **equal linear input/output transfer labels solely to bypass transfer processing** while converting RGB to BT.2020 NCL YCbCr. This label does not assert that the values are scene-linear. `setparams` clears it before encoding.
 5. Chroma is downsampled to left-sited 4:2:2 and quantized with error-diffusion dithering to `yuv422p10le`, then encoded by `prores_ks`, profile 3 (HQ).
 
@@ -92,6 +92,6 @@ Tests compare mathematical reference points, 100,001 samples across each forward
 
 A Log encoding is not a single fixed low-contrast appearance. Its encoded image also depends on scene exposure, illumination, white balance and any processing already present in the input. Inverting the HLG OETF does not identify or undo undocumented camera rendering. No source-specific inverse tone mapping or desaturation is guessed here.
 
-For a controlled comparison, decode both files using their actual YCbCr matrices and range, then assign Apple Log / BT.2020 and use the same viewing transform. Turning off HDR conversion in a player does not establish that those steps are identical for two files. LogForge's unspecified transfer tag also does not establish automatic Apple Log support in that player. A direct view of encoded Log values can be useful, but cannot certify a camera match.
+For a controlled comparison, decode both files using their actual YCbCr matrices and range, then interpret both as Apple Log / BT.2020 with the same viewing transform. Turning off HDR conversion in a player does not establish that those steps are identical for two files. The separately verified `logs` sample-entry identifier enables automatic Apple Log input detection in the tested Resolve managed workflow; generic players may still ignore it. The nclc transfer remains unspecified, just as in the native reference. A direct view of encoded Log values can be useful, but cannot certify a camera match. See [identification and range evidence](APPLE_LOG_IDENTIFICATION.md).
 
 Without a matching captured reference, the verified target is the published encoding and a declared exposure reference. Native-camera appearance equivalence remains unverified; changing contrast/saturation to achieve a flatter-looking image would not demonstrate that equivalence.

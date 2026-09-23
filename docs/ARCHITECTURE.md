@@ -7,7 +7,11 @@ The C++20 core contains no GUI framework or linked multimedia library. Win32 is 
 | `color/AppleLog.cpp`, `color/HLG.cpp` | Double reference equations, float frame transformation |
 | `Platform.cpp` | UTF-8/UTF-16, RAII handles, quoting, supervised child processes, logs, BCrypt SHA-256 |
 | `FFmpeg.cpp` | Ordered discovery, runtime capability checks, provider abstraction, WinHTTP installer |
-| `Media.cpp` | ffprobe parser, input acceptance, packet cadence checks, metadata policy, output validation, bounded MOV atom reader |
+| `Media.cpp`, `Cadence.cpp` | ffprobe parsing, full-packet timing verification and output validation |
+| `MetadataPolicy.cpp`, `MovAnalyzer.cpp` | Whitelist copy plan, bounded typed metadata/sample-entry reader and semantic diff |
+| `AppleLogIdentification.cpp` | Independently verified sample-entry `logs` writer; metadata only, 1 MiB relocation buffer, strict atom validation |
+| `ToolTrust.cpp`, `FFmpegNumeric.cpp` | Explicit path/hash execution approval, locked images and numeric qualification |
+| `color/FloatTransformer.cpp` | Persistent CPU workers calling scalar equations on bounded chunks/tiles |
 | `Transcode.cpp` | Job lifecycle, float decode/transform/encode bridge, progress, orientation, validation and publication |
 | `MainWindow.cpp`, `SettingsWindow.cpp`, `Ui.cpp` | Native controls, settings, dark/light palettes, drop handling, DPI scaling and background-task events |
 | `Settings.cpp` | Atomic per-user JSON preferences; preserve unrelated settings and migrate the legacy FFmpeg field |
@@ -20,7 +24,7 @@ The C++20 core contains no GUI framework or linked multimedia library. Win32 is 
 - One GUI task worker owns a detection, probe, download or transcode operation. Controls that could conflict with it are disabled.
 - Worker progress/results are heap-owned event messages with ownership transferred through `PostMessage`; the UI consumes them with `unique_ptr`.
 - Every child process starts suspended, is assigned to a kill-on-close Windows Job Object, then resumes. `STARTUPINFOEX` restricts handle inheritance to the three standard I/O handles; no other decoder/encoder pipes accidentally stay open.
-- The transcode worker reads a whole float frame, transforms it, and writes it to the encoder. Separate reader threads drain decoder stderr, encoder stderr and encoder progress to prevent pipe deadlocks.
+- The standard transcode worker reads bounded float chunks (at most 4 MiB), transforms them with persistent CPU workers, and writes them to the encoder. Creative mode needs corresponding RGB planes and retains one frame, split into 16,384-pixel worker tiles. Scalar math is unchanged and exact float equality is tested. Separate reader threads drain decoder stderr, encoder stderr and encoder progress to prevent pipe deadlocks.
 - A cancellation watcher terminates both supervised processes when requested; readers unblock, all threads join, and only the job's uniquely named partial output is removed. Closing the UI uses the same cancellation path.
 - The parent-process handle/job lifetime prevents orphan FFmpeg processes even if the main application exits unexpectedly.
 
@@ -28,11 +32,19 @@ The C++20 core contains no GUI framework or linked multimedia library. Win32 is 
 
 The raw float pipe does not carry timestamps. V1 therefore checks the complete video packet cadence before conversion and supports only a fixed-rate, monotonic stream. The rational input rate generates rawvideo timestamps. Original audio timestamps are offset by the input video start; output offsets/durations are checked. This is intentionally narrower than silently rebuilding VFR timing.
 
-When the reported average and nominal rates agree within 0.1%, the nominal rate is the candidate cadence. Every packet duration, PTS interval and cumulative PTS phase must then agree within 1.05 source time-base ticks. This accommodates a one-tick camera clock correction while preventing drift from accumulating silently; the raw average remains in the probe report. Output uses the verified cadence, so a 24 fps recording remains 24 fps instead of acquiring an arbitrary mean-rate fraction. V1 can normalize source timing by up to this one-tick tolerance.
+Average and nominal rates are candidates, never a VFR verdict. If all packet durations and adjacent intervals are identical, their exact time-base ratio is authoritative, including 29.99/29.98/29.970x rates. For nonuniform quantized clocks, a nominal candidate inside the observed duration range is tested; otherwise the dominant packet duration is the conservative anchor. The checker does not regress the mean/endpoints to erase sustained corrections. Every duration, interval and cumulative phase must stay within the existing 1.05-tick budget; interval/previous-duration inconsistencies, duplicate/reverse PTS and sustained phase drift fail with a zero-based packet index. Missing timing is rejected. This conservative policy can refuse ambiguous nonuniform clocks rather than manufacture a new rate. Output is checked again over every packet and uses the verified input cadence.
 
 Audio uses stream copy and `-guess_layout_max 0` on the source input and any rotation remux. An absent channel-layout declaration stays absent; two unlabelled channels are not automatically declared stereo. The validator continues to compare codec, channel count, sample rate and layout strictly, with a field-specific diagnostic. Regression tests compare the complete audio payload hash for both unrotated and rotated unlabelled PCM input.
 
-The selected destination is never overwritten. A unique partial MOV in the destination directory is written, probed and atom-checked. A same-directory rename publishes it only after validation. Cancellation or a failed validator removes the partial. A local JSON report records the evidence.
+The selected destination is never overwritten. A unique partial MOV in the destination directory is written, probed and atom-checked. A same-directory `MoveFileExW` without REPLACE_EXISTING publishes it only after validation, also protecting a destination created during conversion. Cancellation or a failed validator removes the partial. A local JSON report records the evidence.
+
+After encoding and any rotation remux, the separate identification writer adds
+the verified `logs` sample-entry atom. It requires one HQ entry and trailing
+moov, preserves mdat/packet offsets, and holds a deny-write/delete handle while
+moving the moov tail in 1 MiB chunks. Conflicting or unexpected layouts fail
+before publication. Final validation requires the exact identifier and nclc
+9/2/9; no color equation or camera identity is changed. See the
+[actual Resolve A/B evidence](APPLE_LOG_IDENTIFICATION.md).
 
 Creative controls are captured on the UI thread into immutable job options before worker dispatch. The Settings dialog and exposure selector are disabled during work. The worker applies the documented scene-linear grade only when enabled, before the separate Apple Log encoder, and records the settings in metadata and the validation report. All transformed components contribute to signal-range counters; warnings are returned to the GUI rather than discarded after a successful format check. These counters are explicitly scoped to the float signal before final quantization and compression.
 
@@ -54,10 +66,10 @@ The UI uses documented DWM caption attributes where available and owner-drawn na
 
 ## FFmpeg discovery
 
-Quick candidates are checked before all accessible local-volume roots. Every accepted candidate must have a sibling ffprobe and pass the production version/capability/synthetic codec tests. Invalid candidates are logged and traversal continues. The scan uses directory enumeration with cancellation at each entry, skips reparse subdirectories to avoid loops, and runs at background thread/I/O priority. Progress reports the drive and actual folder/candidate/skip counts; there is no invented percentage.
+Quick paths are discovered before accessible local-volume roots. Unknown files are never executed by discovery. A managed SHA-verified receipt or explicit approval of both executable hashes is required before version/capability/numeric tests. Changed hashes require renewed approval. A known path is not enough. Candidates requiring review are logged and traversal continues. The scan uses directory enumeration with cancellation at each entry, skips reparse subdirectories to avoid loops, and runs at background thread/I/O priority. Progress reports the drive and actual folder/candidate/skip counts; there is no invented percentage.
 
 A verified path is cached but is checked again on every launch. Download/manual buttons are visible only after completed discovery finds no usable pair, and hidden after success. Cancelled discovery leaves a rescan action. The installer uses the same capability checks before reporting success. Traversal tests inject small explicit directory roots; an additional test uses the real FFmpeg binaries after invalid fixtures and verifies cached rediscovery.
 
 ## Version and resources
 
-CMake defines version 1.0.0 and build 26922A. Generated headers feed both the C++ display/logs/metadata and the Windows VERSIONINFO resource. The manifest uses the four-part assembly version. Both executables embed the same nine-size icon. Portable packaging uses an explicit document/image allowlist; an independent ZIP audit rejects unexpected files and compares the packaged executable to the tested Release binary.
+CMake defines version 1.1.0 and build 26923C. Generated headers feed both the C++ display/logs/metadata and the Windows VERSIONINFO resource. The manifest uses the four-part assembly version. Both executables embed the same nine-size icon. Portable packaging uses an explicit document/image allowlist; an independent ZIP audit rejects unexpected files and compares the packaged executable to the tested Release binary.

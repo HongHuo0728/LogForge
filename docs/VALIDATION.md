@@ -1,4 +1,206 @@
-# Validation record — 1.0.0 (26922A)
+# Validation record
+
+## 1.1.0 (26923C) cleanup and release verification
+
+Local verification date: **2026-09-23**. The 1.1.0 scope includes both the
+29.99 fps CFR/hardening work and the native-reference Apple Log identification
+work. This is recorded in [CHANGELOG.md](../CHANGELOG.md) and the README.
+
+- CMake configure and MSVC x64 Release build passed. All **11 core/resource
+  CTest groups passed in 5.46 seconds**, including independent color mathematics,
+  identification writer/parser, timing, security, parallel processing and actual
+  executable version/icon resource inspection.
+- Both executables retain Windows FileVersion/ProductVersion **1.1.0**
+  (numeric **1.1.0.0**). Generated headers, the CLI and the actual native GUI
+  report **1.1.0 (26923C)**. Settings Save/Cancel and FFmpeg-control visibility
+  checks passed using an isolated profile. The empty-workspace README screenshot
+  was refreshed from this build.
+- Downloaded reference footage, A/B videos, render TIFFs, temporary Resolve
+  project exports, raw reference metadata, obsolete test profiles/screenshots,
+  duplicate installer resources and packaging staging were removed. The initial
+  cleanup removed **1,183 files / 1,544,531,754 bytes**; temporary resources from
+  this final verification were also cleaned afterward. Source tests, documented
+  results and the required development FFmpeg/ffprobe pair remain available.
+- The portable ZIP allowlist now contains **16 files**, including `CHANGELOG.md`.
+  `tests/package_audit.py` checks the exact allowlist, archive CRC and equality
+  between the packaged executable and the tested Release executable.
+- This build changes version stamps, documentation and the package contents;
+  Apple Log/HLG mathematics and the identification implementation are unchanged.
+  The full media/4K120 tests and real Resolve A/B imports below were verified
+  on 26923B and were not rerun for this packaging change. Their historical build
+  labels are preserved rather than relabeled as new editor tests.
+
+## 1.1.0 (26923B) Apple Log identification verification
+
+Local verification date: **2026-09-23**. This extends the earlier 1.1.0 work
+without changing Apple Log/HLG equations or BT.2408 scaling.
+
+- Acquired a public, camera-origin iPhone 15 Pro Max / Blackmagic Camera Apple
+  Log ProRes original; preserved its downloaded bytes and recorded provenance,
+  size and SHA-256. No reference footage is included in Git or the release ZIP.
+- Fixed the analyzer's rejection of the documented four-byte video-description
+  terminator; it now exposes the reference's `logs` identifier and complete
+  `meta/keys/ilst/data` key/value scope.
+- Actual **Resolve Studio 20.3.2.9 on Windows** imported the native reference,
+  negative baseline, four isolated metadata candidates and real production output.
+  A fresh-project repeat using `tests/resolve_identification.py` also passed.
+  Input color space/gamma/LUT was never manually assigned. `logs` alone caused
+  **Apple Log** identification; the baseline remained **Rec.2020 (Scene)**.
+- Resolve rendered the same automatically identified production frame at
+  **Auto**, **Video** and **Full** levels to 16-bit TIFF. Auto and Video hashes
+  were identical; Full differed. Evidence, exact placement results for
+  customgamma, hashes and limitations are in [the A/B record](APPLE_LOG_IDENTIFICATION.md).
+- The standalone C++ writer adds 35 metadata bytes after encoding/rotation.
+  Production output and baseline have identical complete `mdat` payload hashes.
+  This confirms no pixel/audio changes in the identification step.
+- CMake configure and MSVC x64 Release build passed. **16/16 CTest groups passed
+  in 242.45 seconds**, including independent scalar math, real codec/numeric
+  sampling, metadata conflicts, audio preservation, rotation, no overwrite,
+  cancellation/trust checks, writer bounds and sustained 240-frame **4K120**.
+- Writer tests cover extended atom sizes, exact preservation across backward
+  chunk moves, optional terminators, idempotence, conflicting/missing/duplicate
+  declarations, unexpected layout rejection and cancellation without mutation.
+- After formatting the new module, the final Release build passed **11/11
+  core/resource groups** in **6.85 seconds**. The actual GUI completed both
+  standard and creative synthetic conversions. Both resulting MOV files were
+  imported into Resolve and automatically identified as Apple Log with no input
+  LUT; the standard result remained byte-identical to the successful B candidate.
+- The updated portable package contains **15 allowed files**, including the
+  new identification evidence document; no FFmpeg, reference footage, generated
+  test video, Resolve project, logs or local settings are part of that allowlist.
+- Normal conversion validation records structural identification separately from
+  editor test evidence. It does not claim that each user's output was opened
+  in Resolve. Automatic import remains unverified in Premiere, Final Cut and
+  other Resolve versions/editions. Native-camera appearance equivalence is not
+  established by an identification test.
+
+The sections below retain earlier verification history; their statements that
+no native reference or Resolve test existed describe those earlier checkpoints.
+
+## 1.1.0 (26923B) version and package verification
+
+Local verification date: 2026-09-23. The 1.1.0 feature scope begins with the
+29.99 fps CFR/VFR fix and includes the FFmpeg trust/numeric checks, metadata and
+chroma handling, MOV analysis, CPU processing and validation work recorded below.
+This subsection covers the final version-stamping checks: CMake, generated
+resources, the manifest, displayed/logged identifiers and documentation. The
+version-stamping step itself does not change conversion behavior.
+
+- CMake configure and MSVC x64 Release build passed.
+- All **10 core/resource CTest groups** passed in **4.11 seconds**, including
+  actual GUI/CLI executable resource inspection and independent color tests.
+- Both executables have numeric FileVersion/ProductVersion **1.1.0.0** and
+  property text **1.1.0**. The generated manifest declares **1.1.0.0**.
+- CLI output and the actual native English/dark window report
+  **1.1.0 (26923B)**. Settings Save/Cancel and the captured window check passed.
+  The README screenshot was refreshed from this empty window.
+- The portable package is `LogForge-1.1.0-Windows-x64.zip`. Its 14-file allowlist,
+  archive CRC and exact EXE match are checked with `tests/package_audit.py`.
+- Full generated-media, sustained 4K120 and multi-scenario GUI results from the
+  unchanged hardening implementation remain recorded below. They were not rerun
+  for this version-only change. No native Apple Log/editor certification is added.
+
+## 1.1.0 feature verification before version stamping
+
+Local verification date: 2026-09-22. These are the 1.1.0 feature tests, performed
+before the executable version was updated. The test binary still displayed
+1.0.0 (26922A); this identifies the tested artifact, not the release to which the
+features belong. These changes are not in the previously published 1.0.0 ZIP.
+All media used is programmatically generated; no private camera footage or
+native Apple Log sample is needed by these tests.
+
+MSVC x64 Release configure/build and all **15 CTest groups** passed in the final
+run (**220.76 seconds**), including the canonical-path execution fix and the
+4K120 conversion. The malicious alias-sibling ffprobe regression ran and passed
+on this host; it was not skipped. The published
+Apple Log and inverse HLG source files are unchanged, as are BT.2408 scaling,
+independent scalar references and numerical acceptance thresholds.
+
+| Area | Verified behavior |
+| --- | --- |
+| Packet cadence | All-packet PTS, duration, adjacency and cumulative phase; constant 29.99, 29.98 and 29.9701 fps accepted despite differing average/nominal hints; VFR, cumulative drift, gaps, duplicate/backwards timestamps rejected with a packet index |
+| Executable trust | Production discovery callback encounters a real executable fake FFmpeg without running it; absent approval, changed ffmpeg or ffprobe hashes, approval-snapshot changes and image write attempts are rejected; an unapproved ffprobe beside an approved ffmpeg alias is never executed; a positive canary control proves the fake would write its marker if run |
+| External FFmpeg numerics | Independent integer YCbCr matrix/range reference, left/center chroma phase, float transport and post-ProRes code-value checks; capability-only status cannot start conversion |
+| Metadata | Format/video/audio whitelist, source-only camera values, conflicting color-tag removal and preservation validation; output side-data conflicts are errors |
+| MOV analyzer | Indexed mdta keys, typed ilst/data values, ISO and headerless QuickTime meta, ProRes sample-entry child atoms, malformed boundaries and semantic comparison ignoring byte offsets/key indices |
+| Chroma | Explicit left/center conversion; unknown requires a user declaration; unsupported native siting cannot be replaced by an override; output phase qualification and declarations checked |
+| Preservation | Drop-frame timecode, two audio streams with exact payload hashes, 180/270-degree rotation, existing audio/rotation/cancellation regressions |
+| Publication | Destination created during conversion remains intact; partial output is removed and publication fails instead of overwriting it |
+| Parallel color | 4K standard and creative transforms exactly match scalar float results; persistent CPU workers preserve range counters |
+
+The full group list is `hardening_cadence`, `hardening_security`, `hardening_mov`,
+`hardening_parallel`, `color_math`, `media_metadata_validation`, `ffmpeg_platform`,
+`application_preferences`, `ffmpeg_disk_discovery`, `application_resources`,
+`media_pipeline`, `color_signal`, `ffmpeg_discovery_capabilities`,
+`publication_no_overwrite` and `sustained_4k120`.
+
+### Numerical and performance observations
+
+- The unchanged generated-media RGB comparison measured mean absolute error
+  **0.00043347373910234966** and maximum **0.01275258321150774** on 122,304
+  samples (existing limits 0.003 and 0.025, including ProRes/chroma error).
+- FFmpeg qualification's float matrix/chroma comparison measured maximum error
+  about **5.823e-8** (limit 2e-6). Post-encode patch error was at most
+  **0.655728 of one 10-bit code value** (limit 2); the output chroma phase ramp
+  had zero measured code error. These are fixture-specific measurements.
+- Sustained fixture: **3840 x 2160, 120 fps, 240 frames**. Conversion and tool
+  qualification took **61.515 seconds**, about **3.902 encoded frames/second**.
+  This is high-frame-rate input support, not real-time 120 fps processing.
+- The standard app-owned float buffer was **4,194,304 bytes**. Sampled peak
+  LogForge process private memory was **6,283,264 bytes**. This excludes FFmpeg
+  child-process allocations; it is not total conversion memory. The creative
+  path still retains one planar frame plus small worker tiles.
+- Independent post-encode luma sampling at frames 0, 119 and 239 covered 1,536
+  patch-center samples; maximum error was **0.655728 code**. The test also
+  checked all 240 output packets and the expected output format.
+
+Reports are generated under `build/sustained/sustained-report.json`,
+`build/integration/integration-report.json`, `build/signal-test/signal-report.json`
+and the isolated test profiles' `logs/*.validation.json`. Validation JSON includes
+average/nominal fps, verified cadence, maximum timing errors, both executable
+paths/hashes, FFmpeg version/trust/qualification, chroma evidence and the
+preserved/removed metadata plan with preservation results.
+
+### Installer and native UI
+
+- The production installer was rerun in the isolated
+  `build/installer-hardening` profile. It downloaded **109,728,040 bytes** over
+  HTTPS, matched the embedded archive SHA-256, extracted the pair, recorded
+  managed trust and passed capability and numerical qualification. A subsequent
+  managed rediscovery passed. An unrelated unapproved executable path was
+  rejected in that same profile. User AppData preferences were not changed.
+- `tests/gui_smoke.py` passed **14 language/theme/DPI/missing-state scenarios**
+  and both standard and enabled-creative real GUI conversions. These tests
+  explicitly approve the selected test tools in isolated profiles. Interactive
+  manual approval/file-picker click-through is not claimed as an automated test.
+- The current README screenshot was captured from the English/dark empty GUI;
+  it contains no private media. Test artifacts are excluded from source/packages.
+
+### Deliberate limits
+
+- No genuine iPhone Apple Log MOV or Resolve/Premiere/Final Cut validation was
+  available. Output remains **nclc 9/2/9** (transfer unspecified). Neither
+  `com.apple.rec2020.apple-log` nor `com.apple.proapps.customgamma` is written;
+  no Apple encoder identity, `apl0`, invented camera identity or unknown private
+  atom is synthesized. The analyzer enables later evidence-based comparison.
+- FFmpeg 8.1.2 does not expose a chroma-location field for these ProRes MOVs.
+  Output validation therefore requires numerical left-siting qualification and
+  LogForge's own `logforge.chroma_location=left` declaration when that native
+  field is absent. This is not a standardized Apple/QuickTime siting atom and
+  does not establish automatic editor interpretation. Unknown input siting is
+  not guessed.
+- Nonuniform packet clocks retain the conservative 1.05-tick error budget and
+  may be refused when no supported candidate can be established. A fitted
+  average is never used to disguise accumulated timestamp corrections.
+- Path/hash approval covers both executable images, not every dependency DLL
+  in arbitrary shared FFmpeg builds. The pinned build is static. Same-user
+  modification of LogForge's approval store is outside this trust boundary.
+- The sustained run is 240 full 4K frames, not a multi-hour endurance test.
+  Windows 10 boot testing, commercial editors, arbitrary edit lists and unusual
+  audio layouts remain unverified. Remote GitHub Actions was not run as part
+  of this local task.
+
+## Historical 1.0.0 release record
 
 Local verification date: 2026-09-22. Results below are observations from this development machine, not claims of device or editor certification.
 
@@ -190,8 +392,10 @@ The GUI supports a developer smoke path:
 
 ```powershell
 $env:LOGFORGE_DATA_DIR = "$PWD\build\gui-test-data"
-# Put a validated ffmpeg path in this directory's settings.json, or install it through the CLI.
-Start-Process .\build\Release\LogForge.exe -ArgumentList '--smoke-test "input.mov" "new-output.mov"' -Wait
+.\build\Release\LogForge-cli.exe --approve-ffmpeg --ffmpeg C:\ffmpeg\bin\ffmpeg.exe
+# Approve only a reviewed pair, or install the pinned build through --install-ffmpeg.
+# Use only a generated fixture with known left chroma siting for this declaration.
+Start-Process .\build\Release\LogForge.exe -ArgumentList '--smoke-test "input.mov" "new-output.mov" --input-chroma-location left' -Wait
 ```
 
 This path creates a native window, injects a drop into that window, uses the production worker, and emits `new-output.mov.gui-test.json` plus a PNG. It never simulates encoder progress or bypasses output validation.

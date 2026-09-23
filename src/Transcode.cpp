@@ -1,5 +1,7 @@
 #include "logforge/Transcode.h"
+#include "logforge/AppleLogIdentification.h"
 #include "logforge/Color.h"
+#include "logforge/FloatTransformer.h"
 #include <array>
 #include <cmath>
 #include <sstream>
@@ -11,9 +13,18 @@ void logCommand(Logger& log, const fs::path& exe, const std::vector<std::wstring
     log.Write("Command: " + Utf8(CommandLine(exe, args)));
 }
 } // namespace
-ValidationReport TranscodeJob::Run(const FFmpegInstallation& tools, const MediaInfo& m,
+ValidationReport TranscodeJob::Run(const FFmpegInstallation& tools, const MediaInfo& input,
                                    const fs::path& output, Logger& log, const std::atomic_bool& cancel,
                                    const JobCallback& progress, const TranscodeOptions& options) {
+    auto m = input;
+    auto lease = ToolTrust::Acquire(tools.ffmpeg);
+    if (tools.ffmpeg != lease->identity.ffmpeg || tools.ffprobe != lease->identity.ffprobe)
+        throw AppError(Message(TextId::FFmpegUntrusted, {PathText(tools.ffmpeg)}));
+    if (!tools.numericallyVerified)
+        throw AppError(TextId::FFmpegUnverified);
+    if (!tools.lease || lease->identity.ffmpegHash != tools.lease->identity.ffmpegHash ||
+        lease->identity.ffprobeHash != tools.lease->identity.ffprobeHash)
+        throw AppError(TextId::FFmpegHashChanged);
     if (cancel.load())
         throw AppError(TextId::Cancelled);
     ValidateExposureStops(options.exposureStops);
@@ -27,6 +38,11 @@ ValidationReport TranscodeJob::Run(const FFmpegInstallation& tools, const MediaI
         throw AppError(TextId::OutputExists);
     if (!fs::is_directory(dest.parent_path()))
         throw AppError(TextId::OutputDirectory);
+    progress({Message(TextId::VerifyTiming)});
+    log.Write("Input media: " + m.raw.dump());
+    m.cadence = VerifyConstantFrameRate(tools.ffprobe, m, cancel);
+    m.fps = m.cadence.rate;
+    const auto expectedFrames = m.cadence.packets;
     // Conservative practical estimate, not an assertion of exact ProRes bitrate.
     const auto estimate = static_cast<uint64_t>(m.width) * m.height *
                               static_cast<uint64_t>(std::ceil(m.fps.Value() * m.videoDuration)) * 2ull +
@@ -51,9 +67,6 @@ ValidationReport TranscodeJob::Run(const FFmpegInstallation& tools, const MediaI
             }
         }
     } guard{partial};
-    progress({Message(TextId::VerifyTiming)});
-    log.Write("Input media: " + m.raw.dump());
-    const auto expectedFrames = VerifyConstantFrameRate(tools.ffprobe, m, cancel);
     log.Write(
         "CFR timestamps verified: " + std::to_string(expectedFrames) +
         " frames. BT.2408 HLG75% -> 100% reflectance; scale=" + std::to_string(HLGToReflectanceScale()) +
@@ -65,7 +78,8 @@ ValidationReport TranscodeJob::Run(const FFmpegInstallation& tools, const MediaI
     const std::wstring range = m.range == "pc" ? L"full" : L"limited";
     std::wstring decodeFilter = L"zscale=matrixin=2020_ncl:matrix=gbr:rangein=" + range +
                                 L":range=full:transferin=arib-std-b67:transfer=arib-std-b67:primariesin=2020:"
-                                L"primaries=2020:filter=spline36,format=gbrpf32le";
+                                L"primaries=2020:chromalin=" +
+                                Wide(m.EffectiveChromaLocation()) + L":filter=spline36,format=gbrpf32le";
     std::vector<std::wstring> decode{L"-hide_banner",
                                      L"-loglevel",
                                      L"warning",
@@ -183,10 +197,24 @@ ValidationReport TranscodeJob::Run(const FFmpegInstallation& tools, const MediaI
     int64_t frames = 0;
     int decodeExit = -1, encodeExit = -1;
     SignalStatistics signal;
+    size_t floatBufferBytes = 0;
+    unsigned transformWorkers = 0;
+    const auto transformStart = std::chrono::steady_clock::now();
     std::exception_ptr workError;
     try {
-        std::vector<float> frame(static_cast<size_t>(m.width) * m.height * 3);
+        const size_t frameSamples = static_cast<size_t>(m.width) * m.height * 3;
+        // Standard per-channel transfer can stream arbitrary planar chunks.
+        // Creative luminance needs corresponding G/B/R planes, so retains one
+        // frame and processes bounded RGB tiles on the same persistent workers.
+        std::vector<float> frame(options.tone.enabled ? frameSamples
+                                                      : std::min<size_t>(frameSamples, 1024 * 1024));
         const size_t bytes = frame.size() * sizeof(float);
+        FloatTransformer transformer(options.exposureStops, options.tone);
+        floatBufferBytes = bytes;
+        transformWorkers = transformer.Workers();
+        log.Write("Float bridge workers=" + std::to_string(transformer.Workers()) +
+                  "; buffer bytes=" + std::to_string(bytes));
+        size_t frameRemainder = 0;
         progress({Message(TextId::Decoding), 0});
         while (!cancel.load()) {
             size_t filled = 0;
@@ -199,12 +227,16 @@ ValidationReport TranscodeJob::Run(const FFmpegInstallation& tools, const MediaI
             }
             if (filled == 0)
                 break;
-            if (filled != bytes)
+            if (filled % sizeof(float) || (options.tone.enabled && filled != bytes))
                 throw AppError(TextId::IncompleteFrame);
-            TransformHLGToAppleLog(frame, options.exposureStops, options.tone, &signal);
-            encoder.Write(frame.data(), bytes);
-            ++frames;
+            transformer.Apply(std::span(frame).first(filled / sizeof(float)), signal);
+            encoder.Write(frame.data(), filled);
+            frameRemainder += filled / sizeof(float);
+            frames += static_cast<int64_t>(frameRemainder / frameSamples);
+            frameRemainder %= frameSamples;
         }
+        if (frameRemainder)
+            throw AppError(TextId::IncompleteFrame);
         encoder.CloseInput();
         decodeExit = decoder.Wait();
         encodeExit = encoder.Wait();
@@ -268,10 +300,30 @@ ValidationReport TranscodeJob::Run(const FFmpegInstallation& tools, const MediaI
         fs::remove(partial);
         fs::rename(rotated, partial);
     }
+    progress({Message(TextId::WritingIdentification)});
+    AppleLogIdentificationWriter::WriteToEncodedPartial(partial, cancel);
+    log.Write("Apple Log identification: ProRes sample-entry logs / com.apple.rec2020.apple-log");
     progress({Message(TextId::ValidatingOutput)});
-    const auto out = Probe(tools.ffprobe, partial, &cancel);
+    auto out = Probe(tools.ffprobe, partial, &cancel);
+    out.outputChromaVerified =
+        tools.numericallyVerified && tools.numeric.value("chroma_reference_passed", false);
+    out.cadence = VerifyConstantFrameRate(tools.ffprobe, out, cancel, false);
+    out.fps = out.cadence.rate;
     auto report = ValidateOutput(m, out, frames);
+    report.ffmpeg = tools.ToJson();
+    report.metadata["chroma"] = {
+        {"input_ffprobe", m.chromaLocation},
+        {"input_explicit_override", m.inputChromaOverride},
+        {"input_used", m.EffectiveChromaLocation()},
+        {"output_ffprobe", out.chromaLocation},
+        {"output_declared", out.tags.value("logforge.chroma_location", "")},
+        {"verification", "explicit zscale siting plus reference signal test; MOV/ffprobe may omit siting"}};
     const auto atomReport = ReferenceMovAnalyzer::Analyze(partial);
+    report.metadata["apple_log_identification"] = AppleLogIdentificationWriter::Validate(atomReport);
+    if (!report.metadata["apple_log_identification"]["passed"].get<bool>()) {
+        report.passed = false;
+        report.errors.emplace_back(TextId::OutputIdentification);
+    }
     bool correctColr = false;
     for (const auto& a : atomReport["atoms"])
         if (a.value("type", std::string()) == "colr" && a.value("color_type", std::string()) == "nclc" &&
@@ -295,28 +347,35 @@ ValidationReport TranscodeJob::Run(const FFmpegInstallation& tools, const MediaI
         report.warnings.emplace_back(TextId::SignalFloor);
     if (signal.aboveNominalWhite)
         report.warnings.emplace_back(TextId::SignalWhite);
-    Json full{{"version", Version},
-              {"build", BuildNumber},
-              {"validation", report.ToJson()},
-              {"input", m.raw},
-              {"output", out.raw},
-              {"output_atoms", atomReport},
-              {"processed_frames", frames},
-              {"color",
-               {{"transform", "inverse HLG OETF -> reflectance scale -> Apple Log"},
-                {"reference", "BT.2408: 75% HLG -> 100% reflectance"},
-                {"reference_scale", HLGToReflectanceScale()},
-                {"exposure_ev", options.exposureStops},
-                {"creative_adjustment",
-                 {{"enabled", options.tone.enabled},
-                  {"algorithm", "creative-luma-v1"},
-                  {"shadow_lift_ev", options.tone.shadowStops},
-                  {"highlight_compression_ev", options.tone.highlightStops},
-                  {"saturation", options.tone.saturation}}},
-                {"scale", HLGToReflectanceScale() * std::exp2(options.exposureStops)},
-                {"intermediate", "gbrpf32le"},
-                {"math", "double"},
-                {"range", "video (Y 64..940; C 64..960)"}}}};
+    Json full{
+        {"version", Version},
+        {"build", BuildNumber},
+        {"validation", report.ToJson()},
+        {"input", m.raw},
+        {"output", out.raw},
+        {"output_atoms", atomReport},
+        {"processed_frames", frames},
+        {"processing",
+         {{"float_buffer_bytes", floatBufferBytes},
+          {"transform_workers", transformWorkers},
+          {"mode", options.tone.enabled ? "planar frame with parallel RGB tiles" : "bounded planar chunks"},
+          {"transform_and_encode_seconds",
+           std::chrono::duration<double>(std::chrono::steady_clock::now() - transformStart).count()}}},
+        {"color",
+         {{"transform", "inverse HLG OETF -> reflectance scale -> Apple Log"},
+          {"reference", "BT.2408: 75% HLG -> 100% reflectance"},
+          {"reference_scale", HLGToReflectanceScale()},
+          {"exposure_ev", options.exposureStops},
+          {"creative_adjustment",
+           {{"enabled", options.tone.enabled},
+            {"algorithm", "creative-luma-v1"},
+            {"shadow_lift_ev", options.tone.shadowStops},
+            {"highlight_compression_ev", options.tone.highlightStops},
+            {"saturation", options.tone.saturation}}},
+          {"scale", HLGToReflectanceScale() * std::exp2(options.exposureStops)},
+          {"intermediate", "gbrpf32le"},
+          {"math", "double"},
+          {"range", "video (Y 64..940; C 64..960)"}}}};
     auto reportPath =
         DataDirectory() / L"logs" /
         (dest.filename().wstring() + L"-" + std::to_wstring(GetTickCount64()) + L".validation.json");
@@ -331,7 +390,13 @@ ValidationReport TranscodeJob::Run(const FFmpegInstallation& tools, const MediaI
     if (cancel.load())
         throw AppError(TextId::Cancelled);
     // Same-volume rename publishes only a fully validated file, with no overwrite.
-    fs::rename(partial, dest);
+    // Windows std::filesystem::rename may replace an existing destination.
+    // No REPLACE_EXISTING flag: also refuse a file created during conversion.
+    if (!MoveFileExW(partial.c_str(), dest.c_str(), MOVEFILE_WRITE_THROUGH)) {
+        if (fs::exists(dest))
+            throw AppError(TextId::OutputExists);
+        throw AppError(Message(TextId::OutputCreate, {Utf8(WinError())}));
+    }
     guard.keep = true;
     progress({Message(report.signalWarning ? TextId::CompleteWarning : TextId::CompleteStandard), 1.0,
               m.videoDuration, 0, 0, frames});

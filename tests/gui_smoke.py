@@ -34,6 +34,8 @@ def main():
         }), encoding='utf-8')
         env = {k.upper(): v for k, v in os.environ.items()}
         env['LOGFORGE_DATA_DIR'] = str(data)
+        subprocess.run([str(args.exe.resolve().with_name('LogForge-cli.exe')), '--approve-ffmpeg',
+                        '--ffmpeg', str(args.ffmpeg.resolve())], env=env, check=True, capture_output=True)
         # Language / theme are read from settings, so this also exercises startup persistence.
         command = [str(args.exe.resolve()), '--ui-test', str(case), '--dpi', str(dpi)]
         if missing:
@@ -56,10 +58,15 @@ def main():
         (data / 'settings.json').write_text(json.dumps({'ffmpeg': str(args.ffmpeg.resolve())}), encoding='utf-8')
         env = {k.upper(): v for k, v in os.environ.items()}
         env['LOGFORGE_DATA_DIR'] = str(data)
+        subprocess.run([str(args.exe.resolve().with_name('LogForge-cli.exe')), '--approve-ffmpeg',
+                        '--ffmpeg', str(args.ffmpeg.resolve())], env=env, check=True, capture_output=True)
         # Two modes use distinct output names; production overwrite protection stays active.
         for creative in (False, True):
             output = case / ('creative.mov' if creative else 'standard.mov')
-            command = [str(args.exe.resolve()), '--smoke-test', str(args.input.resolve()), str(output)]
+            if output.exists():
+                output.unlink()  # This generated test fixture only; application keeps no-overwrite.
+            command = [str(args.exe.resolve()), '--smoke-test', str(args.input.resolve()), str(output),
+                       '--input-chroma-location', 'left']
             if creative:
                 command += ['--tone']
             subprocess.run(command, env=env, timeout=180, check=True)

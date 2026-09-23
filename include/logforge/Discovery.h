@@ -11,7 +11,8 @@ struct DiscoveryProgress {
 };
 using DiscoveryCallback = std::function<void(const DiscoveryProgress&)>;
 std::vector<fs::path> LocalDriveRoots();
-// Callback returns true only after the candidate passed actual capability checks.
+// Enumeration itself never executes a file. Production callbacks may check ONLY
+// previously approved hashes, and collect unknown paths for explicit review.
 // Explicit roots make the traversal independently testable without scanning a user's drives.
 DiscoveryProgress SearchFFmpegDirectories(const std::vector<fs::path>& roots, const std::atomic_bool& cancel,
                                           const std::function<bool(const fs::path&)>& accept,

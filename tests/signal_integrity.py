@@ -24,6 +24,7 @@ def main():
     work.mkdir(parents=True, exist_ok=True)
     env = {k.upper(): v for k, v in os.environ.items()}
     env['LOGFORGE_DATA_DIR'] = str(work/'appdata')
+    run([args.cli.resolve(),'--approve-ffmpeg','--ffmpeg',ff],env=env)
     neutral = [-.03, 0, .002, .004, .008, .01, .02, .03, .05, .075, .1,
                .2, .3, .3782588830779046, .5, .65, .75, .9, 1, 1.05, 1.08]
     patches = [(v, v, v) for v in neutral] + [(.75,.2,.1), (.1,.75,.2), (.2,.1,.75),
@@ -101,7 +102,7 @@ def main():
         dest = work/('creative.mov' if creative else 'standard.mov')
         if dest.exists(): dest.unlink()
         extra = ['--tone'] if creative else []
-        run([cli,'--convert',source,dest,'--ffmpeg',ff,*extra],env=env)
+        run([cli,'--convert',source,dest,'--ffmpeg',ff,'--input-chroma-location','left',*extra],env=env)
         actual = native_codes(dest)
         errors, measured = [], []
         for p,rgb in enumerate(patches):
@@ -137,7 +138,7 @@ def main():
     # Extreme exposure must report signal risk instead of an unqualified success.
     risk = work/'exposure-risk.mov'
     if risk.exists(): risk.unlink()
-    run([cli,'--convert',source,risk,'--ffmpeg',ff,'--exposure-ev','4'],env=env)
+    run([cli,'--convert',source,risk,'--ffmpeg',ff,'--input-chroma-location','left','--exposure-ev','4'],env=env)
     risk_file = max((work/'appdata/logs').glob(risk.name+'-*.validation.json'),key=lambda p:p.stat().st_mtime)
     risk_report = json.loads(risk_file.read_text(encoding='utf-8'))['validation']
     assert risk_report['signal_warning'] and risk_report['signal']['above_nominal_white']>0
@@ -146,7 +147,7 @@ def main():
                        ['--tone','--saturation-percent','151'], ['--tone','--saturation-percent','85junk'],
                        ['--shadow-lift-ev','1']):
         bad = work/'invalid-must-not-exist.mov'
-        result = subprocess.run([str(x) for x in [cli,'--convert',source,bad,'--ffmpeg',ff,*parameters]],
+        result = subprocess.run([str(x) for x in [cli,'--convert',source,bad,'--ffmpeg',ff,'--input-chroma-location','left',*parameters]],
                                  env=env,capture_output=True)
         assert result.returncode!=0 and not bad.exists(), parameters
     report = {'passed':True,'reference':'Independent scalar BT.2020 NCL and integer video-range mapping',

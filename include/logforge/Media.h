@@ -22,6 +22,17 @@ struct AudioInfo {
     double start = 0, duration = 0;
     Json tags = Json::object();
 };
+struct VideoPacketTiming {
+    int64_t pts = 0, duration = 0;
+};
+struct CadenceReport {
+    bool verified = false;
+    Rational rate;
+    int64_t packets = 0, errorPacket = -1;
+    double maxIntervalError = 0, maxPhaseError = 0, maxDurationError = 0;
+    std::string error;
+    Json ToJson() const;
+};
 struct MediaInfo {
     fs::path path;
     std::string container, codec, profile, pixelFormat, primaries, transfer, matrix, range, fieldOrder,
@@ -33,18 +44,24 @@ struct MediaInfo {
     std::string timecode;
     Json tags = Json::object(), videoTags = Json::object(), raw;
     std::vector<AudioInfo> audio;
+    CadenceReport cadence;
+    std::string inputChromaOverride;
+    bool outputChromaVerified = false;
+    std::string EffectiveChromaLocation() const;
     static MediaInfo Parse(const Json& json, const fs::path& path = {});
     std::vector<Message> UnsupportedReasons() const;
     std::wstring Summary(Language language = Language::English) const;
 };
 MediaInfo Probe(const fs::path& ffprobe, const fs::path& path, const std::atomic_bool* cancel = nullptr);
-int64_t VerifyConstantFrameRate(const fs::path& ffprobe, const MediaInfo& media,
-                                const std::atomic_bool& cancel);
+CadenceReport AnalyzeCadence(std::span<const VideoPacketTiming> packets, const MediaInfo& media);
+CadenceReport VerifyConstantFrameRate(const fs::path& ffprobe, const MediaInfo& media,
+                                      const std::atomic_bool& cancel, bool rejectInvalid = true);
 struct ValidationReport {
     bool passed = true;
     bool signalWarning = false;
     std::vector<Message> errors, warnings;
     Json signal = Json::object();
+    Json timing = Json::object(), metadata = Json::object(), ffmpeg = Json::object();
     Json ToJson() const;
 };
 ValidationReport ValidateOutput(const MediaInfo& input, const MediaInfo& output, int64_t processedFrames);
@@ -53,8 +70,11 @@ struct AppleLogMetadataWriter {
     // 2 means unspecified. Never use 9 (generic logarithmic 100:1) or 18 (HLG).
     static std::vector<std::wstring> Arguments(const MediaInfo& input, double exposureStops = 0,
                                                const ToneAdjustments& tone = {});
+    static Json CopyPlan(const MediaInfo& input);
+    static bool IsConflict(const std::string& key);
 };
 struct ReferenceMovAnalyzer {
     static Json Analyze(const fs::path& file);
+    static Json SemanticDiff(const Json& first, const Json& second);
 };
 } // namespace logforge

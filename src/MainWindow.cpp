@@ -36,7 +36,7 @@ enum Control {
     DetailsButton,
     RescanButton
 };
-enum class Kind { Progress, Discovery, Detect, Probe, Convert, Install, Failure };
+enum class Kind { Progress, Discovery, Detect, Probe, Convert, Install, Approval, Failure };
 struct Event {
     Kind kind;
     JobProgress progress;
@@ -46,6 +46,8 @@ struct Event {
     Message error{TextId::Unexpected, {"Unknown error"}};
     std::vector<Message> details;
     std::optional<ValidationReport> validation;
+    std::vector<fs::path> candidates;
+    ToolIdentity identity;
 };
 std::optional<fs::path> SelectFile(HWND owner, bool save, bool executable, Language language,
                                    const fs::path& defaultPath = {}) {
@@ -106,7 +108,9 @@ class MainWindow {
     std::atomic_bool cancelled = false;
     std::optional<FFmpegInstallation> tools;
     std::optional<MediaInfo> source;
+    std::vector<fs::path> candidates;
     fs::path selected, smokeInput, smokeOutput, uiDirectory;
+    std::string explicitInputChroma;
     bool busy = false, closing = false, detectionComplete = false, smoke = false, smokeStarted = false;
     bool uiTest = false, missingScenario = false, settingsExercised = false, lastSignalWarning = false;
     bool conversionTone = false, layingOut = false;
@@ -219,13 +223,15 @@ class MainWindow {
         detectionComplete = false;
         Stage(TextId::Detecting);
         Start(Kind::Detect, [this] {
-            auto found = FFmpegManager(logger).Detect(cancelled, [this](const DiscoveryProgress& p) {
+            FFmpegManager manager(logger);
+            auto found = manager.Detect(cancelled, [this](const DiscoveryProgress& p) {
                 Event e{Kind::Discovery};
                 e.discovery = p;
                 Post(std::move(e));
             });
             Event e{Kind::Detect};
             e.tools = std::move(found);
+            e.candidates = manager.UnapprovedCandidates();
             Post(std::move(e));
         });
     }
@@ -245,6 +251,7 @@ class MainWindow {
         Stage(TextId::ReadingMedia);
         Start(Kind::Probe, [this, path] {
             auto media = Probe(tools->ffprobe, path, &cancelled);
+            media.inputChromaOverride = explicitInputChroma;
             logger.Write("Selected input: " + media.raw.dump());
             Event e{Kind::Probe};
             e.media = std::move(media);
@@ -497,14 +504,40 @@ class MainWindow {
                 Finish(false, Translate(e->error));
             return;
         }
+        if (e->kind == Kind::Approval) {
+            Buttons();
+            const auto body = T(Message(TextId::FFmpegApproveBody, {e->identity.ToJson().dump(2)}));
+            if (MessageBoxW(window, body.c_str(), T(TextId::FFmpegApprove).c_str(),
+                            MB_YESNO | MB_ICONQUESTION | MB_DEFBUTTON2) == IDYES) {
+                Start(Kind::Detect, [this, identity = e->identity] {
+                    ToolTrust::ApproveManual(identity);
+                    FFmpegManager manager(logger);
+                    auto checked = manager.Check(identity.ffmpeg, cancelled);
+                    manager.SaveManual(identity.ffmpeg);
+                    Event result{Kind::Detect};
+                    result.tools = std::move(checked);
+                    Post(std::move(result));
+                });
+            } else {
+                Stage(TextId::FFmpegApprovalCancelled);
+                Buttons();
+            }
+            return;
+        }
         if (e->kind == Kind::Detect || e->kind == Kind::Install) {
             tools = std::move(e->tools);
+            candidates = std::move(e->candidates);
+            for (const auto& candidate : candidates)
+                details.emplace_back(TextId::FFmpegUntrusted,
+                                     std::initializer_list<std::string>{PathText(candidate)});
             detectionComplete = true;
             if (discovery.skipped)
                 details.emplace_back(TextId::ScanSkipped);
             if (settings.recoveredDefaults)
                 details.emplace_back(TextId::SettingsRecovered);
-            Stage(tools ? TextId::Ready : TextId::ToolsMissing);
+            Stage(tools                ? TextId::Ready
+                  : candidates.empty() ? TextId::ToolsMissing
+                                       : TextId::FFmpegDiscovered);
             Buttons();
             Layout();
             if (uiTest) {
@@ -535,6 +568,15 @@ class MainWindow {
         }
         if (e->kind == Kind::Probe) {
             source = std::move(e->media);
+            if (!smoke && source->EffectiveChromaLocation().empty()) {
+                const auto answer = MessageBoxW(window, T(TextId::InputChromaChoose).c_str(),
+                                                T(TextId::InputChromaTitle).c_str(),
+                                                MB_YESNOCANCEL | MB_ICONQUESTION | MB_DEFBUTTON3);
+                if (answer == IDYES)
+                    source->inputChromaOverride = "left";
+                else if (answer == IDNO)
+                    source->inputChromaOverride = "center";
+            }
             Text(SourceText, source->Summary(settings.language));
             details = source->UnsupportedReasons();
             Stage(details.empty() ? Message(TextId::InputReady) : details.front());
@@ -603,14 +645,12 @@ class MainWindow {
         else if (id == RescanButton)
             Detect();
         else if (id == Manual) {
-            if (auto path = SelectFile(window, false, true, settings.language)) {
+            if (auto path = SelectFile(window, false, true, settings.language,
+                                       candidates.empty() ? fs::path{} : candidates.front())) {
                 Stage(TextId::Detecting);
                 Start(Kind::Detect, [this, path = *path] {
-                    FFmpegManager manager(logger);
-                    auto checked = manager.Check(path, cancelled);
-                    manager.SaveManual(path);
-                    Event e{Kind::Detect};
-                    e.tools = std::move(checked);
+                    Event e{Kind::Approval};
+                    e.identity = ToolTrust::Inspect(path);
                     Post(std::move(e));
                 });
             }
@@ -892,7 +932,11 @@ int Run(HINSTANCE instance) {
     for (; option < args.size(); ++option) {
         if (args[option] == L"--tone")
             app.settings.tone.enabled = true;
-        else if (args[option] == L"--missing-ffmpeg" && app.uiTest)
+        else if (args[option] == L"--input-chroma-location" && option + 1 < args.size()) {
+            app.explicitInputChroma = Utf8(args[++option]);
+            if (app.explicitInputChroma != "left" && app.explicitInputChroma != "center")
+                throw AppError(TextId::InputChroma);
+        } else if (args[option] == L"--missing-ffmpeg" && app.uiTest)
             app.missingScenario = true;
         else if (args[option] == L"--language" && option + 1 < args.size()) {
             const auto v = args[++option];

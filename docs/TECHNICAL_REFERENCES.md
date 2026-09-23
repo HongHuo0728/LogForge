@@ -1,6 +1,23 @@
 # Technical references
 
-Reviewed 2026-09-22. Conclusions are limited to the versions and interfaces below; a source URL does not imply a tested editor or device.
+Reviewed through 2026-09-23. Conclusions are limited to the versions and interfaces below; a source URL does not imply a tested editor or device.
+
+## Native Apple Log and actual Resolve import (2026-09-23)
+
+- [Publisher's original tutorial](https://www.youtube.com/watch?v=K5F2uyMxL3Y), its [sample folder](https://drive.google.com/drive/folders/1FOziyLgHfKimVunhcF5Ws5ZCcvkZcvEp) and [specific ProRes original](https://drive.google.com/file/d/1iS5rYcgOyOKQfgFq6uHmx7oL51vUpeC_/view). The original description and file bytes were retrieved directly. SHA-256, provenance limits, exact observed `logs` and movie-level mdta fields, and controlled import results are recorded in [Apple Log identification evidence](APPLE_LOG_IDENTIFICATION.md).
+- Apple's [video sample description](https://developer.apple.com/documentation/quicktime-file-format/video_sample_description) explicitly permits a four-zero-byte optional terminator. This explains the real reference's layout and supports the bounded analyzer correction; unrelated truncation errors are not suppressed.
+- The locally installed Blackmagic **DaVinci Resolve Studio 20.3.2.9 Scripting README**, last updated 7 October 2025, documents `-nogui`, `GetClipProperty`, project color settings, media import and rendering. Actual SDK calls imported the original, negative baseline, isolated candidates and production output. This is direct runtime evidence, not inference from API names or a simulated Resolve test.
+
+The following 2026-09-22 notes record the earlier investigation. Native-reference/Resolve conclusions from that date are superseded by the evidence above; Premiere and Final Cut remain untested.
+
+## Hardening research (2026-09-22)
+
+- [VideoToolbox LogTransferFunction](https://developer.apple.com/documentation/videotoolbox/kvtcompressionpropertykey_logtransferfunction) explicitly identifies `com.apple.rec2020.apple-log` for Apple Log. This is an API identifier, not sufficient evidence of MOV serialization or editor recognition.
+- [CoreMedia LogTransferFunction extension](https://developer.apple.com/documentation/coremedia/kcmformatdescriptionextension_logtransferfunction) and [typed extension](https://developer.apple.com/documentation/coremedia/cmformatdescription/extensions-swift.struct/key/logtransferfunction) describe format-description signaling. No private sample-entry bytes are inferred from those symbol names. No authoritative mapping for `com.apple.proapps.customgamma` to verified iPhone/editor behavior was established during this review; it remains a candidate for reference-file research only.
+- Apple's [metadata structure](https://developer.apple.com/documentation/quicktime-file-format/metadata_atoms_and_types), [item keys](https://developer.apple.com/documentation/quicktime-file-format/metadata_item_keys_atom), [item list](https://developer.apple.com/documentation/quicktime-file-format/metadata_item_list_atom), [value atom](https://developer.apple.com/documentation/quicktime-file-format/value_atom) and [well-known value types](https://developer.apple.com/documentation/quicktime-file-format/well-known_types) define key-index resolution and type/locale/value decoding. These underpin the reader, not a speculative Apple Log writer.
+- [FFmpeg zscale implementation](https://ffmpeg.org/doxygen/8.1/vf__zscale_8c_source.html) exposes explicit input `chromalin` and output `chromal`. Runtime tests distinguish left and center using a linear chroma ramp and independently computed BT.2020 equations, then sample the encoded output phase. [Apple's left-siting definition](https://developer.apple.com/documentation/corevideo/kcvimagebufferchromalocation_left) describes horizontal co-siting. Neither that definition nor a command-line option guarantees that ProRes MOV carries a readable siting tag. Our selected FFmpeg's output was re-probed: it omits chroma_location. Reports preserve that limitation instead of inventing a native atom.
+
+At that earlier review no genuine native Apple Log movie or editor project was available. The synthetic fixtures alone were not evidence of native-camera serialization. The current writer still uses H.273 transfer unspecified, as does the actual reference, with the separately verified sample-entry `logs` identifier added after encoding.
 
 ## Apple Log math and gamut
 

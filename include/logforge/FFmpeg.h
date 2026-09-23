@@ -1,12 +1,17 @@
 #pragma once
 #include "Discovery.h"
 #include "Media.h"
+#include "ToolTrust.h"
 #include <optional>
 
 namespace logforge {
 struct FFmpegInstallation {
     fs::path ffmpeg, ffprobe;
     std::string version;
+    std::shared_ptr<ToolLease> lease;
+    bool numericallyVerified = false;
+    Json numeric = Json::object();
+    Json ToJson() const;
 };
 class FFmpegManager {
   public:
@@ -15,6 +20,11 @@ class FFmpegManager {
                                              const DiscoveryCallback& progress = {});
     FFmpegInstallation Check(const fs::path& executable, const std::atomic_bool& cancel, bool smoke = true);
     void SaveManual(const fs::path& executable);
+    const std::vector<fs::path>& UnapprovedCandidates() const {
+        return unapproved_;
+    }
+    bool DiscoverCandidate(const fs::path& path, const std::atomic_bool& cancel,
+                           std::optional<FFmpegInstallation>& found);
     static fs::path ManagedExecutable();
     static std::vector<std::string> MissingCapabilities(const std::string& decoders,
                                                         const std::string& encoder,
@@ -23,6 +33,7 @@ class FFmpegManager {
 
   private:
     Logger& logger_;
+    std::vector<fs::path> unapproved_;
 };
 struct DownloadSpec {
     std::wstring name, version, url, archiveRoot;

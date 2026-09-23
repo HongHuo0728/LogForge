@@ -10,11 +10,11 @@ def main():
     parser.add_argument('--zip', type=Path, required=True)
     parser.add_argument('--exe', type=Path, required=True)
     args = parser.parse_args()
-    expected = {'LogForge.exe', 'README.md', 'LICENSE', 'THIRD_PARTY_NOTICES.md',
+    expected = {'LogForge.exe', 'README.md', 'CHANGELOG.md', 'LICENSE', 'THIRD_PARTY_NOTICES.md',
                 'licenses/nlohmann-json-MIT.txt', 'docs/images/LogForge.png'}
     expected |= {f'docs/{name}.md' for name in (
         'ARCHITECTURE', 'COLOR_PIPELINE', 'CREATIVE_ADJUSTMENTS', 'FFMPEG_PROVIDER',
-        'ICON', 'METADATA', 'TECHNICAL_REFERENCES', 'VALIDATION')}
+        'ICON', 'METADATA', 'TECHNICAL_REFERENCES', 'VALIDATION', 'APPLE_LOG_IDENTIFICATION')}
     with ZipFile(args.zip) as archive:
         files = [entry for entry in archive.infolist() if not entry.is_dir()]
         names = [entry.filename for entry in files]

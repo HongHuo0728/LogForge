@@ -183,6 +183,7 @@ void Discovery(const fs::path& realFFmpeg) {
                 fs::copy_file(realFFmpeg.parent_path() / name, valid / name);
         }
         size_t rejections = 0;
+        ToolTrust::ApproveManual(ToolTrust::Inspect(valid / L"ffmpeg.exe"));
         report = SearchFFmpegDirectories({first, second, valid}, cancel, [&](const auto& candidate) {
             try {
                 manager.Check(candidate, cancel);
@@ -218,15 +219,15 @@ void Resources() {
         UINT length = 0;
         Require(VerQueryValueW(bytes.data(), L"\\", reinterpret_cast<void**>(&fixed), &length) != FALSE,
                 "Missing numeric version");
-        Require(fixed->dwFileVersionMS == MAKELONG(0, 1) && fixed->dwFileVersionLS == 0 &&
-                    fixed->dwProductVersionMS == MAKELONG(0, 1) && fixed->dwProductVersionLS == 0,
-                "Numeric Windows version is not 1.0.0.0");
+        Require(fixed->dwFileVersionMS == MAKELONG(1, 1) && fixed->dwFileVersionLS == 0 &&
+                    fixed->dwProductVersionMS == MAKELONG(1, 1) && fixed->dwProductVersionLS == 0,
+                "Numeric Windows version is not 1.1.0.0");
         for (const auto* key : {L"FileVersion", L"ProductVersion"}) {
             wchar_t* value = nullptr;
             const auto query = std::wstring(L"\\StringFileInfo\\040904b0\\") + key;
             Require(VerQueryValueW(bytes.data(), query.c_str(), reinterpret_cast<void**>(&value), &length) &&
-                        std::wstring(value) == L"1.0.0",
-                    "Windows version text is not 1.0.0");
+                        std::wstring(value) == L"1.1.0",
+                    "Windows version text is not 1.1.0");
         }
         HMODULE module =
             LoadLibraryExW(path.c_str(), nullptr, LOAD_LIBRARY_AS_DATAFILE | LOAD_LIBRARY_AS_IMAGE_RESOURCE);
@@ -237,7 +238,7 @@ void Resources() {
         Require(data && data[2] == 9, "Application icon does not contain nine DPI sizes");
         FreeLibrary(module);
     }
-    Require(std::string(DisplayVersion) == "1.0.0 (26922A)", "Incorrect displayed build number");
+    Require(std::string(DisplayVersion) == "1.1.0 (26923C)", "Incorrect displayed build number");
     std::cout << "PASS: GUI / CLI Windows versions, build number and embedded multiresolution icons\n";
 }
 } // namespace

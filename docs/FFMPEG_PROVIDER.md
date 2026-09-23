@@ -21,11 +21,17 @@ FFmpeg.org's download page links to Gyan's Windows builds. FFmpeg.org itself dis
 
 ## Automatic discovery
 
-Before offering installation, LogForge checks its managed tool location, a saved manual choice, the cached automatic choice, PATH and common locations. It then searches accessible local fixed/removable volumes, including mounted folders. A candidate needs both executables and must pass version, feature and actual ProRes/float tests. Discovery stops at the first verified pair and caches it for the next launch; cached files are revalidated.
+Discovery visits managed/saved paths, PATH, common locations, then accessible fixed/removable volumes. **A filename is not authorization.** Unknown candidates are listed without running even `-version`. Only approved hashes enter capability/numeric checks. `ffmpeg-trust.json` binds canonical paths and SHA-256 for both ffmpeg and ffprobe. Legacy settings and merely residing inside the managed directory do not grant trust. A change to either binary requires fresh approval.
 
-Scanning is read-only apart from LogForge's local logs/cache and capability-test temporary files. It never changes PATH or deletes another installation. The UI reports actual directory/candidate counts and supports cancellation. Inaccessible, unavailable and offline locations are skipped; reparse subdirectories, recycle bins and protected restore data are excluded. Remote network drives are not scanned. This is a search of accessible local storage, not a guarantee about unreadable or disconnected disks.
+Manual selection shows paths/hashes and an execution confirmation (No by default). The CLI authorization command is `--approve-ffmpeg --ffmpeg PATH`. Executable images remain open with deny-write/delete sharing during use. The trust store is not a security boundary against an attacker who already controls the user's settings/application. Approval of a shared-library build also requires trusting its DLL dependencies; the pair hashes do not attest every loaded DLL. The pinned provider build is static.
 
-Only after this search completes unsuccessfully do **Download FFmpeg** and **Locate FFmpeg...** appear. Both disappear when a compatible installation is ready. A cancelled scan offers **Search drives again** without falsely claiming a complete search.
+Execution uses the resolved canonical pair, not the discovered alias. A malicious ffprobe placed beside a file alias to an approved ffmpeg must never substitute for the approved sibling. A probe resolving outside the canonical pair's directory is rejected. The alias-sibling regression uses a real approved FFmpeg and an executable canary; it runs where Windows permits symbolic links.
+
+**Verified FFmpeg** passes feature checks and integer reference-signal tests for BT.2020 matrix/range, float transport, left/center chroma phase, ProRes HQ and post-encode samples. Limits are `2e-6` float error and 2 ten-bit code values after encoding. **Compatible but unverified FFmpeg** is available for capability-only inspection and cannot transcode. Numeric failures are errors. Reports record paths, version, both hashes, trust type and actual measured errors.
+
+Scanning is read-only apart from LogForge's local logs/cache. Synthetic capability/numeric files are produced only after approval. It never changes PATH or deletes another installation. The UI reports actual directory/candidate counts and supports cancellation. Inaccessible, unavailable and offline locations are skipped; reparse subdirectories, recycle bins and protected restore data are excluded. Remote network drives are not scanned. This is a search of accessible local storage, not a guarantee about unreadable or disconnected disks.
+
+Only after this search completes unsuccessfully do **Download FFmpeg** and **Locate FFmpeg...** appear. Both disappear when a numerically verified installation is ready. A cancelled scan offers **Search drives again** without falsely claiming a complete search.
 
 ## Installation mechanics
 
@@ -35,7 +41,7 @@ Only after this search completes unsuccessfully do **Download FFmpeg** and **Loc
 - Three download attempts, bounded network timeouts, exact byte progress where Content-Length is available, 512 MiB archive limit, and cancellation checks.
 - At least 1 GiB free space is required before extraction.
 - The archive is extracted only after SHA-256 matches, using Windows' built-in `tar.exe`. Archive paths are checked for traversal/absolute paths before extraction.
-- A uniquely named staging directory is used. Both executables and an actual ProRes/float smoke test must pass before publication to the version directory.
+- A uniquely named staging directory is used. After the archive hash passes, a managed-sha256 receipt records both executable hashes before execution. Capability and numeric tests must pass before publication. The receipt is recorded for the final path too.
 - The provider's LICENSE, README, documentation and binaries are kept together. No global PATH, system environment, registry installation, Program Files, service or administrator changes occur.
 - Settings and logs remain per-user. No videos are sent to the provider.
 
@@ -45,4 +51,4 @@ Interrupted/failed installers may leave a clearly named `install-PID-ticks` stag
 
 LogForge's MIT license covers its own source, not the independently obtained FFmpeg binary or its enabled libraries. The portable ZIP intentionally excludes FFmpeg. If downstream distributors bundle FFmpeg, they must separately satisfy its GPL and component obligations, including corresponding source as applicable. Preserve the provider's notices. See FFmpeg's own [license discussion](https://ffmpeg.org/legal.html).
 
-Manual builds are supported if the capabilities pass. Their origin, updates and licensing remain the user's responsibility. No private Apple encoder is downloaded or impersonated.
+Manual builds are supported after explicit approval and successful capability plus numerical verification. Their origin, updates and licensing remain the user's responsibility. No private Apple encoder is downloaded or impersonated.

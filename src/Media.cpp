@@ -1,4 +1,5 @@
 #include "logforge/Media.h"
+#include "logforge/ToolTrust.h"
 #include <array>
 #include <charconv>
 #include <cmath>
@@ -114,6 +115,11 @@ MediaInfo MediaInfo::Parse(const Json& j, const fs::path& path) {
         m.timecode = str(m.tags, "timecode");
     return m;
 }
+std::string MediaInfo::EffectiveChromaLocation() const {
+    if (chromaLocation.empty() || chromaLocation == "unknown" || chromaLocation == "unspecified")
+        return inputChromaOverride;
+    return chromaLocation;
+}
 std::vector<Message> MediaInfo::UnsupportedReasons() const {
     std::vector<Message> e;
     if (videoStreams != 1)
@@ -134,15 +140,14 @@ std::vector<Message> MediaInfo::UnsupportedReasons() const {
         e.emplace_back(TextId::InputRange);
     if (width <= 0 || height <= 0 || width % 2 || width > 8192 || height > 8192)
         e.emplace_back(TextId::InputResolution);
-    if (fps.Value() <= 0 || fps.Value() > 120 || timeBase.Value() <= 0 || videoDuration <= 0)
+    if (timeBase.Value() <= 0 || videoDuration <= 0)
         e.emplace_back(TextId::InputTiming);
     if (fieldOrder != "progressive" && fieldOrder != "unknown" && !fieldOrder.empty())
         e.emplace_back(TextId::InputProgressive);
     if (!sampleAspect.empty() && sampleAspect != "1:1" && sampleAspect != "0:1" && sampleAspect != "N/A")
         e.emplace_back(TextId::InputAspect);
-    if (averageFps.Value() > 0 && nominalFps.Value() > 0 &&
-        std::abs(averageFps.Value() - nominalFps.Value()) > averageFps.Value() * 0.001)
-        e.emplace_back(TextId::InputCFR);
+    if (EffectiveChromaLocation() != "left" && EffectiveChromaLocation() != "center")
+        e.emplace_back(TextId::InputChroma);
     return e;
 }
 std::wstring MediaInfo::Summary(Language language) const {
@@ -154,6 +159,10 @@ std::wstring MediaInfo::Summary(Language language) const {
       << (transfer == "arib-std-b67" ? L"HLG" : Wide(transfer)) << L" / "
       << (matrix == "bt2020nc" ? L"BT.2020 NCL" : Wide(matrix)) << L"   ·   "
       << TranslateWide(TextId::RangeLabel, language) << L": " << Wide(range) << L"\r\n";
+    s << TranslateWide(TextId::ChromaLocation, language) << L": "
+      << Wide(EffectiveChromaLocation().empty() ? "unknown" : EffectiveChromaLocation())
+      << (inputChromaOverride.empty() ? L"" : L" (" + TranslateWide(TextId::ExplicitSource, language) + L")")
+      << L"\r\n";
     s << TranslateWide(TextId::Duration, language) << L": " << std::setprecision(2) << videoDuration
       << L" s   ·   " << TranslateWide(TextId::Audio, language) << L": ";
     if (audio.empty())
@@ -167,9 +176,12 @@ std::wstring MediaInfo::Summary(Language language) const {
     return s.str();
 }
 MediaInfo Probe(const fs::path& ffprobe, const fs::path& path, const std::atomic_bool* cancel) {
+    auto lease = ToolTrust::Acquire(ffprobe.parent_path() / L"ffmpeg.exe");
+    if (fs::weakly_canonical(ffprobe) != lease->identity.ffprobe)
+        throw AppError(Message(TextId::FFmpegUntrusted, {PathText(ffprobe)}));
     const auto r = RunProcess(
-        ffprobe, {L"-v", L"error", L"-show_format", L"-show_streams", L"-of", L"json", path.wstring()},
-        cancel, 60);
+        lease->identity.ffprobe,
+        {L"-v", L"error", L"-show_format", L"-show_streams", L"-of", L"json", path.wstring()}, cancel, 60);
     if (r.exitCode)
         throw AppError(Message(TextId::ProbeFailed, {r.error}));
     try {
@@ -177,48 +189,6 @@ MediaInfo Probe(const fs::path& ffprobe, const fs::path& path, const std::atomic
     } catch (const Json::exception& e) {
         throw AppError(Message(TextId::ProbeJson, {e.what()}));
     }
-}
-int64_t VerifyConstantFrameRate(const fs::path& ffprobe, const MediaInfo& m, const std::atomic_bool& cancel) {
-    int64_t count = 0, previous = 0, first = 0;
-    bool good = true;
-    const double expected = 1.0 / m.fps.Value() / m.timeBase.Value();
-    auto r =
-        RunProcess(ffprobe,
-                   {L"-v", L"error", L"-select_streams", L"v:0", L"-show_packets", L"-show_entries",
-                    L"packet=pts,duration", L"-of", L"csv=p=0", m.path.wstring()},
-                   &cancel, 0, [&](const std::string& line) {
-                       auto c = line.find(',');
-                       if (c == std::string::npos) {
-                           good = false;
-                           return;
-                       }
-                       try {
-                           int64_t pts = std::stoll(line.substr(0, c));
-                           int64_t dur = std::stoll(line.substr(c + 1));
-                           if (count == 0)
-                               first = pts;
-                           if (dur <= 0 || std::abs(static_cast<double>(dur) - expected) > 1.05)
-                               good = false;
-                           if (count && (pts <= previous ||
-                                         std::abs(static_cast<double>(pts - previous) - expected) > 1.05))
-                               good = false;
-                           // Bound total phase error too: per-frame tolerance alone
-                           // can hide VFR or a small rate mismatch accumulating over time.
-                           if (std::abs((static_cast<double>(pts) - static_cast<double>(first)) -
-                                        static_cast<double>(count) * expected) > 1.05)
-                               good = false;
-                           previous = pts;
-                           ++count;
-                       } catch (...) {
-                           good = false;
-                       }
-                   });
-    if (r.exitCode || !good || count == 0)
-        throw AppError(TextId::InputCadence);
-    if (std::abs(static_cast<double>(count) / m.fps.Value() - m.videoDuration) >
-        std::max(0.05, 2.0 / m.fps.Value()))
-        throw AppError(TextId::InputFrameDuration);
-    return count;
 }
 Json ValidationReport::ToJson() const {
     Json e = Json::array(), w = Json::array(), codes = Json::array(), warningCodes = Json::array();
@@ -236,7 +206,10 @@ Json ValidationReport::ToJson() const {
             {"error_codes", codes},
             {"warning_codes", warningCodes},
             {"signal_warning", signalWarning},
-            {"signal", signal}};
+            {"signal", signal},
+            {"timing", timing},
+            {"metadata", metadata},
+            {"ffmpeg", ffmpeg}};
 }
 ValidationReport ValidateOutput(const MediaInfo& in, const MediaInfo& out, int64_t frames) {
     ValidationReport r;
@@ -260,6 +233,57 @@ ValidationReport ValidateOutput(const MediaInfo& in, const MediaInfo& out, int64
             TextId::OutputTransfer);
     require(out.tags.value("logforge.transfer", std::string()) == "Apple Log", TextId::OutputDeclaration);
     require(out.range == "tv", TextId::OutputRange);
+    const bool unspecifiedChroma =
+        out.chromaLocation.empty() || out.chromaLocation == "unspecified" || out.chromaLocation == "unknown";
+    require(out.chromaLocation == "left" || (unspecifiedChroma && out.outputChromaVerified &&
+                                             out.tags.value("logforge.chroma_location", "") == "left"),
+            TextId::OutputChroma);
+    require(in.cadence.verified && out.cadence.verified && out.cadence.packets == frames &&
+                std::abs(out.cadence.rate.Value() - in.cadence.rate.Value()) < 0.00001,
+            TextId::OutputCadence);
+    if (!out.cadence.verified)
+        r.errors.emplace_back(TextId::InputCadenceDetail,
+                              std::initializer_list<std::string>{"output packet " +
+                                                                 std::to_string(out.cadence.errorPacket) +
+                                                                 ": " + out.cadence.error});
+    r.timing = {{"input",
+                 {{"avg_fps", in.averageFps.Value()},
+                  {"nominal_fps", in.nominalFps.Value()},
+                  {"cadence", in.cadence.ToJson()}}},
+                {"output",
+                 {{"avg_fps", out.averageFps.Value()},
+                  {"nominal_fps", out.nominalFps.Value()},
+                  {"cadence", out.cadence.ToJson()}}}};
+    r.metadata = AppleLogMetadataWriter::CopyPlan(in);
+    for (auto& entry : r.metadata["preserved"]) {
+        const auto scope = entry.value("write_scope", entry["scope"].get<std::string>());
+        const auto key = entry["key"].get<std::string>();
+        const Json* tags = nullptr;
+        if (scope == "format")
+            tags = &out.tags;
+        else if (scope == "v:0")
+            tags = &out.videoTags;
+        else if (scope.starts_with("a:")) {
+            const auto index = static_cast<size_t>(std::stoul(scope.substr(2)));
+            if (index < out.audio.size())
+                tags = &out.audio[index].tags;
+        }
+        const bool preserved = tags && tags->contains(key) && tags->at(key) == entry["value"];
+        entry["verified_preserved"] = preserved;
+        const bool defaultLanguage =
+            key == "language" && entry["value"] == "und" && tags && !tags->contains(key);
+        require(preserved || defaultLanguage, Message(TextId::OutputMetadataPreserve, {scope + ":" + key}));
+    }
+    for (const auto* tags : {&out.tags, &out.videoTags})
+        for (const auto& [key, value] : tags->items())
+            require(!AppleLogMetadataWriter::IsConflict(key), Message(TextId::OutputMetadataConflict, {key}));
+    for (const auto& stream : out.raw.value("streams", Json::array()))
+        if (stream.value("codec_type", "") == "video")
+            for (const auto& side : stream.value("side_data_list", Json::array())) {
+                const auto type = side.value("side_data_type", "");
+                require(!AppleLogMetadataWriter::IsConflict(type),
+                        Message(TextId::OutputMetadataConflict, {type}));
+            }
     const double tolerance = std::max(0.05, 2.0 / in.fps.Value());
     require(std::abs(out.videoDuration - in.videoDuration) <= tolerance, TextId::OutputVideoDuration);
     require(std::abs(out.duration - in.duration) <= std::max(0.1, tolerance),
@@ -292,16 +316,17 @@ ValidationReport ValidateOutput(const MediaInfo& in, const MediaInfo& out, int64
             if (!out.tags.contains(k) || out.tags[k] != v)
                 r.warnings.emplace_back(TextId::MetadataChanged, std::initializer_list<std::string>{k});
     }
-    r.warnings.emplace_back(TextId::IdentificationNotice);
     return r;
 }
 std::vector<std::wstring> AppleLogMetadataWriter::Arguments(const MediaInfo& in, double exposureStops,
                                                             const ToneAdjustments& tone) {
     std::vector<std::wstring> args{
         L"-map_metadata",
-        L"1",
+        L"-1",
         L"-map_metadata:s:v:0",
-        L"1:s:v:0",
+        L"-1",
+        L"-map_metadata:s:a",
+        L"-1",
         L"-color_primaries",
         L"bt2020",
         L"-color_trc",
@@ -310,10 +335,14 @@ std::vector<std::wstring> AppleLogMetadataWriter::Arguments(const MediaInfo& in,
         L"bt2020nc",
         L"-color_range",
         L"tv",
+        L"-chroma_sample_location",
+        L"left",
         L"-movflags",
         L"+write_colr+use_metadata_tags",
         L"-metadata",
         L"logforge.transfer=Apple Log",
+        L"-metadata",
+        L"logforge.chroma_location=left",
         L"-metadata",
         L"logforge.reference=BT2408_HLG75pct_to_100pct_reflectance",
         L"-metadata",
@@ -332,104 +361,16 @@ std::vector<std::wstring> AppleLogMetadataWriter::Arguments(const MediaInfo& in,
         L"logforge.build=" + Wide(BuildNumber),
         L"-metadata:s:v:0",
         L"encoder=LogForge / FFmpeg prores_ks"};
-    // Drop source HDR declarations which no longer describe the encoded pixels.
-    for (const auto& [key, value] : in.tags.items()) {
-        std::string lower = key;
-        for (auto& c : lower)
-            c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
-        if (lower.find("transfer") != std::string::npos || lower.find("hdr") != std::string::npos ||
-            lower.find("dolby") != std::string::npos || lower.find("colorspace") != std::string::npos ||
-            lower.find("color_space") != std::string::npos)
-            if (key.rfind("logforge.", 0) != 0) {
-                args.push_back(L"-metadata");
-                args.push_back(Wide(key) + L"=");
-            }
+    const auto plan = CopyPlan(in);
+    for (const auto& tag : plan["preserved"]) {
+        const auto scope = tag.value("write_scope", tag["scope"].get<std::string>());
+        args.push_back(scope == "format" ? L"-metadata" : L"-metadata:s:" + Wide(scope));
+        args.push_back(Wide(tag["key"].get<std::string>()) + L"=" + Wide(tag["value"].get<std::string>()));
     }
     if (!in.timecode.empty()) {
         args.push_back(L"-timecode");
         args.push_back(Wide(in.timecode));
     }
     return args;
-}
-namespace {
-uint32_t be32(const unsigned char* p) {
-    return (uint32_t(p[0]) << 24) | (uint32_t(p[1]) << 16) | (uint32_t(p[2]) << 8) | p[3];
-}
-uint64_t be64(const unsigned char* p) {
-    return (uint64_t(be32(p)) << 32) | be32(p + 4);
-}
-void atoms(std::ifstream& f, uint64_t begin, uint64_t end, const std::string& parent, Json& list, int depth) {
-    if (depth > 20)
-        throw AppError(TextId::MovNesting);
-    for (uint64_t pos = begin; pos + 8 <= end;) {
-        if (list.size() > 100000)
-            throw AppError(TextId::MovCount);
-        std::array<unsigned char, 96> b{};
-        f.seekg(static_cast<std::streamoff>(pos));
-        f.read(reinterpret_cast<char*>(b.data()), 8);
-        if (!f)
-            throw AppError(TextId::MovTruncated);
-        uint64_t size = be32(b.data()), header = 8;
-        std::string type;
-        for (size_t k = 4; k < 8; ++k) {
-            if (b[k] >= 32 && b[k] < 127)
-                type += static_cast<char>(b[k]);
-            else {
-                std::ostringstream escaped;
-                escaped << "\\x" << std::hex << std::setw(2) << std::setfill('0')
-                        << static_cast<unsigned>(b[k]);
-                type += escaped.str();
-            }
-        }
-        if (size == 1) {
-            if (end - pos < 16)
-                throw AppError(TextId::MovExtended);
-            f.read(reinterpret_cast<char*>(b.data() + 8), 8);
-            if (!f)
-                throw AppError(TextId::MovExtended);
-            size = be64(b.data() + 8);
-            header = 16;
-        }
-        if (size == 0)
-            size = end - pos;
-        if (size < header || size > end - pos)
-            throw AppError(TextId::MovSize);
-        std::string path = parent + "/" + type;
-        Json item{{"path", path}, {"offset", pos}, {"size", size}, {"type", type}};
-        if (type == "colr" && size >= header + 10) {
-            f.seekg(static_cast<std::streamoff>(pos + header));
-            f.read(reinterpret_cast<char*>(b.data()), 10);
-            item["color_type"] = std::string(reinterpret_cast<char*>(b.data()), 4);
-            if (item["color_type"] == "nclc" || item["color_type"] == "nclx") {
-                item["primaries"] = (b[4] << 8) | b[5];
-                item["transfer"] = (b[6] << 8) | b[7];
-                item["matrix"] = (b[8] << 8) | b[9];
-                if (item["color_type"] == "nclx" && size >= header + 11) {
-                    char flag = 0;
-                    f.read(&flag, 1);
-                    item["full_range"] = (static_cast<unsigned char>(flag) & 0x80) != 0;
-                }
-            }
-        }
-        list.push_back(item);
-        if (type == "moov" || type == "trak" || type == "mdia" || type == "minf" || type == "stbl" ||
-            type == "udta" || type == "ilst" || type == "dinf" || type == "edts" || type == "tref")
-            atoms(f, pos + header, pos + size, path, list, depth + 1);
-        else if (type == "meta" || type == "stsd")
-            atoms(f, pos + header + (type == "meta" ? 4 : 8), pos + size, path, list, depth + 1);
-        else if (type == "apch" || type == "apcn" || type == "apcs" || type == "apco" || type == "ap4h" ||
-                 type == "ap4x")
-            atoms(f, pos + header + 78, pos + size, path, list, depth + 1);
-        pos += size;
-    }
-}
-} // namespace
-Json ReferenceMovAnalyzer::Analyze(const fs::path& path) {
-    std::ifstream f(path, std::ios::binary);
-    if (!f)
-        throw AppError(TextId::MovRead);
-    Json list = Json::array();
-    atoms(f, 0, fs::file_size(path), "", list, 0);
-    return {{"atoms", list}, {"bytes", fs::file_size(path)}};
 }
 } // namespace logforge

@@ -62,4 +62,5 @@ jobs:
             build/Testing/Temporary/LastTest.log
             build/integration/integration-report.json
             build/signal-test/signal-report.json
+            build/sustained/sustained-report.json
           if-no-files-found: ignore
