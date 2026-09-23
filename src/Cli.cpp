@@ -16,6 +16,8 @@ int wmain(int argc, wchar_t** argv) {
     SetConsoleOutputCP(CP_UTF8);
     SetConsoleCtrlHandler(Ctrl, TRUE);
     try {
+        if (argc > 1 && std::wstring(argv[1]) == L"--internal-discover")
+            return RunDiscoveryHelper(std::vector<std::wstring>(argv + 1, argv + argc));
         Logger log;
         std::vector<std::wstring> a;
         fs::path explicitFFmpeg;
@@ -23,8 +25,11 @@ int wmain(int argc, wchar_t** argv) {
         int64_t cancelAfterFrames = 0;
         TranscodeOptions options;
         bool toneParameter = false;
+        bool deepSearch = false;
         for (int i = 1; i < argc; ++i) {
-            if (std::wstring(argv[i]) == L"--language" && i + 1 < argc) {
+            if (std::wstring(argv[i]) == L"--deep-search")
+                deepSearch = true;
+            else if (std::wstring(argv[i]) == L"--language" && i + 1 < argc) {
                 const std::wstring value = argv[++i];
                 if (value == L"zh-CN")
                     language = Language::SimplifiedChinese;
@@ -74,7 +79,8 @@ int wmain(int argc, wchar_t** argv) {
             std::cout << "LogForge " << DisplayVersion << "\n";
             if (!a.empty() && a[0] == L"--version")
                 return 0;
-            std::cout << "--detect | --check-compatible --ffmpeg PATH | --install-ffmpeg | --approve-ffmpeg "
+            std::cout << "--detect [--deep-search] | --check-compatible --ffmpeg PATH | --install-ffmpeg | "
+                         "--approve-ffmpeg "
                          "--ffmpeg PATH | --probe INPUT | --convert INPUT "
                          "OUTPUT | --analyze INPUT [REFERENCE]\n"
                       << Translate(TextId::CLIOptional, language)
@@ -85,6 +91,15 @@ int wmain(int argc, wchar_t** argv) {
                          "[--highlight-compression-ev 1] [--saturation-percent 85]\n";
             return 0;
         }
+        // Reject malformed commands before discovering or executing any tools.
+        const bool single = a.size() == 1 && (a[0] == L"--detect" || a[0] == L"--check-compatible" ||
+                                              a[0] == L"--install-ffmpeg" || a[0] == L"--approve-ffmpeg");
+        const bool command = single || (a.size() == 2 && a[0] == L"--probe") ||
+                             (a.size() == 3 && a[0] == L"--convert") ||
+                             ((a.size() == 2 || a.size() == 3) && a[0] == L"--analyze");
+        if (!command || (deepSearch && (a[0] != L"--detect" || !explicitFFmpeg.empty())) ||
+            (a[0] == L"--check-compatible" && explicitFFmpeg.empty()))
+            throw AppError(TextId::CLICommand);
         FFmpegManager manager(log);
         std::optional<FFmpegInstallation> tools;
         if (a[0] == L"--approve-ffmpeg") {
@@ -110,15 +125,22 @@ int wmain(int argc, wchar_t** argv) {
             return 0;
         }
         tools = explicitFFmpeg.empty()
-                    ? manager.Detect(cancelled)
+                    ? manager.Detect(cancelled, {}, {deepSearch ? DiscoveryMode::Deep : DiscoveryMode::Quick})
                     : std::optional(manager.Check(explicitFFmpeg, cancelled, a[0] != L"--check-compatible"));
         if (!tools) {
+            if (a[0] == L"--detect")
+                std::cout << manager.Discovery().ToJson().dump(2) << '\n';
+            if (cancelled)
+                throw AppError(TextId::Cancelled);
             for (const auto& path : manager.UnapprovedCandidates())
                 std::cerr << "Discovered, not executed: " << PathText(path) << '\n';
             throw AppError(TextId::FFmpegNotFoundCLI);
         }
         if (a[0] == L"--detect" || a[0] == L"--check-compatible") {
-            std::cout << tools->ToJson().dump(2) << '\n';
+            auto result = tools->ToJson();
+            if (explicitFFmpeg.empty())
+                result["discovery"] = manager.Discovery().ToJson();
+            std::cout << result.dump(2) << '\n';
             return 0;
         }
         if (a[0] == L"--probe" && a.size() == 2) {

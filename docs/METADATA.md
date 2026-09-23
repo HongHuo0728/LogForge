@@ -52,4 +52,4 @@ Additional evidence still needed:
 
 V1 does not copy arbitrary camera data streams, Dolby Vision metadata, chapters, GPS tracks, anamorphic display transforms or complex edit lists. Files requiring those should be treated as outside the certified workflow. We do not claim binary equality with an iPhone file.
 
-Version 1.1.0 records `logforge.version=1.1.0` and `logforge.build=26923C`. These are application version identifiers, not camera-model or Apple compatibility identifiers.
+Version 1.1.1 records `logforge.version=1.1.1` and `logforge.build=26923D`. These are application version identifiers, not camera-model or Apple compatibility identifiers.

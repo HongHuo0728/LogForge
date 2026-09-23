@@ -1,4 +1,5 @@
 #pragma once
+#include "Discovery.h"
 #include "Settings.h"
 #include <commctrl.h>
 
@@ -32,6 +33,9 @@ class UiStyle {
     int dpi_ = 96;
 };
 std::wstring WindowText(HWND window);
+std::wstring EditLines(const std::wstring& text);
+inline constexpr UINT FocusRevealMessage = WM_APP + 41;
+int ScrollDeltaToReveal(HWND parent, HWND focused, int dpi);
 HWND MakeControl(HWND parent, int id, const wchar_t* klass, const std::wstring& text, DWORD style,
                  const UiStyle& theme, bool compact = false);
 void SetCombo(HWND combo, const std::vector<std::wstring>& choices, int selected);
@@ -39,4 +43,7 @@ bool ShowSettings(HWND owner, AppSettings& settings, const fs::path& snapshot = 
 void ShowDetails(HWND owner, const std::wstring& title, const std::wstring& text,
                  const AppSettings& settings);
 bool SaveWindowSnapshot(HWND window, const fs::path& destination);
+std::optional<fs::path> ShowFFmpegCandidates(HWND owner, const std::vector<DiscoveryCandidate>& candidates,
+                                             const AppSettings& settings, const fs::path& snapshot = {},
+                                             int exerciseSelection = -2);
 } // namespace logforge

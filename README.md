@@ -4,13 +4,22 @@ A small native Windows tool that re-encodes **BT.2020 HLG ProRes** into **Apple 
 
 LogForge changes the pixels using published color mathematics. It does not restore clipped highlights, crushed shadows, tone-mapped-away detail, or information lost in a camera's ISP. It cannot turn processed phone footage into the original sensor capture.
 
-**Version 1.1.0 · Build 26923C.** Apple Log automatic input identification is **verified in DaVinci Resolve Studio 20.3.2.9 on Windows**, using DaVinci YRGB Color Managed. Output is **Apple Log / Rec.2020 with Video levels**. This is Apple Log, not Apple Log 2 / Apple Wide Gamut. See the [native-reference and real-import evidence](docs/APPLE_LOG_IDENTIFICATION.md).
+**Version 1.1.1 · Build 26923D.** The unchanged Apple Log identification writer was **verified in 1.1.0 with DaVinci Resolve Studio 20.3.2.9 on Windows**, using DaVinci YRGB Color Managed. The 1.1.1 editor import was not reverified because the installed Resolve scripting interface did not connect. Output is **Apple Log / Rec.2020 with Video levels**. This is Apple Log, not Apple Log 2 / Apple Wide Gamut. See the [native-reference and real-import evidence](docs/APPLE_LOG_IDENTIFICATION.md).
 
 ![LogForge Windows interface](docs/images/LogForge.png)
 
 The screenshot uses an empty workspace; no personal video or camera image is included.
 
-## What's new in 1.1.0
+## What's new in 1.1.1
+
+- **Fast FFmpeg startup:** Quick discovery has a shared three-second filesystem budget. A verified managed/saved pair avoids later searches. Other sources include PATH, Windows App Paths, package installations, bounded common folders and the existing Windows Search index.
+- **Deep search is explicit:** use **Deep search all drives** only when needed, or `LogForge-cli --detect --deep-search`. Startup never falls through to whole-drive traversal.
+- **Review discovered candidates directly:** select a path from the candidate list, review the real executable pair and hashes, and approve before any tool runs. Missing probes and changed/incompatible tools retain their reasons. Search cancellation and failures restore download/manual/retry actions.
+- **Supervised discovery:** potentially blocking filesystem/index queries run in a hidden mode of LogForge itself, with Job Object cancellation and deadlines. Discovery and verification times are reported separately; hashes and numerical qualification are still checked.
+- **Reliability fixes:** descendant-held pipes remain cancellable after a parent exits; excessive output and reader exceptions fail safely. Mixed-case MOV extensions, numeric metadata bounds, temporary trust-file cleanup and worker-buffer allocation are corrected.
+- **Regression audit:** see [confirmed defects and remaining limits](docs/BUG_AUDIT_1.1.1.md) and [actual verification](docs/VALIDATION.md). Apple Log/HLG equations, reference scaling, numerical tolerances and the Resolve identification writer are unchanged.
+
+## Previous release: 1.1.0
 
 Version **1.1.0 (26923C)** includes all changes beginning with the 29.99 fps CFR fix, including the verified Resolve Apple Log identification work. The Apple Log equations, inverse HLG OETF and BT.2408 reference scaling remain unchanged. See the [1.1.0 changelog](CHANGELOG.md) for the complete release scope.
 
@@ -30,10 +39,10 @@ Automatic identification was checked with an unmodified iPhone 15 Pro Max / Blac
 ## Features
 
 - Native Win32 GUI, file dialogs, Unicode paths and file drag-and-drop.
-- Read-only FFmpeg path discovery across accessible local drives; explicit path/hash approval before external tools may run, plus a pinned HTTPS installer.
+- Bounded Quick FFmpeg discovery and optional manual Deep search; explicit path/hash approval before external tools may run, plus a pinned HTTPS installer.
 - Numerical FFmpeg qualification (matrix, range, left/center chroma phase and post-ProRes code values).
 - English (default) and Simplified Chinese; dark (default) and light themes, saved in Settings.
-- Original spectrum-and-curve icon; Windows version 1.1.0 and in-app build display 1.1.0 (26923C).
+- Original spectrum-and-curve icon; Windows version 1.1.1 and in-app build display 1.1.1 (26923D).
 - Double-precision Apple Log and inverse HLG math; 32-bit float RGB transport.
 - ProRes HQ 10-bit 4:2:2 MOV output; audio packet copy, frame rate and raster preservation.
 - Timecode, creation metadata, original Make/Model and ordinary rotation preservation.
@@ -45,9 +54,9 @@ Automatic identification was checked with an unmodified iPhone 15 Pro Max / Blac
 
 ## Install and run
 
-1. Download `LogForge-1.1.0-Windows-x64.zip` from this project's GitHub Releases when published.
+1. Download `LogForge-1.1.1-Windows-x64.zip` from this project's GitHub Releases when published.
 2. Extract the ZIP and run `LogForge.exe`. No installer or administrator rights are required.
-3. Let LogForge discover FFmpeg paths. Unapproved programs are **not executed**. Use **Locate FFmpeg...** to review a discovered path and both SHA-256 hashes, then explicitly approve it; or use **Download FFmpeg** for the pinned build. Buttons disappear after approved tools pass numerical verification. An old saved path alone is not execution approval.
+3. Let LogForge discover FFmpeg paths. Unapproved programs are **not executed**. Use **Review FFmpeg...** to select a discovered candidate and review both SHA-256 hashes, then explicitly approve it. If none is usable, retry Quick search, explicitly start Deep search, choose a file manually, or use **Download FFmpeg** for the pinned build. Buttons disappear after approved tools pass numerical verification. An old saved path alone is not execution approval.
 4. Open or drop one supported video. If chroma siting is absent, explicitly confirm left or center from your recording/export settings; cancel if unknown. Choose a new output `.mov`, then select **Convert to Apple Log**.
 5. Wait for output validation. An existing output file is never overwritten.
 
@@ -101,7 +110,7 @@ Identical packet durations/intervals establish the exact rational cadence, inclu
 
 ## How FFmpeg works
 
-The release ZIP contains **no FFmpeg binaries**. Discovery searches managed/saved paths, PATH, common installations and accessible local drives. It records unknown paths without running them. Only a pinned, SHA-256-verified download or an explicitly approved pair may execute. Approval is stored separately as canonical paths plus SHA-256 for **both ffmpeg and ffprobe**; changes require approval again. While in use, deny-write/delete handles protect the approved executable images. Network shares, inaccessible/offline directories and reparse subdirectories are excluded from disk traversal; skipped locations are reported.
+The release ZIP contains **no FFmpeg binaries**. Quick discovery searches managed/saved paths, app-adjacent tools, PATH, App Paths, actual WinGet/Scoop/Chocolatey installations, bounded common folders and the existing Windows Search index. It never starts a full-drive search automatically. Deep search of accessible local drives is an explicit user action. It records unknown paths without running them. Only a pinned, SHA-256-verified download or an explicitly approved pair may execute. Approval is stored separately as canonical paths plus SHA-256 for **both ffmpeg and ffprobe**; changes require approval again. While in use, deny-write/delete handles protect the approved executable images. Network shares, inaccessible/offline directories and reparse subdirectories are excluded from disk traversal; skipped locations are reported.
 
 A compatible feature list is not sufficient for conversion. **Verified FFmpeg** additionally passes integer-signal matrix/range tests, half-pixel chroma tests and ProRes HQ encode/decode sampling. **Compatible but unverified FFmpeg** may be inspected but cannot transcode. Failed numerical tests are errors, never warnings. See [trust and provider details](docs/FFMPEG_PROVIDER.md).
 
@@ -138,7 +147,7 @@ Generate the small portable package:
 
 ```powershell
 cpack --config build/CPackConfig.cmake -C Release -B dist
-python tests/package_audit.py --zip dist/LogForge-1.1.0-Windows-x64.zip --exe build/Release/LogForge.exe
+python tests/package_audit.py --zip dist/LogForge-1.1.1-Windows-x64.zip --exe build/Release/LogForge.exe
 ```
 
 Pushes and pull requests configure/build/test on Windows. Every build creates a ZIP artifact; version tags must match the CMake version, and the workflow does not silently publish a GitHub Release. See [validation details](docs/VALIDATION.md) and [architecture](docs/ARCHITECTURE.md).

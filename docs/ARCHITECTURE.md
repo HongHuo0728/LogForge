@@ -66,10 +66,38 @@ The UI uses documented DWM caption attributes where available and owner-drawn na
 
 ## FFmpeg discovery
 
-Quick paths are discovered before accessible local-volume roots. Unknown files are never executed by discovery. A managed SHA-verified receipt or explicit approval of both executable hashes is required before version/capability/numeric tests. Changed hashes require renewed approval. A known path is not enough. Candidates requiring review are logged and traversal continues. The scan uses directory enumeration with cancellation at each entry, skips reparse subdirectories to avoid loops, and runs at background thread/I/O priority. Progress reports the drive and actual folder/candidate/skip counts; there is no invented percentage.
+`DiscoveryHelper.cpp` implements a hidden entry point in both application binaries;
+no additional helper EXE is distributed. The parent supervises it with the same
+Job Object/process abstraction as FFmpeg. File/index queries run outside the UI
+process, so a blocked provider cannot defeat cancellation or the Quick deadline.
 
-A verified path is cached but is checked again on every launch. Download/manual buttons are visible only after completed discovery finds no usable pair, and hidden after success. Cancelled discovery leaves a rescan action. The installer uses the same capability checks before reporting success. Traversal tests inject small explicit directory roots; an additional test uses the real FFmpeg binaries after invalid fixtures and verifies cached rediscovery.
+Quick discovery shares a 3,000 ms budget across the preferred and fallback passes.
+Managed and saved paths are discovered first and fully verified. A verified pair
+stops further discovery. Hashes/capability/reference-signal validation are timed
+separately and do not consume the filesystem budget. Otherwise the remaining
+budget covers app-adjacent tools, PATH, registry App Paths, WinGet/Scoop/Chocolatey
+actual installations, common folders (depth 3, up to 4,096 entries per root), then
+an optional exact-filename query against the existing Windows Search index.
+Known folders come from Windows, independently of the app data override. Index
+absence/failure is not proof that FFmpeg is absent. No package-manager or shim
+commands are executed, no service/index settings are modified.
+
+Only explicit Deep mode enumerates accessible fixed/removable drives. Reparse
+subdirectories, offline/protected locations and network shares are skipped.
+Results stream before completion; a 256-candidate safety limit is reported rather
+than silently claiming complete coverage. The report includes completion reason,
+source, canonical pair, trust/capability issue, folder counts and timings.
+
+Unknown candidates are never executed. Selection stops a live Deep search before
+approval/validation. Both hashes are still checked while deny-write/delete handles
+are held. GUI failure/cancellation always restores download, manual and retry
+controls. A successful verification hides them. All background jobs remain serial.
+
+Pipe readers propagate exceptions. The process watcher remains active until both
+readers finish, even if the primary process already exited. Stdout callback lines
+are bounded to 1 MiB; stderr/progress lines to 64 KiB. Jobs terminate before reader
+joins on cancellation/failure, including partial reader-thread construction.
 
 ## Version and resources
 
-CMake defines version 1.1.0 and build 26923C. Generated headers feed both the C++ display/logs/metadata and the Windows VERSIONINFO resource. The manifest uses the four-part assembly version. Both executables embed the same nine-size icon. Portable packaging uses an explicit document/image allowlist; an independent ZIP audit rejects unexpected files and compares the packaged executable to the tested Release binary.
+CMake defines version 1.1.1 and build 26923D. Generated headers feed both the C++ display/logs/metadata and the Windows VERSIONINFO resource. The manifest uses the four-part assembly version. Both executables embed the same nine-size icon. Portable packaging uses an explicit document/image allowlist; an independent ZIP audit rejects unexpected files and compares the packaged executable to the tested Release binary.

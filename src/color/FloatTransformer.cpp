@@ -29,15 +29,21 @@ struct FloatTransformer::Impl {
     size_t epoch = 0, pending = 0;
     std::exception_ptr error;
     std::vector<SignalStatistics> stats;
+    std::vector<std::vector<float>> tiles;
     std::vector<std::jthread> workers;
     static constexpr size_t Tile = 16384;
-    Impl(double e, const ToneAdjustments& t, unsigned n) : exposure(e), tone(t), stats(n) {
+    Impl(double e, const ToneAdjustments& t, unsigned n) : exposure(e), tone(t), stats(n), tiles(n) {
         ValidateExposureStops(e);
         ValidateToneAdjustments(t);
+        // Allocate on the caller before starting workers. Allocation failure must
+        // propagate through the job's exception boundary, never escape a thread.
+        for (auto& tile : tiles)
+            tile.resize(tone.enabled ? Tile * 3 : 0);
+        workers.reserve(n);
         for (unsigned worker = 0; worker < n; ++worker)
             workers.emplace_back([this, worker](std::stop_token stop) {
                 size_t seen = 0;
-                std::vector<float> tile(tone.enabled ? Tile * 3 : 0);
+                auto& tile = tiles[worker];
                 while (true) {
                     {
                         std::unique_lock lock(mutex);

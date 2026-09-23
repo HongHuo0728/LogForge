@@ -1,5 +1,27 @@
 # Changelog
 
+## 1.1.1 (26923D)
+
+A discovery and reliability update. The official Apple Log / HLG mathematics,
+BT.2408 scaling, float intermediate, numerical tolerances and Apple Log
+identification writer remain unchanged.
+
+- Replace automatic all-drive traversal with a three-second Quick discovery budget.
+- Stop after a managed/saved installation passes the existing trust and numerical checks; otherwise inspect PATH, App Paths, actual package locations, bounded common folders and the existing Windows Search index.
+- Resolve package locations using Windows known folders and real environment variables, independently of `LOGFORGE_DATA_DIR`.
+- Keep Deep search as an explicit cancellable GUI/CLI action with real directory counts.
+- Isolate filesystem/index queries in a hidden mode of the same executable, supervised by a Job Object.
+- Add a candidate list showing paths, origins, paired-file status and rejection reasons; selection still requires path/hash approval.
+- Restore download/manual/retry controls after cancellation, timeout, failed verification or refused approval. Reset discovery counters before every run.
+- Keep process deadlines active until output pipes close, including after the original process exits. Bound oversized lines and propagate reader exceptions without terminating the application.
+- Reject malformed CLI commands before discovery, accept mixed-case `.mov` extensions, validate numeric metadata before integer conversion and use checked disk-space estimates.
+- Clean failed trust-save temporary files and allocate Creative worker buffers inside the caller's exception boundary.
+- Keep high-DPI keyboard focus visible, correct multiline diagnostic text, update candidate scroll extents on DPI changes, and refresh system colors.
+- Add root-cause regressions and a severity-based bug audit. Update both executable resources, manifest, UI and CLI to 1.1.1 / 26923D.
+
+Verification results and limitations are recorded in [VALIDATION](docs/VALIDATION.md)
+and [BUG_AUDIT_1.1.1](docs/BUG_AUDIT_1.1.1.md).
+
 ## 1.1.0 (26923C)
 
 This release includes all work beginning with the 29.99 fps CFR detection fix,

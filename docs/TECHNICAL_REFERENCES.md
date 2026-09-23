@@ -106,3 +106,9 @@ The optional 0.1.3 `creative-luma-v1` curve is a LogForge creative adjustment re
     Local mount paths supplement ordinary drive letters. Remote, unavailable and unreadable locations are not asserted to have been searched.
 24. **Microsoft directory enumeration**: https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-findfirstfileexw
     Discovery uses explicit enumeration and reparse/offline exclusions, with cancellation and actual counts.
+
+## Windows discovery and supervision (1.1.1)
+
+- [Microsoft: Application Registration / App Paths](https://learn.microsoft.com/en-us/windows/win32/shell/app-registration) — per-user/machine executable registration; read-only inspection.
+- [Microsoft: Querying the index with ADO](https://learn.microsoft.com/en-us/previous-versions/windows/desktop/legacy/ff684395(v=vs.85)) — optional Windows Search SQL query; not a complete inventory of installed executables.
+- Windows Known Folder APIs resolve LocalAppData, Profile, ProgramFiles and ProgramData. Package directories are inspected without invoking WinGet, Scoop, Chocolatey or a shim. A stale/non-indexed path does not grant trust.

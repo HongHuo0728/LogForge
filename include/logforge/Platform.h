@@ -94,6 +94,6 @@ struct ProcessResult {
 };
 ProcessResult RunProcess(const fs::path& exe, const std::vector<std::wstring>& args,
                          const std::atomic_bool* cancel = nullptr, int timeoutSeconds = 30,
-                         const LineCallback& onLine = {});
+                         const LineCallback& onLine = {}, uint64_t timeoutMilliseconds = 0);
 std::string SHA256(const fs::path& file);
 } // namespace logforge

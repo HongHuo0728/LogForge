@@ -1,5 +1,59 @@
 # Validation record
 
+## 1.1.1 (26923D): discovery and reliability
+
+Local verification: 2026-09-23, Windows build 26200, MSVC x64 Release, static runtime.
+
+- Configure and Release build passed. The complete **19/19 CTest** suite passed in
+  **240.65 seconds**, including actual codec conversions, timing/metadata/audio/
+  rotation, numeric samples, publication protection and 240 frames of 4K120.
+- After final discovery/UI refinements, **14/14 core/resource tests** passed in
+  **12.46 seconds**. This includes the added long-path regression on a system where
+  ordinary non-extended filesystem paths cannot exceed MAX_PATH. No tolerance or
+  validator was weakened. AppleLog.cpp, HLG.cpp and AppleLogIdentification.cpp are
+  unchanged from 1.1.0.
+- Saved approved pair: first isolated-profile launch **47 ms discovery + 1797 ms
+  full verification** (1853 ms total); repeat **47 + 1734 ms** (1788 ms total).
+  These are application launches, not a rebooted/cold Windows file-cache benchmark.
+  With no approved/saved pair, the optional-source pass returned zero candidates
+  in 141 ms on this host. That result does not mean FFmpeg is absent everywhere.
+- Owned stalled-helper tests enforce the Quick deadline while retaining streamed
+  candidates. Other checks cover Deep opt-in, fake executable non-execution,
+  environment package paths, quoted/expanded registry values, Unicode/long paths,
+  missing pairs, duplicate results, cancellation, hash changes and trust-save failure.
+- A held-pipe descendant test verifies that root-process exit cannot defeat the
+  timeout/cancel watcher. Long stdout/stderr and throwing callback fixtures fail
+  safely. The GUI close test also confirms no surviving descendant.
+- The 4K120 test processed **240 frames, 3840 x 2160**, with a **4 MiB application
+  float buffer**. Conversion took **64.02 seconds (3.75 fps)**; this is support for
+  120-fps source media, not a real-time performance claim. Maximum sampled
+  post-encode luma error was **0.656 code values**, within the unchanged limit.
+  Application private memory was about 6.27 MiB; this excludes FFmpeg child memory.
+- The native GUI matrix covers English/Simplified Chinese, dark/light and
+  96/144/192 DPI layout values, plus two missing-tool cases. It exercises real
+  candidate dialogs, No on execution approval, Settings Save/Cancel, injected
+  download/hash failures, actual search cancellation and repeated dialogs.
+  Native caches are warmed with 20 identical cycles before measuring another 20;
+  GDI and USER resource counts must remain exactly equal. Earlier unequal samples
+  were decreases caused by cache/teardown state, not a relaxed leak threshold.
+- **Resolve import was not reverified in 1.1.1.** Resolve was launched, but the
+  installed scripting SDK returned no connection. No temporary project was created
+  and no clip settings were changed. The unchanged writer's real 1.1.0 native/A-B
+  evidence below remains historical evidence; it is not reported as a new pass.
+- Version resource checks passed: text FileVersion/ProductVersion 1.1.1,
+  numeric resource/manifest 1.1.1.0, UI/CLI 1.1.1 (26923D).
+
+Final GUI checks passed: **14 language/theme/DPI/missing-tool cases**, **one
+close-during-active-search case**, and **two real standard/Creative conversions**.
+All final focus, CRLF, approval-refusal, cancellation and resource assertions passed.
+The empty English/dark main-window screenshot was refreshed from this final EXE.
+The portable ZIP is audited against the **17-file allowlist**, CRC integrity and
+byte-identical Release EXE; FFmpeg, test tools, media, logs and settings are excluded.
+The adjacent .zip.sha256 file records the final archive hash. The original 1.1.0
+validation history is retained below.
+See [the defect audit and remaining limits](BUG_AUDIT_1.1.1.md).
+
+
 ## 1.1.0 (26923C) cleanup and release verification
 
 Local verification date: **2026-09-23**. The 1.1.0 scope includes both the

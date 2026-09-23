@@ -30,7 +30,7 @@ def main():
     env['LOGFORGE_DATA_DIR'] = str(work / 'appdata')
     run([args.cli.resolve(),'--approve-ffmpeg','--ffmpeg',ff],env=env)
     width, height, frames = 320, 180, 60
-    source, output = work / 'HLG 测试 input.mov', work / 'Apple Log output.mov'
+    source, output = work / 'HLG 测试 input.mov', work / 'Apple Log output.mOv'
     raw = work / 'patterns.gbrpf32le'
     pixels = array.array('f')
     for channel in (1, 2, 0):  # GBR planar

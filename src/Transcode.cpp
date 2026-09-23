@@ -4,6 +4,7 @@
 #include "logforge/FloatTransformer.h"
 #include <array>
 #include <cmath>
+#include <limits>
 #include <sstream>
 #include <thread>
 
@@ -32,7 +33,7 @@ ValidationReport TranscodeJob::Run(const FFmpegInstallation& tools, const MediaI
     if (auto errors = m.UnsupportedReasons(); !errors.empty())
         throw AppError(TextId::InputRejected, errors);
     const auto dest = fs::absolute(output);
-    if (dest.extension() != L".mov" && dest.extension() != L".MOV")
+    if (_wcsicmp(dest.extension().c_str(), L".mov") != 0)
         throw AppError(TextId::OutputExtension);
     if (fs::exists(dest))
         throw AppError(TextId::OutputExists);
@@ -44,9 +45,11 @@ ValidationReport TranscodeJob::Run(const FFmpegInstallation& tools, const MediaI
     m.fps = m.cadence.rate;
     const auto expectedFrames = m.cadence.packets;
     // Conservative practical estimate, not an assertion of exact ProRes bitrate.
-    const auto estimate = static_cast<uint64_t>(m.width) * m.height *
-                              static_cast<uint64_t>(std::ceil(m.fps.Value() * m.videoDuration)) * 2ull +
-                          256ull * 1024 * 1024;
+    const long double estimatedBytes =
+        static_cast<long double>(m.width) * m.height * expectedFrames * 2 + 256ull * 1024 * 1024;
+    if (estimatedBytes >= static_cast<long double>(std::numeric_limits<uint64_t>::max()))
+        throw AppError(TextId::OutputSpace);
+    const auto estimate = static_cast<uint64_t>(estimatedBytes);
     if (fs::space(dest.parent_path()).available < estimate)
         throw AppError(TextId::OutputSpace);
     fs::path partial =
@@ -128,22 +131,45 @@ ValidationReport TranscodeJob::Run(const FFmpegInstallation& tools, const MediaI
     logCommand(log, tools.ffmpeg, encode);
     FFmpegProcess decoder(tools.ffmpeg, decode), encoder(tools.ffmpeg, encode, true);
     std::string decoderError, encoderError;
-    std::exception_ptr progressError;
-    std::jthread readDecoderError([&] {
-        ReadLines(decoder.ErrorPipe(), [&](const auto& line) {
-            log.Write("decode: " + line);
-            if (decoderError.size() < 65536)
-                decoderError += line + '\n';
-        });
+    std::exception_ptr progressError, decodeReadError, encodeReadError;
+    std::jthread readDecoderError, readEncoderError, progressReader, cancellation;
+    struct StopBeforeJoin {
+        FFmpegProcess &decoder, &encoder;
+        bool complete = false;
+        ~StopBeforeJoin() {
+            if (!complete) {
+                decoder.Terminate();
+                encoder.Terminate();
+            }
+        }
+    } stopReaders{decoder, encoder};
+    readDecoderError = std::jthread([&] {
+        try {
+            ReadLines(decoder.ErrorPipe(), [&](const auto& line) {
+                log.Write("decode: " + line);
+                if (decoderError.size() + line.size() + 1 <= 65536)
+                    decoderError += line + '\n';
+            });
+        } catch (...) {
+            decodeReadError = std::current_exception();
+            decoder.Terminate();
+            encoder.Terminate();
+        }
     });
-    std::jthread readEncoderError([&] {
-        ReadLines(encoder.ErrorPipe(), [&](const auto& line) {
-            log.Write("encode: " + line);
-            if (encoderError.size() < 65536)
-                encoderError += line + '\n';
-        });
+    readEncoderError = std::jthread([&] {
+        try {
+            ReadLines(encoder.ErrorPipe(), [&](const auto& line) {
+                log.Write("encode: " + line);
+                if (encoderError.size() + line.size() + 1 <= 65536)
+                    encoderError += line + '\n';
+            });
+        } catch (...) {
+            encodeReadError = std::current_exception();
+            decoder.Terminate();
+            encoder.Terminate();
+        }
     });
-    std::jthread progressReader([&] {
+    progressReader = std::jthread([&] {
         try {
             std::array<char, 8192> b{};
             std::string pending;
@@ -153,6 +179,8 @@ ValidationReport TranscodeJob::Run(const FFmpegInstallation& tools, const MediaI
                 pending.append(b.data(), got);
                 size_t pos;
                 while ((pos = pending.find('\n')) != std::string::npos) {
+                    if (pos > 65536)
+                        throw AppError(TextId::ProcessOutputLimit);
                     auto line = pending.substr(0, pos);
                     pending.erase(0, pos + 1);
                     auto equal = line.find('=');
@@ -177,6 +205,8 @@ ValidationReport TranscodeJob::Run(const FFmpegInstallation& tools, const MediaI
                     } catch (const std::out_of_range&) {
                     }
                 }
+                if (pending.size() > 65536)
+                    throw AppError(TextId::ProcessOutputLimit);
             }
         } catch (...) {
             progressError = std::current_exception();
@@ -184,7 +214,7 @@ ValidationReport TranscodeJob::Run(const FFmpegInstallation& tools, const MediaI
             encoder.Terminate();
         }
     });
-    std::jthread cancellation([&](std::stop_token stop) {
+    cancellation = std::jthread([&](std::stop_token stop) {
         while (!stop.stop_requested()) {
             if (cancel.load()) {
                 decoder.Terminate();
@@ -247,17 +277,25 @@ ValidationReport TranscodeJob::Run(const FFmpegInstallation& tools, const MediaI
         decoder.Wait();
         encoder.Wait();
     }
+    // Both primary processes have exited; release any descendant-held pipe ends.
+    decoder.Terminate();
+    encoder.Terminate();
     cancellation.request_stop();
     cancellation.join();
     readDecoderError.join();
     readEncoderError.join();
     progressReader.join();
+    stopReaders.complete = true;
     log.Write("Decoder exit=" + std::to_string(decodeExit) + "; encoder exit=" + std::to_string(encodeExit) +
               "; processed frames=" + std::to_string(frames));
     if (cancel.load())
         throw AppError(TextId::CancelledClean);
     if (progressError)
         std::rethrow_exception(progressError);
+    if (decodeReadError)
+        std::rethrow_exception(decodeReadError);
+    if (encodeReadError)
+        std::rethrow_exception(encodeReadError);
     if (workError) {
         try {
             std::rethrow_exception(workError);

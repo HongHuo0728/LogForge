@@ -14,7 +14,7 @@ def main():
                 'licenses/nlohmann-json-MIT.txt', 'docs/images/LogForge.png'}
     expected |= {f'docs/{name}.md' for name in (
         'ARCHITECTURE', 'COLOR_PIPELINE', 'CREATIVE_ADJUSTMENTS', 'FFMPEG_PROVIDER',
-        'ICON', 'METADATA', 'TECHNICAL_REFERENCES', 'VALIDATION', 'APPLE_LOG_IDENTIFICATION')}
+        'ICON', 'METADATA', 'TECHNICAL_REFERENCES', 'VALIDATION', 'APPLE_LOG_IDENTIFICATION', 'BUG_AUDIT_1.1.1')}
     with ZipFile(args.zip) as archive:
         files = [entry for entry in archive.infolist() if not entry.is_dir()]
         names = [entry.filename for entry in files]

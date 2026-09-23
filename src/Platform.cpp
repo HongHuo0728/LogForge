@@ -231,7 +231,14 @@ void ReadLines(HANDLE pipe, const LineCallback& fn) {
     std::string line;
     std::array<char, 8192> buffer{};
     DWORD n{};
-    while (ReadFile(pipe, buffer.data(), static_cast<DWORD>(buffer.size()), &n, nullptr) && n) {
+    for (;;) {
+        if (!ReadFile(pipe, buffer.data(), static_cast<DWORD>(buffer.size()), &n, nullptr)) {
+            if (GetLastError() == ERROR_BROKEN_PIPE)
+                break;
+            throw AppError(TextId::ProcessRead);
+        }
+        if (!n)
+            break;
         for (DWORD i = 0; i < n; ++i) {
             char c = buffer[i];
             if (c == '\n' || c == '\r') {
@@ -239,19 +246,34 @@ void ReadLines(HANDLE pipe, const LineCallback& fn) {
                     fn(line);
                     line.clear();
                 }
-            } else if (line.size() < 65536)
+            } else {
+                if (line.size() >= 65536)
+                    throw AppError(TextId::ProcessOutputLimit);
                 line += c;
+            }
         }
     }
     if (!line.empty())
         fn(line);
 }
 ProcessResult RunProcess(const fs::path& exe, const std::vector<std::wstring>& args,
-                         const std::atomic_bool* cancel, int timeout, const LineCallback& fn) {
+                         const std::atomic_bool* cancel, int timeout, const LineCallback& fn,
+                         uint64_t timeoutMilliseconds) {
     FFmpegProcess p(exe, args);
     ProcessResult result;
-    std::exception_ptr readError;
-    std::jthread out([&] {
+    std::exception_ptr readError, stderrError;
+    std::atomic_bool outDone = false, errDone = false;
+    std::jthread out, err;
+    // Also terminate before jthread destruction if a reader cannot be created.
+    struct StopBeforeJoin {
+        FFmpegProcess& process;
+        bool complete = false;
+        ~StopBeforeJoin() {
+            if (!complete)
+                process.Terminate();
+        }
+    } stop{p};
+    out = std::jthread([&] {
         try {
             std::array<char, 16384> b{};
             std::string pending;
@@ -265,9 +287,13 @@ ProcessResult RunProcess(const fs::path& exe, const std::vector<std::wstring>& a
                     pending.append(b.data(), n);
                     size_t pos;
                     while ((pos = pending.find('\n')) != std::string::npos) {
+                        if (pos > 1024 * 1024)
+                            throw AppError(TextId::ProcessOutputLimit);
                         fn(pending.substr(0, pos));
                         pending.erase(0, pos + 1);
                     }
+                    if (pending.size() > 1024 * 1024)
+                        throw AppError(TextId::ProcessOutputLimit);
                 }
             }
             if (fn && !pending.empty())
@@ -276,21 +302,32 @@ ProcessResult RunProcess(const fs::path& exe, const std::vector<std::wstring>& a
             readError = std::current_exception();
             p.Terminate();
         }
+        outDone = true;
     });
-    std::jthread err([&] {
-        ReadLines(p.ErrorPipe(), [&](const auto& line) {
-            if (result.error.size() < 2 * 1024 * 1024)
-                result.error += line + '\n';
-        });
+    err = std::jthread([&] {
+        try {
+            ReadLines(p.ErrorPipe(), [&](const auto& line) {
+                if (result.error.size() + line.size() + 1 <= 2 * 1024 * 1024)
+                    result.error += line + '\n';
+            });
+        } catch (...) {
+            stderrError = std::current_exception();
+            p.Terminate();
+        }
+        errDone = true;
     });
     const auto start = std::chrono::steady_clock::now();
     bool timedOut = false;
-    while (p.Running()) {
+    // A descendant can hold pipe handles after the original process exits.
+    // Cancellation and the deadline must remain active until readers finish.
+    while (p.Running() || !outDone.load() || !errDone.load()) {
         if (cancel && cancel->load()) {
             p.Terminate();
             break;
         }
-        if (timeout > 0 && std::chrono::steady_clock::now() - start > std::chrono::seconds(timeout)) {
+        const auto budget =
+            timeoutMilliseconds ? timeoutMilliseconds : static_cast<uint64_t>(std::max(timeout, 0)) * 1000;
+        if (budget && std::chrono::steady_clock::now() - start > std::chrono::milliseconds(budget)) {
             timedOut = true;
             p.Terminate();
             break;
@@ -300,8 +337,11 @@ ProcessResult RunProcess(const fs::path& exe, const std::vector<std::wstring>& a
     result.exitCode = p.Wait();
     out.join();
     err.join();
+    stop.complete = true;
     if (readError)
         std::rethrow_exception(readError);
+    if (stderrError)
+        std::rethrow_exception(stderrError);
     if (cancel && cancel->load())
         throw AppError(TextId::Cancelled);
     if (timedOut)

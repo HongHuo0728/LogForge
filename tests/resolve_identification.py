@@ -25,8 +25,10 @@ def sha256(path):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--reference', type=Path, required=True)
-    parser.add_argument('--baseline', type=Path, required=True)
+    parser.add_argument('--reference', type=Path)
+    parser.add_argument('--baseline', type=Path)
+    parser.add_argument('--production-only', action='store_true',
+                        help='Regression import of new generated outputs; does not establish native equivalence')
     parser.add_argument('--production', type=Path, required=True)
     parser.add_argument('--candidate', action='append', default=[],
                         help='Optional expected-color-space=path pair for an isolated A/B file')
@@ -37,9 +39,14 @@ def main():
                         'Blackmagic Design/DaVinci Resolve/Support/Developer/Scripting/Modules')
     args = parser.parse_args()
     assert not args.report.exists(), 'Refusing to overwrite an earlier test report'
-    cases = [('native-reference', args.reference, 'Apple Log'),
-             ('baseline', args.baseline, 'Rec.2020 (Scene)'),
-             ('production', args.production, 'Apple Log')]
+    if args.production_only:
+        assert not args.reference and not args.baseline
+        cases = [('production', args.production, 'Apple Log')]
+    else:
+        assert args.reference and args.baseline, 'Full A/B testing requires both reference and baseline'
+        cases = [('native-reference', args.reference, 'Apple Log'),
+                 ('baseline', args.baseline, 'Rec.2020 (Scene)'),
+                 ('production', args.production, 'Apple Log')]
     for index, candidate in enumerate(args.candidate):
         expected, path = candidate.split('=', 1)
         cases.append((f'candidate-{index + 1}', Path(path), expected))
@@ -63,7 +70,8 @@ def main():
     project = manager.CreateProject(name)
     assert project
     report = {'product': resolve.GetProductName(), 'version': resolve.GetVersionString(),
-              'project': name, 'clip_color_space_set_by_script': False,
+              'project': name, 'production_only_regression': args.production_only,
+              'clip_color_space_set_by_script': False,
               'clip_lut_set_by_script': False, 'results': []}
     try:
         for key, value in [('colorScienceMode', 'davinciYRGBColorManagedv2'),

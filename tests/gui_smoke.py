@@ -4,6 +4,7 @@ Requires an interactive Windows desktop. Missing FFmpeg is an explicitly injecte
 UI state; disk traversal and real capabilities are covered by separate CTests.
 """
 import argparse
+import ctypes
 import json
 import os
 from pathlib import Path
@@ -46,10 +47,30 @@ def main():
         assert (result['language'], result['theme'], result['dpi']) == (language, theme, dpi), result
         assert result['creative_enabled'] == creative, result
         assert result['install_visible'] == result['manual_visible'] == missing, result
-        for image in ('main.png', 'settings.png', 'switched.png', 'settings-cancel.png'):
+        assert all(value for value in result['reliability_checks'].values() if isinstance(value, bool)), result
+        for image in ('main.png', 'settings.png', 'switched.png', 'settings-cancel.png', 'candidates.png'):
             assert (case / image).read_bytes().startswith(b'\x89PNG\r\n\x1a\n'), image
         results.append({'case': name, **result})
         print('PASS:', name, flush=True)
+    close = args.work.resolve() / 'close-active-search'
+    close.mkdir(exist_ok=True)
+    env = {k.upper(): v for k, v in os.environ.items()}
+    env['LOGFORGE_DATA_DIR'] = str(close / 'appdata')
+    subprocess.run([str(args.exe.resolve()), '--ui-test', str(close), '--close-search-test'],
+                   env=env, check=True, timeout=8)
+    pid = int((close / 'descendant.txt').read_text())
+    kernel = ctypes.WinDLL('kernel32', use_last_error=True)
+    kernel.OpenProcess.restype = ctypes.c_void_p
+    kernel.WaitForSingleObject.argtypes = [ctypes.c_void_p, ctypes.c_ulong]
+    kernel.CloseHandle.argtypes = [ctypes.c_void_p]
+    handle = kernel.OpenProcess(0x100000, False, pid)
+    if handle:
+        try:
+            assert kernel.WaitForSingleObject(handle, 1000) == 0, 'Window close left a descendant alive'
+        finally:
+            kernel.CloseHandle(handle)
+    results.append({'case': 'close-active-search', 'passed': True, 'descendant_terminated': True})
+    print('PASS: close during active held-pipe search, no orphan', flush=True)
     if args.input:
         case = args.work.resolve() / 'actual-conversion'
         case.mkdir(exist_ok=True)

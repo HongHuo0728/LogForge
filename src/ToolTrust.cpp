@@ -49,6 +49,13 @@ void Save(const ToolIdentity& id) {
     const auto dir = DataDirectory();
     fs::create_directories(dir);
     const auto tmp = dir / (L"trust-" + std::to_wstring(GetCurrentProcessId()) + L".tmp");
+    struct Cleanup {
+        fs::path path;
+        ~Cleanup() {
+            std::error_code ec;
+            fs::remove(path, ec);
+        }
+    } cleanup{tmp};
     {
         std::ofstream f(tmp, std::ios::binary | std::ios::trunc);
         f << j.dump(2);

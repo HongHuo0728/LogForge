@@ -17,7 +17,11 @@ class FFmpegManager {
   public:
     explicit FFmpegManager(Logger& logger) : logger_(logger) {}
     std::optional<FFmpegInstallation> Detect(const std::atomic_bool& cancel,
-                                             const DiscoveryCallback& progress = {});
+                                             const DiscoveryCallback& progress = {},
+                                             const DiscoveryOptions& options = {});
+    const DiscoveryReport& Discovery() const {
+        return discovery_;
+    }
     FFmpegInstallation Check(const fs::path& executable, const std::atomic_bool& cancel, bool smoke = true);
     void SaveManual(const fs::path& executable);
     const std::vector<fs::path>& UnapprovedCandidates() const {
@@ -34,6 +38,7 @@ class FFmpegManager {
   private:
     Logger& logger_;
     std::vector<fs::path> unapproved_;
+    DiscoveryReport discovery_;
 };
 struct DownloadSpec {
     std::wstring name, version, url, archiveRoot;

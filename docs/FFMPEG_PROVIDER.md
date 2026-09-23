@@ -21,7 +21,7 @@ FFmpeg.org's download page links to Gyan's Windows builds. FFmpeg.org itself dis
 
 ## Automatic discovery
 
-Discovery visits managed/saved paths, PATH, common locations, then accessible fixed/removable volumes. **A filename is not authorization.** Unknown candidates are listed without running even `-version`. Only approved hashes enter capability/numeric checks. `ffmpeg-trust.json` binds canonical paths and SHA-256 for both ffmpeg and ffprobe. Legacy settings and merely residing inside the managed directory do not grant trust. A change to either binary requires fresh approval.
+Quick discovery first checks managed/saved paths, then app-adjacent tools, PATH, registry App Paths, WinGet/Scoop/Chocolatey real installations, bounded common folders and the existing Windows Search index. All filesystem passes share three seconds. A verified saved pair skips fallback discovery. Deep scanning of accessible fixed/removable volumes is explicit only. **A filename is not authorization.** Unknown candidates are listed without running even `-version`. Only approved hashes enter capability/numeric checks. `ffmpeg-trust.json` binds canonical paths and SHA-256 for both ffmpeg and ffprobe. Legacy settings and merely residing inside the managed directory do not grant trust. A change to either binary requires fresh approval.
 
 Manual selection shows paths/hashes and an execution confirmation (No by default). The CLI authorization command is `--approve-ffmpeg --ffmpeg PATH`. Executable images remain open with deny-write/delete sharing during use. The trust store is not a security boundary against an attacker who already controls the user's settings/application. Approval of a shared-library build also requires trusting its DLL dependencies; the pair hashes do not attest every loaded DLL. The pinned provider build is static.
 
@@ -31,7 +31,7 @@ Execution uses the resolved canonical pair, not the discovered alias. A maliciou
 
 Scanning is read-only apart from LogForge's local logs/cache. Synthetic capability/numeric files are produced only after approval. It never changes PATH or deletes another installation. The UI reports actual directory/candidate counts and supports cancellation. Inaccessible, unavailable and offline locations are skipped; reparse subdirectories, recycle bins and protected restore data are excluded. Remote network drives are not scanned. This is a search of accessible local storage, not a guarantee about unreadable or disconnected disks.
 
-Only after this search completes unsuccessfully do **Download FFmpeg** and **Locate FFmpeg...** appear. Both disappear when a numerically verified installation is ready. A cancelled scan offers **Search drives again** without falsely claiming a complete search.
+After unsuccessful, cancelled, failed or timed-out discovery, download, manual selection, Quick retry and explicit Deep search are available. **Review FFmpeg...** opens the candidate list directly. All fallback controls disappear when a numerically verified installation is ready. Search work is isolated in a supervised hidden mode of the same binary; it requires no extra distributed executable. Hash/feature/numeric verification has separate timing and is not skipped to meet the three-second discovery budget.
 
 ## Installation mechanics
 

@@ -4,6 +4,7 @@
 #include <charconv>
 #include <cmath>
 #include <iomanip>
+#include <limits>
 #include <sstream>
 
 namespace logforge {
@@ -32,6 +33,22 @@ double number(const Json& j, const char* k, double fallback = 0) {
 }
 Json ReadTags(const Json& j) {
     return j.contains("tags") && j["tags"].is_object() ? j["tags"] : Json::object();
+}
+int integer(const Json& j, const char* key) {
+    const auto n = number(j, key);
+    if (n < 0 || n > std::numeric_limits<int>::max() || std::floor(n) != n)
+        throw AppError(TextId::ProbeStreams);
+    return static_cast<int>(n);
+}
+int64_t frameCount(const Json& j) {
+    const auto text = str(j, "nb_frames");
+    if (text.empty() || text == "N/A")
+        return 0;
+    int64_t n = 0;
+    const auto parsed = std::from_chars(text.data(), text.data() + text.size(), n);
+    if (parsed.ec != std::errc{} || parsed.ptr != text.data() + text.size() || n < 0)
+        throw AppError(TextId::ProbeStreams);
+    return n;
 }
 } // namespace
 Rational Rational::Parse(const std::string& value) {
@@ -73,9 +90,9 @@ MediaInfo MediaInfo::Parse(const Json& j, const fs::path& path) {
             m.codec = str(s, "codec_name");
             m.profile = str(s, "profile");
             m.pixelFormat = str(s, "pix_fmt");
-            m.width = static_cast<int>(number(s, "width"));
-            m.height = static_cast<int>(number(s, "height"));
-            m.bitDepth = static_cast<int>(number(s, "bits_per_raw_sample"));
+            m.width = integer(s, "width");
+            m.height = integer(s, "height");
+            m.bitDepth = integer(s, "bits_per_raw_sample");
             if (!m.bitDepth && m.pixelFormat == "yuv422p10le")
                 m.bitDepth = 10;
             m.primaries = str(s, "color_primaries");
@@ -94,7 +111,7 @@ MediaInfo MediaInfo::Parse(const Json& j, const fs::path& path) {
                 std::abs(m.nominalFps.Value() - m.averageFps.Value()) <= m.averageFps.Value() * 0.001)
                 m.fps = m.nominalFps;
             m.timeBase = Rational::Parse(str(s, "time_base"));
-            m.frames = static_cast<int64_t>(number(s, "nb_frames"));
+            m.frames = frameCount(s);
             m.videoDuration = number(s, "duration", m.duration);
             m.startTime = number(s, "start_time");
             m.videoTags = ReadTags(s);
@@ -104,10 +121,9 @@ MediaInfo MediaInfo::Parse(const Json& j, const fs::path& path) {
                 if (side.contains("rotation"))
                     m.rotation = number(side, "rotation");
         } else if (type == "audio") {
-            m.audio.push_back({str(s, "codec_name"), str(s, "channel_layout"),
-                               static_cast<int>(number(s, "channels")),
-                               static_cast<int>(number(s, "sample_rate")), number(s, "start_time"),
-                               number(s, "duration"), ReadTags(s)});
+            m.audio.push_back({str(s, "codec_name"), str(s, "channel_layout"), integer(s, "channels"),
+                               integer(s, "sample_rate"), number(s, "start_time"), number(s, "duration"),
+                               ReadTags(s)});
         } else if (m.timecode.empty() && str(s, "codec_tag_string") == "tmcd")
             m.timecode = str(ReadTags(s), "timecode");
     }

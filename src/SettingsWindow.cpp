@@ -182,6 +182,17 @@ class SettingsWindow {
                 if (!self->controls.empty())
                     self->Layout();
                 return 0;
+            case FocusRevealMessage:
+                self->scroll += ScrollDeltaToReveal(h, reinterpret_cast<HWND>(l), self->dpi);
+                self->Layout();
+                return 0;
+            case WM_SETTINGCHANGE:
+            case WM_SYSCOLORCHANGE:
+                self->style.Apply(self->draft.theme, self->draft.language, self->dpi);
+                for (auto [id, control] : self->controls)
+                    self->style.Control(control);
+                self->style.Window(h);
+                return 0;
             case WM_GETMINMAXINFO: {
                 auto info = reinterpret_cast<MINMAXINFO*>(l);
                 MONITORINFO monitor{sizeof(monitor)};
@@ -370,7 +381,217 @@ struct DetailsWindow {
         return DefWindowProcW(h, m, w, l);
     }
 };
+struct CandidateWindow {
+    HWND window{}, list{}, info{}, help{}, select{}, cancel{};
+    UiStyle style;
+    AppSettings settings;
+    std::vector<DiscoveryCandidate> candidates;
+    std::optional<fs::path> selected;
+    int dpi = 96, exercise = -2;
+    fs::path snapshot;
+    int S(int n) const {
+        return style.Scale(n);
+    }
+    void Extent() {
+        auto dc = GetDC(list);
+        const auto font = SelectObject(dc, style.normal);
+        int extent = 0;
+        for (const auto& c : candidates) {
+            const auto text = c.ffmpeg.wstring();
+            SIZE size{};
+            GetTextExtentPoint32W(dc, text.c_str(), static_cast<int>(text.size()), &size);
+            extent = std::max(extent, static_cast<int>(size.cx) + S(12));
+        }
+        SelectObject(dc, font);
+        ReleaseDC(list, dc);
+        SendMessageW(list, LB_SETHORIZONTALEXTENT, extent, 0);
+    }
+    void Layout() {
+        RECT r{};
+        GetClientRect(window, &r);
+        const int width = MulDiv(r.right, 96, dpi), height = MulDiv(r.bottom, 96, dpi);
+        const int listHeight = std::max(60, (height - 138) / 2);
+        MoveWindow(help, S(20), S(14), S(width - 40), S(46), TRUE);
+        MoveWindow(list, S(20), S(66), S(width - 40), S(listHeight), TRUE);
+        MoveWindow(info, S(20), S(76 + listHeight), S(width - 40), S(std::max(24, height - listHeight - 138)),
+                   TRUE);
+        MoveWindow(select, S(std::max(20, width - 316)), S(height - 48), S(180), S(32), TRUE);
+        MoveWindow(cancel, S(width - 120), S(height - 48), S(100), S(32), TRUE);
+        InvalidateRect(window, nullptr, TRUE);
+    }
+    void Selection() {
+        const auto i = SendMessageW(list, LB_GETCURSEL, 0, 0);
+        EnableWindow(select, i >= 0 && static_cast<size_t>(i) < candidates.size() && candidates[i].paired);
+        if (i < 0 || static_cast<size_t>(i) >= candidates.size())
+            return;
+        const auto& c = candidates[i];
+        const auto text = TranslateWide(
+            {TextId::CandidateInfo,
+             {PathText(c.ffmpeg), c.source, PathText(c.ffprobe), Translate(c.issue, settings.language)}},
+            settings.language);
+        SetWindowTextW(info, EditLines(text).c_str());
+    }
+    void Create() {
+        style.Apply(settings.theme, settings.language, dpi);
+        style.Window(window);
+        help = MakeControl(window, 700, L"STATIC", TranslateWide(TextId::CandidateHelp, settings.language),
+                           SS_NOPREFIX, style, true);
+        list = MakeControl(
+            window, 701, L"LISTBOX", L"",
+            WS_TABSTOP | WS_BORDER | WS_VSCROLL | WS_HSCROLL | LBS_NOTIFY | LBS_NOINTEGRALHEIGHT, style);
+        info =
+            MakeControl(window, 702, L"EDIT", L"",
+                        WS_TABSTOP | ES_MULTILINE | ES_READONLY | ES_AUTOVSCROLL | WS_VSCROLL, style, true);
+        select =
+            MakeControl(window, IDOK, L"BUTTON", TranslateWide(TextId::CandidateSelect, settings.language),
+                        WS_TABSTOP | BS_OWNERDRAW, style);
+        cancel = MakeControl(window, IDCANCEL, L"BUTTON", TranslateWide(TextId::Cancel, settings.language),
+                             WS_TABSTOP | BS_OWNERDRAW, style);
+        for (const auto& c : candidates) {
+            const auto text = c.ffmpeg.wstring();
+            SendMessageW(list, LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(text.c_str()));
+        }
+        Extent();
+        if (!candidates.empty())
+            SendMessageW(list, LB_SETCURSEL, 0, 0);
+        Selection();
+        Layout();
+        SetFocus(list);
+        if (exercise != -2)
+            SetTimer(window, 1, 100, nullptr);
+    }
+    void Command(int id) {
+        if (id == IDCANCEL)
+            DestroyWindow(window);
+        else if (id == IDOK && IsWindowEnabled(select)) {
+            const auto i = SendMessageW(list, LB_GETCURSEL, 0, 0);
+            if (i >= 0 && static_cast<size_t>(i) < candidates.size())
+                selected = candidates[i].ffmpeg;
+            DestroyWindow(window);
+        }
+    }
+    static LRESULT CALLBACK Proc(HWND h, UINT m, WPARAM w, LPARAM l) {
+        auto self = reinterpret_cast<CandidateWindow*>(GetWindowLongPtrW(h, GWLP_USERDATA));
+        if (m == WM_NCCREATE) {
+            self = static_cast<CandidateWindow*>(reinterpret_cast<CREATESTRUCTW*>(l)->lpCreateParams);
+            self->window = h;
+            SetWindowLongPtrW(h, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(self));
+        }
+        if (!self)
+            return DefWindowProcW(h, m, w, l);
+        try {
+            switch (m) {
+            case WM_CREATE:
+                self->Create();
+                return 0;
+            case WM_SIZE:
+                self->Layout();
+                return 0;
+            case WM_SETTINGCHANGE:
+            case WM_SYSCOLORCHANGE:
+                self->style.Apply(self->settings.theme, self->settings.language, self->dpi);
+                for (const auto c : {self->help, self->list, self->info, self->select, self->cancel})
+                    self->style.Control(c, c == self->help || c == self->info);
+                self->Extent();
+                self->style.Window(h);
+                return 0;
+            case WM_COMMAND:
+                if (LOWORD(w) == 701 && HIWORD(w) == LBN_SELCHANGE)
+                    self->Selection();
+                else if (HIWORD(w) == BN_CLICKED)
+                    self->Command(LOWORD(w));
+                return 0;
+            case WM_DRAWITEM:
+                self->style.DrawItem(*reinterpret_cast<DRAWITEMSTRUCT*>(l));
+                return TRUE;
+            case WM_CTLCOLORSTATIC:
+            case WM_CTLCOLOREDIT:
+            case WM_CTLCOLORLISTBOX:
+            case WM_CTLCOLORBTN:
+                return self->style.Color(m, w, l);
+            case WM_PAINT: {
+                PAINTSTRUCT ps{};
+                const auto dc = BeginPaint(h, &ps);
+                RECT r{};
+                GetClientRect(h, &r);
+                FillRect(dc, &r, self->style.background);
+                EndPaint(h, &ps);
+                return 0;
+            }
+            case WM_GETMINMAXINFO: {
+                auto v = reinterpret_cast<MINMAXINFO*>(l);
+                MONITORINFO monitor{sizeof(monitor)};
+                GetMonitorInfoW(MonitorFromWindow(h, MONITOR_DEFAULTTONEAREST), &monitor);
+                v->ptMinTrackSize = {
+                    std::min(self->S(400), static_cast<int>(monitor.rcWork.right - monitor.rcWork.left)),
+                    std::min(self->S(320), static_cast<int>(monitor.rcWork.bottom - monitor.rcWork.top))};
+                return 0;
+            }
+            case WM_DPICHANGED: {
+                self->dpi = HIWORD(w);
+                self->style.Apply(self->settings.theme, self->settings.language, self->dpi);
+                for (const auto c : {self->help, self->list, self->info, self->select, self->cancel})
+                    self->style.Control(c, c == self->help || c == self->info);
+                const auto r = reinterpret_cast<RECT*>(l);
+                SetWindowPos(h, nullptr, r->left, r->top, r->right - r->left, r->bottom - r->top,
+                             SWP_NOZORDER | SWP_NOACTIVATE);
+                self->Extent();
+                self->Layout();
+                return 0;
+            }
+            case WM_TIMER:
+                KillTimer(h, 1);
+                if (!self->snapshot.empty() && !SaveWindowSnapshot(h, self->snapshot))
+                    throw AppError(TextId::SettingsSaveFailed);
+                if (self->exercise >= 0) {
+                    SendMessageW(self->list, LB_SETCURSEL, self->exercise, 0);
+                    self->Selection();
+                    if (IsWindowEnabled(self->select))
+                        self->Command(IDOK);
+                    else
+                        self->Command(IDCANCEL);
+                } else
+                    self->Command(IDCANCEL);
+                return 0;
+            case WM_CLOSE:
+                self->Command(IDCANCEL);
+                return 0;
+            }
+        } catch (...) {
+            self->selected.reset();
+            DestroyWindow(h);
+        }
+        return DefWindowProcW(h, m, w, l);
+    }
+};
 } // namespace
+std::optional<fs::path> ShowFFmpegCandidates(HWND owner, const std::vector<DiscoveryCandidate>& candidates,
+                                             const AppSettings& settings, const fs::path& snapshot,
+                                             int exerciseSelection) {
+    CandidateWindow state;
+    state.settings = settings;
+    state.candidates = candidates;
+    state.snapshot = snapshot;
+    state.exercise = exerciseSelection;
+    state.dpi = static_cast<int>(GetDpiForWindow(owner));
+    if (auto testDpi = GetPropW(owner, L"test-dpi"))
+        state.dpi = static_cast<int>(reinterpret_cast<INT_PTR>(testDpi));
+    WNDCLASSEXW c{sizeof(c)};
+    c.hInstance = GetModuleHandleW(nullptr);
+    c.lpfnWndProc = CandidateWindow::Proc;
+    c.hCursor = LoadCursorW(nullptr, IDC_ARROW);
+    c.lpszClassName = L"LogForge.Candidates";
+    RegisterClassExW(&c);
+    const auto r = ModalRect(owner, 840, 580, state.dpi);
+    auto h = CreateWindowExW(WS_EX_DLGMODALFRAME, c.lpszClassName,
+                             TranslateWide(TextId::CandidateTitle, settings.language).c_str(),
+                             WS_CAPTION | WS_SYSMENU | WS_SIZEBOX, r.left, r.top, r.right - r.left,
+                             r.bottom - r.top, owner, nullptr, c.hInstance, &state);
+    if (!h)
+        throw AppError(TextId::DialogOpenFailed);
+    RunModal(owner, h);
+    return state.selected;
+}
 bool ShowSettings(HWND owner, AppSettings& settings, const fs::path& snapshot, bool exercise) {
     SettingsWindow state;
     state.owner = owner;

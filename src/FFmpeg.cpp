@@ -143,82 +143,90 @@ bool FFmpegManager::DiscoverCandidate(const fs::path& p, const std::atomic_bool&
     }
 }
 std::optional<FFmpegInstallation> FFmpegManager::Detect(const std::atomic_bool& cancel,
-                                                        const DiscoveryCallback& progress) {
+                                                        const DiscoveryCallback& progress,
+                                                        const DiscoveryOptions& options) {
     unapproved_.clear();
-    std::vector<fs::path> candidates{ManagedExecutable(),
-                                     ExecutableDirectory() / L"tools" / L"ffmpeg" / L"bin" / L"ffmpeg.exe"};
-    const auto settings = SettingsStore::Load();
-    candidates.push_back(settings.manualFFmpeg);
-    candidates.push_back(settings.detectedFFmpeg);
-    wchar_t path[32768]{};
-    GetEnvironmentVariableW(L"PATH", path, 32768);
-    std::wstringstream split(path);
-    std::wstring entry;
-    while (std::getline(split, entry, L';')) {
-        if (entry.size() > 1 && entry.front() == L'\"' && entry.back() == L'\"')
-            entry = entry.substr(1, entry.size() - 2);
-        if (!entry.empty())
-            candidates.emplace_back(fs::path(entry) / L"ffmpeg.exe");
-    }
-    candidates.emplace_back(L"C:\\ffmpeg\\bin\\ffmpeg.exe");
-    candidates.emplace_back(L"C:\\Program Files\\ffmpeg\\bin\\ffmpeg.exe");
-    candidates.emplace_back(L"C:\\ProgramData\\chocolatey\\bin\\ffmpeg.exe");
-    wchar_t user[32768]{};
-    GetEnvironmentVariableW(L"USERPROFILE", user, 32768);
-    candidates.push_back(fs::path(user) / L"scoop/apps/ffmpeg/current/bin/ffmpeg.exe");
-    auto packages = DataDirectory().parent_path() / L"Microsoft/WinGet/Packages";
-    std::error_code ec;
-    for (fs::directory_iterator i(packages, ec), end; i != end && !ec; i.increment(ec)) {
-        if (cancel.load())
-            throw AppError(TextId::Cancelled);
-        if (i->is_directory(ec) && i->path().filename().wstring().find(L"FFmpeg") != std::wstring::npos) {
-            for (fs::recursive_directory_iterator
-                     k(i->path(), fs::directory_options::skip_permission_denied, ec),
-                 ke;
-                 k != ke && !ec; k.increment(ec)) {
-                if (cancel.load())
-                    throw AppError(TextId::Cancelled);
-                if (k.depth() > 3)
-                    k.disable_recursion_pending();
-                if (k->path().filename() == L"ffmpeg.exe")
-                    candidates.push_back(k->path());
-            }
-        }
-    }
-    std::set<std::wstring> visited;
+    discovery_ = {};
+    discovery_.mode = options.mode;
     std::optional<FFmpegInstallation> found;
-    const auto check = [&](const fs::path& p) {
-        if (cancel.load())
-            throw AppError(TextId::Cancelled);
-        if (p.empty())
-            return false;
-        auto key = fs::absolute(p).lexically_normal().wstring();
-        for (auto& c : key)
-            c = static_cast<wchar_t>(towlower(c));
-        if (!visited.insert(key).second || !fs::is_regular_file(p, ec))
-            return false;
-        return DiscoverCandidate(p, cancel, found);
-    };
-    if (progress)
-        progress({DiscoveryPhase::CheckingPaths});
-    for (const auto& p : candidates) {
-        if (check(p))
-            return found;
-    }
-    const bool background = SetThreadPriority(GetCurrentThread(), THREAD_MODE_BACKGROUND_BEGIN) != FALSE;
-    struct RestorePriority {
-        bool active;
-        ~RestorePriority() {
-            if (active)
-                SetThreadPriority(GetCurrentThread(), THREAD_MODE_BACKGROUND_END);
+    auto pass = [&](const DiscoveryOptions& request) {
+        auto report = DiscoverFFmpegPaths(request, cancel, [&](const DiscoveryProgress& p) {
+            if (progress) {
+                auto combined = p;
+                combined.elapsedMs += discovery_.elapsedMs;
+                combined.directories += discovery_.directories;
+                combined.skipped += discovery_.skipped;
+                combined.candidates += discovery_.candidates.size();
+                progress(combined);
+            }
+        });
+        discovery_.elapsedMs += report.elapsedMs;
+        discovery_.directories += report.directories;
+        discovery_.skipped += report.skipped;
+        discovery_.end = report.end;
+        if (!report.diagnostic.empty())
+            discovery_.diagnostic = report.diagnostic;
+        for (auto candidate : report.candidates) {
+            if (std::any_of(discovery_.candidates.begin(), discovery_.candidates.end(),
+                            [&](const auto& prior) {
+                                return _wcsicmp(prior.ffmpeg.c_str(), candidate.ffmpeg.c_str()) == 0;
+                            }))
+                continue;
+            if (!found && candidate.paired && discovery_.end != DiscoveryEnd::Cancelled) {
+                if (!ToolTrust::HasApproval(candidate.ffmpeg)) {
+                    unapproved_.push_back(candidate.ffmpeg);
+                    logger_.Write("Discovered, NOT EXECUTED (no approval): " + PathText(candidate.ffmpeg));
+                } else {
+                    const auto started = GetTickCount64();
+                    try {
+                        if (progress) {
+                            DiscoveryProgress state;
+                            state.phase = DiscoveryPhase::Verifying;
+                            state.drive = candidate.ffmpeg;
+                            state.elapsedMs = discovery_.elapsedMs;
+                            progress(state);
+                        }
+                        found = Check(candidate.ffmpeg, cancel);
+                        SettingsStore::SaveFFmpeg(found->ffmpeg, true);
+                        candidate.state = CandidateState::Verified;
+                        candidate.issue = TextId::ToolsReady;
+                    } catch (const AppError& e) {
+                        if (cancel.load())
+                            discovery_.end = DiscoveryEnd::Cancelled;
+                        candidate.state = e.message.id == TextId::FFmpegHashChanged
+                                              ? CandidateState::Changed
+                                              : CandidateState::Incompatible;
+                        candidate.issue = e.message;
+                        unapproved_.push_back(candidate.ffmpeg);
+                        logger_.Write("Approved candidate failed: " + PathText(candidate.ffmpeg) + ": " +
+                                      e.what());
+                    }
+                    discovery_.verificationMs += GetTickCount64() - started;
+                }
+            }
+            discovery_.candidates.push_back(std::move(candidate));
         }
-    } restore{background};
-    const auto report = SearchFFmpegDirectories(LocalDriveRoots(), cancel, check, progress);
-    logger_.Write("Local-drive FFmpeg search: folders=" + std::to_string(report.directories) +
-                  ", candidates=" + std::to_string(report.candidates) +
-                  ", skipped=" + std::to_string(report.skipped) + ", verified=" + (found ? "yes" : "no"));
+    };
+    if (options.mode == DiscoveryMode::Quick && options.roots.empty()) {
+        auto request = options;
+        request.preferredOnly = true;
+        pass(request);
+        // A verified managed/saved installation avoids registry, package and
+        // index work entirely. Failed/unapproved entries still allow fallbacks.
+        if (!found && discovery_.end == DiscoveryEnd::Completed && discovery_.elapsedMs < options.budgetMs) {
+            request.preferredOnly = false;
+            request.skipPreferred = true;
+            request.budgetMs = options.budgetMs - discovery_.elapsedMs;
+            pass(request);
+        } else if (!found && discovery_.end == DiscoveryEnd::Completed) {
+            discovery_.end = DiscoveryEnd::TimedOut;
+        }
+    } else
+        pass(options);
+    logger_.Write("FFmpeg discovery: " + discovery_.ToJson().dump());
     return found;
 }
+
 DownloadSpec GyanReleaseProvider::Release() const {
     return {L"Gyan.dev essentials",
             L"8.1.2",

@@ -10,6 +10,7 @@
 #include <shobjidl.h>
 #include <sstream>
 #include <thread>
+#include <utility>
 #include <wrl/client.h>
 
 namespace logforge {
@@ -34,9 +35,11 @@ enum Control {
     Exposure,
     SettingsButton,
     DetailsButton,
-    RescanButton
+    RescanButton,
+    DeepSearchButton,
+    CandidatesButton
 };
-enum class Kind { Progress, Discovery, Detect, Probe, Convert, Install, Approval, Failure };
+enum class Kind { Progress, Discovery, Detect, Verify, Probe, Convert, Install, Approval, Failure };
 struct Event {
     Kind kind;
     JobProgress progress;
@@ -46,7 +49,7 @@ struct Event {
     Message error{TextId::Unexpected, {"Unknown error"}};
     std::vector<Message> details;
     std::optional<ValidationReport> validation;
-    std::vector<fs::path> candidates;
+    DiscoveryReport discoveryReport;
     ToolIdentity identity;
 };
 std::optional<fs::path> SelectFile(HWND owner, bool save, bool executable, Language language,
@@ -108,12 +111,17 @@ class MainWindow {
     std::atomic_bool cancelled = false;
     std::optional<FFmpegInstallation> tools;
     std::optional<MediaInfo> source;
-    std::vector<fs::path> candidates;
+    std::vector<DiscoveryCandidate> candidates;
+    DiscoveryOptions discoveryOptions;
+    DiscoveryReport discoveryReport;
+    fs::path reviewAfterSearch, reviewing;
     fs::path selected, smokeInput, smokeOutput, uiDirectory;
     std::string explicitInputChroma;
     bool busy = false, closing = false, detectionComplete = false, smoke = false, smokeStarted = false;
     bool uiTest = false, missingScenario = false, settingsExercised = false, lastSignalWarning = false;
     bool conversionTone = false, layingOut = false;
+    bool exercisingFlow = false, closeSearchTest = false;
+    Json uiChecks = Json::object();
     Kind active = Kind::Detect;
     int dpi = 96, testDpi = 0, scroll = 0, footerTop = 0, exposureIndex = 5, exitCode = 0;
     Message stage{TextId::Starting};
@@ -155,8 +163,20 @@ class MainWindow {
         details.clear();
         rawDetails.clear();
         currentProgress = {};
+        SendMessageW(H(ProgressBar), PBM_SETPOS, 0, 0);
         Buttons();
         Layout();
+        struct RestoreOnStartFailure {
+            MainWindow& owner;
+            bool started = false;
+            ~RestoreOnStartFailure() {
+                if (!started) {
+                    owner.busy = false;
+                    owner.Buttons();
+                    owner.Layout();
+                }
+            }
+        } startGuard{*this};
         worker = std::jthread([this, work = std::move(work)] {
             try {
                 work();
@@ -177,6 +197,7 @@ class MainWindow {
                 Post(std::move(event));
             }
         });
+        startGuard.started = true;
     }
     void Stage(Message value) {
         stage = std::move(value);
@@ -185,6 +206,11 @@ class MainWindow {
     void RefreshStatus() {
         std::wostringstream s;
         s << T(stage);
+        if (!busy && discoveryReport.elapsedMs && (active == Kind::Detect || active == Kind::Verify))
+            s << L"\r\n"
+              << T({TextId::DiscoveryTiming,
+                    {std::to_string(discoveryReport.elapsedMs),
+                     std::to_string(discoveryReport.verificationMs)}});
         if (busy && currentProgress.fraction >= 0) {
             s << L"\r\n" << std::fixed << std::setprecision(1) << currentProgress.fraction * 100 << L"%";
             if (currentProgress.frame)
@@ -198,7 +224,10 @@ class MainWindow {
             }
         }
         Text(StageText, s.str());
-        Text(ToolText, T(tools                            ? TextId::ToolsReady
+        Text(ToolText, T(tools ? TextId::ToolsReady
+                         : busy && (active == Kind::Verify ||
+                                    (active == Kind::Detect && discovery.phase == DiscoveryPhase::Verifying))
+                             ? TextId::VerifyingTools
                          : busy && active == Kind::Detect ? TextId::Detecting
                                                           : TextId::NeedTools) +
                            L"\r\n" + T(settings.tone.enabled ? TextId::GradeOn : TextId::GradeOff));
@@ -209,29 +238,54 @@ class MainWindow {
             EnableWindow(H(id), !busy);
         EnableWindow(H(Convert), !busy && tools && source && source->UnsupportedReasons().empty());
         EnableWindow(H(Cancel), busy);
-        // Installation is a fallback only after full accessible-drive discovery finishes.
-        const bool fallback = !tools && detectionComplete && !busy;
+        // Cancelled/failed discovery must not strand the user without an alternative.
+        const bool fallback = !tools && !busy;
         for (int id : {Install, Manual}) {
             ShowWindow(H(id), fallback ? SW_SHOW : SW_HIDE);
             EnableWindow(H(id), fallback);
         }
         ShowWindow(H(RescanButton), !tools && !busy ? SW_SHOW : SW_HIDE);
         EnableWindow(H(RescanButton), !busy);
+        ShowWindow(H(DeepSearchButton), fallback ? SW_SHOW : SW_HIDE);
+        EnableWindow(H(DeepSearchButton), fallback);
+        const bool review =
+            !tools && !candidates.empty() &&
+            (!busy || (active == Kind::Detect && discoveryOptions.mode == DiscoveryMode::Deep &&
+                       discovery.phase != DiscoveryPhase::Verifying));
+        ShowWindow(H(CandidatesButton), !tools && !candidates.empty() ? SW_SHOW : SW_HIDE);
+        EnableWindow(H(CandidatesButton), review);
         RefreshStatus();
     }
-    void Detect() {
+    void Detect(DiscoveryMode mode = DiscoveryMode::Quick) {
         detectionComplete = false;
+        discovery = {};
+        discoveryReport = {};
+        candidates.clear();
+        reviewing.clear();
+        discoveryOptions.mode = mode;
         Stage(TextId::Detecting);
         Start(Kind::Detect, [this] {
             FFmpegManager manager(logger);
-            auto found = manager.Detect(cancelled, [this](const DiscoveryProgress& p) {
-                Event e{Kind::Discovery};
-                e.discovery = p;
-                Post(std::move(e));
-            });
+            auto found = manager.Detect(
+                cancelled,
+                [this](const DiscoveryProgress& p) {
+                    Event e{Kind::Discovery};
+                    e.discovery = p;
+                    Post(std::move(e));
+                },
+                discoveryOptions);
             Event e{Kind::Detect};
             e.tools = std::move(found);
-            e.candidates = manager.UnapprovedCandidates();
+            e.discoveryReport = manager.Discovery();
+            Post(std::move(e));
+        });
+    }
+    void InspectCandidate(const fs::path& path) {
+        reviewing = path;
+        Stage(TextId::VerifyingTools);
+        Start(Kind::Verify, [this, path] {
+            Event e{Kind::Approval};
+            e.identity = ToolTrust::Inspect(path);
             Post(std::move(e));
         });
     }
@@ -301,7 +355,9 @@ class MainWindow {
                                {Logs, TextId::Logs},
                                {SettingsButton, TextId::Settings},
                                {DetailsButton, TextId::Details},
-                               {RescanButton, TextId::Rescan}})
+                               {RescanButton, TextId::Rescan},
+                               {DeepSearchButton, TextId::DeepSearch},
+                               {CandidatesButton, TextId::ReviewFFmpeg}})
             Text(id, T(key));
         Text(DropZone, selected.empty() ? T(TextId::Drop) : selected.filename().wstring());
         Text(SourceText, source ? source->Summary(settings.language) : T(TextId::AwaitInput));
@@ -343,13 +399,25 @@ class MainWindow {
         for (int id : {Open, ChooseOutput, Convert, Cancel})
             Add(panel, id, L"BUTTON", L"", WS_TABSTOP | BS_OWNERDRAW);
         SetPropW(H(Convert), L"primary", reinterpret_cast<HANDLE>(1));
-        for (int id : {SettingsButton, Install, Manual, Logs, DetailsButton, RescanButton})
+        for (int id : {SettingsButton, Install, Manual, Logs, DetailsButton, RescanButton, DeepSearchButton,
+                       CandidatesButton})
             Add(window, id, L"BUTTON", L"", WS_TABSTOP | BS_OWNERDRAW);
         Add(window, ToolText, L"STATIC", L"", SS_NOPREFIX, true);
         Add(window, StageText, L"STATIC", L"", SS_NOPREFIX, true);
         ApplyAppearance();
         Buttons();
-        if (uiTest && missingScenario) {
+        if (uiTest && closeSearchTest) {
+            Start(Kind::Detect, [this] {
+                RunProcess(ExecutableDirectory() / L"logforge_process_fixture.exe", {L"heldpipe"}, &cancelled,
+                           10, [&](const std::string& line) {
+                               std::ofstream file(uiDirectory / L"descendant.txt");
+                               file << line;
+                               file.close();
+                               PostMessageW(window, WM_CLOSE, 0, 0);
+                           });
+                Post(Event{Kind::Detect});
+            });
+        } else if (uiTest && missingScenario) {
             detectionComplete = true;
             Stage(TextId::ToolsMissing);
             Buttons();
@@ -376,7 +444,7 @@ class MainWindow {
         DrawTextW(dc, copy.c_str(), -1, &measured, DT_CALCRECT | DT_WORDBREAK | DT_NOPREFIX);
         SelectObject(dc, old);
         ReleaseDC(window, dc);
-        const int footerHeight = std::max(238, MulDiv(measured.bottom, 96, dpi) + 36);
+        const int footerHeight = std::max(tools ? 238 : 276, MulDiv(measured.bottom, 96, dpi) + 36);
         footerTop = std::max(100, height - footerHeight);
         MoveWindow(panel, S(24), S(78), S(width - 48), S(std::max(22, footerTop - 90)), TRUE);
         MoveWindow(H(SettingsButton), S(width - 144), S(23), S(116), S(36), TRUE);
@@ -387,9 +455,11 @@ class MainWindow {
         place(StageText, 32, footerTop + 64, column, 46);
         place(Logs, 32, footerTop + 112, 104, 30);
         place(DetailsButton, 144, footerTop + 112, 90, 30);
-        place(RescanButton, 244, footerTop + 112, std::max(110, column - 212), 30);
-        place(Install, 32, footerTop + 150, (column - 8) / 2, 32);
-        place(Manual, 40 + (column - 8) / 2, footerTop + 150, (column - 8) / 2, 32);
+        place(CandidatesButton, 244, footerTop + 112, std::max(110, column - 212), 30);
+        place(RescanButton, 32, footerTop + 150, (column - 8) / 2, 32);
+        place(DeepSearchButton, 40 + (column - 8) / 2, footerTop + 150, (column - 8) / 2, 32);
+        place(Install, 32, footerTop + 190, (column - 8) / 2, 32);
+        place(Manual, 40 + (column - 8) / 2, footerTop + 190, (column - 8) / 2, 32);
         LayoutPanel();
         layingOut = false;
         InvalidateRect(window, nullptr, TRUE);
@@ -480,12 +550,21 @@ class MainWindow {
         }
         if (e->kind == Kind::Discovery) {
             discovery = e->discovery;
+            if (discovery.candidate) {
+                candidates.push_back(*discovery.candidate);
+                Buttons();
+                Layout();
+            }
             if (discovery.phase == DiscoveryPhase::ScanningDrive)
                 Stage({TextId::Scanning,
                        {PathText(discovery.drive), std::to_string(discovery.directories),
                         std::to_string(discovery.candidates), std::to_string(discovery.skipped)}});
             else if (discovery.phase == DiscoveryPhase::CheckingCandidate)
                 Stage({TextId::CheckingCandidate, {PathText(discovery.drive)}});
+            else if (discovery.phase == DiscoveryPhase::Verifying) {
+                Stage(TextId::VerifyingTools);
+                Buttons();
+            }
             return;
         }
         busy = false;
@@ -496,11 +575,24 @@ class MainWindow {
             return;
         }
         if (e->kind == Kind::Failure) {
+            detectionComplete = true;
             details = e->details;
             details.insert(details.begin(), e->error);
+            for (auto& candidate : candidates)
+                if (candidate.ffmpeg == reviewing) {
+                    candidate.issue = e->error;
+                    candidate.state = e->error.id == TextId::FFmpegHashChanged ? CandidateState::Changed
+                                                                               : CandidateState::Incompatible;
+                }
             Stage(cancelled ? TextId::Cancelled : TextId::Failed);
             Buttons();
-            if (smoke || uiTest)
+            Layout();
+            if (!reviewAfterSearch.empty()) {
+                auto path = std::exchange(reviewAfterSearch, {});
+                InspectCandidate(path);
+                return;
+            }
+            if (smoke || (uiTest && !exercisingFlow))
                 Finish(false, Translate(e->error));
             return;
         }
@@ -509,7 +601,8 @@ class MainWindow {
             const auto body = T(Message(TextId::FFmpegApproveBody, {e->identity.ToJson().dump(2)}));
             if (MessageBoxW(window, body.c_str(), T(TextId::FFmpegApprove).c_str(),
                             MB_YESNO | MB_ICONQUESTION | MB_DEFBUTTON2) == IDYES) {
-                Start(Kind::Detect, [this, identity = e->identity] {
+                Stage(TextId::VerifyingTools);
+                Start(Kind::Verify, [this, identity = e->identity] {
                     ToolTrust::ApproveManual(identity);
                     FFmpegManager manager(logger);
                     auto checked = manager.Check(identity.ffmpeg, cancelled);
@@ -521,26 +614,36 @@ class MainWindow {
             } else {
                 Stage(TextId::FFmpegApprovalCancelled);
                 Buttons();
+                Layout();
             }
             return;
         }
         if (e->kind == Kind::Detect || e->kind == Kind::Install) {
             tools = std::move(e->tools);
-            candidates = std::move(e->candidates);
+            discoveryReport = std::move(e->discoveryReport);
+            candidates = discoveryReport.candidates;
+            rawDetails = Wide(discoveryReport.ToJson().dump(2));
             for (const auto& candidate : candidates)
-                details.emplace_back(TextId::FFmpegUntrusted,
-                                     std::initializer_list<std::string>{PathText(candidate)});
+                details.push_back(candidate.issue);
             detectionComplete = true;
             if (discovery.skipped)
                 details.emplace_back(TextId::ScanSkipped);
             if (settings.recoveredDefaults)
                 details.emplace_back(TextId::SettingsRecovered);
-            Stage(tools                ? TextId::Ready
-                  : candidates.empty() ? TextId::ToolsMissing
-                                       : TextId::FFmpegDiscovered);
+            Stage(tools                                            ? TextId::Ready
+                  : discoveryReport.end == DiscoveryEnd::Cancelled ? TextId::Cancelled
+                  : discoveryReport.end == DiscoveryEnd::TimedOut  ? TextId::QuickSearchEnded
+                  : discoveryReport.end == DiscoveryEnd::Failed    ? TextId::DiscoveryFailed
+                  : candidates.empty()                             ? TextId::ToolsMissing
+                                                                   : TextId::FFmpegDiscovered);
             Buttons();
             Layout();
-            if (uiTest) {
+            if (!reviewAfterSearch.empty()) {
+                auto path = std::exchange(reviewAfterSearch, {});
+                InspectCandidate(path);
+                return;
+            }
+            if (uiTest && !exercisingFlow) {
                 SetTimer(window, 9002, 300, nullptr);
                 return;
             }
@@ -627,6 +730,19 @@ class MainWindow {
             ShowDetails(window, T(TextId::Details), text, settings);
             return;
         }
+        if (id == CandidatesButton && IsWindowEnabled(H(CandidatesButton))) {
+            // Copy the list: a deep-search worker can post new entries during the modal loop.
+            const auto snapshot = candidates;
+            if (auto path = ShowFFmpegCandidates(window, snapshot, settings)) {
+                if (busy) {
+                    reviewAfterSearch = *path;
+                    cancelled = true;
+                    Stage(TextId::Cancelling);
+                } else
+                    InspectCandidate(*path);
+            }
+            return;
+        }
         if (busy)
             return;
         if (id == SettingsButton) {
@@ -644,15 +760,12 @@ class MainWindow {
             BeginConvert();
         else if (id == RescanButton)
             Detect();
+        else if (id == DeepSearchButton)
+            Detect(DiscoveryMode::Deep);
         else if (id == Manual) {
             if (auto path = SelectFile(window, false, true, settings.language,
-                                       candidates.empty() ? fs::path{} : candidates.front())) {
-                Stage(TextId::Detecting);
-                Start(Kind::Detect, [this, path = *path] {
-                    Event e{Kind::Approval};
-                    e.identity = ToolTrust::Inspect(path);
-                    Post(std::move(e));
-                });
+                                       candidates.empty() ? fs::path{} : candidates.front().ffmpeg)) {
+                InspectCandidate(*path);
             }
         } else if (id == Install) {
             Stage(TextId::Downloading);
@@ -698,6 +811,7 @@ class MainWindow {
                     {"creative_enabled", settings.tone.enabled},
                     {"ui_only", uiTest},
                     {"missing_scenario_injected", missingScenario}};
+        report["reliability_checks"] = uiChecks;
         const auto path =
             uiTest ? uiDirectory / L"ui-test.json" : fs::path(smokeOutput.wstring() + L".gui-test.json");
         std::ofstream file(path);
@@ -709,6 +823,14 @@ class MainWindow {
     }
     void UiTest() {
         const auto original = settings;
+        SetFocus(H(OutputEdit));
+        uiChecks["keyboard_focus_visible"] = ScrollDeltaToReveal(panel, H(OutputEdit), dpi) == 0;
+        SetFocus(H(Open));
+        uiChecks["keyboard_focus_visible"] =
+            uiChecks["keyboard_focus_visible"].get<bool>() && ScrollDeltaToReveal(panel, H(Open), dpi) == 0;
+        uiChecks["multiline_edit_crlf"] = EditLines(L"a\nb\r\nc") == L"a\r\nb\r\nc";
+        scroll = 0;
+        LayoutPanel();
         if (!ShowSettings(window, settings, uiDirectory / L"settings.png", true)) {
             Finish(false, "Settings Save did not run");
             return;
@@ -733,12 +855,139 @@ class MainWindow {
         settings = original;
         SettingsStore::SavePreferences(settings);
         ApplyAppearance();
+        const auto savedTools = tools;
+        const auto savedCandidates = candidates;
+        exercisingFlow = true;
+        tools.reset();
+        DiscoveryCandidate sample;
+        sample.ffmpeg =
+            uiDirectory / L"long Unicode 测试 path with spaces for candidate display/bin/ffmpeg.exe";
+        sample.ffprobe = sample.ffmpeg.parent_path() / L"ffprobe.exe";
+        sample.paired = true;
+        sample.source = "ui-test-fixture";
+        auto incomplete = sample;
+        incomplete.paired = false;
+        incomplete.state = CandidateState::MissingProbe;
+        incomplete.issue = TextId::FFmpegPair;
+        std::vector<DiscoveryCandidate> list{sample, incomplete};
+        const auto chosen = ShowFFmpegCandidates(window, list, settings, uiDirectory / L"candidates.png", 0);
+        const auto declined = ShowFFmpegCandidates(window, list, settings, {}, -1);
+        const auto missing = ShowFFmpegCandidates(window, list, settings, {}, 1);
+        uiChecks["candidate_select_cancel_missing_probe"] = chosen == sample.ffmpeg && !declined && !missing;
+        // Warmed native dialog resource counts: no settings or trust are changed.
+        // Let native close animations and deferred HWND destruction settle before
+        // both samples; comparing transient live dialogs is not a leak measurement.
+        auto settleDialogs = [&] {
+            const auto until = GetTickCount64() + 400;
+            while (GetTickCount64() < until) {
+                MsgWaitForMultipleObjects(0, nullptr, FALSE, 20, QS_ALLINPUT);
+                MSG message{};
+                while (PeekMessageW(&message, nullptr, 0, 0, PM_REMOVE)) {
+                    TranslateMessage(&message);
+                    DispatchMessageW(&message);
+                }
+            }
+        };
+        // Warm native font/listbox caches with the same sequence being measured,
+        // independently of the preceding Settings/snapshot/selection scenarios.
+        for (int i = 0; i < 20; ++i)
+            ShowFFmpegCandidates(window, list, settings, {}, -1);
+        settleDialogs();
+        const auto gdiBefore = GetGuiResources(GetCurrentProcess(), GR_GDIOBJECTS);
+        const auto userBefore = GetGuiResources(GetCurrentProcess(), GR_USEROBJECTS);
+        for (int i = 0; i < 20; ++i)
+            ShowFFmpegCandidates(window, list, settings, {}, -1);
+        settleDialogs();
+        const auto gdiAfter = GetGuiResources(GetCurrentProcess(), GR_GDIOBJECTS);
+        const auto userAfter = GetGuiResources(GetCurrentProcess(), GR_USEROBJECTS);
+        uiChecks["dialog_cycles"] = 20;
+        uiChecks["dialog_warmup_cycles"] = 20;
+        uiChecks["gdi_before_after"] = {gdiBefore, gdiAfter};
+        uiChecks["user_before_after"] = {userBefore, userAfter};
+        uiChecks["dialog_resources_stable"] = gdiBefore == gdiAfter && userBefore == userAfter;
+        auto fallback = [&] {
+            return !busy && IsWindowVisible(H(Install)) && IsWindowEnabled(H(Install)) &&
+                   IsWindowVisible(H(Manual)) && IsWindowVisible(H(RescanButton)) &&
+                   IsWindowVisible(H(DeepSearchButton));
+        };
+        // Use the real completion handler; injected errors avoid network traffic.
+        for (const auto id : {TextId::Cancelled, TextId::DownloadConnect, TextId::FFmpegHashChanged}) {
+            busy = true;
+            cancelled = id == TextId::Cancelled;
+            auto event = std::make_unique<Event>(Kind::Failure);
+            event->error = Message(id, {"Injected UI regression failure"});
+            OnEvent(std::move(event));
+            if (!fallback())
+                throw std::runtime_error("Failure/cancel hid FFmpeg recovery actions");
+        }
+        uiChecks["cancel_download_hash_failure_recovery"] = true;
+        // Exercise the actual approval dialog, choosing No without touching trust.
+        auto approval = std::make_unique<Event>(Kind::Approval);
+        approval->identity.ffmpeg = sample.ffmpeg;
+        approval->identity.ffprobe = sample.ffprobe;
+        const auto thread = GetCurrentThreadId();
+        std::jthread reject([thread](std::stop_token stop) {
+            while (!stop.stop_requested()) {
+                bool sent = false;
+                EnumThreadWindows(
+                    thread,
+                    [](HWND h, LPARAM context) -> BOOL {
+                        wchar_t name[32]{};
+                        GetClassNameW(h, name, 32);
+                        if (wcscmp(name, L"#32770") == 0 && GetDlgItem(h, IDNO)) {
+                            PostMessageW(h, WM_COMMAND, IDNO, 0);
+                            *reinterpret_cast<bool*>(context) = true;
+                            return FALSE;
+                        }
+                        return TRUE;
+                    },
+                    reinterpret_cast<LPARAM>(&sent));
+                if (sent)
+                    return;
+                std::this_thread::sleep_for(std::chrono::milliseconds(20));
+            }
+        });
+        cancelled = false;
+        OnEvent(std::move(approval));
+        reject.request_stop();
+        reject.join();
+        uiChecks["approval_refusal_recovery"] = fallback() && stage.id == TextId::FFmpegApprovalCancelled;
+        // Start from stale counters and verify the next Quick request clears them.
+        discovery.directories = 999;
+        discovery.candidates = 999;
+        discoveryOptions.roots = {uiDirectory / L"empty-discovery-fixture"};
+        fs::create_directories(discoveryOptions.roots.front());
+        Detect(DiscoveryMode::Quick);
+        uiChecks["fresh_search_state"] = discovery.directories == 0 && discovery.candidates == 0;
+        Command(Cancel);
+        const auto deadline = GetTickCount64() + 6000;
+        while (busy && GetTickCount64() < deadline) {
+            MsgWaitForMultipleObjects(0, nullptr, FALSE, 50, QS_ALLINPUT);
+            MSG message{};
+            while (PeekMessageW(&message, nullptr, 0, 0, PM_REMOVE)) {
+                TranslateMessage(&message);
+                DispatchMessageW(&message);
+            }
+        }
+        uiChecks["actual_search_cancel_recovery"] = fallback();
+        if (busy)
+            throw std::runtime_error("UI discovery cancellation deadline failed");
+        exercisingFlow = false;
+        tools = savedTools;
+        candidates = savedCandidates;
+        Stage(tools ? TextId::Ready : TextId::ToolsMissing);
         Buttons();
+        Layout();
         const bool visibility = missingScenario
                                     ? IsWindowVisible(H(Install)) && IsWindowVisible(H(Manual))
                                     : tools && !IsWindowVisible(H(Install)) && !IsWindowVisible(H(Manual));
-        Finish(settingsExercised && visibility,
-               "Native settings Save/Cancel and FFmpeg fallback visibility exercised");
+        bool checks = true;
+        for (const auto& value : uiChecks)
+            if (value.is_boolean() && !value.get<bool>())
+                checks = false;
+        Finish(settingsExercised && visibility && checks,
+               "Native Settings, candidate selection, approval refusal, failure/cancel recovery and resource "
+               "checks");
     }
     static LRESULT CALLBACK PanelProc(HWND h, UINT m, WPARAM w, LPARAM l) {
         auto self = reinterpret_cast<MainWindow*>(GetWindowLongPtrW(h, GWLP_USERDATA));
@@ -749,6 +998,10 @@ class MainWindow {
         if (!self)
             return DefWindowProcW(h, m, w, l);
         switch (m) {
+        case FocusRevealMessage:
+            self->scroll += ScrollDeltaToReveal(h, reinterpret_cast<HWND>(l), self->dpi);
+            self->LayoutPanel();
+            return 0;
         case WM_PAINT:
             if (self->panel)
                 self->PaintPanel();
@@ -810,6 +1063,11 @@ class MainWindow {
                 return 1;
             case WM_SIZE:
                 self->Layout();
+                return 0;
+            case WM_SETTINGCHANGE:
+            case WM_SYSCOLORCHANGE:
+                self->exposureIndex = static_cast<int>(SendMessageW(self->H(Exposure), CB_GETCURSEL, 0, 0));
+                self->ApplyAppearance();
                 return 0;
             case WM_DRAWITEM:
                 self->style.DrawItem(*reinterpret_cast<DRAWITEMSTRUCT*>(l));
@@ -903,13 +1161,15 @@ class MainWindow {
     }
 };
 int Run(HINSTANCE instance) {
-    MainWindow app;
     int argc = 0;
     auto argv = CommandLineToArgvW(GetCommandLineW(), &argc);
     std::vector<std::wstring> args;
     for (int i = 1; i < argc; ++i)
         args.emplace_back(argv[i]);
     LocalFree(argv);
+    if (!args.empty() && args[0] == L"--internal-discover")
+        return RunDiscoveryHelper(args);
+    MainWindow app;
     size_t option = 0;
     if (args.size() >= 3 && args[0] == L"--smoke-test") {
         app.smoke = true;
@@ -936,7 +1196,9 @@ int Run(HINSTANCE instance) {
             app.explicitInputChroma = Utf8(args[++option]);
             if (app.explicitInputChroma != "left" && app.explicitInputChroma != "center")
                 throw AppError(TextId::InputChroma);
-        } else if (args[option] == L"--missing-ffmpeg" && app.uiTest)
+        } else if (args[option] == L"--close-search-test" && app.uiTest)
+            app.closeSearchTest = true;
+        else if (args[option] == L"--missing-ffmpeg" && app.uiTest)
             app.missingScenario = true;
         else if (args[option] == L"--language" && option + 1 < args.size()) {
             const auto v = args[++option];

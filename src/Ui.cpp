@@ -185,15 +185,52 @@ std::wstring WindowText(HWND h) {
 }
 HWND MakeControl(HWND parent, int id, const wchar_t* klass, const std::wstring& text, DWORD flags,
                  const UiStyle& style, bool compact) {
-    auto h = CreateWindowExW(0, klass, text.c_str(), WS_CHILD | WS_VISIBLE | flags, 0, 0, 10, 10, parent,
-                             reinterpret_cast<HMENU>(static_cast<INT_PTR>(id)), GetModuleHandleW(nullptr),
-                             nullptr);
+    const auto nativeText = _wcsicmp(klass, L"EDIT") == 0 ? EditLines(text) : text;
+    auto h = CreateWindowExW(0, klass, nativeText.c_str(), WS_CHILD | WS_VISIBLE | flags, 0, 0, 10, 10,
+                             parent, reinterpret_cast<HMENU>(static_cast<INT_PTR>(id)),
+                             GetModuleHandleW(nullptr), nullptr);
     if (!h)
         throw AppError(Message(TextId::Unexpected, {"Cannot create a Windows control."}));
     if (compact)
         SetPropW(h, L"compact", reinterpret_cast<HANDLE>(1));
     style.Control(h, compact);
+    if (flags & WS_TABSTOP)
+        SetWindowSubclass(
+            h,
+            [](HWND child, UINT m, WPARAM w, LPARAM l, UINT_PTR, DWORD_PTR) -> LRESULT {
+                const auto result = DefSubclassProc(child, m, w, l);
+                if (m == WM_SETFOCUS)
+                    SendMessageW(GetParent(child), FocusRevealMessage, 0, reinterpret_cast<LPARAM>(child));
+                return result;
+            },
+            2, 0);
     return h;
+}
+std::wstring EditLines(const std::wstring& text) {
+    std::wstring result;
+    result.reserve(text.size());
+    for (const auto c : text) {
+        if (c == L'\n' && (result.empty() || result.back() != L'\r'))
+            result += L'\r';
+        result += c;
+    }
+    return result;
+}
+int ScrollDeltaToReveal(HWND parent, HWND focused, int dpi) {
+    RECT viewport{}, bounds{};
+    GetClientRect(parent, &viewport);
+    GetWindowRect(focused, &bounds);
+    MapWindowPoints(nullptr, parent, reinterpret_cast<POINT*>(&bounds), 2);
+    wchar_t type[32]{};
+    GetClassNameW(focused, type, 32);
+    // A combo's dropdown is a popup; only its collapsed field needs revealing.
+    if (_wcsicmp(type, L"COMBOBOX") == 0)
+        bounds.bottom = std::min(bounds.bottom, bounds.top + MulDiv(36, dpi, 96));
+    if (bounds.top < 0)
+        return MulDiv(bounds.top, 96, dpi) - 1;
+    if (bounds.bottom > viewport.bottom)
+        return MulDiv(bounds.bottom - viewport.bottom, 96, dpi) + 1;
+    return 0;
 }
 void SetCombo(HWND combo, const std::vector<std::wstring>& choices, int selected) {
     SendMessageW(combo, CB_RESETCONTENT, 0, 0);

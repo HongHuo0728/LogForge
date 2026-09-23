@@ -71,6 +71,30 @@ void MediaTests() {
         threw = true;
     }
     check(threw, "Malformed JSON accepted");
+    for (auto [stream, key, value] :
+         std::vector<std::tuple<size_t, std::string, Json>>{{0, "width", 1e30},
+                                                            {0, "height", -1},
+                                                            {0, "width", 12.5},
+                                                            {0, "bits_per_raw_sample", "999999999999"},
+                                                            {1, "channels", 1e30},
+                                                            {1, "sample_rate", "999999999999"},
+                                                            {0, "nb_frames", "9223372036854775808"},
+                                                            {0, "nb_frames", "12junk"},
+                                                            {0, "nb_frames", "-1"}}) {
+        auto bad = j;
+        bad["streams"][stream][key] = value;
+        bool rejected = false;
+        try {
+            MediaInfo::Parse(bad);
+        } catch (const AppError&) {
+            rejected = true;
+        }
+        check(rejected, "Overflow/fractional numeric metadata was accepted");
+    }
+    auto exact = j;
+    exact["streams"][0]["nb_frames"] = "9007199254740993";
+    check(MediaInfo::Parse(exact).frames == 9007199254740993LL,
+          "Frame count lost integer precision through double");
     auto output = j;
     output["streams"][0].erase("color_transfer");
     output["format"]["tags"]["logforge.transfer"] = "Apple Log";
