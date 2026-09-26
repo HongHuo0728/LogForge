@@ -67,6 +67,21 @@ class Logger {
     std::ofstream file_;
     std::mutex mutex_;
 };
+// An OS file lock, shared by every process using the same settings directory.
+// The lock is released by Windows even when a process crashes.
+class StateLock {
+  public:
+    StateLock();
+    ~StateLock();
+    StateLock(const StateLock&) = delete;
+    StateLock& operator=(const StateLock&) = delete;
+
+  private:
+    Handle file_;
+    OVERLAPPED offset_{};
+};
+void RequireWritableDirectory(const fs::path& directory);
+void MaintainOwnedStorage();
 class FFmpegProcess {
   public:
     FFmpegProcess(const fs::path& exe, const std::vector<std::wstring>& args, bool inputPipe = false);
@@ -79,6 +94,7 @@ class FFmpegProcess {
     void Terminate() noexcept;
     bool Running() const;
     int Wait();
+    double CpuSeconds() const;
     HANDLE ErrorPipe() const {
         return error_.get();
     }

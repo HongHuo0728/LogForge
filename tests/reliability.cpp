@@ -224,7 +224,7 @@ void CommandLine() {
         Require(result.exitCode != 0 && result.error.find("CLICommand") != std::string::npos,
                 "Malformed command launched discovery or returned the wrong error");
     }
-    Require(RunProcess(cli, {L"--version"}, &cancel, 2).output.find("1.1.1 (26923D)") != std::string::npos,
+    Require(RunProcess(cli, {L"--version"}, &cancel, 2).output.find("1.2.0 (26926A)") != std::string::npos,
             "CLI build identifier wrong");
     std::cout << "PASS: malformed CLI rejected before tool detection and current version\n";
 }

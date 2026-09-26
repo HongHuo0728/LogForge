@@ -117,9 +117,12 @@ MediaInfo MediaInfo::Parse(const Json& j, const fs::path& path) {
             m.videoTags = ReadTags(s);
             m.timecode = str(m.videoTags, "timecode");
             m.rotation = number(m.videoTags, "rotate");
-            for (const auto& side : s.value("side_data_list", Json::array()))
+            for (const auto& side : s.value("side_data_list", Json::array())) {
                 if (side.contains("rotation"))
                     m.rotation = number(side, "rotation");
+                if (side.contains("displaymatrix"))
+                    m.displayMatrixSupported &= SupportedDisplayMatrix(str(side, "displaymatrix"));
+            }
         } else if (type == "audio") {
             m.audio.push_back({str(s, "codec_name"), str(s, "channel_layout"), integer(s, "channels"),
                                integer(s, "sample_rate"), number(s, "start_time"), number(s, "duration"),
@@ -138,6 +141,11 @@ std::string MediaInfo::EffectiveChromaLocation() const {
 }
 std::vector<Message> MediaInfo::UnsupportedReasons() const {
     std::vector<Message> e;
+    if ((container != "mov,mp4,m4a,3gp,3g2,mj2" && container != "mov") ||
+        tags.value("major_brand", std::string()) != "qt  ")
+        e.emplace_back(TextId::InputContainer);
+    if (!displayMatrixSupported || std::abs(std::remainder(rotation, 90.0)) > 0.001)
+        e.emplace_back(TextId::InputDisplayMatrix);
     if (videoStreams != 1)
         e.emplace_back(TextId::InputVideoCount);
     if (codec != "prores")
@@ -195,9 +203,10 @@ MediaInfo Probe(const fs::path& ffprobe, const fs::path& path, const std::atomic
     auto lease = ToolTrust::Acquire(ffprobe.parent_path() / L"ffmpeg.exe");
     if (fs::weakly_canonical(ffprobe) != lease->identity.ffprobe)
         throw AppError(Message(TextId::FFmpegUntrusted, {PathText(ffprobe)}));
-    const auto r = RunProcess(
-        lease->identity.ffprobe,
-        {L"-v", L"error", L"-show_format", L"-show_streams", L"-of", L"json", path.wstring()}, cancel, 60);
+    const auto r = RunProcess(lease->identity.ffprobe,
+                              {L"-v", L"error", L"-show_format", L"-show_streams", L"-show_chapters", L"-of",
+                               L"json", path.wstring()},
+                              cancel, 60);
     if (r.exitCode)
         throw AppError(Message(TextId::ProbeFailed, {r.error}));
     try {
@@ -284,7 +293,8 @@ ValidationReport ValidateOutput(const MediaInfo& in, const MediaInfo& out, int64
             if (index < out.audio.size())
                 tags = &out.audio[index].tags;
         }
-        const bool preserved = tags && tags->contains(key) && tags->at(key) == entry["value"];
+        const bool preserved =
+            tags && tags->contains(key) && SameMetadataValue(key, tags->at(key), entry["value"]);
         entry["verified_preserved"] = preserved;
         const bool defaultLanguage =
             key == "language" && entry["value"] == "und" && tags && !tags->contains(key);
@@ -305,6 +315,17 @@ ValidationReport ValidateOutput(const MediaInfo& in, const MediaInfo& out, int64
     require(std::abs(out.duration - in.duration) <= std::max(0.1, tolerance),
             TextId::OutputContainerDuration);
     require(out.audio.size() == in.audio.size(), TextId::OutputAudioCount);
+    const auto chaptersIn = in.raw.value("chapters", Json::array()),
+               chaptersOut = out.raw.value("chapters", Json::array());
+    require(chaptersIn.size() == chaptersOut.size(), TextId::OutputChapters);
+    for (size_t i = 0; i < std::min(chaptersIn.size(), chaptersOut.size()); ++i) {
+        for (const char* time : {"start_time", "end_time"})
+            require(std::abs(number(chaptersIn[i], time) - number(chaptersOut[i], time)) <= 0.001,
+                    TextId::OutputChapters);
+        require(chaptersIn[i].value("tags", Json::object()).value("title", "") ==
+                    chaptersOut[i].value("tags", Json::object()).value("title", ""),
+                TextId::OutputChapters);
+    }
     for (size_t i = 0; i < std::min(in.audio.size(), out.audio.size()); ++i) {
         const auto& a = in.audio[i];
         const auto& b = out.audio[i];
@@ -323,13 +344,14 @@ ValidationReport ValidateOutput(const MediaInfo& in, const MediaInfo& out, int64
         require(std::abs((a.start - in.startTime) - (b.start - out.startTime)) < 0.05,
                 TextId::OutputAudioOffset);
     }
+    require(out.displayMatrixSupported, TextId::InputDisplayMatrix);
     require(std::abs(std::remainder(out.rotation - in.rotation, 360.0)) < 0.1, TextId::OutputRotation);
     if (!in.timecode.empty())
         require(in.timecode == out.timecode, TextId::OutputTimecode);
     for (const auto& [k, v] : in.tags.items()) {
         if (k == "creation_time" || k == "com.apple.quicktime.make" || k == "com.apple.quicktime.model" ||
             k == "com.apple.quicktime.creationdate")
-            if (!out.tags.contains(k) || out.tags[k] != v)
+            if (!out.tags.contains(k) || !SameMetadataValue(k, out.tags[k], v))
                 r.warnings.emplace_back(TextId::MetadataChanged, std::initializer_list<std::string>{k});
     }
     return r;
@@ -382,6 +404,16 @@ std::vector<std::wstring> AppleLogMetadataWriter::Arguments(const MediaInfo& in,
         const auto scope = tag.value("write_scope", tag["scope"].get<std::string>());
         args.push_back(scope == "format" ? L"-metadata" : L"-metadata:s:" + Wide(scope));
         args.push_back(Wide(tag["key"].get<std::string>()) + L"=" + Wide(tag["value"].get<std::string>()));
+    }
+    // Disabling automatic metadata copy also disables chapter titles. Restore
+    // only their safe title field, with the chapter timeline mapped separately.
+    const auto chapters = in.raw.value("chapters", Json::array());
+    for (size_t i = 0; i < chapters.size(); ++i) {
+        const auto tags = chapters[i].value("tags", Json::object());
+        if (tags.contains("title") && tags.at("title").is_string()) {
+            args.push_back(L"-metadata:c:" + std::to_wstring(i));
+            args.push_back(L"title=" + Wide(tags.at("title").get<std::string>()));
+        }
     }
     if (!in.timecode.empty()) {
         args.push_back(L"-timecode");

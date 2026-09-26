@@ -1,5 +1,16 @@
 # Technical references
 
+## 1.2.0 reliability, performance and CUDA references (2026-09-26)
+
+- [FFmpeg 8.1.2 MOV muxer source](https://github.com/FFmpeg/FFmpeg/blob/n8.1.2/libavformat/movenc.c): track headers use the movie creation timestamp; copying a tmcd stream takes precedence over explicit timecode. LogForge reapplies source header times and regenerates the timecode track on rotation remux.
+- [Apple QuickTime File Format](https://developer.apple.com/documentation/quicktime-file-format): documented mvhd/tkhd/mdhd creation-time fields, edit lists and matrix structures. Only understood fixed-width header fields are patched.
+- [Apple ProRes overview](https://support.apple.com/en-sa/102207) and [Apple ProRes white paper](https://www.apple.com/tw/final-cut-pro/docs/Apple_ProRes_White_Paper.pdf): HQ's approximate 220 Mb/s at 1920x1080/29.97 forms a planning heuristic, with explicit headroom and rotation-copy allowance, not a guaranteed bitrate.
+- [NVRTC 12.8.1 documentation](https://docs.nvidia.com/cuda/archive/12.8.1/nvrtc/index.html): PTX compilation, precise math switches and compiler API.
+- [CUDA programming guide](https://docs.nvidia.com/cuda/archive/13.0.0/cuda-c-programming-guide/index.html): Driver API, pinned memory, streams, events and device qualification.
+- [Blackwell compatibility guide](https://docs.nvidia.com/cuda/blackwell-compatibility-guide/): forward JIT compatibility of included PTX, subject to the installed driver.
+- [CUDA 12.8.1 license](https://docs.nvidia.com/cuda/archive/12.8.1/eula/index.html): compiler-generated device-math portions are covered by NVIDIA terms, separately from LogForge source.
+- [CMake CPack module](https://cmake.org/cmake/help/latest/module/CPack.html): `CPACK_PACKAGE_CHECKSUM SHA256` creates the checksum beside the final package; the package audit independently recomputes it.
+
 Reviewed through 2026-09-23. Conclusions are limited to the versions and interfaces below; a source URL does not imply a tested editor or device.
 
 ## Native Apple Log and actual Resolve import (2026-09-23)

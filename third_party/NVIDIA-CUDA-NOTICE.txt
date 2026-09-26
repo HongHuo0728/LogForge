@@ -1,0 +1,23 @@
+NVIDIA CUDA compiled device math
+
+The CUDA backend embeds PTX compiled from LogForge's own ColorKernel.cu with
+NVIDIA NVRTC 12.8. The generated PTX includes compiled device math routines
+from NVIDIA's compiler support library. NVIDIA retains its rights in those
+portions; the LogForge MIT license does not relicense NVIDIA SDK components.
+
+Use and redistribution of NVIDIA portions are subject to the NVIDIA CUDA
+Toolkit Software License Agreement, including its redistribution requirements:
+https://docs.nvidia.com/cuda/archive/12.8.1/eula/index.html
+
+No NVIDIA driver, CUDA runtime DLL, NVRTC DLL, SDK headers, Toolkit installer,
+or NVIDIA sample source code is bundled with the portable application.
+The separately installed NVIDIA driver loads the embedded PTX. The GPU is
+selected by runtime capability and numerical qualification, not a model list.
+
+LogForge-authored C++ and CUDA source remain licensed under MIT. Developers
+can rebuild the device artifact using their licensed CUDA compiler; the
+source hash, PTX hash, compiler hash and exact options are recorded in
+src/color/ColorKernel.manifest.json.
+
+NVIDIA, CUDA and GeForce are trademarks of NVIDIA Corporation. LogForge is
+independent and is not endorsed by NVIDIA Corporation.

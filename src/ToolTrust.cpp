@@ -44,6 +44,7 @@ std::shared_ptr<ToolLease> Lock(const fs::path& p) {
 }
 void Save(const ToolIdentity& id) {
     std::lock_guard lock(trustMutex);
+    StateLock processLock;
     auto j = Read();
     j[Key(id.ffmpeg)] = id.ToJson();
     const auto dir = DataDirectory();
@@ -93,6 +94,7 @@ void ToolTrust::RecordDownload(const fs::path& p, const std::string& archiveHash
 }
 bool ToolTrust::HasApproval(const fs::path& p) {
     std::lock_guard lock(trustMutex);
+    StateLock processLock;
     return Read().contains(Key(p));
 }
 std::shared_ptr<ToolLease> ToolTrust::Acquire(const fs::path& p) {
@@ -100,6 +102,7 @@ std::shared_ptr<ToolLease> ToolTrust::Acquire(const fs::path& p) {
     Json record;
     {
         std::lock_guard lock(trustMutex);
+        StateLock processLock;
         auto j = Read();
         const auto it = j.find(Key(p));
         if (it == j.end())

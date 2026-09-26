@@ -42,7 +42,7 @@ def main():
     memory=[];start=time.monotonic()
     with (work/'conversion.log').open('wb') as log:
         process=subprocess.Popen([str(cli),'--convert',str(source),str(output),'--ffmpeg',str(ff),
-                                  '--input-chroma-location','left'],env=env,stdout=log,stderr=subprocess.STDOUT)
+                                  '--input-chroma-location','left','--backend','cpu'],env=env,stdout=log,stderr=subprocess.STDOUT)
         handle=kernel.OpenProcess(0x0400|0x0010,False,process.pid)
         assert handle, 'Cannot observe conversion process memory'
         try:

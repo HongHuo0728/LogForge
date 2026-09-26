@@ -95,7 +95,7 @@ struct FloatTransformer::Impl {
 };
 FloatTransformer::FloatTransformer(double e, const ToneAdjustments& t, unsigned workers)
     : impl_(std::make_unique<Impl>(e, t,
-                                   workers ? std::clamp(workers, 1u, 16u)
+                                   workers ? std::clamp(workers, 1u, 64u)
                                            : std::clamp(std::thread::hardware_concurrency() / 2, 1u, 8u))) {}
 FloatTransformer::~FloatTransformer() = default;
 unsigned FloatTransformer::Workers() const {

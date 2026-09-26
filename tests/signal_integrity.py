@@ -118,7 +118,7 @@ def main():
             assert measured[hi][0] > measured[lo][0]+1, ('Collapsed ramp',creative,lo,hi)
         assert measured[1][0] > 180, 'Apple black was crushed to video black'
         assert measured[20][0] < 900, 'Super-white signal was clipped to white'
-        report_file = max((work/'appdata/logs').glob(dest.name+'-*.validation.json'),key=lambda p:p.stat().st_mtime)
+        report_file = max((work/'appdata/logs').glob('LogForge-'+dest.name+'-*.validation.json'),key=lambda p:p.stat().st_mtime)
         validation = json.loads(report_file.read_text(encoding='utf-8'))
         signal = validation['validation']['signal']
         assert signal['samples'] == width*height*3*frames
@@ -139,7 +139,7 @@ def main():
     risk = work/'exposure-risk.mov'
     if risk.exists(): risk.unlink()
     run([cli,'--convert',source,risk,'--ffmpeg',ff,'--input-chroma-location','left','--exposure-ev','4'],env=env)
-    risk_file = max((work/'appdata/logs').glob(risk.name+'-*.validation.json'),key=lambda p:p.stat().st_mtime)
+    risk_file = max((work/'appdata/logs').glob('LogForge-'+risk.name+'-*.validation.json'),key=lambda p:p.stat().st_mtime)
     risk_report = json.loads(risk_file.read_text(encoding='utf-8'))['validation']
     assert risk_report['signal_warning'] and risk_report['signal']['above_nominal_white']>0
 

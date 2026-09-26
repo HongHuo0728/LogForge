@@ -24,3 +24,18 @@ Apple's vendor-supplied ACES input transform and ITU specifications were consult
 ## Windows components
 
 Win32, Common Controls, WinHTTP, BCrypt and Windows Imaging Component are operating-system APIs. MSVC Release code uses the static runtime. Visual Studio and the Windows SDK are build prerequisites, not project-distributed dependencies.
+
+## NVIDIA CUDA compiler-generated device code
+
+The CUDA kernel source is LogForge project code. The checked-in PTX is generated
+by NVIDIA NVRTC 12.8 with precise math options and may contain NVIDIA device-math
+implementation portions. Those portions are not relicensed under LogForge's MIT
+license. See the bundled `licenses/NVIDIA-CUDA-NOTICE.txt` and the
+[CUDA 12.8.1 EULA](https://docs.nvidia.com/cuda/archive/12.8.1/eula/index.html).
+The portable package places the notice under `licenses/NVIDIA-CUDA-NOTICE.txt`.
+
+No NVIDIA Toolkit, NVRTC, cudart or driver DLL is redistributed. Runtime loads the
+installed system NVIDIA CUDA driver. Compiler provenance, options and source/PTX
+SHA-256 values are in `src/color/ColorKernel.manifest.json`; regeneration requires
+an explicitly supplied licensed NVRTC installation. Running LogForge does not
+require that development compiler or DaVinci Resolve.

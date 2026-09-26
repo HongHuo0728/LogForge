@@ -1,5 +1,6 @@
 #pragma once
 #include "Color.h"
+#include "CudaTransformer.h"
 #include "Localization.h"
 #include "Platform.h"
 
@@ -9,6 +10,7 @@ struct AppSettings {
     Language language = Language::English;
     Theme theme = Theme::Dark;
     ToneAdjustments tone;
+    ProcessingBackend backend = ProcessingBackend::Auto;
     fs::path manualFFmpeg, detectedFFmpeg;
     bool recoveredDefaults = false;
 };

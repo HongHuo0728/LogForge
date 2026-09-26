@@ -7,7 +7,8 @@
 namespace logforge {
 namespace {
 constexpr int LanguageControl = 501, ThemeControl = 502, CreativeControl = 503, ShadowControl = 504,
-              HighlightControl = 505, SaturationControl = 506, SaveControl = IDOK, CancelControl = IDCANCEL;
+              HighlightControl = 505, SaturationControl = 506, BackendControl = 507, SaveControl = IDOK,
+              CancelControl = IDCANCEL;
 constexpr DWORD ComboStyle = WS_TABSTOP | CBS_DROPDOWNLIST | CBS_OWNERDRAWFIXED | CBS_HASSTRINGS | WS_VSCROLL;
 class SettingsWindow {
   public:
@@ -49,6 +50,7 @@ class SettingsWindow {
         style.Window(window);
         Add(LanguageControl, L"COMBOBOX", L"", ComboStyle);
         Add(ThemeControl, L"COMBOBOX", L"", ComboStyle);
+        Add(BackendControl, L"COMBOBOX", L"", ComboStyle);
         Add(CreativeControl, L"BUTTON", L"", WS_TABSTOP | BS_OWNERDRAW);
         for (int id : {ShadowControl, HighlightControl, SaturationControl})
             Add(id, L"COMBOBOX", L"", ComboStyle);
@@ -59,6 +61,8 @@ class SettingsWindow {
                  draft.language == Language::English ? 0 : 1);
         SetCombo(controls[ThemeControl], {T(TextId::Dark), T(TextId::Light)},
                  draft.theme == Theme::Dark ? 0 : 1);
+        SetCombo(controls[BackendControl], {T(TextId::BackendAuto), L"CPU", L"NVIDIA RTX CUDA"},
+                 static_cast<int>(draft.backend));
         NumberCombo(ShadowControl, shadows, draft.tone.shadowStops);
         NumberCombo(HighlightControl, highlights, draft.tone.highlightStops);
         NumberCombo(SaturationControl, saturation, draft.tone.saturation * 100);
@@ -71,7 +75,7 @@ class SettingsWindow {
         RECT r{};
         GetClientRect(window, &r);
         const int width = MulDiv(r.right, 96, dpi), height = MulDiv(r.bottom, 96, dpi);
-        const int content = draft.tone.enabled ? 520 : 382;
+        const int content = draft.tone.enabled ? 580 : 442;
         scroll = std::clamp(scroll, 0, std::max(0, content - height));
         SCROLLINFO si{sizeof(si),  SIF_RANGE | SIF_PAGE | SIF_POS, 0,
                       content - 1, static_cast<UINT>(height),      scroll};
@@ -81,14 +85,15 @@ class SettingsWindow {
         };
         place(LanguageControl, 240, 64, width - 268, 260);
         place(ThemeControl, 240, 125, width - 268, 180);
-        place(CreativeControl, 28, 192, width - 56, 38);
+        place(BackendControl, 240, 182, width - 268, 180);
+        place(CreativeControl, 28, 252, width - 56, 38);
         SetWindowTextW(controls[CreativeControl],
                        T(draft.tone.enabled ? TextId::GradeOn : TextId::GradeOff).c_str());
         if (draft.tone.enabled)
             SetPropW(controls[CreativeControl], L"checked", reinterpret_cast<HANDLE>(1));
         else
             RemovePropW(controls[CreativeControl], L"checked");
-        int y = 306;
+        int y = 366;
         for (int id : {ShadowControl, HighlightControl, SaturationControl}) {
             place(id, 320, y, width - 348, 220);
             y += 42;
@@ -99,9 +104,9 @@ class SettingsWindow {
         place(CancelControl, width - 132, content - 58, 104, 36);
         InvalidateRect(window, nullptr, TRUE);
     }
-    void Paint() {
+    void Paint(HDC printDC = nullptr) {
         PAINTSTRUCT ps{};
-        auto dc = BeginPaint(window, &ps);
+        auto dc = printDC ? printDC : BeginPaint(window, &ps);
         RECT r{};
         GetClientRect(window, &r);
         FillRect(dc, &r, style.background);
@@ -113,18 +118,20 @@ class SettingsWindow {
         label(TextId::Settings, 18);
         label(TextId::LanguageLabel, 68);
         label(TextId::Appearance, 129);
-        label(TextId::CreativeHelp, 242, 48, true);
+        label(TextId::Backend, 186);
+        label(TextId::CreativeHelp, 302, 48, true);
         if (draft.tone.enabled) {
-            label(TextId::Shadows, 309);
-            label(TextId::Highlights, 351);
-            label(TextId::Saturation, 393);
+            label(TextId::Shadows, 369);
+            label(TextId::Highlights, 411);
+            label(TextId::Saturation, 453);
         }
         if (!error.empty()) {
-            RECT rect{S(28), S((draft.tone.enabled ? 430 : 294) - scroll), S(width - 28),
-                      S((draft.tone.enabled ? 458 : 322) - scroll)};
+            RECT rect{S(28), S((draft.tone.enabled ? 490 : 354) - scroll), S(width - 28),
+                      S((draft.tone.enabled ? 518 : 382) - scroll)};
             style.Text(dc, error, rect, false, true);
         }
-        EndPaint(window, &ps);
+        if (!printDC)
+            EndPaint(window, &ps);
     }
     double Choice(int id, const std::vector<double>& values) {
         auto index = SendMessageW(controls[id], CB_GETCURSEL, 0, 0);
@@ -151,6 +158,10 @@ class SettingsWindow {
             throw AppError(TextId::SettingsSaveFailed);
         next.language = language == 0 ? Language::English : Language::SimplifiedChinese;
         next.theme = theme == 0 ? Theme::Dark : Theme::Light;
+        const auto backend = SendMessageW(controls[BackendControl], CB_GETCURSEL, 0, 0);
+        if (backend < 0 || backend > 2)
+            throw AppError(TextId::SettingsSaveFailed);
+        next.backend = static_cast<ProcessingBackend>(backend);
         next.tone.shadowStops = Choice(ShadowControl, shadows);
         next.tone.highlightStops = Choice(HighlightControl, highlights);
         next.tone.saturation = Choice(SaturationControl, saturation) / 100;
@@ -175,6 +186,9 @@ class SettingsWindow {
                 return 0;
             case WM_PAINT:
                 self->Paint();
+                return 0;
+            case WM_PRINTCLIENT:
+                self->Paint(reinterpret_cast<HDC>(w));
                 return 0;
             case WM_ERASEBKGND:
                 return 1;
@@ -509,13 +523,15 @@ struct CandidateWindow {
             case WM_CTLCOLORLISTBOX:
             case WM_CTLCOLORBTN:
                 return self->style.Color(m, w, l);
-            case WM_PAINT: {
+            case WM_PAINT:
+            case WM_PRINTCLIENT: {
                 PAINTSTRUCT ps{};
-                const auto dc = BeginPaint(h, &ps);
+                const auto dc = m == WM_PRINTCLIENT ? reinterpret_cast<HDC>(w) : BeginPaint(h, &ps);
                 RECT r{};
                 GetClientRect(h, &r);
                 FillRect(dc, &r, self->style.background);
-                EndPaint(h, &ps);
+                if (m != WM_PRINTCLIENT)
+                    EndPaint(h, &ps);
                 return 0;
             }
             case WM_GETMINMAXINFO: {

@@ -1,5 +1,6 @@
 #include "logforge/FFmpeg.h"
 #include "logforge/Settings.h"
+#include "logforge/StorageSafety.h"
 #include <array>
 #include <set>
 #include <sstream>
@@ -342,6 +343,7 @@ FFmpegInstallation FFmpegDownloader::Install(const FFmpegBuildProvider& provider
     auto staging = root / (L"install-" + std::to_wstring(GetCurrentProcessId()) + L"-" +
                            std::to_wstring(GetTickCount64()));
     fs::create_directories(staging);
+    MarkOwnedInstallDirectory(staging);
     auto zip = staging / L"download.zip";
     log.Write("FFmpeg provider: " + Utf8(spec.name) + " " + Utf8(spec.version) + "; " + Utf8(spec.url) +
               "; SHA256 " + spec.sha256 + "; " + spec.license);
@@ -399,12 +401,14 @@ FFmpegInstallation FFmpegDownloader::Install(const FFmpegBuildProvider& provider
                 throw;
             auto backup = root / (spec.archiveRoot + L".replaced-" + std::to_wstring(GetTickCount64()));
             fs::rename(target, backup);
+            MarkOwnedInstallDirectory(backup);
             log.Write("Preserved unusable managed installation: " + PathText(backup));
         }
     }
     fs::rename(staging / spec.archiveRoot, target);
     ToolTrust::RecordDownload(target / L"bin/ffmpeg.exe", spec.sha256);
     fs::remove(zip);
+    fs::remove(staging / L".logforge-owned.json");
     fs::remove(staging);
     progress(1, 1, Message(TextId::Installed));
     return manager.Check(target / L"bin/ffmpeg.exe", cancel);

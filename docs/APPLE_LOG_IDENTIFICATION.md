@@ -6,8 +6,10 @@ records container identification, not an assertion that converted HLG recovers
 a native camera's scene rendering or sensor information.
 
 This identification work is part of **LogForge 1.1.0**. The editor experiments
-used build 26923B; the current build is 26923C, with the same identification
-implementation. See the [1.1.0 changelog](../CHANGELOG.md).
+used build 26923B; the released 1.1.0 build was 26923C, with the same identification
+implementation. These are historical build labels. Later regression results are
+recorded separately in [VALIDATION.md](VALIDATION.md). See the
+[1.1.0 changelog](../CHANGELOG.md).
 
 ## Reference provenance
 

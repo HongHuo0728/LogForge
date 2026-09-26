@@ -1,5 +1,93 @@
 # Validation record
 
+## 1.2.0 (26926A): portrait MOV, CUDA, stability and interface
+
+Local verification: **2026-09-26**, Windows 11 x64 build 26200, 20 logical CPUs,
+MSVC Release with static runtime. UI/CLI display `1.2.0 (26926A)`; Windows
+FileVersion, ProductVersion and manifest are **1.2.0.0**. The tested GUI EXE is
+1,511,424 bytes. Its imports contain Windows libraries, without a VC++ runtime,
+FFmpeg or CUDA runtime DLL dependency.
+
+- Configure and Release build passed. The complete **22/22 CTest suite passed
+  in 225.77 seconds**, including independent scalar math, CFR/VFR, FFmpeg trust
+  and numerical verification, metadata/chroma, audio/timecode, no-overwrite,
+  cancellation and actual encoding. Existing color tolerances were not relaxed.
+  `AppleLog.cpp`, `HLG.cpp` and `Cadence.cpp` are unchanged from the starting release.
+- Portrait regressions construct actual MOV headers with distinct movie, video,
+  audio and timecode creation timestamps. **0, 90, -90, 180 and 270 degrees** all
+  pass semantic tag comparison, structural header preservation, timecode and
+  output validation. These are generated structural fixtures, not private footage.
+- New regression paths cover chapter titles/times and removed metadata tracks,
+  unsafe trim/edit lists, mirrored matrices, Creative completion, ownership-checked
+  stale partial cleanup (including locked-file retry), four concurrent state-store
+  writers, report-save failure, insufficient conversion/remux space, Auto GPU
+  fallback and forced-GPU failure. Failed jobs publish no final movie.
+- CUDA qualification passed on **NVIDIA GeForce RTX 3080 Ti Laptop GPU, 16 GB,
+  driver 616.92 / DLL 32.0.16.1692 / CUDA Driver API 13040**. Six cases each compare
+  24,576 samples against independent scalar CPU double calculations: Standard
+  and Creative at -8, 0 and +8 EV, including ramps, signed shadows, super-white,
+  saturated colors and random values. Observed maximum and mean float32 output
+  error were **0** for every case. Qualification tolerance remains 2e-6; this new
+  gate does not replace any older stricter scalar or encoded-signal test.
+- All **20 benchmark cases** passed production validation: 1080p24 and
+  4K24/30/60/120, CPU/CUDA, Standard/Creative. Timing definitions, peak application
+  and process-tree memory, worker counts and GPU copy/kernel times are in the
+  [benchmark record](BENCHMARK_1.2.0.md).
+- The independent **240-frame 4K120 CPU Standard** test passed in **45.202 seconds
+  of conversion time / 5.309 fps**, versus a 65.072-second serial-bridge baseline
+  on this machine. Application peak private memory was **14.43 MiB**, with three
+  chunks of at most 4 MiB. The 1,536 post-encode luma samples across frames
+  0/119/239 had maximum error **0.8651 code values**, below the unchanged limit of 2.
+- **26 native GUI scenarios passed**: English/Simplified Chinese × dark/light ×
+  five DPI values, two missing-FFmpeg scenarios, closing an active held-pipe
+  search, real Standard/Creative conversions and a queue whose first file fails
+  while the second succeeds. Approval refusal, Settings Save/Cancel, focus,
+  failure/cancel recovery and per-item reports were checked. Repeated dialogs
+  require exactly unchanged GDI/USER resource counts after the existing warmup.
+- **960 production-layout cases and 20 distinct snapshots passed** at
+  100/125/150/175/200% DPI and 1280×720, 1920×1080, 2560×1440 client sizes, both
+  languages/themes, Creative on/off, FFmpeg ready/missing and idle/running/failed/
+  completed states. Checks cover non-overlapping logical rectangles, reachable
+  scroll content, footer separation, single status rendering, DPI relayout and
+  stable GDI use. They exercise native windows and the real `WM_DPICHANGED`,
+  layout and paint paths; they do not claim three physical monitor setups.
+
+### Fresh Resolve import
+
+**DaVinci Resolve Studio 20.3.2.9** imported this build's new generated Standard
+and Creative outputs in a fresh, temporary DaVinci YRGB Color Managed project.
+Both reported `Input Color Space = Apple Log`, `IDT = Apple Log`,
+`Data Level = Auto`, an empty Input LUT, ProRes 422 HQ and 10-bit. The test did
+not assign any clip color space, gamma or LUT, and camera make/type remained
+empty rather than invented. The temporary project was deleted and the headless
+Resolve instance launched for this check was closed.
+
+This **verifies automatic identification for these v1.2.0 outputs in that Resolve
+version**. It is not a new native-camera A/B experiment or a new render-level
+comparison; the separate 1.1.0 evidence is retained below. Premiere and Final Cut
+remain untested.
+
+### Limits and release evidence
+
+Only one physical CUDA GPU and this Windows machine were tested. Other GPU
+families/drivers must pass the same runtime qualification. Disk-full, CUDA error
+and OOM paths use deterministic injected failures; the physical disk and GPU
+were not deliberately exhausted. Creative still holds one complete planar RGB
+frame. One earlier GUI resource sample changed without an established root
+cause; its isolated recheck and the final strict 26-case suite passed, with no
+relaxation of resource assertions. This is recorded as a remaining observation,
+not a proven leak repair or a claim that all possible bugs are eliminated.
+
+The [compact verification record](verification/1.2.0.json) includes the tested
+EXE hash, test groups, CUDA qualification, GUI cases, sustained result and fresh
+Resolve import properties. The portable ZIP audit passed its exact **22-file
+allowlist**, CRC integrity, byte-identical tested EXE and actual matching
+`.zip.sha256` sidecar checks. The executable extracted from the ZIP also passed
+native startup, Settings and missing-tool/failure-recovery smoke checks. Generated
+media and temporary app/editor profiles were removed after verification and are
+excluded from Git and the release. Compact reports and synthetic UI snapshots
+remain; the empty main-window screenshot comes from the tested executable.
+
 ## 1.1.1 (26923D): discovery and reliability
 
 Local verification: 2026-09-23, Windows build 26200, MSVC x64 Release, static runtime.

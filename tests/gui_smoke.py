@@ -21,7 +21,7 @@ def main():
     args.work.mkdir(parents=True, exist_ok=True)
     results = []
     cases = [(language, theme, dpi, False)
-             for language in ('en', 'zh-CN') for theme in ('dark', 'light') for dpi in (96, 144, 192)]
+              for language in ('en', 'zh-CN') for theme in ('dark', 'light') for dpi in (96, 120, 144, 168, 192)]
     cases += [('en', 'dark', 96, True), ('zh-CN', 'light', 144, True)]
     for language, theme, dpi, missing in cases:
         name = f'{language}-{theme}-{dpi}' + ('-missing' if missing else '')
@@ -96,6 +96,26 @@ def main():
             assert report['convert_enabled'] and not report['cancel_enabled'], report
             results.append({'case': output.stem, **report})
             print('PASS: native drop, probe, transcode, validation:', output.stem, flush=True)
+        # Real multi-file WM_DROPFILES: a failed first probe must not disable
+        # conversion of the remaining supported file.
+        broken = case / 'broken.mov'
+        broken.write_text('Deliberately invalid generated MOV fixture', encoding='ascii')
+        output_dir = case / 'queue-output'
+        output_dir.mkdir(exist_ok=True)
+        output = output_dir / (args.input.stem + '_AppleLog.mov')
+        if output.exists():
+            output.unlink()
+        subprocess.run([str(args.exe.resolve()), '--smoke-test', str(broken), str(output_dir),
+                        '--queue-next', str(args.input.resolve()), '--input-chroma-location', 'left'],
+                       env=env, timeout=180, check=True)
+        report = json.loads(Path(str(output_dir) + '.gui-test.json').read_text(encoding='utf-8'))
+        queue = report['queue']
+        assert report['passed'] and (queue['successful'], queue['failed'], queue['remaining']) == (1, 1, 0), report
+        assert not queue['items'][0]['passed'] and queue['items'][1]['passed'], queue
+        assert Path(queue['items'][0]['failure_report']).is_file() and output.is_file(), queue
+        assert report['convert_enabled'] and not report['cancel_enabled'], report
+        results.append({'case': 'queue-failed-first-continues', **report})
+        print('PASS: native queue continues after first input fails; separate reports', flush=True)
     (args.work / 'gui-suite.json').write_text(json.dumps(results, indent=2), encoding='utf-8')
 
 

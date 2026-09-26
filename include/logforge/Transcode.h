@@ -1,5 +1,6 @@
 #pragma once
 #include "Color.h"
+#include "CudaTransformer.h"
 #include "FFmpeg.h"
 
 namespace logforge {
@@ -9,10 +10,19 @@ struct JobProgress {
     int64_t frame = 0;
 };
 using JobCallback = std::function<void(const JobProgress&)>;
+struct JobIOHooks {
+    // Dependency injection for deterministic disk-full/report/CUDA-fault tests.
+    // Production GUI and CLI never set these hooks; there are no environment overrides.
+    std::function<uintmax_t(const fs::path&)> availableSpace;
+    std::function<void(const fs::path&)> beforeReportWrite;
+    std::function<void(const char*)> cudaCheckpoint;
+};
 struct TranscodeOptions {
     // A scene-linear exposure gain before the unchanged Apple Log encoding.
     double exposureStops = 0;
     ToneAdjustments tone;
+    ProcessingBackend backend = ProcessingBackend::Auto;
+    const JobIOHooks* io = nullptr;
 };
 class TranscodeJob {
   public:

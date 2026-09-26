@@ -50,6 +50,23 @@ Additional evidence still needed:
 3. Repeat the verified Resolve managed-import/range test in Premiere, Final Cut and other Resolve versions; compare actual LUT/CST workflows separately.
 4. Tie any further atom changes to observed editor behavior. The existing native-reference/A/B evidence supports only the implemented minimal identification field.
 
-V1 does not copy arbitrary camera data streams, Dolby Vision metadata, chapters, GPS tracks, anamorphic display transforms or complex edit lists. Files requiring those should be treated as outside the certified workflow. We do not claim binary equality with an iPhone file.
+Version 1.2.0 copies chapter positions and titles with explicit validation, and
+records removed nonessential camera metadata/data streams. Dolby Vision/GPS
+tracks, anamorphic or mirrored display transforms and complex edit lists are not
+copied. Unsafe timeline edits are rejected before processing. The accepted edit
+list is a unit-rate zero-origin duration declaration or packet-verified AAC
+priming, never an arbitrary trim. We do not claim binary equality with an iPhone.
 
-Version 1.1.1 records `logforge.version=1.1.1` and `logforge.build=26923D`. These are application version identifiers, not camera-model or Apple compatibility identifiers.
+Version 1.2.0 records `logforge.version=1.2.0` and `logforge.build=26926A`. These are application version identifiers, not camera-model or Apple compatibility identifiers.
+
+Creation-time validation compares timezone-aware ISO 8601 instants exactly at
+microsecond precision, accepting trailing-zero fractional formatting differences.
+For source movie/video/audio/timecode headers, the documented creation seconds
+since 1904 are copied into the matching output mvhd/tkhd/mdhd fields and read back
+for verification. Unsupported header capacity or mismatched structure fails
+closed. No size, sample offset or media bytes change. Genuine source creationdate
+remains a separate whitelisted metadata field, including its timezone information.
+
+During rotation remux only the encoded video and copied audio streams are mapped;
+chapters and timecode are rebuilt explicitly. This avoids copying an old tmcd
+track that causes FFmpeg to ignore the source drop-frame timecode metadata.

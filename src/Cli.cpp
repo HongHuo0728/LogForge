@@ -1,3 +1,4 @@
+#include "logforge/Queue.h"
 #include "logforge/Transcode.h"
 #include <fcntl.h>
 #include <io.h>
@@ -27,7 +28,17 @@ int wmain(int argc, wchar_t** argv) {
         bool toneParameter = false;
         bool deepSearch = false;
         for (int i = 1; i < argc; ++i) {
-            if (std::wstring(argv[i]) == L"--deep-search")
+            if (std::wstring(argv[i]) == L"--backend" && i + 1 < argc) {
+                const std::wstring value = argv[++i];
+                if (value == L"cpu")
+                    options.backend = ProcessingBackend::CPU;
+                else if (value == L"cuda")
+                    options.backend = ProcessingBackend::CUDA;
+                else if (value == L"auto")
+                    options.backend = ProcessingBackend::Auto;
+                else
+                    throw AppError(TextId::CLICommand);
+            } else if (std::wstring(argv[i]) == L"--deep-search")
                 deepSearch = true;
             else if (std::wstring(argv[i]) == L"--language" && i + 1 < argc) {
                 const std::wstring value = argv[++i];
@@ -82,19 +93,26 @@ int wmain(int argc, wchar_t** argv) {
             std::cout << "--detect [--deep-search] | --check-compatible --ffmpeg PATH | --install-ffmpeg | "
                          "--approve-ffmpeg "
                          "--ffmpeg PATH | --probe INPUT | --convert INPUT "
-                         "OUTPUT | --analyze INPUT [REFERENCE]\n"
+                         "OUTPUT | --batch OUTPUT_DIRECTORY INPUT... | --qualify-cuda | --analyze INPUT "
+                         "[REFERENCE]\n"
                       << Translate(TextId::CLIOptional, language)
                       << ": --ffmpeg PATH_TO_FFMPEG_EXE "
-                         "--language en|zh-CN --exposure-ev STOPS --input-chroma-location left|center\n"
+                         "--language en|zh-CN --backend auto|cpu|cuda --exposure-ev STOPS "
+                         "--input-chroma-location left|center\n"
                       << Translate(TextId::CLICreative, language)
                       << ": --tone [--shadow-lift-ev 3] "
                          "[--highlight-compression-ev 1] [--saturation-percent 85]\n";
+            return 0;
+        }
+        if (a.size() == 1 && a[0] == L"--qualify-cuda") {
+            std::cout << CudaTransformer::Qualify().dump(2) << std::endl;
             return 0;
         }
         // Reject malformed commands before discovering or executing any tools.
         const bool single = a.size() == 1 && (a[0] == L"--detect" || a[0] == L"--check-compatible" ||
                                               a[0] == L"--install-ffmpeg" || a[0] == L"--approve-ffmpeg");
         const bool command = single || (a.size() == 2 && a[0] == L"--probe") ||
+                             (a.size() >= 3 && a[0] == L"--batch") ||
                              (a.size() == 3 && a[0] == L"--convert") ||
                              ((a.size() == 2 || a.size() == 3) && a[0] == L"--analyze");
         if (!command || (deepSearch && (a[0] != L"--detect" || !explicitFFmpeg.empty())) ||
@@ -151,6 +169,17 @@ int wmain(int argc, wchar_t** argv) {
             for (const auto& e : errors)
                 std::cerr << Translate(e, language) << '\n';
             return errors.empty() ? 0 : 2;
+        }
+        if (a[0] == L"--batch") {
+            std::vector<fs::path> paths(a.begin() + 2, a.end());
+            auto queue = RunQueue(*tools, paths, a[1], log, cancelled, options, inputChroma,
+                                  [&](size_t index, size_t count, const MediaInfo&, const JobProgress& p) {
+                                      std::cout << "[" << index + 1 << "/" << count << "] "
+                                                << Translate(p.stage, language) << " frame=" << p.frame
+                                                << '\n';
+                                  });
+            std::cout << queue.dump(2) << std::endl;
+            return cancelled ? 130 : queue["failed"] == 0 ? 0 : 3;
         }
         if (a[0] == L"--convert" && a.size() == 3) {
             auto m = Probe(tools->ffprobe, a[1], &cancelled);

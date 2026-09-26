@@ -49,6 +49,7 @@ void Write(const Json& data) {
 } // namespace
 AppSettings SettingsStore::Load() {
     std::lock_guard lock(settingsMutex);
+    StateLock processLock;
     AppSettings result;
     const auto data = Read(&result.recoveredDefaults);
     const auto read = [&](const char* key, const auto& action) {
@@ -73,6 +74,15 @@ AppSettings SettingsStore::Load() {
         else if (s != "dark")
             throw std::runtime_error("Invalid theme");
     });
+    read("processing_backend", [&](const Json& v) {
+        const auto b = v.get<std::string>();
+        if (b == "cpu")
+            result.backend = ProcessingBackend::CPU;
+        else if (b == "cuda")
+            result.backend = ProcessingBackend::CUDA;
+        else if (b != "auto")
+            throw std::runtime_error("Invalid backend");
+    });
     read("ffmpeg", [&](const Json& v) { result.manualFFmpeg = Wide(v.get<std::string>()); });
     read("detected_ffmpeg", [&](const Json& v) { result.detectedFFmpeg = Wide(v.get<std::string>()); });
     read("creative", [&](const Json& v) {
@@ -89,9 +99,11 @@ AppSettings SettingsStore::Load() {
 void SettingsStore::SavePreferences(const AppSettings& settings) {
     ValidateToneAdjustments(settings.tone);
     std::lock_guard lock(settingsMutex);
+    StateLock processLock;
     auto data = Read();
     data["language"] = settings.language == Language::SimplifiedChinese ? "zh-CN" : "en";
     data["theme"] = settings.theme == Theme::Light ? "light" : "dark";
+    data["processing_backend"] = BackendName(settings.backend);
     data["creative"] = {{"enabled", settings.tone.enabled},
                         {"shadow_stops", settings.tone.shadowStops},
                         {"highlight_stops", settings.tone.highlightStops},
@@ -100,6 +112,7 @@ void SettingsStore::SavePreferences(const AppSettings& settings) {
 }
 void SettingsStore::SaveFFmpeg(const fs::path& path, bool automatic) {
     std::lock_guard lock(settingsMutex);
+    StateLock processLock;
     auto data = Read();
     data[automatic ? "detected_ffmpeg" : "ffmpeg"] = PathText(fs::absolute(path));
     Write(data);

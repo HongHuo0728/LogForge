@@ -1,0 +1,2805 @@
+{
+  "version": "1.2.0",
+  "build": "26926A",
+  "date": "2026-09-26",
+  "host": {
+    "os_build": 26200,
+    "logical_processors": 20,
+    "gpu": "NVIDIA GeForce RTX 3080 Ti Laptop GPU",
+    "nvidia_driver": "616.92",
+    "cuda_driver_api_version": 13040
+  },
+  "fixture": "One second of generated 10-bit HLG grayscale ramp per capture rate; no audio/rotation in throughput matrix. Every output passed production validation.",
+  "results": [
+    {
+      "case": "1920x1080-24-cpu-standard",
+      "width": 1920,
+      "height": 1080,
+      "capture_fps": 24,
+      "frames": 24,
+      "creative": false,
+      "backend": "cpu",
+      "wall_seconds_including_tool_verification": 4.9657474999985425,
+      "fps_including_verification": 4.833109214676551,
+      "peak_app_private_bytes": 15085568,
+      "peak_tree_private_bytes": 572362752,
+      "peak_tree_threads": 69,
+      "timing": {
+        "backend": {
+          "backend": "cpu",
+          "bridge_buffers": 3,
+          "bridge_total_bytes": 12582912,
+          "requested": "cpu"
+        },
+        "input": {
+          "avg_fps": 24.0,
+          "cadence": {
+            "error": "",
+            "error_packet": -1,
+            "error_units": "video time-base ticks",
+            "fps": 24.0,
+            "max_duration_error": 0.0,
+            "max_interval_error": 0.0,
+            "max_phase_error": 0.0,
+            "packets": 24,
+            "verified": true,
+            "verified_cadence": "24/1"
+          },
+          "nominal_fps": 24.0
+        },
+        "mode": "standard",
+        "output": {
+          "avg_fps": 24.0,
+          "cadence": {
+            "error": "",
+            "error_packet": -1,
+            "error_units": "video time-base ticks",
+            "fps": 24.0,
+            "max_duration_error": 0.0,
+            "max_interval_error": 0.0,
+            "max_phase_error": 0.0,
+            "packets": 24,
+            "verified": true,
+            "verified_cadence": "24/1"
+          },
+          "nominal_fps": 24.0
+        },
+        "space_estimate": {
+          "bytes": 306973956,
+          "headroom_factor": 1.75,
+          "heuristic": true,
+          "hq_target_mbps_1080p2997": 220,
+          "note": "Scene complexity and encoder behavior affect actual ProRes size; write failures remain fatal.",
+          "rotation_second_copy": false
+        },
+        "stages": {
+          "creation_metadata_seconds": 0.0091633,
+          "decode_cpu_seconds": 0.875,
+          "decode_pipe_read_seconds": 0.3511992000000001,
+          "decode_transform_encode_wall_seconds": 1.2392781,
+          "definition": "Pipe read/write include backpressure; decode and encode run concurrently. Stage values are not additive.",
+          "encode_cpu_seconds": 5.0625,
+          "encode_pipe_write_seconds": 0.2946964999999999,
+          "identification_seconds": 0.0467899,
+          "rotation_remux_seconds": 3e-07,
+          "total_before_publication_seconds": 2.7743304,
+          "transform_seconds": 1.0253060000000007,
+          "validation_seconds": 0.8498582
+        },
+        "threads": {
+          "color": 9,
+          "decoder": 2,
+          "encoder": 7,
+          "filter": 1,
+          "logical_cpus": 20
+        }
+      },
+      "pixel_sanity": {
+        "frames": [
+          {
+            "frame": 0,
+            "max_patch_mean_code_error": 0.08105328679084778,
+            "mean_code_error": 0.015028845656801152
+          },
+          {
+            "frame": 12,
+            "max_patch_mean_code_error": 0.08105328679084778,
+            "mean_code_error": 0.015028845656801152
+          },
+          {
+            "frame": 23,
+            "max_patch_mean_code_error": 0.08105328679084778,
+            "mean_code_error": 0.015028845656801152
+          }
+        ],
+        "max_patch_mean_code_error": 0.08105328679084778,
+        "mean_code_error": 0.015028845656801152,
+        "mean_limit_codes": 8,
+        "passed": true,
+        "peak_limit_codes": 32,
+        "scope": "first/middle/last, 9 patches per frame; scalar input reference vs decoded output YCbCr"
+      }
+    },
+    {
+      "case": "1920x1080-24-cpu-creative",
+      "width": 1920,
+      "height": 1080,
+      "capture_fps": 24,
+      "frames": 24,
+      "creative": true,
+      "backend": "cpu",
+      "wall_seconds_including_tool_verification": 5.288459199997305,
+      "fps_including_verification": 4.538183824886506,
+      "peak_app_private_bytes": 29237248,
+      "peak_tree_private_bytes": 567332864,
+      "peak_tree_threads": 69,
+      "timing": {
+        "backend": {
+          "backend": "cpu",
+          "bridge_buffers": 1,
+          "bridge_total_bytes": 24883200,
+          "requested": "cpu"
+        },
+        "input": {
+          "avg_fps": 24.0,
+          "cadence": {
+            "error": "",
+            "error_packet": -1,
+            "error_units": "video time-base ticks",
+            "fps": 24.0,
+            "max_duration_error": 0.0,
+            "max_interval_error": 0.0,
+            "max_phase_error": 0.0,
+            "packets": 24,
+            "verified": true,
+            "verified_cadence": "24/1"
+          },
+          "nominal_fps": 24.0
+        },
+        "mode": "creative",
+        "output": {
+          "avg_fps": 24.0,
+          "cadence": {
+            "error": "",
+            "error_packet": -1,
+            "error_units": "video time-base ticks",
+            "fps": 24.0,
+            "max_duration_error": 0.0,
+            "max_interval_error": 0.0,
+            "max_phase_error": 0.0,
+            "packets": 24,
+            "verified": true,
+            "verified_cadence": "24/1"
+          },
+          "nominal_fps": 24.0
+        },
+        "space_estimate": {
+          "bytes": 306973956,
+          "headroom_factor": 1.75,
+          "heuristic": true,
+          "hq_target_mbps_1080p2997": 220,
+          "note": "Scene complexity and encoder behavior affect actual ProRes size; write failures remain fatal.",
+          "rotation_second_copy": false
+        },
+        "stages": {
+          "creation_metadata_seconds": 0.0083882,
+          "decode_cpu_seconds": 0.84375,
+          "decode_pipe_read_seconds": 0.2731715,
+          "decode_transform_encode_wall_seconds": 1.9337483,
+          "definition": "Pipe read/write include backpressure; decode and encode run concurrently. Stage values are not additive.",
+          "encode_cpu_seconds": 4.265625,
+          "encode_pipe_write_seconds": 0.21835009999999996,
+          "identification_seconds": 0.0325995,
+          "rotation_remux_seconds": 2e-07,
+          "total_before_publication_seconds": 3.3080884,
+          "transform_seconds": 1.2804998999999997,
+          "validation_seconds": 0.7524298
+        },
+        "threads": {
+          "color": 9,
+          "decoder": 2,
+          "encoder": 7,
+          "filter": 1,
+          "logical_cpus": 20
+        }
+      },
+      "pixel_sanity": {
+        "frames": [
+          {
+            "frame": 0,
+            "max_patch_mean_code_error": 0.055646784603595734,
+            "mean_code_error": 0.012625078636187094
+          },
+          {
+            "frame": 12,
+            "max_patch_mean_code_error": 0.055646784603595734,
+            "mean_code_error": 0.012625078636187094
+          },
+          {
+            "frame": 23,
+            "max_patch_mean_code_error": 0.055646784603595734,
+            "mean_code_error": 0.012625078636187094
+          }
+        ],
+        "max_patch_mean_code_error": 0.055646784603595734,
+        "mean_code_error": 0.012625078636187094,
+        "mean_limit_codes": 8,
+        "passed": true,
+        "peak_limit_codes": 32,
+        "scope": "first/middle/last, 9 patches per frame; scalar input reference vs decoded output YCbCr"
+      }
+    },
+    {
+      "case": "1920x1080-24-cuda-standard",
+      "width": 1920,
+      "height": 1080,
+      "capture_fps": 24,
+      "frames": 24,
+      "creative": false,
+      "backend": "cuda",
+      "wall_seconds_including_tool_verification": 4.739732000001823,
+      "fps_including_verification": 5.063577434334003,
+      "peak_app_private_bytes": 313466880,
+      "peak_tree_private_bytes": 897302528,
+      "peak_tree_threads": 78,
+      "timing": {
+        "backend": {
+          "backend": "cuda",
+          "bridge_buffers": 3,
+          "bridge_total_bytes": 12582912,
+          "chunks": 143,
+          "compute_capability": "8.6",
+          "download_seconds": 0.05957513615489008,
+          "driver_cuda_version": 13040,
+          "gpu": "NVIDIA GeForce RTX 3080 Ti Laptop GPU",
+          "gpu_transform_seconds": 0.14732227241992948,
+          "math": "double expressions, FP32 input/output; FMA disabled",
+          "pinned_host_bytes": 4210688,
+          "ptx_target": "compute_75",
+          "qualification": {
+            "absolute_tolerance": 2e-06,
+            "cases": [
+              {
+                "creative": false,
+                "exposure_ev": -8.0,
+                "max_error": 0.0,
+                "mean_error": 0.0,
+                "samples": 24576
+              },
+              {
+                "creative": false,
+                "exposure_ev": 0.0,
+                "max_error": 0.0,
+                "mean_error": 0.0,
+                "samples": 24576
+              },
+              {
+                "creative": false,
+                "exposure_ev": 8.0,
+                "max_error": 0.0,
+                "mean_error": 0.0,
+                "samples": 24576
+              },
+              {
+                "creative": true,
+                "exposure_ev": -8.0,
+                "max_error": 0.0,
+                "mean_error": 0.0,
+                "samples": 24576
+              },
+              {
+                "creative": true,
+                "exposure_ev": 0.0,
+                "max_error": 0.0,
+                "mean_error": 0.0,
+                "samples": 24576
+              },
+              {
+                "creative": true,
+                "exposure_ev": 8.0,
+                "max_error": 0.0,
+                "mean_error": 0.0,
+                "samples": 24576
+              }
+            ],
+            "max_error": 0.0,
+            "passed": true,
+            "reference": "independent scalar CPU double"
+          },
+          "requested": "cuda",
+          "runtime": "CUDA Driver API; no cudart",
+          "upload_seconds": 0.06561695973575117
+        },
+        "input": {
+          "avg_fps": 24.0,
+          "cadence": {
+            "error": "",
+            "error_packet": -1,
+            "error_units": "video time-base ticks",
+            "fps": 24.0,
+            "max_duration_error": 0.0,
+            "max_interval_error": 0.0,
+            "max_phase_error": 0.0,
+            "packets": 24,
+            "verified": true,
+            "verified_cadence": "24/1"
+          },
+          "nominal_fps": 24.0
+        },
+        "mode": "standard",
+        "output": {
+          "avg_fps": 24.0,
+          "cadence": {
+            "error": "",
+            "error_packet": -1,
+            "error_units": "video time-base ticks",
+            "fps": 24.0,
+            "max_duration_error": 0.0,
+            "max_interval_error": 0.0,
+            "max_phase_error": 0.0,
+            "packets": 24,
+            "verified": true,
+            "verified_cadence": "24/1"
+          },
+          "nominal_fps": 24.0
+        },
+        "space_estimate": {
+          "bytes": 306973956,
+          "headroom_factor": 1.75,
+          "heuristic": true,
+          "hq_target_mbps_1080p2997": 220,
+          "note": "Scene complexity and encoder behavior affect actual ProRes size; write failures remain fatal.",
+          "rotation_second_copy": false
+        },
+        "stages": {
+          "creation_metadata_seconds": 0.0085046,
+          "decode_cpu_seconds": 0.90625,
+          "decode_pipe_read_seconds": 0.3547616000000001,
+          "decode_transform_encode_wall_seconds": 0.7534942,
+          "definition": "Pipe read/write include backpressure; decode and encode run concurrently. Stage values are not additive.",
+          "encode_cpu_seconds": 4.78125,
+          "encode_pipe_write_seconds": 0.3336996999999998,
+          "identification_seconds": 0.0419324,
+          "rotation_remux_seconds": 1e-07,
+          "total_before_publication_seconds": 2.3796875,
+          "transform_seconds": 0.5028146,
+          "validation_seconds": 0.7824195
+        },
+        "threads": {
+          "color": 2,
+          "decoder": 5,
+          "encoder": 11,
+          "filter": 1,
+          "logical_cpus": 20
+        }
+      },
+      "pixel_sanity": {
+        "frames": [
+          {
+            "frame": 0,
+            "max_patch_mean_code_error": 0.08105328679084778,
+            "mean_code_error": 0.015028845656801152
+          },
+          {
+            "frame": 12,
+            "max_patch_mean_code_error": 0.08105328679084778,
+            "mean_code_error": 0.015028845656801152
+          },
+          {
+            "frame": 23,
+            "max_patch_mean_code_error": 0.08105328679084778,
+            "mean_code_error": 0.015028845656801152
+          }
+        ],
+        "max_patch_mean_code_error": 0.08105328679084778,
+        "mean_code_error": 0.015028845656801152,
+        "mean_limit_codes": 8,
+        "passed": true,
+        "peak_limit_codes": 32,
+        "scope": "first/middle/last, 9 patches per frame; scalar input reference vs decoded output YCbCr"
+      }
+    },
+    {
+      "case": "1920x1080-24-cuda-creative",
+      "width": 1920,
+      "height": 1080,
+      "capture_fps": 24,
+      "frames": 24,
+      "creative": true,
+      "backend": "cuda",
+      "wall_seconds_including_tool_verification": 4.72692939999979,
+      "fps_including_verification": 5.0772918250061165,
+      "peak_app_private_bytes": 366542848,
+      "peak_tree_private_bytes": 958713856,
+      "peak_tree_threads": 78,
+      "timing": {
+        "backend": {
+          "backend": "cuda",
+          "bridge_buffers": 1,
+          "bridge_total_bytes": 24883200,
+          "chunks": 24,
+          "compute_capability": "8.6",
+          "download_seconds": 0.05314329624176027,
+          "driver_cuda_version": 13040,
+          "gpu": "NVIDIA GeForce RTX 3080 Ti Laptop GPU",
+          "gpu_transform_seconds": 0.15771900844573974,
+          "math": "double expressions, FP32 input/output; FMA disabled",
+          "pinned_host_bytes": 24899584,
+          "ptx_target": "compute_75",
+          "qualification": {
+            "absolute_tolerance": 2e-06,
+            "cases": [
+              {
+                "creative": false,
+                "exposure_ev": -8.0,
+                "max_error": 0.0,
+                "mean_error": 0.0,
+                "samples": 24576
+              },
+              {
+                "creative": false,
+                "exposure_ev": 0.0,
+                "max_error": 0.0,
+                "mean_error": 0.0,
+                "samples": 24576
+              },
+              {
+                "creative": false,
+                "exposure_ev": 8.0,
+                "max_error": 0.0,
+                "mean_error": 0.0,
+                "samples": 24576
+              },
+              {
+                "creative": true,
+                "exposure_ev": -8.0,
+                "max_error": 0.0,
+                "mean_error": 0.0,
+                "samples": 24576
+              },
+              {
+                "creative": true,
+                "exposure_ev": 0.0,
+                "max_error": 0.0,
+                "mean_error": 0.0,
+                "samples": 24576
+              },
+              {
+                "creative": true,
+                "exposure_ev": 8.0,
+                "max_error": 0.0,
+                "mean_error": 0.0,
+                "samples": 24576
+              }
+            ],
+            "max_error": 0.0,
+            "passed": true,
+            "reference": "independent scalar CPU double"
+          },
+          "requested": "cuda",
+          "runtime": "CUDA Driver API; no cudart",
+          "upload_seconds": 0.054189920425415025
+        },
+        "input": {
+          "avg_fps": 24.0,
+          "cadence": {
+            "error": "",
+            "error_packet": -1,
+            "error_units": "video time-base ticks",
+            "fps": 24.0,
+            "max_duration_error": 0.0,
+            "max_interval_error": 0.0,
+            "max_phase_error": 0.0,
+            "packets": 24,
+            "verified": true,
+            "verified_cadence": "24/1"
+          },
+          "nominal_fps": 24.0
+        },
+        "mode": "creative",
+        "output": {
+          "avg_fps": 24.0,
+          "cadence": {
+            "error": "",
+            "error_packet": -1,
+            "error_units": "video time-base ticks",
+            "fps": 24.0,
+            "max_duration_error": 0.0,
+            "max_interval_error": 0.0,
+            "max_phase_error": 0.0,
+            "packets": 24,
+            "verified": true,
+            "verified_cadence": "24/1"
+          },
+          "nominal_fps": 24.0
+        },
+        "space_estimate": {
+          "bytes": 306973956,
+          "headroom_factor": 1.75,
+          "heuristic": true,
+          "hq_target_mbps_1080p2997": 220,
+          "note": "Scene complexity and encoder behavior affect actual ProRes size; write failures remain fatal.",
+          "rotation_second_copy": false
+        },
+        "stages": {
+          "creation_metadata_seconds": 0.0076784,
+          "decode_cpu_seconds": 0.828125,
+          "decode_pipe_read_seconds": 0.2715905,
+          "decode_transform_encode_wall_seconds": 1.1078527,
+          "definition": "Pipe read/write include backpressure; decode and encode run concurrently. Stage values are not additive.",
+          "encode_cpu_seconds": 3.984375,
+          "encode_pipe_write_seconds": 0.19428820000000002,
+          "identification_seconds": 0.0402085,
+          "rotation_remux_seconds": 1e-07,
+          "total_before_publication_seconds": 2.7553994,
+          "transform_seconds": 0.4167177999999999,
+          "validation_seconds": 0.8416873
+        },
+        "threads": {
+          "color": 2,
+          "decoder": 5,
+          "encoder": 11,
+          "filter": 1,
+          "logical_cpus": 20
+        }
+      },
+      "pixel_sanity": {
+        "frames": [
+          {
+            "frame": 0,
+            "max_patch_mean_code_error": 0.055646784603595734,
+            "mean_code_error": 0.012625078636187094
+          },
+          {
+            "frame": 12,
+            "max_patch_mean_code_error": 0.055646784603595734,
+            "mean_code_error": 0.012625078636187094
+          },
+          {
+            "frame": 23,
+            "max_patch_mean_code_error": 0.055646784603595734,
+            "mean_code_error": 0.012625078636187094
+          }
+        ],
+        "max_patch_mean_code_error": 0.055646784603595734,
+        "mean_code_error": 0.012625078636187094,
+        "mean_limit_codes": 8,
+        "passed": true,
+        "peak_limit_codes": 32,
+        "scope": "first/middle/last, 9 patches per frame; scalar input reference vs decoded output YCbCr"
+      }
+    },
+    {
+      "case": "3840x2160-24-cpu-standard",
+      "width": 3840,
+      "height": 2160,
+      "capture_fps": 24,
+      "frames": 24,
+      "creative": false,
+      "backend": "cpu",
+      "wall_seconds_including_tool_verification": 9.676203000002715,
+      "fps_including_verification": 2.4803117503832097,
+      "peak_app_private_bytes": 15118336,
+      "peak_tree_private_bytes": 2166886400,
+      "peak_tree_threads": 69,
+      "timing": {
+        "backend": {
+          "backend": "cpu",
+          "bridge_buffers": 3,
+          "bridge_total_bytes": 12582912,
+          "requested": "cpu"
+        },
+        "input": {
+          "avg_fps": 24.0,
+          "cadence": {
+            "error": "",
+            "error_packet": -1,
+            "error_units": "video time-base ticks",
+            "fps": 24.0,
+            "max_duration_error": 0.0,
+            "max_interval_error": 0.0,
+            "max_phase_error": 0.0,
+            "packets": 24,
+            "verified": true,
+            "verified_cadence": "24/1"
+          },
+          "nominal_fps": 24.0
+        },
+        "mode": "standard",
+        "output": {
+          "avg_fps": 24.0,
+          "cadence": {
+            "error": "",
+            "error_packet": -1,
+            "error_units": "video time-base ticks",
+            "fps": 24.0,
+            "max_duration_error": 0.0,
+            "max_interval_error": 0.0,
+            "max_phase_error": 0.0,
+            "packets": 24,
+            "verified": true,
+            "verified_cadence": "24/1"
+          },
+          "nominal_fps": 24.0
+        },
+        "space_estimate": {
+          "bytes": 422589456,
+          "headroom_factor": 1.75,
+          "heuristic": true,
+          "hq_target_mbps_1080p2997": 220,
+          "note": "Scene complexity and encoder behavior affect actual ProRes size; write failures remain fatal.",
+          "rotation_second_copy": false
+        },
+        "stages": {
+          "creation_metadata_seconds": 0.0101248,
+          "decode_cpu_seconds": 3.515625,
+          "decode_pipe_read_seconds": 1.3229661999999995,
+          "decode_transform_encode_wall_seconds": 5.4918069,
+          "definition": "Pipe read/write include backpressure; decode and encode run concurrently. Stage values are not additive.",
+          "encode_cpu_seconds": 21.078125,
+          "encode_pipe_write_seconds": 1.637217,
+          "identification_seconds": 0.039979,
+          "rotation_remux_seconds": 0.0,
+          "total_before_publication_seconds": 7.4143262,
+          "transform_seconds": 4.196320200000002,
+          "validation_seconds": 1.2034311
+        },
+        "threads": {
+          "color": 9,
+          "decoder": 2,
+          "encoder": 7,
+          "filter": 1,
+          "logical_cpus": 20
+        }
+      },
+      "pixel_sanity": {
+        "frames": [
+          {
+            "frame": 0,
+            "max_patch_mean_code_error": 0.07506850361824036,
+            "mean_code_error": 0.008217193738177971
+          },
+          {
+            "frame": 12,
+            "max_patch_mean_code_error": 0.07506850361824036,
+            "mean_code_error": 0.008217193738177971
+          },
+          {
+            "frame": 23,
+            "max_patch_mean_code_error": 0.07506850361824036,
+            "mean_code_error": 0.008217193738177971
+          }
+        ],
+        "max_patch_mean_code_error": 0.07506850361824036,
+        "mean_code_error": 0.008217193738177971,
+        "mean_limit_codes": 8,
+        "passed": true,
+        "peak_limit_codes": 32,
+        "scope": "first/middle/last, 9 patches per frame; scalar input reference vs decoded output YCbCr"
+      }
+    },
+    {
+      "case": "3840x2160-24-cpu-creative",
+      "width": 3840,
+      "height": 2160,
+      "capture_fps": 24,
+      "frames": 24,
+      "creative": true,
+      "backend": "cpu",
+      "wall_seconds_including_tool_verification": 11.783947599993553,
+      "fps_including_verification": 2.0366689342723427,
+      "peak_app_private_bytes": 103944192,
+      "peak_tree_private_bytes": 2192678912,
+      "peak_tree_threads": 69,
+      "timing": {
+        "backend": {
+          "backend": "cpu",
+          "bridge_buffers": 1,
+          "bridge_total_bytes": 99532800,
+          "requested": "cpu"
+        },
+        "input": {
+          "avg_fps": 24.0,
+          "cadence": {
+            "error": "",
+            "error_packet": -1,
+            "error_units": "video time-base ticks",
+            "fps": 24.0,
+            "max_duration_error": 0.0,
+            "max_interval_error": 0.0,
+            "max_phase_error": 0.0,
+            "packets": 24,
+            "verified": true,
+            "verified_cadence": "24/1"
+          },
+          "nominal_fps": 24.0
+        },
+        "mode": "creative",
+        "output": {
+          "avg_fps": 24.0,
+          "cadence": {
+            "error": "",
+            "error_packet": -1,
+            "error_units": "video time-base ticks",
+            "fps": 24.0,
+            "max_duration_error": 0.0,
+            "max_interval_error": 0.0,
+            "max_phase_error": 0.0,
+            "packets": 24,
+            "verified": true,
+            "verified_cadence": "24/1"
+          },
+          "nominal_fps": 24.0
+        },
+        "space_estimate": {
+          "bytes": 422589456,
+          "headroom_factor": 1.75,
+          "heuristic": true,
+          "hq_target_mbps_1080p2997": 220,
+          "note": "Scene complexity and encoder behavior affect actual ProRes size; write failures remain fatal.",
+          "rotation_second_copy": false
+        },
+        "stages": {
+          "creation_metadata_seconds": 0.0089204,
+          "decode_cpu_seconds": 2.953125,
+          "decode_pipe_read_seconds": 0.9100815999999999,
+          "decode_transform_encode_wall_seconds": 7.5932135,
+          "definition": "Pipe read/write include backpressure; decode and encode run concurrently. Stage values are not additive.",
+          "encode_cpu_seconds": 16.328125,
+          "encode_pipe_write_seconds": 1.1865230000000002,
+          "identification_seconds": 0.0576841,
+          "rotation_remux_seconds": 1e-07,
+          "total_before_publication_seconds": 9.3862337,
+          "transform_seconds": 4.9843456,
+          "validation_seconds": 1.0572807
+        },
+        "threads": {
+          "color": 9,
+          "decoder": 2,
+          "encoder": 7,
+          "filter": 1,
+          "logical_cpus": 20
+        }
+      },
+      "pixel_sanity": {
+        "frames": [
+          {
+            "frame": 0,
+            "max_patch_mean_code_error": 0.056120097637176514,
+            "mean_code_error": 0.012409513195355734
+          },
+          {
+            "frame": 12,
+            "max_patch_mean_code_error": 0.056120097637176514,
+            "mean_code_error": 0.012409513195355734
+          },
+          {
+            "frame": 23,
+            "max_patch_mean_code_error": 0.056120097637176514,
+            "mean_code_error": 0.012409513195355734
+          }
+        ],
+        "max_patch_mean_code_error": 0.056120097637176514,
+        "mean_code_error": 0.012409513195355734,
+        "mean_limit_codes": 8,
+        "passed": true,
+        "peak_limit_codes": 32,
+        "scope": "first/middle/last, 9 patches per frame; scalar input reference vs decoded output YCbCr"
+      }
+    },
+    {
+      "case": "3840x2160-24-cuda-standard",
+      "width": 3840,
+      "height": 2160,
+      "capture_fps": 24,
+      "frames": 24,
+      "creative": false,
+      "backend": "cuda",
+      "wall_seconds_including_tool_verification": 8.55039840000245,
+      "fps_including_verification": 2.8068867527848904,
+      "peak_app_private_bytes": 313040896,
+      "peak_tree_private_bytes": 2616291328,
+      "peak_tree_threads": 78,
+      "timing": {
+        "backend": {
+          "backend": "cuda",
+          "bridge_buffers": 3,
+          "bridge_total_bytes": 12582912,
+          "chunks": 570,
+          "compute_capability": "8.6",
+          "download_seconds": 0.2234203838706018,
+          "driver_cuda_version": 13040,
+          "gpu": "NVIDIA GeForce RTX 3080 Ti Laptop GPU",
+          "gpu_transform_seconds": 0.4516885442733763,
+          "math": "double expressions, FP32 input/output; FMA disabled",
+          "pinned_host_bytes": 4210688,
+          "ptx_target": "compute_75",
+          "qualification": {
+            "absolute_tolerance": 2e-06,
+            "cases": [
+              {
+                "creative": false,
+                "exposure_ev": -8.0,
+                "max_error": 0.0,
+                "mean_error": 0.0,
+                "samples": 24576
+              },
+              {
+                "creative": false,
+                "exposure_ev": 0.0,
+                "max_error": 0.0,
+                "mean_error": 0.0,
+                "samples": 24576
+              },
+              {
+                "creative": false,
+                "exposure_ev": 8.0,
+                "max_error": 0.0,
+                "mean_error": 0.0,
+                "samples": 24576
+              },
+              {
+                "creative": true,
+                "exposure_ev": -8.0,
+                "max_error": 0.0,
+                "mean_error": 0.0,
+                "samples": 24576
+              },
+              {
+                "creative": true,
+                "exposure_ev": 0.0,
+                "max_error": 0.0,
+                "mean_error": 0.0,
+                "samples": 24576
+              },
+              {
+                "creative": true,
+                "exposure_ev": 8.0,
+                "max_error": 0.0,
+                "mean_error": 0.0,
+                "samples": 24576
+              }
+            ],
+            "max_error": 0.0,
+            "passed": true,
+            "reference": "independent scalar CPU double"
+          },
+          "requested": "cuda",
+          "runtime": "CUDA Driver API; no cudart",
+          "upload_seconds": 0.23991830429434782
+        },
+        "input": {
+          "avg_fps": 24.0,
+          "cadence": {
+            "error": "",
+            "error_packet": -1,
+            "error_units": "video time-base ticks",
+            "fps": 24.0,
+            "max_duration_error": 0.0,
+            "max_interval_error": 0.0,
+            "max_phase_error": 0.0,
+            "packets": 24,
+            "verified": true,
+            "verified_cadence": "24/1"
+          },
+          "nominal_fps": 24.0
+        },
+        "mode": "standard",
+        "output": {
+          "avg_fps": 24.0,
+          "cadence": {
+            "error": "",
+            "error_packet": -1,
+            "error_units": "video time-base ticks",
+            "fps": 24.0,
+            "max_duration_error": 0.0,
+            "max_interval_error": 0.0,
+            "max_phase_error": 0.0,
+            "packets": 24,
+            "verified": true,
+            "verified_cadence": "24/1"
+          },
+          "nominal_fps": 24.0
+        },
+        "space_estimate": {
+          "bytes": 422589456,
+          "headroom_factor": 1.75,
+          "heuristic": true,
+          "hq_target_mbps_1080p2997": 220,
+          "note": "Scene complexity and encoder behavior affect actual ProRes size; write failures remain fatal.",
+          "rotation_second_copy": false
+        },
+        "stages": {
+          "creation_metadata_seconds": 0.0098242,
+          "decode_cpu_seconds": 3.09375,
+          "decode_pipe_read_seconds": 1.2659209000000002,
+          "decode_transform_encode_wall_seconds": 3.4088016,
+          "definition": "Pipe read/write include backpressure; decode and encode run concurrently. Stage values are not additive.",
+          "encode_cpu_seconds": 20.4375,
+          "encode_pipe_write_seconds": 1.6725818000000012,
+          "identification_seconds": 0.0268751,
+          "rotation_remux_seconds": 1e-07,
+          "total_before_publication_seconds": 6.284581,
+          "transform_seconds": 1.778967199999999,
+          "validation_seconds": 1.0570503
+        },
+        "threads": {
+          "color": 2,
+          "decoder": 5,
+          "encoder": 11,
+          "filter": 1,
+          "logical_cpus": 20
+        }
+      },
+      "pixel_sanity": {
+        "frames": [
+          {
+            "frame": 0,
+            "max_patch_mean_code_error": 0.07506850361824036,
+            "mean_code_error": 0.008217193738177971
+          },
+          {
+            "frame": 12,
+            "max_patch_mean_code_error": 0.07506850361824036,
+            "mean_code_error": 0.008217193738177971
+          },
+          {
+            "frame": 23,
+            "max_patch_mean_code_error": 0.07506850361824036,
+            "mean_code_error": 0.008217193738177971
+          }
+        ],
+        "max_patch_mean_code_error": 0.07506850361824036,
+        "mean_code_error": 0.008217193738177971,
+        "mean_limit_codes": 8,
+        "passed": true,
+        "peak_limit_codes": 32,
+        "scope": "first/middle/last, 9 patches per frame; scalar input reference vs decoded output YCbCr"
+      }
+    },
+    {
+      "case": "3840x2160-24-cuda-creative",
+      "width": 3840,
+      "height": 2160,
+      "capture_fps": 24,
+      "frames": 24,
+      "creative": true,
+      "backend": "cuda",
+      "wall_seconds_including_tool_verification": 8.751686099996732,
+      "fps_including_verification": 2.7423287039521402,
+      "peak_app_private_bytes": 592777216,
+      "peak_tree_private_bytes": 2812059648,
+      "peak_tree_threads": 78,
+      "timing": {
+        "backend": {
+          "backend": "cuda",
+          "bridge_buffers": 1,
+          "bridge_total_bytes": 99532800,
+          "chunks": 24,
+          "compute_capability": "8.6",
+          "download_seconds": 0.21134390211105347,
+          "driver_cuda_version": 13040,
+          "gpu": "NVIDIA GeForce RTX 3080 Ti Laptop GPU",
+          "gpu_transform_seconds": 0.6563166732788085,
+          "math": "double expressions, FP32 input/output; FMA disabled",
+          "pinned_host_bytes": 99549184,
+          "ptx_target": "compute_75",
+          "qualification": {
+            "absolute_tolerance": 2e-06,
+            "cases": [
+              {
+                "creative": false,
+                "exposure_ev": -8.0,
+                "max_error": 0.0,
+                "mean_error": 0.0,
+                "samples": 24576
+              },
+              {
+                "creative": false,
+                "exposure_ev": 0.0,
+                "max_error": 0.0,
+                "mean_error": 0.0,
+                "samples": 24576
+              },
+              {
+                "creative": false,
+                "exposure_ev": 8.0,
+                "max_error": 0.0,
+                "mean_error": 0.0,
+                "samples": 24576
+              },
+              {
+                "creative": true,
+                "exposure_ev": -8.0,
+                "max_error": 0.0,
+                "mean_error": 0.0,
+                "samples": 24576
+              },
+              {
+                "creative": true,
+                "exposure_ev": 0.0,
+                "max_error": 0.0,
+                "mean_error": 0.0,
+                "samples": 24576
+              },
+              {
+                "creative": true,
+                "exposure_ev": 8.0,
+                "max_error": 0.0,
+                "mean_error": 0.0,
+                "samples": 24576
+              }
+            ],
+            "max_error": 0.0,
+            "passed": true,
+            "reference": "independent scalar CPU double"
+          },
+          "requested": "cuda",
+          "runtime": "CUDA Driver API; no cudart",
+          "upload_seconds": 0.22030371379852293
+        },
+        "input": {
+          "avg_fps": 24.0,
+          "cadence": {
+            "error": "",
+            "error_packet": -1,
+            "error_units": "video time-base ticks",
+            "fps": 24.0,
+            "max_duration_error": 0.0,
+            "max_interval_error": 0.0,
+            "max_phase_error": 0.0,
+            "packets": 24,
+            "verified": true,
+            "verified_cadence": "24/1"
+          },
+          "nominal_fps": 24.0
+        },
+        "mode": "creative",
+        "output": {
+          "avg_fps": 24.0,
+          "cadence": {
+            "error": "",
+            "error_packet": -1,
+            "error_units": "video time-base ticks",
+            "fps": 24.0,
+            "max_duration_error": 0.0,
+            "max_interval_error": 0.0,
+            "max_phase_error": 0.0,
+            "packets": 24,
+            "verified": true,
+            "verified_cadence": "24/1"
+          },
+          "nominal_fps": 24.0
+        },
+        "space_estimate": {
+          "bytes": 422589456,
+          "headroom_factor": 1.75,
+          "heuristic": true,
+          "hq_target_mbps_1080p2997": 220,
+          "note": "Scene complexity and encoder behavior affect actual ProRes size; write failures remain fatal.",
+          "rotation_second_copy": false
+        },
+        "stages": {
+          "creation_metadata_seconds": 0.0086986,
+          "decode_cpu_seconds": 2.765625,
+          "decode_pipe_read_seconds": 0.9854264999999999,
+          "decode_transform_encode_wall_seconds": 4.596978,
+          "definition": "Pipe read/write include backpressure; decode and encode run concurrently. Stage values are not additive.",
+          "encode_cpu_seconds": 15.46875,
+          "encode_pipe_write_seconds": 1.2725288,
+          "identification_seconds": 0.0336361,
+          "rotation_remux_seconds": 1e-07,
+          "total_before_publication_seconds": 6.394919,
+          "transform_seconds": 1.6910576,
+          "validation_seconds": 0.9835778
+        },
+        "threads": {
+          "color": 2,
+          "decoder": 5,
+          "encoder": 11,
+          "filter": 1,
+          "logical_cpus": 20
+        }
+      },
+      "pixel_sanity": {
+        "frames": [
+          {
+            "frame": 0,
+            "max_patch_mean_code_error": 0.056120097637176514,
+            "mean_code_error": 0.012409513195355734
+          },
+          {
+            "frame": 12,
+            "max_patch_mean_code_error": 0.056120097637176514,
+            "mean_code_error": 0.012409513195355734
+          },
+          {
+            "frame": 23,
+            "max_patch_mean_code_error": 0.056120097637176514,
+            "mean_code_error": 0.012409513195355734
+          }
+        ],
+        "max_patch_mean_code_error": 0.056120097637176514,
+        "mean_code_error": 0.012409513195355734,
+        "mean_limit_codes": 8,
+        "passed": true,
+        "peak_limit_codes": 32,
+        "scope": "first/middle/last, 9 patches per frame; scalar input reference vs decoded output YCbCr"
+      }
+    },
+    {
+      "case": "3840x2160-30-cpu-standard",
+      "width": 3840,
+      "height": 2160,
+      "capture_fps": 30,
+      "frames": 30,
+      "creative": false,
+      "backend": "cpu",
+      "wall_seconds_including_tool_verification": 10.199166300000797,
+      "fps_including_verification": 2.941416888162482,
+      "peak_app_private_bytes": 15110144,
+      "peak_tree_private_bytes": 2175655936,
+      "peak_tree_threads": 70,
+      "timing": {
+        "backend": {
+          "backend": "cpu",
+          "bridge_buffers": 3,
+          "bridge_total_bytes": 12582912,
+          "requested": "cpu"
+        },
+        "input": {
+          "avg_fps": 30.0,
+          "cadence": {
+            "error": "",
+            "error_packet": -1,
+            "error_units": "video time-base ticks",
+            "fps": 30.0,
+            "max_duration_error": 0.0,
+            "max_interval_error": 0.0,
+            "max_phase_error": 0.0,
+            "packets": 30,
+            "verified": true,
+            "verified_cadence": "30/1"
+          },
+          "nominal_fps": 30.0
+        },
+        "mode": "standard",
+        "output": {
+          "avg_fps": 30.0,
+          "cadence": {
+            "error": "",
+            "error_packet": -1,
+            "error_units": "video time-base ticks",
+            "fps": 30.0,
+            "max_duration_error": 0.0,
+            "max_interval_error": 0.0,
+            "max_phase_error": 0.0,
+            "packets": 30,
+            "verified": true,
+            "verified_cadence": "30/1"
+          },
+          "nominal_fps": 30.0
+        },
+        "space_estimate": {
+          "bytes": 461127956,
+          "headroom_factor": 1.75,
+          "heuristic": true,
+          "hq_target_mbps_1080p2997": 220,
+          "note": "Scene complexity and encoder behavior affect actual ProRes size; write failures remain fatal.",
+          "rotation_second_copy": false
+        },
+        "stages": {
+          "creation_metadata_seconds": 0.0106763,
+          "decode_cpu_seconds": 4.453125,
+          "decode_pipe_read_seconds": 1.5315146999999996,
+          "decode_transform_encode_wall_seconds": 6.3581235,
+          "definition": "Pipe read/write include backpressure; decode and encode run concurrently. Stage values are not additive.",
+          "encode_cpu_seconds": 25.734375,
+          "encode_pipe_write_seconds": 1.925674099999998,
+          "identification_seconds": 0.0359581,
+          "rotation_remux_seconds": 2e-07,
+          "total_before_publication_seconds": 8.1260437,
+          "transform_seconds": 5.156018499999996,
+          "validation_seconds": 1.0427172
+        },
+        "threads": {
+          "color": 9,
+          "decoder": 2,
+          "encoder": 7,
+          "filter": 1,
+          "logical_cpus": 20
+        }
+      },
+      "pixel_sanity": {
+        "frames": [
+          {
+            "frame": 0,
+            "max_patch_mean_code_error": 0.07506850361824036,
+            "mean_code_error": 0.008217193738177971
+          },
+          {
+            "frame": 15,
+            "max_patch_mean_code_error": 0.07506850361824036,
+            "mean_code_error": 0.008217193738177971
+          },
+          {
+            "frame": 29,
+            "max_patch_mean_code_error": 0.07506850361824036,
+            "mean_code_error": 0.008217193738177971
+          }
+        ],
+        "max_patch_mean_code_error": 0.07506850361824036,
+        "mean_code_error": 0.008217193738177971,
+        "mean_limit_codes": 8,
+        "passed": true,
+        "peak_limit_codes": 32,
+        "scope": "first/middle/last, 9 patches per frame; scalar input reference vs decoded output YCbCr"
+      }
+    },
+    {
+      "case": "3840x2160-30-cpu-creative",
+      "width": 3840,
+      "height": 2160,
+      "capture_fps": 30,
+      "frames": 30,
+      "creative": true,
+      "backend": "cpu",
+      "wall_seconds_including_tool_verification": 13.78858219999529,
+      "fps_including_verification": 2.175713178111253,
+      "peak_app_private_bytes": 104067072,
+      "peak_tree_private_bytes": 2197807104,
+      "peak_tree_threads": 70,
+      "timing": {
+        "backend": {
+          "backend": "cpu",
+          "bridge_buffers": 1,
+          "bridge_total_bytes": 99532800,
+          "requested": "cpu"
+        },
+        "input": {
+          "avg_fps": 30.0,
+          "cadence": {
+            "error": "",
+            "error_packet": -1,
+            "error_units": "video time-base ticks",
+            "fps": 30.0,
+            "max_duration_error": 0.0,
+            "max_interval_error": 0.0,
+            "max_phase_error": 0.0,
+            "packets": 30,
+            "verified": true,
+            "verified_cadence": "30/1"
+          },
+          "nominal_fps": 30.0
+        },
+        "mode": "creative",
+        "output": {
+          "avg_fps": 30.0,
+          "cadence": {
+            "error": "",
+            "error_packet": -1,
+            "error_units": "video time-base ticks",
+            "fps": 30.0,
+            "max_duration_error": 0.0,
+            "max_interval_error": 0.0,
+            "max_phase_error": 0.0,
+            "packets": 30,
+            "verified": true,
+            "verified_cadence": "30/1"
+          },
+          "nominal_fps": 30.0
+        },
+        "space_estimate": {
+          "bytes": 461127956,
+          "headroom_factor": 1.75,
+          "heuristic": true,
+          "hq_target_mbps_1080p2997": 220,
+          "note": "Scene complexity and encoder behavior affect actual ProRes size; write failures remain fatal.",
+          "rotation_second_copy": false
+        },
+        "stages": {
+          "creation_metadata_seconds": 0.0099381,
+          "decode_cpu_seconds": 3.65625,
+          "decode_pipe_read_seconds": 1.1534351999999997,
+          "decode_transform_encode_wall_seconds": 9.8446308,
+          "definition": "Pipe read/write include backpressure; decode and encode run concurrently. Stage values are not additive.",
+          "encode_cpu_seconds": 22.203125,
+          "encode_pipe_write_seconds": 1.5529753999999998,
+          "identification_seconds": 0.0382949,
+          "rotation_remux_seconds": 1e-07,
+          "total_before_publication_seconds": 11.6172651,
+          "transform_seconds": 6.5319398,
+          "validation_seconds": 1.0261469
+        },
+        "threads": {
+          "color": 9,
+          "decoder": 2,
+          "encoder": 7,
+          "filter": 1,
+          "logical_cpus": 20
+        }
+      },
+      "pixel_sanity": {
+        "frames": [
+          {
+            "frame": 0,
+            "max_patch_mean_code_error": 0.056120097637176514,
+            "mean_code_error": 0.012409513195355734
+          },
+          {
+            "frame": 15,
+            "max_patch_mean_code_error": 0.056120097637176514,
+            "mean_code_error": 0.012409513195355734
+          },
+          {
+            "frame": 29,
+            "max_patch_mean_code_error": 0.056120097637176514,
+            "mean_code_error": 0.012409513195355734
+          }
+        ],
+        "max_patch_mean_code_error": 0.056120097637176514,
+        "mean_code_error": 0.012409513195355734,
+        "mean_limit_codes": 8,
+        "passed": true,
+        "peak_limit_codes": 32,
+        "scope": "first/middle/last, 9 patches per frame; scalar input reference vs decoded output YCbCr"
+      }
+    },
+    {
+      "case": "3840x2160-30-cuda-standard",
+      "width": 3840,
+      "height": 2160,
+      "capture_fps": 30,
+      "frames": 30,
+      "creative": false,
+      "backend": "cuda",
+      "wall_seconds_including_tool_verification": 7.825761400003103,
+      "fps_including_verification": 3.8334928023729558,
+      "peak_app_private_bytes": 311836672,
+      "peak_tree_private_bytes": 2779561984,
+      "peak_tree_threads": 79,
+      "timing": {
+        "backend": {
+          "backend": "cuda",
+          "bridge_buffers": 3,
+          "bridge_total_bytes": 12582912,
+          "chunks": 712,
+          "compute_capability": "8.6",
+          "download_seconds": 0.2687782401740555,
+          "driver_cuda_version": 13040,
+          "gpu": "NVIDIA GeForce RTX 3080 Ti Laptop GPU",
+          "gpu_transform_seconds": 0.40386358454823507,
+          "math": "double expressions, FP32 input/output; FMA disabled",
+          "pinned_host_bytes": 4210688,
+          "ptx_target": "compute_75",
+          "qualification": {
+            "absolute_tolerance": 2e-06,
+            "cases": [
+              {
+                "creative": false,
+                "exposure_ev": -8.0,
+                "max_error": 0.0,
+                "mean_error": 0.0,
+                "samples": 24576
+              },
+              {
+                "creative": false,
+                "exposure_ev": 0.0,
+                "max_error": 0.0,
+                "mean_error": 0.0,
+                "samples": 24576
+              },
+              {
+                "creative": false,
+                "exposure_ev": 8.0,
+                "max_error": 0.0,
+                "mean_error": 0.0,
+                "samples": 24576
+              },
+              {
+                "creative": true,
+                "exposure_ev": -8.0,
+                "max_error": 0.0,
+                "mean_error": 0.0,
+                "samples": 24576
+              },
+              {
+                "creative": true,
+                "exposure_ev": 0.0,
+                "max_error": 0.0,
+                "mean_error": 0.0,
+                "samples": 24576
+              },
+              {
+                "creative": true,
+                "exposure_ev": 8.0,
+                "max_error": 0.0,
+                "mean_error": 0.0,
+                "samples": 24576
+              }
+            ],
+            "max_error": 0.0,
+            "passed": true,
+            "reference": "independent scalar CPU double"
+          },
+          "requested": "cuda",
+          "runtime": "CUDA Driver API; no cudart",
+          "upload_seconds": 0.2628560959398744
+        },
+        "input": {
+          "avg_fps": 30.0,
+          "cadence": {
+            "error": "",
+            "error_packet": -1,
+            "error_units": "video time-base ticks",
+            "fps": 30.0,
+            "max_duration_error": 0.0,
+            "max_interval_error": 0.0,
+            "max_phase_error": 0.0,
+            "packets": 30,
+            "verified": true,
+            "verified_cadence": "30/1"
+          },
+          "nominal_fps": 30.0
+        },
+        "mode": "standard",
+        "output": {
+          "avg_fps": 30.0,
+          "cadence": {
+            "error": "",
+            "error_packet": -1,
+            "error_units": "video time-base ticks",
+            "fps": 30.0,
+            "max_duration_error": 0.0,
+            "max_interval_error": 0.0,
+            "max_phase_error": 0.0,
+            "packets": 30,
+            "verified": true,
+            "verified_cadence": "30/1"
+          },
+          "nominal_fps": 30.0
+        },
+        "space_estimate": {
+          "bytes": 461127956,
+          "headroom_factor": 1.75,
+          "heuristic": true,
+          "hq_target_mbps_1080p2997": 220,
+          "note": "Scene complexity and encoder behavior affect actual ProRes size; write failures remain fatal.",
+          "rotation_second_copy": false
+        },
+        "stages": {
+          "creation_metadata_seconds": 0.0065296,
+          "decode_cpu_seconds": 4.234375,
+          "decode_pipe_read_seconds": 1.6612086000000004,
+          "decode_transform_encode_wall_seconds": 3.6876524,
+          "definition": "Pipe read/write include backpressure; decode and encode run concurrently. Stage values are not additive.",
+          "encode_cpu_seconds": 25.9375,
+          "encode_pipe_write_seconds": 2.064879499999999,
+          "identification_seconds": 0.0424379,
+          "rotation_remux_seconds": 1e-07,
+          "total_before_publication_seconds": 5.5921027,
+          "transform_seconds": 1.8355731000000004,
+          "validation_seconds": 1.0766736
+        },
+        "threads": {
+          "color": 2,
+          "decoder": 5,
+          "encoder": 11,
+          "filter": 1,
+          "logical_cpus": 20
+        }
+      },
+      "pixel_sanity": {
+        "frames": [
+          {
+            "frame": 0,
+            "max_patch_mean_code_error": 0.07506850361824036,
+            "mean_code_error": 0.008217193738177971
+          },
+          {
+            "frame": 15,
+            "max_patch_mean_code_error": 0.07506850361824036,
+            "mean_code_error": 0.008217193738177971
+          },
+          {
+            "frame": 29,
+            "max_patch_mean_code_error": 0.07506850361824036,
+            "mean_code_error": 0.008217193738177971
+          }
+        ],
+        "max_patch_mean_code_error": 0.07506850361824036,
+        "mean_code_error": 0.008217193738177971,
+        "mean_limit_codes": 8,
+        "passed": true,
+        "peak_limit_codes": 32,
+        "scope": "first/middle/last, 9 patches per frame; scalar input reference vs decoded output YCbCr"
+      }
+    },
+    {
+      "case": "3840x2160-30-cuda-creative",
+      "width": 3840,
+      "height": 2160,
+      "capture_fps": 30,
+      "frames": 30,
+      "creative": true,
+      "backend": "cuda",
+      "wall_seconds_including_tool_verification": 9.857496399999945,
+      "fps_including_verification": 3.043369105364336,
+      "peak_app_private_bytes": 593502208,
+      "peak_tree_private_bytes": 2932760576,
+      "peak_tree_threads": 78,
+      "timing": {
+        "backend": {
+          "backend": "cuda",
+          "bridge_buffers": 1,
+          "bridge_total_bytes": 99532800,
+          "chunks": 30,
+          "compute_capability": "8.6",
+          "download_seconds": 0.27497740793228154,
+          "driver_cuda_version": 13040,
+          "gpu": "NVIDIA GeForce RTX 3080 Ti Laptop GPU",
+          "gpu_transform_seconds": 1.0105382165908812,
+          "math": "double expressions, FP32 input/output; FMA disabled",
+          "pinned_host_bytes": 99549184,
+          "ptx_target": "compute_75",
+          "qualification": {
+            "absolute_tolerance": 2e-06,
+            "cases": [
+              {
+                "creative": false,
+                "exposure_ev": -8.0,
+                "max_error": 0.0,
+                "mean_error": 0.0,
+                "samples": 24576
+              },
+              {
+                "creative": false,
+                "exposure_ev": 0.0,
+                "max_error": 0.0,
+                "mean_error": 0.0,
+                "samples": 24576
+              },
+              {
+                "creative": false,
+                "exposure_ev": 8.0,
+                "max_error": 0.0,
+                "mean_error": 0.0,
+                "samples": 24576
+              },
+              {
+                "creative": true,
+                "exposure_ev": -8.0,
+                "max_error": 0.0,
+                "mean_error": 0.0,
+                "samples": 24576
+              },
+              {
+                "creative": true,
+                "exposure_ev": 0.0,
+                "max_error": 0.0,
+                "mean_error": 0.0,
+                "samples": 24576
+              },
+              {
+                "creative": true,
+                "exposure_ev": 8.0,
+                "max_error": 0.0,
+                "mean_error": 0.0,
+                "samples": 24576
+              }
+            ],
+            "max_error": 0.0,
+            "passed": true,
+            "reference": "independent scalar CPU double"
+          },
+          "requested": "cuda",
+          "runtime": "CUDA Driver API; no cudart",
+          "upload_seconds": 0.2903725767135619
+        },
+        "input": {
+          "avg_fps": 30.0,
+          "cadence": {
+            "error": "",
+            "error_packet": -1,
+            "error_units": "video time-base ticks",
+            "fps": 30.0,
+            "max_duration_error": 0.0,
+            "max_interval_error": 0.0,
+            "max_phase_error": 0.0,
+            "packets": 30,
+            "verified": true,
+            "verified_cadence": "30/1"
+          },
+          "nominal_fps": 30.0
+        },
+        "mode": "creative",
+        "output": {
+          "avg_fps": 30.0,
+          "cadence": {
+            "error": "",
+            "error_packet": -1,
+            "error_units": "video time-base ticks",
+            "fps": 30.0,
+            "max_duration_error": 0.0,
+            "max_interval_error": 0.0,
+            "max_phase_error": 0.0,
+            "packets": 30,
+            "verified": true,
+            "verified_cadence": "30/1"
+          },
+          "nominal_fps": 30.0
+        },
+        "space_estimate": {
+          "bytes": 461127956,
+          "headroom_factor": 1.75,
+          "heuristic": true,
+          "hq_target_mbps_1080p2997": 220,
+          "note": "Scene complexity and encoder behavior affect actual ProRes size; write failures remain fatal.",
+          "rotation_second_copy": false
+        },
+        "stages": {
+          "creation_metadata_seconds": 0.0064632,
+          "decode_cpu_seconds": 3.625,
+          "decode_pipe_read_seconds": 1.2745538,
+          "decode_transform_encode_wall_seconds": 5.8541182,
+          "definition": "Pipe read/write include backpressure; decode and encode run concurrently. Stage values are not additive.",
+          "encode_cpu_seconds": 20.5625,
+          "encode_pipe_write_seconds": 1.6565415,
+          "identification_seconds": 0.0486332,
+          "rotation_remux_seconds": 2e-07,
+          "total_before_publication_seconds": 7.6268634,
+          "transform_seconds": 2.3168924,
+          "validation_seconds": 0.9451189
+        },
+        "threads": {
+          "color": 2,
+          "decoder": 5,
+          "encoder": 11,
+          "filter": 1,
+          "logical_cpus": 20
+        }
+      },
+      "pixel_sanity": {
+        "frames": [
+          {
+            "frame": 0,
+            "max_patch_mean_code_error": 0.056120097637176514,
+            "mean_code_error": 0.012409513195355734
+          },
+          {
+            "frame": 15,
+            "max_patch_mean_code_error": 0.056120097637176514,
+            "mean_code_error": 0.012409513195355734
+          },
+          {
+            "frame": 29,
+            "max_patch_mean_code_error": 0.056120097637176514,
+            "mean_code_error": 0.012409513195355734
+          }
+        ],
+        "max_patch_mean_code_error": 0.056120097637176514,
+        "mean_code_error": 0.012409513195355734,
+        "mean_limit_codes": 8,
+        "passed": true,
+        "peak_limit_codes": 32,
+        "scope": "first/middle/last, 9 patches per frame; scalar input reference vs decoded output YCbCr"
+      }
+    },
+    {
+      "case": "3840x2160-60-cpu-standard",
+      "width": 3840,
+      "height": 2160,
+      "capture_fps": 60,
+      "frames": 60,
+      "creative": false,
+      "backend": "cpu",
+      "wall_seconds_including_tool_verification": 15.675790400004189,
+      "fps_including_verification": 3.8275581944489363,
+      "peak_app_private_bytes": 15106048,
+      "peak_tree_private_bytes": 2212806656,
+      "peak_tree_threads": 70,
+      "timing": {
+        "backend": {
+          "backend": "cpu",
+          "bridge_buffers": 3,
+          "bridge_total_bytes": 12582912,
+          "requested": "cpu"
+        },
+        "input": {
+          "avg_fps": 60.0,
+          "cadence": {
+            "error": "",
+            "error_packet": -1,
+            "error_units": "video time-base ticks",
+            "fps": 60.0,
+            "max_duration_error": 0.0,
+            "max_interval_error": 0.0,
+            "max_phase_error": 0.0,
+            "packets": 60,
+            "verified": true,
+            "verified_cadence": "60/1"
+          },
+          "nominal_fps": 60.0
+        },
+        "mode": "standard",
+        "output": {
+          "avg_fps": 60.0,
+          "cadence": {
+            "error": "",
+            "error_packet": -1,
+            "error_units": "video time-base ticks",
+            "fps": 60.0,
+            "max_duration_error": 0.0,
+            "max_interval_error": 0.0,
+            "max_phase_error": 0.0,
+            "packets": 60,
+            "verified": true,
+            "verified_cadence": "60/1"
+          },
+          "nominal_fps": 60.0
+        },
+        "space_estimate": {
+          "bytes": 653820456,
+          "headroom_factor": 1.75,
+          "heuristic": true,
+          "hq_target_mbps_1080p2997": 220,
+          "note": "Scene complexity and encoder behavior affect actual ProRes size; write failures remain fatal.",
+          "rotation_second_copy": false
+        },
+        "stages": {
+          "creation_metadata_seconds": 0.0057948,
+          "decode_cpu_seconds": 8.046875,
+          "decode_pipe_read_seconds": 2.8539869999999983,
+          "decode_transform_encode_wall_seconds": 11.9094792,
+          "definition": "Pipe read/write include backpressure; decode and encode run concurrently. Stage values are not additive.",
+          "encode_cpu_seconds": 53.265625,
+          "encode_pipe_write_seconds": 3.8136455999999965,
+          "identification_seconds": 0.0379397,
+          "rotation_remux_seconds": 0.0,
+          "total_before_publication_seconds": 13.5318868,
+          "transform_seconds": 10.338624500000009,
+          "validation_seconds": 0.9411098
+        },
+        "threads": {
+          "color": 9,
+          "decoder": 2,
+          "encoder": 7,
+          "filter": 1,
+          "logical_cpus": 20
+        }
+      },
+      "pixel_sanity": {
+        "frames": [
+          {
+            "frame": 0,
+            "max_patch_mean_code_error": 0.07506850361824036,
+            "mean_code_error": 0.008217193738177971
+          },
+          {
+            "frame": 30,
+            "max_patch_mean_code_error": 0.07506850361824036,
+            "mean_code_error": 0.008217193738177971
+          },
+          {
+            "frame": 59,
+            "max_patch_mean_code_error": 0.07506850361824036,
+            "mean_code_error": 0.008217193738177971
+          }
+        ],
+        "max_patch_mean_code_error": 0.07506850361824036,
+        "mean_code_error": 0.008217193738177971,
+        "mean_limit_codes": 8,
+        "passed": true,
+        "peak_limit_codes": 32,
+        "scope": "first/middle/last, 9 patches per frame; scalar input reference vs decoded output YCbCr"
+      }
+    },
+    {
+      "case": "3840x2160-60-cpu-creative",
+      "width": 3840,
+      "height": 2160,
+      "capture_fps": 60,
+      "frames": 60,
+      "creative": true,
+      "backend": "cpu",
+      "wall_seconds_including_tool_verification": 22.999460200000613,
+      "fps_including_verification": 2.6087568785635415,
+      "peak_app_private_bytes": 104030208,
+      "peak_tree_private_bytes": 2200723456,
+      "peak_tree_threads": 70,
+      "timing": {
+        "backend": {
+          "backend": "cpu",
+          "bridge_buffers": 1,
+          "bridge_total_bytes": 99532800,
+          "requested": "cpu"
+        },
+        "input": {
+          "avg_fps": 60.0,
+          "cadence": {
+            "error": "",
+            "error_packet": -1,
+            "error_units": "video time-base ticks",
+            "fps": 60.0,
+            "max_duration_error": 0.0,
+            "max_interval_error": 0.0,
+            "max_phase_error": 0.0,
+            "packets": 60,
+            "verified": true,
+            "verified_cadence": "60/1"
+          },
+          "nominal_fps": 60.0
+        },
+        "mode": "creative",
+        "output": {
+          "avg_fps": 60.0,
+          "cadence": {
+            "error": "",
+            "error_packet": -1,
+            "error_units": "video time-base ticks",
+            "fps": 60.0,
+            "max_duration_error": 0.0,
+            "max_interval_error": 0.0,
+            "max_phase_error": 0.0,
+            "packets": 60,
+            "verified": true,
+            "verified_cadence": "60/1"
+          },
+          "nominal_fps": 60.0
+        },
+        "space_estimate": {
+          "bytes": 653820456,
+          "headroom_factor": 1.75,
+          "heuristic": true,
+          "hq_target_mbps_1080p2997": 220,
+          "note": "Scene complexity and encoder behavior affect actual ProRes size; write failures remain fatal.",
+          "rotation_second_copy": false
+        },
+        "stages": {
+          "creation_metadata_seconds": 0.008446,
+          "decode_cpu_seconds": 7.8125,
+          "decode_pipe_read_seconds": 2.2361339,
+          "decode_transform_encode_wall_seconds": 19.1913096,
+          "definition": "Pipe read/write include backpressure; decode and encode run concurrently. Stage values are not additive.",
+          "encode_cpu_seconds": 45.09375,
+          "encode_pipe_write_seconds": 3.192650400000002,
+          "identification_seconds": 0.0202487,
+          "rotation_remux_seconds": 1e-07,
+          "total_before_publication_seconds": 20.9530133,
+          "transform_seconds": 13.118389200000003,
+          "validation_seconds": 1.0779941
+        },
+        "threads": {
+          "color": 9,
+          "decoder": 2,
+          "encoder": 7,
+          "filter": 1,
+          "logical_cpus": 20
+        }
+      },
+      "pixel_sanity": {
+        "frames": [
+          {
+            "frame": 0,
+            "max_patch_mean_code_error": 0.056120097637176514,
+            "mean_code_error": 0.012409513195355734
+          },
+          {
+            "frame": 30,
+            "max_patch_mean_code_error": 0.056120097637176514,
+            "mean_code_error": 0.012409513195355734
+          },
+          {
+            "frame": 59,
+            "max_patch_mean_code_error": 0.056120097637176514,
+            "mean_code_error": 0.012409513195355734
+          }
+        ],
+        "max_patch_mean_code_error": 0.056120097637176514,
+        "mean_code_error": 0.012409513195355734,
+        "mean_limit_codes": 8,
+        "passed": true,
+        "peak_limit_codes": 32,
+        "scope": "first/middle/last, 9 patches per frame; scalar input reference vs decoded output YCbCr"
+      }
+    },
+    {
+      "case": "3840x2160-60-cuda-standard",
+      "width": 3840,
+      "height": 2160,
+      "capture_fps": 60,
+      "frames": 60,
+      "creative": false,
+      "backend": "cuda",
+      "wall_seconds_including_tool_verification": 10.946965900002397,
+      "fps_including_verification": 5.480970759211633,
+      "peak_app_private_bytes": 312389632,
+      "peak_tree_private_bytes": 2963087360,
+      "peak_tree_threads": 79,
+      "timing": {
+        "backend": {
+          "backend": "cuda",
+          "bridge_buffers": 3,
+          "bridge_total_bytes": 12582912,
+          "chunks": 1424,
+          "compute_capability": "8.6",
+          "download_seconds": 0.5452270720899118,
+          "driver_cuda_version": 13040,
+          "gpu": "NVIDIA GeForce RTX 3080 Ti Laptop GPU",
+          "gpu_transform_seconds": 0.9754320959150786,
+          "math": "double expressions, FP32 input/output; FMA disabled",
+          "pinned_host_bytes": 4210688,
+          "ptx_target": "compute_75",
+          "qualification": {
+            "absolute_tolerance": 2e-06,
+            "cases": [
+              {
+                "creative": false,
+                "exposure_ev": -8.0,
+                "max_error": 0.0,
+                "mean_error": 0.0,
+                "samples": 24576
+              },
+              {
+                "creative": false,
+                "exposure_ev": 0.0,
+                "max_error": 0.0,
+                "mean_error": 0.0,
+                "samples": 24576
+              },
+              {
+                "creative": false,
+                "exposure_ev": 8.0,
+                "max_error": 0.0,
+                "mean_error": 0.0,
+                "samples": 24576
+              },
+              {
+                "creative": true,
+                "exposure_ev": -8.0,
+                "max_error": 0.0,
+                "mean_error": 0.0,
+                "samples": 24576
+              },
+              {
+                "creative": true,
+                "exposure_ev": 0.0,
+                "max_error": 0.0,
+                "mean_error": 0.0,
+                "samples": 24576
+              },
+              {
+                "creative": true,
+                "exposure_ev": 8.0,
+                "max_error": 0.0,
+                "mean_error": 0.0,
+                "samples": 24576
+              }
+            ],
+            "max_error": 0.0,
+            "passed": true,
+            "reference": "independent scalar CPU double"
+          },
+          "requested": "cuda",
+          "runtime": "CUDA Driver API; no cudart",
+          "upload_seconds": 0.5589050875306129
+        },
+        "input": {
+          "avg_fps": 60.0,
+          "cadence": {
+            "error": "",
+            "error_packet": -1,
+            "error_units": "video time-base ticks",
+            "fps": 60.0,
+            "max_duration_error": 0.0,
+            "max_interval_error": 0.0,
+            "max_phase_error": 0.0,
+            "packets": 60,
+            "verified": true,
+            "verified_cadence": "60/1"
+          },
+          "nominal_fps": 60.0
+        },
+        "mode": "standard",
+        "output": {
+          "avg_fps": 60.0,
+          "cadence": {
+            "error": "",
+            "error_packet": -1,
+            "error_units": "video time-base ticks",
+            "fps": 60.0,
+            "max_duration_error": 0.0,
+            "max_interval_error": 0.0,
+            "max_phase_error": 0.0,
+            "packets": 60,
+            "verified": true,
+            "verified_cadence": "60/1"
+          },
+          "nominal_fps": 60.0
+        },
+        "space_estimate": {
+          "bytes": 653820456,
+          "headroom_factor": 1.75,
+          "heuristic": true,
+          "hq_target_mbps_1080p2997": 220,
+          "note": "Scene complexity and encoder behavior affect actual ProRes size; write failures remain fatal.",
+          "rotation_second_copy": false
+        },
+        "stages": {
+          "creation_metadata_seconds": 0.0139619,
+          "decode_cpu_seconds": 8.015625,
+          "decode_pipe_read_seconds": 2.897527199999996,
+          "decode_transform_encode_wall_seconds": 6.8204683,
+          "definition": "Pipe read/write include backpressure; decode and encode run concurrently. Stage values are not additive.",
+          "encode_cpu_seconds": 53.265625,
+          "encode_pipe_write_seconds": 4.169797599999997,
+          "identification_seconds": 0.0321247,
+          "rotation_remux_seconds": 1e-07,
+          "total_before_publication_seconds": 8.6754143,
+          "transform_seconds": 4.048950799999999,
+          "validation_seconds": 1.0586864
+        },
+        "threads": {
+          "color": 2,
+          "decoder": 5,
+          "encoder": 11,
+          "filter": 1,
+          "logical_cpus": 20
+        }
+      },
+      "pixel_sanity": {
+        "frames": [
+          {
+            "frame": 0,
+            "max_patch_mean_code_error": 0.07506850361824036,
+            "mean_code_error": 0.008217193738177971
+          },
+          {
+            "frame": 30,
+            "max_patch_mean_code_error": 0.07506850361824036,
+            "mean_code_error": 0.008217193738177971
+          },
+          {
+            "frame": 59,
+            "max_patch_mean_code_error": 0.07506850361824036,
+            "mean_code_error": 0.008217193738177971
+          }
+        ],
+        "max_patch_mean_code_error": 0.07506850361824036,
+        "mean_code_error": 0.008217193738177971,
+        "mean_limit_codes": 8,
+        "passed": true,
+        "peak_limit_codes": 32,
+        "scope": "first/middle/last, 9 patches per frame; scalar input reference vs decoded output YCbCr"
+      }
+    },
+    {
+      "case": "3840x2160-60-cuda-creative",
+      "width": 3840,
+      "height": 2160,
+      "capture_fps": 60,
+      "frames": 60,
+      "creative": true,
+      "backend": "cuda",
+      "wall_seconds_including_tool_verification": 14.782791700003145,
+      "fps_including_verification": 4.058773282991415,
+      "peak_app_private_bytes": 592445440,
+      "peak_tree_private_bytes": 2903064576,
+      "peak_tree_threads": 79,
+      "timing": {
+        "backend": {
+          "backend": "cuda",
+          "bridge_buffers": 1,
+          "bridge_total_bytes": 99532800,
+          "chunks": 60,
+          "compute_capability": "8.6",
+          "download_seconds": 0.5354433636665343,
+          "driver_cuda_version": 13040,
+          "gpu": "NVIDIA GeForce RTX 3080 Ti Laptop GPU",
+          "gpu_transform_seconds": 1.6164551973342896,
+          "math": "double expressions, FP32 input/output; FMA disabled",
+          "pinned_host_bytes": 99549184,
+          "ptx_target": "compute_75",
+          "qualification": {
+            "absolute_tolerance": 2e-06,
+            "cases": [
+              {
+                "creative": false,
+                "exposure_ev": -8.0,
+                "max_error": 0.0,
+                "mean_error": 0.0,
+                "samples": 24576
+              },
+              {
+                "creative": false,
+                "exposure_ev": 0.0,
+                "max_error": 0.0,
+                "mean_error": 0.0,
+                "samples": 24576
+              },
+              {
+                "creative": false,
+                "exposure_ev": 8.0,
+                "max_error": 0.0,
+                "mean_error": 0.0,
+                "samples": 24576
+              },
+              {
+                "creative": true,
+                "exposure_ev": -8.0,
+                "max_error": 0.0,
+                "mean_error": 0.0,
+                "samples": 24576
+              },
+              {
+                "creative": true,
+                "exposure_ev": 0.0,
+                "max_error": 0.0,
+                "mean_error": 0.0,
+                "samples": 24576
+              },
+              {
+                "creative": true,
+                "exposure_ev": 8.0,
+                "max_error": 0.0,
+                "mean_error": 0.0,
+                "samples": 24576
+              }
+            ],
+            "max_error": 0.0,
+            "passed": true,
+            "reference": "independent scalar CPU double"
+          },
+          "requested": "cuda",
+          "runtime": "CUDA Driver API; no cudart",
+          "upload_seconds": 0.5584403486251832
+        },
+        "input": {
+          "avg_fps": 60.0,
+          "cadence": {
+            "error": "",
+            "error_packet": -1,
+            "error_units": "video time-base ticks",
+            "fps": 60.0,
+            "max_duration_error": 0.0,
+            "max_interval_error": 0.0,
+            "max_phase_error": 0.0,
+            "packets": 60,
+            "verified": true,
+            "verified_cadence": "60/1"
+          },
+          "nominal_fps": 60.0
+        },
+        "mode": "creative",
+        "output": {
+          "avg_fps": 60.0,
+          "cadence": {
+            "error": "",
+            "error_packet": -1,
+            "error_units": "video time-base ticks",
+            "fps": 60.0,
+            "max_duration_error": 0.0,
+            "max_interval_error": 0.0,
+            "max_phase_error": 0.0,
+            "packets": 60,
+            "verified": true,
+            "verified_cadence": "60/1"
+          },
+          "nominal_fps": 60.0
+        },
+        "space_estimate": {
+          "bytes": 653820456,
+          "headroom_factor": 1.75,
+          "heuristic": true,
+          "hq_target_mbps_1080p2997": 220,
+          "note": "Scene complexity and encoder behavior affect actual ProRes size; write failures remain fatal.",
+          "rotation_second_copy": false
+        },
+        "stages": {
+          "creation_metadata_seconds": 0.0084647,
+          "decode_cpu_seconds": 7.4375,
+          "decode_pipe_read_seconds": 2.4103045,
+          "decode_transform_encode_wall_seconds": 10.5798752,
+          "definition": "Pipe read/write include backpressure; decode and encode run concurrently. Stage values are not additive.",
+          "encode_cpu_seconds": 43.75,
+          "encode_pipe_write_seconds": 3.3436364000000003,
+          "identification_seconds": 0.0242169,
+          "rotation_remux_seconds": 1e-07,
+          "total_before_publication_seconds": 12.5002564,
+          "transform_seconds": 4.197363200000001,
+          "validation_seconds": 1.1342543
+        },
+        "threads": {
+          "color": 2,
+          "decoder": 5,
+          "encoder": 11,
+          "filter": 1,
+          "logical_cpus": 20
+        }
+      },
+      "pixel_sanity": {
+        "frames": [
+          {
+            "frame": 0,
+            "max_patch_mean_code_error": 0.056120097637176514,
+            "mean_code_error": 0.012409513195355734
+          },
+          {
+            "frame": 30,
+            "max_patch_mean_code_error": 0.056120097637176514,
+            "mean_code_error": 0.012409513195355734
+          },
+          {
+            "frame": 59,
+            "max_patch_mean_code_error": 0.056120097637176514,
+            "mean_code_error": 0.012409513195355734
+          }
+        ],
+        "max_patch_mean_code_error": 0.056120097637176514,
+        "mean_code_error": 0.012409513195355734,
+        "mean_limit_codes": 8,
+        "passed": true,
+        "peak_limit_codes": 32,
+        "scope": "first/middle/last, 9 patches per frame; scalar input reference vs decoded output YCbCr"
+      }
+    },
+    {
+      "case": "3840x2160-120-cpu-standard",
+      "width": 3840,
+      "height": 2160,
+      "capture_fps": 120,
+      "frames": 120,
+      "creative": false,
+      "backend": "cpu",
+      "wall_seconds_including_tool_verification": 27.336392799996247,
+      "fps_including_verification": 4.3897525499420125,
+      "peak_app_private_bytes": 15122432,
+      "peak_tree_private_bytes": 2213220352,
+      "peak_tree_threads": 70,
+      "timing": {
+        "backend": {
+          "backend": "cpu",
+          "bridge_buffers": 3,
+          "bridge_total_bytes": 12582912,
+          "requested": "cpu"
+        },
+        "input": {
+          "avg_fps": 120.0,
+          "cadence": {
+            "error": "",
+            "error_packet": -1,
+            "error_units": "video time-base ticks",
+            "fps": 120.0,
+            "max_duration_error": 0.0,
+            "max_interval_error": 0.0,
+            "max_phase_error": 0.0,
+            "packets": 120,
+            "verified": true,
+            "verified_cadence": "120/1"
+          },
+          "nominal_fps": 120.0
+        },
+        "mode": "standard",
+        "output": {
+          "avg_fps": 120.0,
+          "cadence": {
+            "error": "",
+            "error_packet": -1,
+            "error_units": "video time-base ticks",
+            "fps": 120.0,
+            "max_duration_error": 0.0,
+            "max_interval_error": 0.0,
+            "max_phase_error": 0.0,
+            "packets": 120,
+            "verified": true,
+            "verified_cadence": "120/1"
+          },
+          "nominal_fps": 120.0
+        },
+        "space_estimate": {
+          "bytes": 1039205456,
+          "headroom_factor": 1.75,
+          "heuristic": true,
+          "hq_target_mbps_1080p2997": 220,
+          "note": "Scene complexity and encoder behavior affect actual ProRes size; write failures remain fatal.",
+          "rotation_second_copy": false
+        },
+        "stages": {
+          "creation_metadata_seconds": 0.0059658,
+          "decode_cpu_seconds": 16.875,
+          "decode_pipe_read_seconds": 5.932803099999998,
+          "decode_transform_encode_wall_seconds": 23.386944,
+          "definition": "Pipe read/write include backpressure; decode and encode run concurrently. Stage values are not additive.",
+          "encode_cpu_seconds": 109.53125,
+          "encode_pipe_write_seconds": 7.769255999999998,
+          "identification_seconds": 0.0381438,
+          "rotation_remux_seconds": 2e-07,
+          "total_before_publication_seconds": 25.1333024,
+          "transform_seconds": 20.955754600000077,
+          "validation_seconds": 1.0013061
+        },
+        "threads": {
+          "color": 9,
+          "decoder": 2,
+          "encoder": 7,
+          "filter": 1,
+          "logical_cpus": 20
+        }
+      },
+      "pixel_sanity": {
+        "frames": [
+          {
+            "frame": 0,
+            "max_patch_mean_code_error": 0.07506850361824036,
+            "mean_code_error": 0.008217193738177971
+          },
+          {
+            "frame": 60,
+            "max_patch_mean_code_error": 0.07506850361824036,
+            "mean_code_error": 0.008217193738177971
+          },
+          {
+            "frame": 119,
+            "max_patch_mean_code_error": 0.07506850361824036,
+            "mean_code_error": 0.008217193738177971
+          }
+        ],
+        "max_patch_mean_code_error": 0.07506850361824036,
+        "mean_code_error": 0.008217193738177971,
+        "mean_limit_codes": 8,
+        "passed": true,
+        "peak_limit_codes": 32,
+        "scope": "first/middle/last, 9 patches per frame; scalar input reference vs decoded output YCbCr"
+      }
+    },
+    {
+      "case": "3840x2160-120-cpu-creative",
+      "width": 3840,
+      "height": 2160,
+      "capture_fps": 120,
+      "frames": 120,
+      "creative": true,
+      "backend": "cpu",
+      "wall_seconds_including_tool_verification": 41.73276890000125,
+      "fps_including_verification": 2.8754382506356153,
+      "peak_app_private_bytes": 104042496,
+      "peak_tree_private_bytes": 2201518080,
+      "peak_tree_threads": 70,
+      "timing": {
+        "backend": {
+          "backend": "cpu",
+          "bridge_buffers": 1,
+          "bridge_total_bytes": 99532800,
+          "requested": "cpu"
+        },
+        "input": {
+          "avg_fps": 120.0,
+          "cadence": {
+            "error": "",
+            "error_packet": -1,
+            "error_units": "video time-base ticks",
+            "fps": 120.0,
+            "max_duration_error": 0.0,
+            "max_interval_error": 0.0,
+            "max_phase_error": 0.0,
+            "packets": 120,
+            "verified": true,
+            "verified_cadence": "120/1"
+          },
+          "nominal_fps": 120.0
+        },
+        "mode": "creative",
+        "output": {
+          "avg_fps": 120.0,
+          "cadence": {
+            "error": "",
+            "error_packet": -1,
+            "error_units": "video time-base ticks",
+            "fps": 120.0,
+            "max_duration_error": 0.0,
+            "max_interval_error": 0.0,
+            "max_phase_error": 0.0,
+            "packets": 120,
+            "verified": true,
+            "verified_cadence": "120/1"
+          },
+          "nominal_fps": 120.0
+        },
+        "space_estimate": {
+          "bytes": 1039205456,
+          "headroom_factor": 1.75,
+          "heuristic": true,
+          "hq_target_mbps_1080p2997": 220,
+          "note": "Scene complexity and encoder behavior affect actual ProRes size; write failures remain fatal.",
+          "rotation_second_copy": false
+        },
+        "stages": {
+          "creation_metadata_seconds": 0.0076069,
+          "decode_cpu_seconds": 15.25,
+          "decode_pipe_read_seconds": 4.397270900000002,
+          "decode_transform_encode_wall_seconds": 37.7341151,
+          "definition": "Pipe read/write include backpressure; decode and encode run concurrently. Stage values are not additive.",
+          "encode_cpu_seconds": 92.0,
+          "encode_pipe_write_seconds": 6.289772799999995,
+          "identification_seconds": 0.0272651,
+          "rotation_remux_seconds": 2e-07,
+          "total_before_publication_seconds": 39.4265387,
+          "transform_seconds": 26.464707400000005,
+          "validation_seconds": 0.994942
+        },
+        "threads": {
+          "color": 9,
+          "decoder": 2,
+          "encoder": 7,
+          "filter": 1,
+          "logical_cpus": 20
+        }
+      },
+      "pixel_sanity": {
+        "frames": [
+          {
+            "frame": 0,
+            "max_patch_mean_code_error": 0.056120097637176514,
+            "mean_code_error": 0.012409513195355734
+          },
+          {
+            "frame": 60,
+            "max_patch_mean_code_error": 0.056120097637176514,
+            "mean_code_error": 0.012409513195355734
+          },
+          {
+            "frame": 119,
+            "max_patch_mean_code_error": 0.056120097637176514,
+            "mean_code_error": 0.012409513195355734
+          }
+        ],
+        "max_patch_mean_code_error": 0.056120097637176514,
+        "mean_code_error": 0.012409513195355734,
+        "mean_limit_codes": 8,
+        "passed": true,
+        "peak_limit_codes": 32,
+        "scope": "first/middle/last, 9 patches per frame; scalar input reference vs decoded output YCbCr"
+      }
+    },
+    {
+      "case": "3840x2160-120-cuda-standard",
+      "width": 3840,
+      "height": 2160,
+      "capture_fps": 120,
+      "frames": 120,
+      "creative": false,
+      "backend": "cuda",
+      "wall_seconds_including_tool_verification": 16.40501330000552,
+      "fps_including_verification": 7.314837105310949,
+      "peak_app_private_bytes": 312393728,
+      "peak_tree_private_bytes": 2903023616,
+      "peak_tree_threads": 79,
+      "timing": {
+        "backend": {
+          "backend": "cuda",
+          "bridge_buffers": 3,
+          "bridge_total_bytes": 12582912,
+          "chunks": 2848,
+          "compute_capability": "8.6",
+          "download_seconds": 1.0753955510854705,
+          "driver_cuda_version": 13040,
+          "gpu": "NVIDIA GeForce RTX 3080 Ti Laptop GPU",
+          "gpu_transform_seconds": 2.064818112313748,
+          "math": "double expressions, FP32 input/output; FMA disabled",
+          "pinned_host_bytes": 4210688,
+          "ptx_target": "compute_75",
+          "qualification": {
+            "absolute_tolerance": 2e-06,
+            "cases": [
+              {
+                "creative": false,
+                "exposure_ev": -8.0,
+                "max_error": 0.0,
+                "mean_error": 0.0,
+                "samples": 24576
+              },
+              {
+                "creative": false,
+                "exposure_ev": 0.0,
+                "max_error": 0.0,
+                "mean_error": 0.0,
+                "samples": 24576
+              },
+              {
+                "creative": false,
+                "exposure_ev": 8.0,
+                "max_error": 0.0,
+                "mean_error": 0.0,
+                "samples": 24576
+              },
+              {
+                "creative": true,
+                "exposure_ev": -8.0,
+                "max_error": 0.0,
+                "mean_error": 0.0,
+                "samples": 24576
+              },
+              {
+                "creative": true,
+                "exposure_ev": 0.0,
+                "max_error": 0.0,
+                "mean_error": 0.0,
+                "samples": 24576
+              },
+              {
+                "creative": true,
+                "exposure_ev": 8.0,
+                "max_error": 0.0,
+                "mean_error": 0.0,
+                "samples": 24576
+              }
+            ],
+            "max_error": 0.0,
+            "passed": true,
+            "reference": "independent scalar CPU double"
+          },
+          "requested": "cuda",
+          "runtime": "CUDA Driver API; no cudart",
+          "upload_seconds": 1.0663308162987217
+        },
+        "input": {
+          "avg_fps": 120.0,
+          "cadence": {
+            "error": "",
+            "error_packet": -1,
+            "error_units": "video time-base ticks",
+            "fps": 120.0,
+            "max_duration_error": 0.0,
+            "max_interval_error": 0.0,
+            "max_phase_error": 0.0,
+            "packets": 120,
+            "verified": true,
+            "verified_cadence": "120/1"
+          },
+          "nominal_fps": 120.0
+        },
+        "mode": "standard",
+        "output": {
+          "avg_fps": 120.0,
+          "cadence": {
+            "error": "",
+            "error_packet": -1,
+            "error_units": "video time-base ticks",
+            "fps": 120.0,
+            "max_duration_error": 0.0,
+            "max_interval_error": 0.0,
+            "max_phase_error": 0.0,
+            "packets": 120,
+            "verified": true,
+            "verified_cadence": "120/1"
+          },
+          "nominal_fps": 120.0
+        },
+        "space_estimate": {
+          "bytes": 1039205456,
+          "headroom_factor": 1.75,
+          "heuristic": true,
+          "hq_target_mbps_1080p2997": 220,
+          "note": "Scene complexity and encoder behavior affect actual ProRes size; write failures remain fatal.",
+          "rotation_second_copy": false
+        },
+        "stages": {
+          "creation_metadata_seconds": 0.0076063,
+          "decode_cpu_seconds": 16.75,
+          "decode_pipe_read_seconds": 5.979196599999997,
+          "decode_transform_encode_wall_seconds": 12.4650773,
+          "definition": "Pipe read/write include backpressure; decode and encode run concurrently. Stage values are not additive.",
+          "encode_cpu_seconds": 106.3125,
+          "encode_pipe_write_seconds": 8.588496600000017,
+          "identification_seconds": 0.0349742,
+          "rotation_remux_seconds": 1e-07,
+          "total_before_publication_seconds": 14.33568,
+          "transform_seconds": 7.658805400000007,
+          "validation_seconds": 1.1424154
+        },
+        "threads": {
+          "color": 2,
+          "decoder": 5,
+          "encoder": 11,
+          "filter": 1,
+          "logical_cpus": 20
+        }
+      },
+      "pixel_sanity": {
+        "frames": [
+          {
+            "frame": 0,
+            "max_patch_mean_code_error": 0.07506850361824036,
+            "mean_code_error": 0.008217193738177971
+          },
+          {
+            "frame": 60,
+            "max_patch_mean_code_error": 0.07506850361824036,
+            "mean_code_error": 0.008217193738177971
+          },
+          {
+            "frame": 119,
+            "max_patch_mean_code_error": 0.07506850361824036,
+            "mean_code_error": 0.008217193738177971
+          }
+        ],
+        "max_patch_mean_code_error": 0.07506850361824036,
+        "mean_code_error": 0.008217193738177971,
+        "mean_limit_codes": 8,
+        "passed": true,
+        "peak_limit_codes": 32,
+        "scope": "first/middle/last, 9 patches per frame; scalar input reference vs decoded output YCbCr"
+      }
+    },
+    {
+      "case": "3840x2160-120-cuda-creative",
+      "width": 3840,
+      "height": 2160,
+      "capture_fps": 120,
+      "frames": 120,
+      "creative": true,
+      "backend": "cuda",
+      "wall_seconds_including_tool_verification": 21.052252199995564,
+      "fps_including_verification": 5.700102718702244,
+      "peak_app_private_bytes": 593022976,
+      "peak_tree_private_bytes": 3005431808,
+      "peak_tree_threads": 79,
+      "timing": {
+        "backend": {
+          "backend": "cuda",
+          "bridge_buffers": 1,
+          "bridge_total_bytes": 99532800,
+          "chunks": 120,
+          "compute_capability": "8.6",
+          "download_seconds": 0.9385132174491886,
+          "driver_cuda_version": 13040,
+          "gpu": "NVIDIA GeForce RTX 3080 Ti Laptop GPU",
+          "gpu_transform_seconds": 2.554903938293457,
+          "math": "double expressions, FP32 input/output; FMA disabled",
+          "pinned_host_bytes": 99549184,
+          "ptx_target": "compute_75",
+          "qualification": {
+            "absolute_tolerance": 2e-06,
+            "cases": [
+              {
+                "creative": false,
+                "exposure_ev": -8.0,
+                "max_error": 0.0,
+                "mean_error": 0.0,
+                "samples": 24576
+              },
+              {
+                "creative": false,
+                "exposure_ev": 0.0,
+                "max_error": 0.0,
+                "mean_error": 0.0,
+                "samples": 24576
+              },
+              {
+                "creative": false,
+                "exposure_ev": 8.0,
+                "max_error": 0.0,
+                "mean_error": 0.0,
+                "samples": 24576
+              },
+              {
+                "creative": true,
+                "exposure_ev": -8.0,
+                "max_error": 0.0,
+                "mean_error": 0.0,
+                "samples": 24576
+              },
+              {
+                "creative": true,
+                "exposure_ev": 0.0,
+                "max_error": 0.0,
+                "mean_error": 0.0,
+                "samples": 24576
+              },
+              {
+                "creative": true,
+                "exposure_ev": 8.0,
+                "max_error": 0.0,
+                "mean_error": 0.0,
+                "samples": 24576
+              }
+            ],
+            "max_error": 0.0,
+            "passed": true,
+            "reference": "independent scalar CPU double"
+          },
+          "requested": "cuda",
+          "runtime": "CUDA Driver API; no cudart",
+          "upload_seconds": 0.9906977958679198
+        },
+        "input": {
+          "avg_fps": 120.0,
+          "cadence": {
+            "error": "",
+            "error_packet": -1,
+            "error_units": "video time-base ticks",
+            "fps": 120.0,
+            "max_duration_error": 0.0,
+            "max_interval_error": 0.0,
+            "max_phase_error": 0.0,
+            "packets": 120,
+            "verified": true,
+            "verified_cadence": "120/1"
+          },
+          "nominal_fps": 120.0
+        },
+        "mode": "creative",
+        "output": {
+          "avg_fps": 120.0,
+          "cadence": {
+            "error": "",
+            "error_packet": -1,
+            "error_units": "video time-base ticks",
+            "fps": 120.0,
+            "max_duration_error": 0.0,
+            "max_interval_error": 0.0,
+            "max_phase_error": 0.0,
+            "packets": 120,
+            "verified": true,
+            "verified_cadence": "120/1"
+          },
+          "nominal_fps": 120.0
+        },
+        "space_estimate": {
+          "bytes": 1039205456,
+          "headroom_factor": 1.75,
+          "heuristic": true,
+          "hq_target_mbps_1080p2997": 220,
+          "note": "Scene complexity and encoder behavior affect actual ProRes size; write failures remain fatal.",
+          "rotation_second_copy": false
+        },
+        "stages": {
+          "creation_metadata_seconds": 0.0142003,
+          "decode_cpu_seconds": 13.328125,
+          "decode_pipe_read_seconds": 4.198117300000002,
+          "decode_transform_encode_wall_seconds": 16.9845341,
+          "definition": "Pipe read/write include backpressure; decode and encode run concurrently. Stage values are not additive.",
+          "encode_cpu_seconds": 78.96875,
+          "encode_pipe_write_seconds": 5.360175299999998,
+          "identification_seconds": 0.0501336,
+          "rotation_remux_seconds": 2e-07,
+          "total_before_publication_seconds": 18.7504263,
+          "transform_seconds": 6.876082999999997,
+          "validation_seconds": 0.9722077
+        },
+        "threads": {
+          "color": 2,
+          "decoder": 5,
+          "encoder": 11,
+          "filter": 1,
+          "logical_cpus": 20
+        }
+      },
+      "pixel_sanity": {
+        "frames": [
+          {
+            "frame": 0,
+            "max_patch_mean_code_error": 0.056120097637176514,
+            "mean_code_error": 0.012409513195355734
+          },
+          {
+            "frame": 60,
+            "max_patch_mean_code_error": 0.056120097637176514,
+            "mean_code_error": 0.012409513195355734
+          },
+          {
+            "frame": 119,
+            "max_patch_mean_code_error": 0.056120097637176514,
+            "mean_code_error": 0.012409513195355734
+          }
+        ],
+        "max_patch_mean_code_error": 0.056120097637176514,
+        "mean_code_error": 0.012409513195355734,
+        "mean_limit_codes": 8,
+        "passed": true,
+        "peak_limit_codes": 32,
+        "scope": "first/middle/last, 9 patches per frame; scalar input reference vs decoded output YCbCr"
+      }
+    }
+  ]
+}

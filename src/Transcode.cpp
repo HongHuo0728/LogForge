@@ -1,7 +1,10 @@
 #include "logforge/Transcode.h"
 #include "logforge/AppleLogIdentification.h"
 #include "logforge/Color.h"
+#include "logforge/FloatBridge.h"
 #include "logforge/FloatTransformer.h"
+#include "logforge/PixelSanity.h"
+#include "logforge/StorageSafety.h"
 #include <array>
 #include <cmath>
 #include <limits>
@@ -17,6 +20,7 @@ void logCommand(Logger& log, const fs::path& exe, const std::vector<std::wstring
 ValidationReport TranscodeJob::Run(const FFmpegInstallation& tools, const MediaInfo& input,
                                    const fs::path& output, Logger& log, const std::atomic_bool& cancel,
                                    const JobCallback& progress, const TranscodeOptions& options) {
+    const auto jobStart = std::chrono::steady_clock::now();
     auto m = input;
     auto lease = ToolTrust::Acquire(tools.ffmpeg);
     if (tools.ffmpeg != lease->identity.ffmpeg || tools.ffprobe != lease->identity.ffprobe)
@@ -39,18 +43,35 @@ ValidationReport TranscodeJob::Run(const FFmpegInstallation& tools, const MediaI
         throw AppError(TextId::OutputExists);
     if (!fs::is_directory(dest.parent_path()))
         throw AppError(TextId::OutputDirectory);
+    RequireWritableDirectory(DataDirectory() / L"logs");
+    const auto sourceAtoms = ReferenceMovAnalyzer::Analyze(m.path);
+    auto timeline = InspectMovTimeline(m, sourceAtoms, tools.ffprobe, &cancel);
     progress({Message(TextId::VerifyTiming)});
     log.Write("Input media: " + m.raw.dump());
     m.cadence = VerifyConstantFrameRate(tools.ffprobe, m, cancel);
     m.fps = m.cadence.rate;
     const auto expectedFrames = m.cadence.packets;
-    // Conservative practical estimate, not an assertion of exact ProRes bitrate.
+    PixelSanity pixelSanity(m, expectedFrames);
+    // Estimate from Apple's approximate HQ target (220 Mb/s at 1080p29.97),
+    // scaled for raster/cadence with 75% headroom. Add audio and rotation's second
+    // copy. This is a planning heuristic, never an assertion of exact bitrate.
+    const long double videoEstimate = 220000000.L / 8 * m.videoDuration *
+                                      (static_cast<long double>(m.width) * m.height / (1920.L * 1080)) *
+                                      (m.fps.Value() / (30000.L / 1001)) * 1.75L;
+    long double audioEstimate = 0;
+    for (const auto& audio : m.audio)
+        audioEstimate += static_cast<long double>(audio.channels) * audio.sampleRate * 4 *
+                         std::max(audio.duration, m.videoDuration);
     const long double estimatedBytes =
-        static_cast<long double>(m.width) * m.height * expectedFrames * 2 + 256ull * 1024 * 1024;
+        (videoEstimate + audioEstimate) * (std::abs(m.rotation) > 0.01 ? 2 : 1) + 256ull * 1024 * 1024;
     if (estimatedBytes >= static_cast<long double>(std::numeric_limits<uint64_t>::max()))
         throw AppError(TextId::OutputSpace);
     const auto estimate = static_cast<uint64_t>(estimatedBytes);
-    if (fs::space(dest.parent_path()).available < estimate)
+    const auto availableSpace = [&](const fs::path& p) {
+        return options.io && options.io->availableSpace ? options.io->availableSpace(p)
+                                                        : fs::space(p).available;
+    };
+    if (availableSpace(dest.parent_path()) < estimate)
         throw AppError(TextId::OutputSpace);
     fs::path partial =
         dest.parent_path() / (dest.stem().wstring() + L".logforge-" + std::to_wstring(GetCurrentProcessId()) +
@@ -70,6 +91,8 @@ ValidationReport TranscodeJob::Run(const FFmpegInstallation& tools, const MediaI
             }
         }
     } guard{partial};
+    OwnedJobFiles owned;
+    owned.Track(partial);
     log.Write(
         "CFR timestamps verified: " + std::to_string(expectedFrames) +
         " frames. BT.2408 HLG75% -> 100% reflectance; scale=" + std::to_string(HLGToReflectanceScale()) +
@@ -78,6 +101,22 @@ ValidationReport TranscodeJob::Run(const FFmpegInstallation& tools, const MediaI
               "; shadow lift EV=" + std::to_string(options.tone.shadowStops) +
               "; highlight compression EV=" + std::to_string(options.tone.highlightStops) +
               "; saturation=" + std::to_string(options.tone.saturation));
+    Json backend{{"requested", BackendName(options.backend)}, {"backend", "cpu"}};
+    std::unique_ptr<CudaTransformer> cuda;
+    if (options.backend != ProcessingBackend::CPU) {
+        try {
+            if (options.io && options.io->cudaCheckpoint)
+                options.io->cudaCheckpoint("initialize");
+            cuda = std::make_unique<CudaTransformer>(options.exposureStops, options.tone);
+            backend.update(cuda->Report());
+        } catch (const std::exception& e) {
+            if (options.backend == ProcessingBackend::CUDA)
+                throw AppError(Message(TextId::BackendFailed, {e.what()}));
+            backend["fallback_reason"] = e.what();
+            log.Write(std::string("Auto CPU fallback: ") + e.what());
+        }
+    }
+    const auto threads = PlanThreads(cuda != nullptr);
     const std::wstring range = m.range == "pc" ? L"full" : L"limited";
     std::wstring decodeFilter = L"zscale=matrixin=2020_ncl:matrix=gbr:rangein=" + range +
                                 L":range=full:transferin=arib-std-b67:transfer=arib-std-b67:primariesin=2020:"
@@ -88,7 +127,9 @@ ValidationReport TranscodeJob::Run(const FFmpegInstallation& tools, const MediaI
                                      L"warning",
                                      L"-nostdin",
                                      L"-threads",
-                                     L"4",
+                                     std::to_wstring(threads.decode),
+                                     L"-filter_threads",
+                                     L"1",
                                      L"-noautorotate",
                                      L"-guess_layout_max",
                                      L"0",
@@ -121,9 +162,10 @@ ValidationReport TranscodeJob::Run(const FFmpegInstallation& tools, const MediaI
         L"pipe:0", L"-itsoffset", std::to_wstring(-m.startTime), L"-noautorotate",
         // Audio is copied verbatim; do not invent a layout for unlabelled channels.
         L"-guess_layout_max", L"0", L"-i", m.path.wstring(), L"-map", L"0:v:0", L"-map", L"1:a?",
-        L"-map_chapters", L"-1", L"-vf", encodeFilter, L"-c:v", L"prores_ks", L"-profile:v", L"3",
-        L"-pix_fmt", L"yuv422p10le", L"-threads:v", L"4", L"-fps_mode", L"passthrough", L"-c:a", L"copy",
-        L"-avoid_negative_ts", L"disabled", L"-progress", L"pipe:1", L"-stats_period", L"0.25", L"-nostats"};
+        L"-map_chapters", L"1", L"-vf", encodeFilter, L"-c:v", L"prores_ks", L"-profile:v", L"3", L"-pix_fmt",
+        L"yuv422p10le", L"-threads:v", std::to_wstring(threads.encode), L"-filter_threads", L"1",
+        L"-fps_mode", L"passthrough", L"-c:a", L"copy", L"-avoid_negative_ts", L"disabled", L"-progress",
+        L"pipe:1", L"-stats_period", L"0.25", L"-nostats"};
     const auto metadata = AppleLogMetadataWriter::Arguments(m, options.exposureStops, options.tone);
     encode.insert(encode.end(), metadata.begin(), metadata.end());
     encode.push_back(partial.wstring());
@@ -230,44 +272,46 @@ ValidationReport TranscodeJob::Run(const FFmpegInstallation& tools, const MediaI
     size_t floatBufferBytes = 0;
     unsigned transformWorkers = 0;
     const auto transformStart = std::chrono::steady_clock::now();
+    double decodeReadSeconds = 0, transformSeconds = 0, encodeWriteSeconds = 0;
+    const auto elapsed = [](auto start) {
+        return std::chrono::duration<double>(std::chrono::steady_clock::now() - start).count();
+    };
     std::exception_ptr workError;
     try {
         const size_t frameSamples = static_cast<size_t>(m.width) * m.height * 3;
-        // Standard per-channel transfer can stream arbitrary planar chunks.
-        // Creative luminance needs corresponding G/B/R planes, so retains one
-        // frame and processes bounded RGB tiles on the same persistent workers.
-        std::vector<float> frame(options.tone.enabled ? frameSamples
-                                                      : std::min<size_t>(frameSamples, 1024 * 1024));
-        const size_t bytes = frame.size() * sizeof(float);
-        FloatTransformer transformer(options.exposureStops, options.tone);
-        floatBufferBytes = bytes;
+        FloatTransformer transformer(options.exposureStops, options.tone, threads.transform);
         transformWorkers = transformer.Workers();
-        log.Write("Float bridge workers=" + std::to_string(transformer.Workers()) +
-                  "; buffer bytes=" + std::to_string(bytes));
-        size_t frameRemainder = 0;
+        BridgeTiming timing;
         progress({Message(TextId::Decoding), 0});
-        while (!cancel.load()) {
-            size_t filled = 0;
-            while (filled < bytes) {
-                auto got =
-                    decoder.Read(reinterpret_cast<unsigned char*>(frame.data()) + filled, bytes - filled);
-                if (!got)
-                    break;
-                filled += got;
-            }
-            if (filled == 0)
-                break;
-            if (filled % sizeof(float) || (options.tone.enabled && filled != bytes))
-                throw AppError(TextId::IncompleteFrame);
-            transformer.Apply(std::span(frame).first(filled / sizeof(float)), signal);
-            encoder.Write(frame.data(), filled);
-            frameRemainder += filled / sizeof(float);
-            frames += static_cast<int64_t>(frameRemainder / frameSamples);
-            frameRemainder %= frameSamples;
-        }
-        if (frameRemainder)
-            throw AppError(TextId::IncompleteFrame);
-        encoder.CloseInput();
+        frames = RunFloatBridge(
+            decoder, encoder, frameSamples, options.tone.enabled, cancel,
+            [&](std::span<float> samples) {
+                pixelSanity.Observe(samples);
+                if (cuda) {
+                    try {
+                        if (options.io && options.io->cudaCheckpoint)
+                            options.io->cudaCheckpoint("transform");
+                        cuda->Apply(samples, signal);
+                    } catch (const std::exception& e) {
+                        if (options.backend == ProcessingBackend::CUDA)
+                            throw AppError(Message(TextId::BackendFailed, {e.what()}));
+                        backend.update(cuda->Report());
+                        backend["fallback_reason"] = e.what();
+                        backend["backend"] = "cpu after cuda";
+                        log.Write(std::string("CUDA failed; unchanged chunk retried on CPU: ") + e.what());
+                        cuda.reset();
+                        transformer.Apply(samples, signal);
+                    }
+                } else
+                    transformer.Apply(samples, signal);
+            },
+            timing);
+        decodeReadSeconds = timing.read;
+        transformSeconds = timing.transform;
+        encodeWriteSeconds = timing.write;
+        floatBufferBytes = timing.bufferBytes;
+        backend["bridge_buffers"] = timing.buffers;
+        backend["bridge_total_bytes"] = timing.buffers * timing.bufferBytes;
         decodeExit = decoder.Wait();
         encodeExit = encoder.Wait();
     } catch (...) {
@@ -306,6 +350,8 @@ ValidationReport TranscodeJob::Run(const FFmpegInstallation& tools, const MediaI
     }
     if (decodeExit || encodeExit || frames != expectedFrames)
         throw AppError(Message(TextId::EncodeFailed, {encoderError + decoderError}));
+    const double pipelineSeconds = elapsed(transformStart);
+    const auto remuxStart = std::chrono::steady_clock::now();
     // rawvideo has no orientation field. Remux from our encoded file to apply the
     // original display rotation using FFmpeg's documented display_rotation option.
     if (std::abs(m.rotation) > 0.01) {
@@ -313,6 +359,14 @@ ValidationReport TranscodeJob::Run(const FFmpegInstallation& tools, const MediaI
         auto rotated = partial;
         rotated += L".rotated.mov";
         PartialGuard rotatedGuard{rotated};
+        Handle rotatedReservation(CreateFileW(rotated.c_str(), GENERIC_WRITE, 0, nullptr, CREATE_NEW,
+                                              FILE_ATTRIBUTE_NORMAL, nullptr));
+        if (!rotatedReservation)
+            throw AppError(TextId::OutputCreate);
+        rotatedReservation.reset();
+        owned.Track(rotated);
+        if (availableSpace(dest.parent_path()) < fs::file_size(partial) + 32ull * 1024 * 1024)
+            throw AppError(TextId::RotationSpace);
         std::vector<std::wstring> args{L"-hide_banner",
                                        L"-v",
                                        L"error",
@@ -324,23 +378,34 @@ ValidationReport TranscodeJob::Run(const FFmpegInstallation& tools, const MediaI
                                        L"-i",
                                        partial.wstring(),
                                        L"-map",
-                                       L"0",
+                                       L"0:v:0",
+                                       L"-map",
+                                       L"0:a?",
                                        L"-c",
                                        L"copy",
-                                       L"-movflags",
-                                       L"+write_colr+use_metadata_tags",
-                                       L"-y",
-                                       rotated.wstring()};
+                                       L"-map_chapters",
+                                       L"0",
+                                       L"-y"};
+        args.insert(args.end(), metadata.begin(), metadata.end());
+        args.push_back(rotated.wstring());
         logCommand(log, tools.ffmpeg, args);
         auto r = RunProcess(tools.ffmpeg, args, &cancel, 0);
         if (r.exitCode)
             throw AppError(Message(TextId::RotationFailed, {r.error}));
         fs::remove(partial);
         fs::rename(rotated, partial);
+        owned.Track(partial);
     }
+    const double remuxSeconds = elapsed(remuxStart);
+    const auto headerStart = std::chrono::steady_clock::now();
+    const auto headerTimes = PreserveMovCreationTimes(sourceAtoms, partial, cancel);
+    const double headerSeconds = elapsed(headerStart);
+    const auto identificationStart = std::chrono::steady_clock::now();
     progress({Message(TextId::WritingIdentification)});
     AppleLogIdentificationWriter::WriteToEncodedPartial(partial, cancel);
     log.Write("Apple Log identification: ProRes sample-entry logs / com.apple.rec2020.apple-log");
+    const double identificationSeconds = elapsed(identificationStart);
+    const auto validationStart = std::chrono::steady_clock::now();
     progress({Message(TextId::ValidatingOutput)});
     auto out = Probe(tools.ffprobe, partial, &cancel);
     out.outputChromaVerified =
@@ -348,7 +413,15 @@ ValidationReport TranscodeJob::Run(const FFmpegInstallation& tools, const MediaI
     out.cadence = VerifyConstantFrameRate(tools.ffprobe, out, cancel, false);
     out.fps = out.cadence.rate;
     auto report = ValidateOutput(m, out, frames);
+    report.signal["pixel_sanity"] =
+        pixelSanity.Validate(tools.ffmpeg, partial, cancel, options.exposureStops, options.tone);
+    if (!report.signal["pixel_sanity"]["passed"].get<bool>()) {
+        report.passed = false;
+        report.errors.emplace_back(TextId::PixelSanityFailed);
+    }
     report.ffmpeg = tools.ToJson();
+    report.metadata["timeline_policy"] = timeline;
+    report.metadata["creation_headers"] = headerTimes;
     report.metadata["chroma"] = {
         {"input_ffprobe", m.chromaLocation},
         {"input_explicit_override", m.inputChromaOverride},
@@ -357,6 +430,7 @@ ValidationReport TranscodeJob::Run(const FFmpegInstallation& tools, const MediaI
         {"output_declared", out.tags.value("logforge.chroma_location", "")},
         {"verification", "explicit zscale siting plus reference signal test; MOV/ffprobe may omit siting"}};
     const auto atomReport = ReferenceMovAnalyzer::Analyze(partial);
+    report.metadata["output_timeline_policy"] = InspectMovTimeline(out, atomReport, tools.ffprobe, &cancel);
     report.metadata["apple_log_identification"] = AppleLogIdentificationWriter::Validate(atomReport);
     if (!report.metadata["apple_log_identification"]["passed"].get<bool>()) {
         report.passed = false;
@@ -371,20 +445,50 @@ ValidationReport TranscodeJob::Run(const FFmpegInstallation& tools, const MediaI
         report.passed = false;
         report.errors.emplace_back(TextId::OutputColr);
     }
-    report.signal = {
-        {"scope", "all transformed RGB components, before YCbCr quantization and ProRes encoding"},
-        {"samples", signal.samples},
-        {"input_hlg_min", signal.inputMinimum},
-        {"input_hlg_max", signal.inputMaximum},
-        {"output_apple_log_min", signal.outputMinimum},
-        {"output_apple_log_max", signal.outputMaximum},
-        {"apple_floor_clipped", signal.appleFloorClipped},
-        {"above_nominal_white", signal.aboveNominalWhite}};
+    report.signal.update(
+        {{"scope", "all transformed RGB components, before YCbCr quantization and ProRes encoding"},
+         {"samples", signal.samples},
+         {"input_hlg_min", signal.inputMinimum},
+         {"input_hlg_max", signal.inputMaximum},
+         {"output_apple_log_min", signal.outputMinimum},
+         {"output_apple_log_max", signal.outputMaximum},
+         {"apple_floor_clipped", signal.appleFloorClipped},
+         {"above_nominal_white", signal.aboveNominalWhite}});
     report.signalWarning = signal.appleFloorClipped || signal.aboveNominalWhite;
     if (signal.appleFloorClipped)
         report.warnings.emplace_back(TextId::SignalFloor);
     if (signal.aboveNominalWhite)
         report.warnings.emplace_back(TextId::SignalWhite);
+    report.timing["stages"] = {{"decode_pipe_read_seconds", decodeReadSeconds},
+                               {"decode_cpu_seconds", decoder.CpuSeconds()},
+                               {"encode_cpu_seconds", encoder.CpuSeconds()},
+                               {"transform_seconds", transformSeconds},
+                               {"encode_pipe_write_seconds", encodeWriteSeconds},
+                               {"decode_transform_encode_wall_seconds", pipelineSeconds},
+                               {"rotation_remux_seconds", remuxSeconds},
+                               {"creation_metadata_seconds", headerSeconds},
+                               {"identification_seconds", identificationSeconds},
+                               {"validation_seconds", elapsed(validationStart)},
+                               {"total_before_publication_seconds", elapsed(jobStart)},
+                               {"definition", "Pipe read/write include backpressure; decode and encode run "
+                                              "concurrently. Stage values are not additive."}};
+    report.timing["threads"] = {{"logical_cpus", threads.logical},
+                                {"decoder", threads.decode},
+                                {"encoder", threads.encode},
+                                {"color", threads.transform},
+                                {"filter", threads.filter}};
+    report.timing["mode"] = options.tone.enabled ? "creative" : "standard";
+    if (cuda)
+        backend.update(cuda->Report());
+    report.timing["backend"] = backend;
+    report.timing["space_estimate"] = {
+        {"bytes", estimate},
+        {"heuristic", true},
+        {"hq_target_mbps_1080p2997", 220},
+        {"headroom_factor", 1.75},
+        {"rotation_second_copy", std::abs(m.rotation) > 0.01},
+        {"note",
+         "Scene complexity and encoder behavior affect actual ProRes size; write failures remain fatal."}};
     Json full{
         {"version", Version},
         {"build", BuildNumber},
@@ -397,8 +501,7 @@ ValidationReport TranscodeJob::Run(const FFmpegInstallation& tools, const MediaI
          {{"float_buffer_bytes", floatBufferBytes},
           {"transform_workers", transformWorkers},
           {"mode", options.tone.enabled ? "planar frame with parallel RGB tiles" : "bounded planar chunks"},
-          {"transform_and_encode_seconds",
-           std::chrono::duration<double>(std::chrono::steady_clock::now() - transformStart).count()}}},
+          {"transform_and_encode_seconds", pipelineSeconds}}},
         {"color",
          {{"transform", "inverse HLG OETF -> reflectance scale -> Apple Log"},
           {"reference", "BT.2408: 75% HLG -> 100% reflectance"},
@@ -414,13 +517,17 @@ ValidationReport TranscodeJob::Run(const FFmpegInstallation& tools, const MediaI
           {"intermediate", "gbrpf32le"},
           {"math", "double"},
           {"range", "video (Y 64..940; C 64..960)"}}}};
-    auto reportPath =
-        DataDirectory() / L"logs" /
-        (dest.filename().wstring() + L"-" + std::to_wstring(GetTickCount64()) + L".validation.json");
-    std::ofstream file(reportPath);
+    auto reportPath = DataDirectory() / L"logs" /
+                      (L"LogForge-" + dest.filename().wstring() + L"-" + std::to_wstring(GetTickCount64()) +
+                       L".validation.json");
+    auto reportTemporary = fs::path(reportPath.wstring() + L".tmp");
+    PartialGuard reportGuard{reportTemporary};
+    if (options.io && options.io->beforeReportWrite)
+        options.io->beforeReportWrite(reportTemporary);
+    std::ofstream file(reportTemporary);
     file << full.dump(2);
     file.close();
-    if (!file)
+    if (!file || !MoveFileExW(reportTemporary.c_str(), reportPath.c_str(), MOVEFILE_WRITE_THROUGH))
         throw AppError(TextId::ReportSave);
     log.Write("Validation report: " + PathText(reportPath) + "\n" + report.ToJson().dump());
     if (!report.passed)
@@ -436,8 +543,10 @@ ValidationReport TranscodeJob::Run(const FFmpegInstallation& tools, const MediaI
         throw AppError(Message(TextId::OutputCreate, {Utf8(WinError())}));
     }
     guard.keep = true;
-    progress({Message(report.signalWarning ? TextId::CompleteWarning : TextId::CompleteStandard), 1.0,
-              m.videoDuration, 0, 0, frames});
+    progress({Message(report.signalWarning   ? TextId::CompleteWarning
+                      : options.tone.enabled ? TextId::CompleteCreative
+                                             : TextId::CompleteStandard),
+              1.0, m.videoDuration, 0, 0, frames});
     return report;
 }
 } // namespace logforge

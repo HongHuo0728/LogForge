@@ -4,13 +4,26 @@ A small native Windows tool that re-encodes **BT.2020 HLG ProRes** into **Apple 
 
 LogForge changes the pixels using published color mathematics. It does not restore clipped highlights, crushed shadows, tone-mapped-away detail, or information lost in a camera's ISP. It cannot turn processed phone footage into the original sensor capture.
 
-**Version 1.1.1 · Build 26923D.** The unchanged Apple Log identification writer was **verified in 1.1.0 with DaVinci Resolve Studio 20.3.2.9 on Windows**, using DaVinci YRGB Color Managed. The 1.1.1 editor import was not reverified because the installed Resolve scripting interface did not connect. Output is **Apple Log / Rec.2020 with Video levels**. This is Apple Log, not Apple Log 2 / Apple Wide Gamut. See the [native-reference and real-import evidence](docs/APPLE_LOG_IDENTIFICATION.md).
+**Version 1.2.0 · Build 26926A.** Output is **Apple Log / Rec.2020 with Video levels**. The identification fields were **verified in 1.1.0 with DaVinci Resolve Studio 20.3.2.9 on Windows**, using DaVinci YRGB Color Managed. The latest build's verification scope is recorded in [VALIDATION](docs/VALIDATION.md); historical editor evidence is not a fresh import test. This is Apple Log, not Apple Log 2 / Apple Wide Gamut. See the [native-reference and real-import evidence](docs/APPLE_LOG_IDENTIFICATION.md).
 
 ![LogForge Windows interface](docs/images/LogForge.png)
 
 The screenshot uses an empty workspace; no personal video or camera image is included.
 
-## What's new in 1.1.1
+## What's new in 1.2.0
+
+- **Portrait MOV fixes:** preserve movie/video/audio creation timestamps and source creationdate through all supported rotations. Compare timestamp meaning, and preserve drop-frame timecode during remux.
+- **Media safeguards:** explicit QuickTime container and edit-list policy, chapter validation, unsupported display-matrix rejection, structural identification writing and first/middle/last pixel sanity sampling.
+- **Processing backends:** Auto, CPU or NVIDIA RTX CUDA. The GPU accelerates precise color mathematics; ProRes decoding and encoding remain on the CPU. Auto falls back safely after GPU failures, while forced CUDA fails explicitly.
+- **Measured CPU pipeline:** adaptive thread allocation and three bounded Standard buffers overlap decoding, color processing and encoding. Reports distinguish CPU time, color time, pipe waits, remux, metadata, validation and GPU copy/kernel timings. See the [benchmark](docs/BENCHMARK_1.2.0.md).
+- **Batch conversion:** select/drop several videos; each gets its own validation report and a failed item does not stop later items.
+- **Correct main-window layout:** one measured, scrollable layout separates source/output/status/footer, with a single renderer per status text and full relocation invalidation.
+- **Storage reliability:** cross-process settings/trust locking, ownership-checked abandoned temporary-file recovery, bounded retention and report-directory preflight. No output is published after report failure.
+- **Release integrity:** an actual `.zip.sha256` accompanies the ZIP, and packaging audits its contents and executable identity.
+
+See [1.2.0 release details and limitations](docs/RELEASE_1.2.0.md). The Apple Log/HLG reference equations, BT.2408 scale, float32 intermediate, BT.2020, nclc 9/2/9, Video levels, packet cadence checks and color tolerances remain unchanged.
+
+## Previous release: 1.1.1
 
 - **Fast FFmpeg startup:** Quick discovery has a shared three-second filesystem budget. A verified managed/saved pair avoids later searches. Other sources include PATH, Windows App Paths, package installations, bounded common folders and the existing Windows Search index.
 - **Deep search is explicit:** use **Deep search all drives** only when needed, or `LogForge-cli --detect --deep-search`. Startup never falls through to whole-drive traversal.
@@ -42,7 +55,8 @@ Automatic identification was checked with an unmodified iPhone 15 Pro Max / Blac
 - Bounded Quick FFmpeg discovery and optional manual Deep search; explicit path/hash approval before external tools may run, plus a pinned HTTPS installer.
 - Numerical FFmpeg qualification (matrix, range, left/center chroma phase and post-ProRes code values).
 - English (default) and Simplified Chinese; dark (default) and light themes, saved in Settings.
-- Original spectrum-and-curve icon; Windows version 1.1.1 and in-app build display 1.1.1 (26923D).
+- Original spectrum-and-curve icon; Windows version 1.2.0.0 and in-app build display 1.2.0 (26926A).
+- Runtime-qualified CPU/CUDA color processing, a serial multi-file queue and detailed per-job reports.
 - Double-precision Apple Log and inverse HLG math; 32-bit float RGB transport.
 - ProRes HQ 10-bit 4:2:2 MOV output; audio packet copy, frame rate and raster preservation.
 - Timecode, creation metadata, original Make/Model and ordinary rotation preservation.
@@ -54,10 +68,10 @@ Automatic identification was checked with an unmodified iPhone 15 Pro Max / Blac
 
 ## Install and run
 
-1. Download `LogForge-1.1.1-Windows-x64.zip` from this project's GitHub Releases when published.
+1. Download `LogForge-1.2.0-Windows-x64.zip` and its `.sha256` file from this project's GitHub Releases when published.
 2. Extract the ZIP and run `LogForge.exe`. No installer or administrator rights are required.
 3. Let LogForge discover FFmpeg paths. Unapproved programs are **not executed**. Use **Review FFmpeg...** to select a discovered candidate and review both SHA-256 hashes, then explicitly approve it. If none is usable, retry Quick search, explicitly start Deep search, choose a file manually, or use **Download FFmpeg** for the pinned build. Buttons disappear after approved tools pass numerical verification. An old saved path alone is not execution approval.
-4. Open or drop one supported video. If chroma siting is absent, explicitly confirm left or center from your recording/export settings; cancel if unknown. Choose a new output `.mov`, then select **Convert to Apple Log**.
+4. Open or drop supported videos. If chroma siting is absent, explicitly confirm left or center from your recording/export settings; cancel if unknown. Choose a new output `.mov` for one file, or an output directory for a queue, then select **Convert to Apple Log**.
 5. Wait for output validation. An existing output file is never overwritten.
 
 The executable is unsigned. Windows may show an unrecognized-publisher prompt. The Release build uses the static MSVC runtime (`/MT`); no separately installed VC++ runtime is required by LogForge. Windows 10 22H2 / Windows 11 x64 is the supported target. ARM64, macOS and Linux are not supported in v1.
@@ -68,10 +82,11 @@ For exposure matching, keep **0 EV** unless you have a deliberate reason to adju
 
 ## Settings
 
-Open **Settings** in the top right. The three groups are:
+Open **Settings** in the top right:
 
 - **Language:** English or Simplified Chinese. English is the first-run default, independent of the Windows display language.
 - **Appearance:** Dark or Light. Dark is the first-run default.
+- **Processing backend:** Auto (default), CPU or NVIDIA RTX CUDA. Auto tries a usable CUDA device and falls back to CPU with a recorded reason. Forced CUDA reports failure if unavailable or unqualified. The app uses the installed NVIDIA driver; no bundled CUDA runtime or Toolkit is required.
 - **Creative adjustments:** Off by default. Enable to lift shadows, reduce highlights and adjust saturation; the initial values are **3 EV / 1 EV / 85%**. The detailed controls appear when enabled and retain their values when disabled.
 
 **Save** applies changes immediately and persists them for the next launch. **Cancel** discards changes. Settings are disabled during discovery, downloads, probing or conversion. Windows-owned file pickers and operating-system error text may use the Windows language.
@@ -82,6 +97,7 @@ Creative adjustment is an intentional grade applied before the unchanged Apple L
 
 | Property | V1 requirement |
 | --- | --- |
+| Container | Nonfragmented QuickTime MOV with `qt  ` major brand |
 | Codec | ProRes 422 (Standard) or ProRes 422 HQ |
 | Pixel format | `yuv422p10le`, 10-bit 4:2:2 |
 | Primaries / matrix | BT.2020 / BT.2020 non-constant luminance |
@@ -92,7 +108,7 @@ Creative adjustment is an intentional grade applied before the unchanged Apple L
 | Resolution | Even width, up to 8192 × 8192; no resize |
 | Frame rate | Valid rational frame rate, at most 120 fps |
 
-The listed target devices are **iPhone 13 Pro, iPhone 13 Pro Max, iPhone 14 Pro and iPhone 14 Pro Max**. Record **ProRes 422 HDR or ProRes 422 HQ HDR (10-bit BT.2020 HLG)**. Choose your recording resolution and frame rate freely within the format guards above; LogForge preserves the source settings and does not force 4K or 24 fps. Admission depends on the actual media parameters, not a model-name allowlist. A device model name alone is not evidence of compatibility. VFR, HEVC/Dolby Vision, PQ, SDR, interlaced footage, ProRes LT/Proxy/4444, and missing/ambiguous color tags are refused. Timed metadata tracks, chapters, arbitrary track transforms and camera-specific edit lists are not reproduced. Additional audio streams are copied when MOV supports their codecs; otherwise conversion fails visibly.
+The listed target devices are **iPhone 13 Pro, iPhone 13 Pro Max, iPhone 14 Pro and iPhone 14 Pro Max**. Record **ProRes 422 HDR or ProRes 422 HQ HDR (10-bit BT.2020 HLG)**. Choose your recording resolution and frame rate freely within the format guards above; LogForge preserves the source settings and does not force 4K or 24 fps. Admission depends on actual media parameters, not a model-name allowlist. VFR, HEVC/Dolby Vision, PQ, SDR, interlaced footage, ProRes LT/Proxy/4444 and missing/ambiguous color tags are refused. Chapters are copied and validated. Nonessential metadata/data tracks are removed with a report entry. Only unit rotations are supported; mirrors, scaling, translation, perspective and nonidentity movie-level transforms are refused. Edit lists must be zero-origin unit-rate duration declarations or packet-confirmed AAC priming; timeline trims, empty edits, repeats and speed changes are refused. Additional audio streams are copied when MOV supports their codecs; otherwise conversion fails visibly.
 
 Identical packet durations/intervals establish the exact rational cadence, including 29.99, 29.98 and 29.9701 fps, even when average/nominal tags disagree. Timing checks retain a 1.05-tick maximum error around a candidate for nonuniform clocks; sustained phase drift, gaps and duplicate/reverse PTS are refused with a packet index. The float pipeline normalizes that small timing difference; it does not preserve arbitrary VFR timestamps. See [timing policy](docs/ARCHITECTURE.md#timing-and-publication).
 
@@ -114,7 +130,12 @@ The release ZIP contains **no FFmpeg binaries**. Quick discovery searches manage
 
 A compatible feature list is not sufficient for conversion. **Verified FFmpeg** additionally passes integer-signal matrix/range tests, half-pixel chroma tests and ProRes HQ encode/decode sampling. **Compatible but unverified FFmpeg** may be inspected but cannot transcode. Failed numerical tests are errors, never warnings. See [trust and provider details](docs/FFMPEG_PROVIDER.md).
 
-The standard color path streams at most 4 MiB of float samples through persistent CPU workers. Creative adjustment uses one planar frame with parallel RGB tiles. Both call the unchanged scalar equations, with exact float equality tests and no approximate SIMD logarithms, fast-math or GPU dependency.
+The Standard path uses three chunks of at most 4 MiB each to overlap CPU decode,
+color transform and CPU encode. Creative adjustment retains one planar float32
+frame so RGB channels stay correctly paired. CPU workers use the unchanged scalar
+equations. CUDA uses precise double expressions with float32 transport and must
+pass independent reference qualification. CPU operation remains available without
+a GPU. No fast math, FP16 or LUT approximation is used.
 
 The installer currently pins **Gyan.dev FFmpeg 8.1.2 essentials**, a third-party Windows build, **GPLv3**. Download size is 109,728,040 bytes (about 105 MiB). HTTPS, embedded SHA-256, bounded retries, byte progress, extraction and post-install capability checks are implemented. It does not update PATH or install system components. Files are stored under:
 
@@ -147,7 +168,7 @@ Generate the small portable package:
 
 ```powershell
 cpack --config build/CPackConfig.cmake -C Release -B dist
-python tests/package_audit.py --zip dist/LogForge-1.1.1-Windows-x64.zip --exe build/Release/LogForge.exe
+python tests/package_audit.py --zip dist/LogForge-1.2.0-Windows-x64.zip --exe build/Release/LogForge.exe
 ```
 
 Pushes and pull requests configure/build/test on Windows. Every build creates a ZIP artifact; version tags must match the CMake version, and the workflow does not silently publish a GitHub Release. See [validation details](docs/VALIDATION.md) and [architecture](docs/ARCHITECTURE.md).

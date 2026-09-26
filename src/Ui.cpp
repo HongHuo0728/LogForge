@@ -248,9 +248,44 @@ bool SaveWindowSnapshot(HWND window, const fs::path& destination) {
     HDC dc = CreateCompatibleDC(screen);
     HBITMAP bitmap = CreateCompatibleBitmap(screen, rect.right, rect.bottom);
     auto old = SelectObject(dc, bitmap);
-    RedrawWindow(window, nullptr, nullptr, RDW_INVALIDATE | RDW_ALLCHILDREN | RDW_UPDATENOW);
+    RedrawWindow(window, nullptr, nullptr, RDW_INVALIDATE | RDW_ERASE | RDW_ALLCHILDREN | RDW_UPDATENOW);
     DwmFlush();
-    BOOL painted = PrintWindow(window, dc, 3);
+    // WM_PRINT asks the real window/control procedures to render the current
+    // state. PrintWindow's DWM surface may lag repeated resize/theme changes.
+    SendMessageW(window, WM_PRINTCLIENT, reinterpret_cast<WPARAM>(dc), PRF_CLIENT | PRF_ERASEBKGND);
+    // Position each child from the actual native rectangles. DefWindowProc's
+    // recursive WM_PRINT path can include the top-level caption offset when the
+    // bitmap itself represents only the client area.
+    const auto children = [&](auto&& visit, HWND parent, POINT origin) -> void {
+        std::vector<HWND> list;
+        for (HWND child = GetWindow(parent, GW_CHILD); child; child = GetWindow(child, GW_HWNDNEXT))
+            if (IsWindowVisible(child))
+                list.push_back(child);
+        for (auto it = list.rbegin(); it != list.rend(); ++it) {
+            const auto child = *it;
+            RECT bounds{};
+            GetWindowRect(child, &bounds);
+            MapWindowPoints(nullptr, parent, reinterpret_cast<POINT*>(&bounds), 2);
+            const int saved = SaveDC(dc);
+            SetViewportOrgEx(dc, origin.x + bounds.left, origin.y + bounds.top, nullptr);
+            IntersectClipRect(dc, 0, 0, bounds.right - bounds.left, bounds.bottom - bounds.top);
+            const int painting = SaveDC(dc);
+            SendMessageW(child, WM_PRINT, reinterpret_cast<WPARAM>(dc),
+                         PRF_CLIENT | PRF_NONCLIENT | PRF_ERASEBKGND);
+            RestoreDC(dc, painting);
+            POINT offset{};
+            ClientToScreen(child, &offset);
+            ScreenToClient(parent, &offset);
+            SetViewportOrgEx(dc, origin.x + offset.x, origin.y + offset.y, nullptr);
+            RECT viewport{};
+            GetClientRect(child, &viewport);
+            IntersectClipRect(dc, 0, 0, viewport.right, viewport.bottom);
+            visit(visit, child, POINT{origin.x + offset.x, origin.y + offset.y});
+            RestoreDC(dc, saved);
+        }
+    };
+    children(children, window, POINT{});
+    const BOOL painted = TRUE;
     SelectObject(dc, old);
     DeleteDC(dc);
     ReleaseDC(window, screen);

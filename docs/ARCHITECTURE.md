@@ -52,17 +52,17 @@ Creative controls are captured on the UI thread into immutable job options befor
 
 ## Source and binary boundaries
 
-FFmpeg remains a separate GPL executable. LogForge invokes its CLI and uses documented rawvideo/progress interfaces; no FFmpeg source is compiled or linked into the MIT executable. The only bundled source dependency is nlohmann/json 3.12.0 (MIT).
+FFmpeg remains a separate GPL executable. LogForge invokes its CLI and uses documented rawvideo/progress interfaces; no FFmpeg source is compiled or linked into the MIT executable. The bundled source dependency is nlohmann/json 3.12.0 (MIT). The embedded CUDA artifact also contains compiler-generated device-math portions governed by the included NVIDIA notice; no NVIDIA DLL is distributed.
 
 Release uses `/MT`, the OS's common controls, WinHTTP, BCrypt and WIC. CPack includes the GUI executable and required license/documentation files, excluding CLI/test executables, media fixtures, compiler artifacts, caches and FFmpeg.
 
 ## Preferences and localization
 
-The first-run defaults are English, dark theme and disabled creative adjustment. `settings.json` stores `language`, `theme`, the `creative` object, `ffmpeg` (manual) and `detected_ffmpeg` (automatic). Writes merge owned fields, use a same-directory temporary file and `MoveFileExW` replacement, and are protected by an in-process mutex. Missing or malformed preferences fall back to defaults; recovery is reported in Details. Settings Save applies language/theme immediately; Cancel never writes the draft. Simultaneous independent app instances are not a synchronized settings editor: the last complete write wins.
+The first-run defaults are English, dark theme, Auto processing and disabled creative adjustment. `settings.json` stores `language`, `theme`, `processing_backend`, the `creative` object, `ffmpeg` (manual) and `detected_ffmpeg` (automatic). Writes merge owned fields under both an in-process mutex and a cross-process file lock, then use a same-directory temporary file and `MoveFileExW` replacement. Saving preferences does not overwrite an independently saved FFmpeg path. Explicit edits to the same preference still use the last saved value; open windows are not live collaborative editors. Missing or malformed preferences fall back to defaults; recovery is reported in Details. Settings Save applies language/theme immediately; Cancel never writes the draft.
 
 User-facing errors and progress carry a stable `TextId` plus arguments across worker events. GUI translation happens on the UI thread. Logs and validation descriptions remain English, with stable diagnostic codes in JSON. Raw FFmpeg/OS diagnostics are retained rather than translated speculatively. `ValidateTranslations` checks complete entries, unique keys and matching placeholder sets.
 
-The UI uses documented DWM caption attributes where available and owner-drawn native controls for both themes; it needs no framework or private Windows dark-mode entry points. DPI-aware layout and scrollable content preserve access at 100%, 150% and 200% sizing. System high-contrast colors take precedence when detected at appearance application. Settings do not change Windows' global theme or language.
+The UI uses documented DWM caption attributes where available and owner-drawn native controls for both themes; it needs no framework or private Windows dark-mode entry points. DPI-aware layout and scrollable content preserve access at 100%, 125%, 150%, 175% and 200% sizing. System high-contrast colors take precedence when detected at appearance application. Settings do not change Windows' global theme or language.
 
 ## FFmpeg discovery
 
@@ -100,4 +100,48 @@ joins on cancellation/failure, including partial reader-thread construction.
 
 ## Version and resources
 
-CMake defines version 1.1.1 and build 26923D. Generated headers feed both the C++ display/logs/metadata and the Windows VERSIONINFO resource. The manifest uses the four-part assembly version. Both executables embed the same nine-size icon. Portable packaging uses an explicit document/image allowlist; an independent ZIP audit rejects unexpected files and compares the packaged executable to the tested Release binary.
+CMake defines version 1.2.0 and build 26926A. Generated headers feed both the C++ display/logs/metadata and Windows VERSIONINFO. FileVersion/ProductVersion and manifest use 1.2.0.0; UI/CLI use 1.2.0 (26926A). Both executables embed the same nine-size icon. Portable packaging uses an explicit document/image allowlist. The independent ZIP audit checks the actual checksum sidecar, CRC integrity and equality with the tested Release executable.
+
+## 1.2.0 processing and storage
+
+`FloatBridge` uses three bounded Standard buffers and persistent reader/writer
+threads. The color stage consumes buffers in order while the CPU decoder and CPU
+ProRes encoder process adjacent chunks. Creative processing retains one planar
+GBR float frame: an interleaved stripe cannot be transformed correctly before its
+matching red/green/blue planes arrive. This memory limit is explicit rather than
+silently mixing pixels across planes or frames.
+
+`PlanThreads` budgets decode, color and encode workers from available logical CPUs
+and the selected backend. Matrix/range filters remain CPU float32 operations.
+`CudaTransformer` loads only system nvcuda.dll, JITs embedded compute_75 PTX and
+qualifies scalar-reference equality before use. Each upload/kernel/download uses
+pinned buffers and a nonblocking stream; events measure GPU costs. Host data and
+statistics are committed only after successful synchronization, allowing Auto to
+retry an unchanged failed chunk on CPU. Forced CUDA never silently falls back.
+
+`MediaSafety` validates edit-list semantics and display matrices before decoding,
+and again checks the output timeline. Rotation remux explicitly rebuilds timecode
+and re-applies the safe metadata plan. A separate fixed-width writer restores
+movie/track/media creation timestamps from source headers. It does not touch mdat
+or sample tables. Semantic timestamp and structural header checks both remain.
+
+`PixelSanity` retains only nine small input patches in each of three selected
+frames. After encoding, it decodes only the selected output frames and checks
+their mean YCbCr values against scalar CPU transforms of those input patches.
+This gross-error gate complements, and does not loosen, the existing strict
+flat-signal numerical tests.
+
+`StateLock` serializes cross-process read/modify/write of settings and approvals
+with a file lock in the active data directory. Atomic replacement remains in use.
+Temporary media recovery requires a journal, dead owner process identity and
+matching file ID; filename matching alone never authorizes deletion. Retention
+only acts on recognized owned locations/names, excludes active/reparse entries
+and leaves older unjournalled files alone. Queue jobs execute serially with an
+independent report for each item.
+
+The main window has one measured layout owner. Every status string is rendered
+by exactly one native owner-drawn text control. Card/background drawing does not
+repeat text. Logical content rectangles remain reachable through the scroll
+viewport, with the footer after the status card. Layout is recalculated after
+resize, DPI, theme, language and state changes; long tokens use the same measured
+line breaks for both control height and drawing.

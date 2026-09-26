@@ -1,5 +1,34 @@
 # Changelog
 
+## 1.2.0 (26926A)
+
+- Fix portrait MOV creation-time loss during rotation remux. Compare ISO 8601
+  timestamps semantically and preserve documented movie/track/media creation fields.
+- Preserve drop-frame timecode by regenerating its track from the source value
+  instead of copying a track that overrides explicit timecode metadata.
+- Distinguish Standard, Creative and warning completion in core/CLI/GUI.
+- Replace the identification writer's fixed-depth assumption with checked ancestor
+  traversal. Keep the verified logs identifier and nclc 9/2/9 unchanged.
+- Enforce QuickTime input, an explicit safe edit-list policy, supported display
+  matrices and chapter preservation; record removed metadata/data tracks.
+- Add lightweight first/middle/last encoded pixel checks against the independent
+  scalar input reference, alongside existing strict numerical qualification.
+- Add cross-process settings/trust locks, ownership-based stale output recovery,
+  local retention and writeability checks. Storage/report/remux failures remain fatal.
+- Add runtime-qualified NVIDIA CUDA color processing with Auto CPU fallback and
+  an explicit forced-CUDA mode. CPU ProRes decode/encode and official color
+  equations remain unchanged; no fast math or approximate transfer functions.
+- Allocate CPU workers dynamically and overlap Standard decode/transform/encode
+  through bounded buffers. Retain complete RGB correspondence in Creative mode.
+- Correct pipeline timing and report CPU, GPU, remux, metadata and validation costs.
+- Add multi-file queue conversion, per-item failure reports and expanded Details.
+- Replace competing main-window layouts with one measured scrollable layout,
+  separate status/footer regions and single-owner text rendering.
+- Generate and audit the real portable ZIP checksum; upload ZIP and checksum in CI.
+- Update display version to 1.2.0 (26926A), FileVersion/ProductVersion and manifest
+  to 1.2.0.0. See [release details](docs/RELEASE_1.2.0.md),
+  [verification](docs/VALIDATION.md) and [benchmarks](docs/BENCHMARK_1.2.0.md).
+
 ## 1.1.1 (26923D)
 
 A discovery and reliability update. The official Apple Log / HLG mathematics,

@@ -119,8 +119,31 @@ void AppleLogIdentificationWriter::WriteToEncodedPartial(const fs::path& partial
         if (p == path || path.starts_with(p + "/"))
             parents.push_back(a);
     }
-    if (moov != 1 || colr != 1 || parents.size() != 7)
+    if (moov != 1 || colr != 1 || parents.empty())
         Fail("Unexpected encoded MOV sample-entry hierarchy.");
+    // Validate each actual containment edge, without assuming an ancestor count.
+    std::sort(parents.begin(), parents.end(), [](const Json& a, const Json& b) {
+        return a.at("path").get<std::string>().size() < b.at("path").get<std::string>().size();
+    });
+    std::string previous;
+    uint64_t enclosingBegin = 0, enclosingEnd = size;
+    bool track = false, description = false;
+    for (const auto& parent : parents) {
+        const auto p = parent.at("path").get<std::string>();
+        const auto offset = parent.at("offset").get<uint64_t>();
+        const auto bytes = parent.at("size").get<uint64_t>();
+        if (p.substr(0, p.find_last_of('/')) != previous || offset < enclosingBegin ||
+            offset > enclosingEnd || bytes > enclosingEnd - offset || bytes < 8)
+            Fail("Incomplete or overlapping sample-entry ancestor chain.");
+        track |= parent.value("type", "") == "trak";
+        description |= parent.value("type", "") == "stsd";
+        previous = p;
+        enclosingBegin = offset + 8;
+        enclosingEnd = offset + bytes;
+    }
+    if (!track || !description || previous != path || parents.front().value("type", "") != "moov" ||
+        parents.back().value("type", "") != "apch")
+        Fail("ProRes is not inside a movie track sample description.");
     // Exact bytes from the native reference, also confirmed by isolated Resolve
     // A/B import. This is a plain UTF-8 identifier, NOT a FullBox or a H.273 ID.
     std::vector<unsigned char> atom{0, 0, 0, 35, 'l', 'o', 'g', 's'};

@@ -162,10 +162,65 @@ class Reader {
         std::map<std::string, int> ordinals;
         for (const auto& box : boxes) {
             const auto path = parent + "/" + box.type + "[" + std::to_string(ordinals[box.type]++) + "]";
-            Json item{{"path", path}, {"type", box.type}, {"offset", box.offset}, {"size", box.size}};
+            Json item{{"path", path},
+                      {"type", box.type},
+                      {"offset", box.offset},
+                      {"size", box.size},
+                      {"header_size", box.header}};
             const auto available = box.size - box.header;
             const auto prores = box.type == "apch" || box.type == "apcn" || box.type == "apcs" ||
                                 box.type == "apco" || box.type == "ap4h" || box.type == "ap4x";
+            if (box.type == "mvhd" || box.type == "mdhd" || box.type == "tkhd") {
+                auto b = Read(box.Begin(), std::min<uint64_t>(available, 112));
+                if (b.size() < 24 || b[0] > 1)
+                    throw AppError(TextId::MovTruncated);
+                const bool wide = b[0] == 1;
+                item["version"] = b[0];
+                const size_t t = wide ? 20 : 12;
+                if (b.size() < t + (wide ? 16u : 12u))
+                    throw AppError(TextId::MovTruncated);
+                item["creation_time_1904_seconds"] = wide ? U64(b.data() + 4) : U32(b.data() + 4);
+                if (box.type != "tkhd") {
+                    item["timescale"] = U32(b.data() + t);
+                    item["duration_ticks"] = wide ? U64(b.data() + t + 4) : U32(b.data() + t + 4);
+                    if (box.type == "mvhd") {
+                        const size_t matrix = wide ? 48 : 36;
+                        if (b.size() < matrix + 36)
+                            throw AppError(TextId::MovTruncated);
+                        item["display_matrix"] = Json::array();
+                        for (size_t n = 0; n < 9; ++n)
+                            item["display_matrix"].push_back(
+                                std::bit_cast<int32_t>(U32(b.data() + matrix + n * 4)));
+                    }
+                } else {
+                    item["track_id"] = U32(b.data() + t);
+                    const size_t matrix = wide ? 52 : 40;
+                    if (b.size() < matrix + 36)
+                        throw AppError(TextId::MovTruncated);
+                    item["display_matrix"] = Json::array();
+                    for (size_t n = 0; n < 9; ++n)
+                        item["display_matrix"].push_back(
+                            std::bit_cast<int32_t>(U32(b.data() + matrix + n * 4)));
+                }
+            }
+            if (box.type == "elst") {
+                auto b = Read(box.Begin(), available);
+                if (b.size() < 8 || b[0] > 1)
+                    throw AppError(TextId::MovTruncated);
+                const size_t n = U32(b.data() + 4), stride = b[0] ? 20 : 12;
+                if (n > 65536 || b.size() != 8 + n * stride)
+                    throw AppError(TextId::MovSize);
+                item["edits"] = Json::array();
+                for (size_t i = 0; i < n; ++i) {
+                    const auto* p = b.data() + 8 + i * stride;
+                    item["edits"].push_back(
+                        {{"duration_ticks", b[0] ? U64(p) : U32(p)},
+                         {"media_time", b[0] ? std::bit_cast<int64_t>(U64(p + 8))
+                                             : static_cast<int64_t>(std::bit_cast<int32_t>(U32(p + 4)))},
+                         {"rate_integer", static_cast<int16_t>((p[stride - 4] << 8) | p[stride - 3])},
+                         {"rate_fraction", static_cast<int16_t>((p[stride - 2] << 8) | p[stride - 1])}});
+                }
+            }
             if (box.type == "keys")
                 item["keys"] = keys;
             if (box.type == "hdlr") {

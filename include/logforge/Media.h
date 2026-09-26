@@ -47,11 +47,18 @@ struct MediaInfo {
     CadenceReport cadence;
     std::string inputChromaOverride;
     bool outputChromaVerified = false;
+    bool displayMatrixSupported = true;
     std::string EffectiveChromaLocation() const;
     static MediaInfo Parse(const Json& json, const fs::path& path = {});
     std::vector<Message> UnsupportedReasons() const;
     std::wstring Summary(Language language = Language::English) const;
 };
+bool SameMetadataValue(const std::string& key, const Json& a, const Json& b);
+bool SupportedDisplayMatrix(const std::string& matrix);
+Json PreserveMovCreationTimes(const Json& sourceAtoms, const fs::path& encodedPartial,
+                              const std::atomic_bool& cancel);
+Json InspectMovTimeline(const MediaInfo& input, const Json& atoms, const fs::path& ffprobe = {},
+                        const std::atomic_bool* cancel = nullptr);
 MediaInfo Probe(const fs::path& ffprobe, const fs::path& path, const std::atomic_bool* cancel = nullptr);
 CadenceReport AnalyzeCadence(std::span<const VideoPacketTiming> packets, const MediaInfo& media);
 CadenceReport VerifyConstantFrameRate(const fs::path& ffprobe, const MediaInfo& media,

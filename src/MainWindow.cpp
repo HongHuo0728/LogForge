@@ -1,3 +1,4 @@
+#include "logforge/Queue.h"
 #include "logforge/Transcode.h"
 #include "logforge/Ui.h"
 #include <algorithm>
@@ -37,9 +38,29 @@ enum Control {
     DetailsButton,
     RescanButton,
     DeepSearchButton,
-    CandidatesButton
+    CandidatesButton,
+    QueueText,
+    SourceLabel,
+    OutputLabel,
+    TargetLabel,
+    ExposureLabel,
+    CreativeText,
+    FooterLeft,
+    FooterRight
 };
-enum class Kind { Progress, Discovery, Detect, Verify, Probe, Convert, Install, Approval, Failure };
+enum class Kind {
+    QueueItem,
+    QueueDone,
+    Progress,
+    Discovery,
+    Detect,
+    Verify,
+    Probe,
+    Convert,
+    Install,
+    Approval,
+    Failure
+};
 struct Event {
     Kind kind;
     JobProgress progress;
@@ -51,9 +72,12 @@ struct Event {
     std::optional<ValidationReport> validation;
     DiscoveryReport discoveryReport;
     ToolIdentity identity;
+    Json queue;
+    size_t itemIndex = 0, itemCount = 0;
 };
 std::optional<fs::path> SelectFile(HWND owner, bool save, bool executable, Language language,
-                                   const fs::path& defaultPath = {}) {
+                                   const fs::path& defaultPath = {},
+                                   std::vector<fs::path>* selection = nullptr, bool selectFolder = false) {
     ComPtr<IFileDialog> dialog;
     HRESULT hr =
         save ? CoCreateInstance(CLSID_FileSaveDialog, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&dialog))
@@ -62,27 +86,34 @@ std::optional<fs::path> SelectFile(HWND owner, bool save, bool executable, Langu
         throw AppError(TextId::DialogOpenFailed);
     DWORD flags = 0;
     dialog->GetOptions(&flags);
-    dialog->SetOptions(flags | FOS_FORCEFILESYSTEM | (save ? FOS_PATHMUSTEXIST : FOS_FILEMUSTEXIST));
+    dialog->SetOptions(flags | FOS_FORCEFILESYSTEM |
+                       (selectFolder ? FOS_PICKFOLDERS | FOS_PATHMUSTEXIST
+                        : save       ? FOS_PATHMUSTEXIST
+                                     : FOS_FILEMUSTEXIST) |
+                       (selection ? FOS_ALLOWMULTISELECT : 0));
     const auto movieLabel = TranslateWide(TextId::VideoFiles, language),
                allLabel = TranslateWide(TextId::AllFiles, language);
-    const COMDLG_FILTERSPEC movie[] = {{movieLabel.c_str(), L"*.mov;*.mp4;*.mxf"},
-                                       {allLabel.c_str(), L"*.*"}};
+    const COMDLG_FILTERSPEC movie[] = {{movieLabel.c_str(), L"*.mov"}, {allLabel.c_str(), L"*.*"}};
     const auto executableLabel = TranslateWide(TextId::FFmpegExecutable, language);
     const COMDLG_FILTERSPEC exe[] = {{executableLabel.c_str(), L"ffmpeg.exe"}};
     const COMDLG_FILTERSPEC mov[] = {{L"QuickTime MOV", L"*.mov"}};
-    dialog->SetFileTypes(executable ? 1 : save ? 1 : 2, executable ? exe : save ? mov : movie);
+    if (!selectFolder)
+        dialog->SetFileTypes(executable ? 1 : save ? 1 : 2, executable ? exe : save ? mov : movie);
     if (save)
         dialog->SetDefaultExtension(L"mov");
     if (!defaultPath.empty()) {
-        dialog->SetFileName(defaultPath.filename().c_str());
+        if (!selectFolder)
+            dialog->SetFileName(defaultPath.filename().c_str());
         ComPtr<IShellItem> folder;
-        if (SUCCEEDED(SHCreateItemFromParsingName(defaultPath.parent_path().c_str(), nullptr,
-                                                  IID_PPV_ARGS(&folder))))
+        if (SUCCEEDED(
+                SHCreateItemFromParsingName((selectFolder ? defaultPath : defaultPath.parent_path()).c_str(),
+                                            nullptr, IID_PPV_ARGS(&folder))))
             dialog->SetFolder(folder.Get());
     }
-    dialog->SetTitle(TranslateWide(executable ? TextId::SelectFFmpeg
-                                   : save     ? TextId::SaveVideo
-                                              : TextId::OpenVideo,
+    dialog->SetTitle(TranslateWide(selectFolder ? TextId::ChooseOutput
+                                   : executable ? TextId::SelectFFmpeg
+                                   : save       ? TextId::SaveVideo
+                                                : TextId::OpenVideo,
                                    language)
                          .c_str());
     hr = dialog->Show(owner);
@@ -90,8 +121,27 @@ std::optional<fs::path> SelectFile(HWND owner, bool save, bool executable, Langu
         return {};
     if (FAILED(hr))
         throw AppError(TextId::DialogFailed);
+    if (selection) {
+        ComPtr<IFileOpenDialog> multi;
+        ComPtr<IShellItemArray> items;
+        if (FAILED(dialog.As(&multi)) || FAILED(multi->GetResults(&items)))
+            throw AppError(TextId::DialogFailed);
+        DWORD n = 0;
+        items->GetCount(&n);
+        for (DWORD i = 0; i < n; ++i) {
+            ComPtr<IShellItem> item;
+            PWSTR path = nullptr;
+            if (SUCCEEDED(items->GetItemAt(i, &item)) &&
+                SUCCEEDED(item->GetDisplayName(SIGDN_FILESYSPATH, &path))) {
+                selection->emplace_back(path);
+                CoTaskMemFree(path);
+            }
+        }
+        return selection->empty() ? std::optional<fs::path>{} : std::optional(selection->front());
+    }
     ComPtr<IShellItem> item;
-    dialog->GetResult(&item);
+    if (FAILED(dialog->GetResult(&item)) || !item)
+        throw AppError(TextId::DialogFailed);
     PWSTR name = nullptr;
     if (FAILED(item->GetDisplayName(SIGDN_FILESYSPATH, &name)))
         throw AppError(TextId::PathReadFailed);
@@ -107,17 +157,25 @@ class MainWindow {
     AppSettings settings = SettingsStore::Load();
     UiStyle style;
     std::map<int, HWND> controls;
+    std::map<int, RECT> layoutRects;
+    std::map<int, std::wstring> wrappedText;
+    std::vector<RECT> cards;
+    int contentHeight = 0, footerContentTop = 0;
     std::jthread worker;
     std::atomic_bool cancelled = false;
     std::optional<FFmpegInstallation> tools;
     std::optional<MediaInfo> source;
+    std::vector<fs::path> queueInputs;
+    Json queueResults;
+    std::optional<ValidationReport> lastValidation;
     std::vector<DiscoveryCandidate> candidates;
     DiscoveryOptions discoveryOptions;
     DiscoveryReport discoveryReport;
     fs::path reviewAfterSearch, reviewing;
-    fs::path selected, smokeInput, smokeOutput, uiDirectory;
+    fs::path selected, smokeInput, smokeSecond, smokeOutput, uiDirectory;
     std::string explicitInputChroma;
     bool busy = false, closing = false, detectionComplete = false, smoke = false, smokeStarted = false;
+    bool layoutOnly = false;
     bool uiTest = false, missingScenario = false, settingsExercised = false, lastSignalWarning = false;
     bool conversionTone = false, layingOut = false;
     bool exercisingFlow = false, closeSearchTest = false;
@@ -181,13 +239,19 @@ class MainWindow {
             try {
                 work();
             } catch (const AppError& error) {
-                logger.Write(std::string("ERROR[") + MessageKey(error.message.id) + "] " + error.what());
+                try {
+                    logger.Write(std::string("ERROR[") + MessageKey(error.message.id) + "] " + error.what());
+                } catch (...) {
+                }
                 Event event{Kind::Failure};
                 event.error = error.message;
                 event.details = error.details;
                 Post(std::move(event));
             } catch (const std::exception& error) {
-                logger.Write(std::string("ERROR: ") + error.what());
+                try {
+                    logger.Write(std::string("ERROR: ") + error.what());
+                } catch (...) {
+                }
                 Event event{Kind::Failure};
                 event.error = {TextId::Unexpected, {error.what()}};
                 Post(std::move(event));
@@ -229,14 +293,19 @@ class MainWindow {
                                     (active == Kind::Detect && discovery.phase == DiscoveryPhase::Verifying))
                              ? TextId::VerifyingTools
                          : busy && active == Kind::Detect ? TextId::Detecting
-                                                          : TextId::NeedTools) +
-                           L"\r\n" + T(settings.tone.enabled ? TextId::GradeOn : TextId::GradeOff));
-        EnableWindow(H(DetailsButton), !details.empty() || !rawDetails.empty());
+                                                          : TextId::NeedTools));
+        Text(CreativeText, T(settings.tone.enabled ? TextId::GradeOn : TextId::GradeOff));
+        Text(QueueText,
+             queueInputs.size() > 1 ? T({TextId::QueueSelected, {std::to_string(queueInputs.size())}}) : L"");
+        EnableWindow(H(DetailsButton), !details.empty() || !rawDetails.empty() || source.has_value());
+        Layout();
     }
     void Buttons() {
         for (int id : {Open, ChooseOutput, OutputEdit, Exposure, SettingsButton})
             EnableWindow(H(id), !busy);
-        EnableWindow(H(Convert), !busy && tools && source && source->UnsupportedReasons().empty());
+        EnableWindow(H(Convert),
+                     !busy && tools &&
+                         (queueInputs.size() > 1 || (source && source->UnsupportedReasons().empty())));
         EnableWindow(H(Cancel), busy);
         // Cancelled/failed discovery must not strand the user without an alternative.
         const bool fallback = !tools && !busy;
@@ -289,6 +358,14 @@ class MainWindow {
             Post(std::move(e));
         });
     }
+    void SelectInputs(std::vector<fs::path> paths) {
+        if (paths.empty() || (busy && active != Kind::Detect))
+            return;
+        queueInputs = std::move(paths);
+        queueResults = Json();
+        lastValidation.reset();
+        ProbeInput(queueInputs.front());
+    }
     void ProbeInput(const fs::path& path) {
         if (busy && active != Kind::Detect)
             return;
@@ -296,7 +373,10 @@ class MainWindow {
         source.reset();
         Text(DropZone, path.filename().wstring());
         Text(SourceText, T(TextId::ReadingMedia));
-        Text(OutputEdit, (path.parent_path() / (path.stem().wstring() + L"_AppleLog.mov")).wstring());
+        Text(OutputEdit,
+             (queueInputs.size() > 1 ? path.parent_path()
+                                     : path.parent_path() / (path.stem().wstring() + L"_AppleLog.mov"))
+                 .wstring());
         if (!tools || busy) {
             Stage(TextId::NeedTools);
             Buttons();
@@ -313,15 +393,39 @@ class MainWindow {
         });
     }
     void BeginConvert() {
-        if (!source || !tools)
+        if (!tools || (!source && queueInputs.size() < 2))
             return;
         const auto path = smoke ? smokeOutput : fs::path(WindowText(H(OutputEdit)));
         const auto index = SendMessageW(H(Exposure), CB_GETCURSEL, 0, 0);
         if (index < 0 || index >= static_cast<LRESULT>(std::size(ExposureValues)))
             throw AppError(TextId::InvalidExposureChoice);
         exposureIndex = static_cast<int>(index);
-        TranscodeOptions options{ExposureValues[index], settings.tone};
+        TranscodeOptions options{ExposureValues[index], settings.tone, settings.backend};
         conversionTone = options.tone.enabled;
+        lastValidation.reset();
+        if (queueInputs.size() > 1) {
+            const auto inputs = queueInputs;
+            const auto directory = path;
+            // A label on one file is not a user declaration for other files.
+            const auto chroma = source ? source->inputChromaOverride : explicitInputChroma;
+            Stage(TextId::Starting);
+            Start(Kind::Convert, [this, inputs, directory, chroma, options] {
+                auto result = RunQueue(
+                    *tools, inputs, directory, logger, cancelled, options, chroma,
+                    [this](size_t index, size_t total, const MediaInfo& media, const JobProgress& p) {
+                        Event e{Kind::QueueItem};
+                        e.itemIndex = index;
+                        e.itemCount = total;
+                        e.media = media;
+                        e.progress = p;
+                        Post(std::move(e));
+                    });
+                Event e{Kind::QueueDone};
+                e.queue = std::move(result);
+                Post(std::move(e));
+            });
+            return;
+        }
         Stage(TextId::VerifyTiming);
         Start(Kind::Convert, [this, path, options] {
             auto report = TranscodeJob::Run(
@@ -339,13 +443,17 @@ class MainWindow {
     }
     void Add(HWND parent, int id, const wchar_t* type, const std::wstring& label, DWORD flags = 0,
              bool compact = false) {
-        controls[id] = MakeControl(parent, id, type, label, flags, style, compact);
+        if (wcscmp(type, L"STATIC") == 0)
+            flags = (flags & ~SS_TYPEMASK) | SS_OWNERDRAW;
+        controls[id] = MakeControl(parent, id, type, label, flags | WS_CLIPSIBLINGS, style, compact);
     }
     void ApplyAppearance() {
         style.Apply(settings.theme, settings.language, dpi);
         style.Window(window);
         for (auto [id, h] : controls)
-            style.Control(h, id == ToolText || id == StageText);
+            style.Control(h, id == ToolText || id == StageText || id == CreativeText || id == FooterLeft ||
+                                 id == FooterRight || id == SourceLabel || id == OutputLabel ||
+                                 id == ExposureLabel);
         for (auto [id, key] : {std::pair{Open, TextId::Open},
                                {ChooseOutput, TextId::ChooseOutput},
                                {Convert, TextId::Convert},
@@ -361,6 +469,12 @@ class MainWindow {
             Text(id, T(key));
         Text(DropZone, selected.empty() ? T(TextId::Drop) : selected.filename().wstring());
         Text(SourceText, source ? source->Summary(settings.language) : T(TextId::AwaitInput));
+        Text(SourceLabel, T(TextId::Source));
+        Text(OutputLabel, T(TextId::Output));
+        Text(TargetLabel, L"Apple Log · BT.2020 · ProRes 422 HQ · 10-bit 4:2:2 · MOV");
+        Text(ExposureLabel, T(TextId::Exposure));
+        Text(FooterLeft, T(TextId::License) + L"\r\n" + T(TextId::Privacy));
+        Text(FooterRight, RightFooter());
         std::vector<std::wstring> exposure;
         for (double ev : ExposureValues) {
             std::wostringstream s;
@@ -399,11 +513,14 @@ class MainWindow {
         for (int id : {Open, ChooseOutput, Convert, Cancel})
             Add(panel, id, L"BUTTON", L"", WS_TABSTOP | BS_OWNERDRAW);
         SetPropW(H(Convert), L"primary", reinterpret_cast<HANDLE>(1));
-        for (int id : {SettingsButton, Install, Manual, Logs, DetailsButton, RescanButton, DeepSearchButton,
-                       CandidatesButton})
-            Add(window, id, L"BUTTON", L"", WS_TABSTOP | BS_OWNERDRAW);
-        Add(window, ToolText, L"STATIC", L"", SS_NOPREFIX, true);
-        Add(window, StageText, L"STATIC", L"", SS_NOPREFIX, true);
+        Add(window, SettingsButton, L"BUTTON", L"", WS_TABSTOP | BS_OWNERDRAW);
+        for (int id :
+             {Install, Manual, Logs, DetailsButton, RescanButton, DeepSearchButton, CandidatesButton})
+            Add(panel, id, L"BUTTON", L"", WS_TABSTOP | BS_OWNERDRAW);
+        for (int id : {ToolText, StageText, CreativeText, QueueText, SourceLabel, OutputLabel, ExposureLabel,
+                       FooterLeft, FooterRight})
+            Add(panel, id, L"STATIC", L"", SS_NOPREFIX, true);
+        Add(panel, TargetLabel, L"STATIC", L"", SS_NOPREFIX);
         ApplyAppearance();
         Buttons();
         if (uiTest && closeSearchTest) {
@@ -426,76 +543,198 @@ class MainWindow {
             Detect();
     }
     std::wstring RightFooter() const {
-        return T(TextId::Devices) + L"\r\n\r\n" + T(TextId::FormatRequired) + L"\r\n" +
-               T(TextId::ResolutionChoice) + L"\r\n\r\n" + T(TextId::EditorHint);
+        return T(TextId::Devices) + L"\r\n" + T(TextId::FormatRequired) + L"\r\n" +
+               T(TextId::ResolutionChoice) + L"\r\n" + T(TextId::EditorHint);
     }
+    // One layout owner. All text, controls and card bounds derive from these
+    // measured rectangles; Paint never computes a competing layout.
     void Layout() {
-        if (layingOut || !panel)
+        if (layingOut || !panel || !H(FooterRight))
             return;
         layingOut = true;
-        RECT r{};
-        GetClientRect(window, &r);
-        const int width = MulDiv(r.right, 96, dpi), height = MulDiv(r.bottom, 96, dpi),
-                  column = (width - 88) / 2;
-        HDC dc = GetDC(window);
-        auto old = SelectObject(dc, style.compact);
-        RECT measured{0, 0, S(column), 0};
-        const auto copy = RightFooter();
-        DrawTextW(dc, copy.c_str(), -1, &measured, DT_CALCRECT | DT_WORDBREAK | DT_NOPREFIX);
-        SelectObject(dc, old);
-        ReleaseDC(window, dc);
-        const int footerHeight = std::max(tools ? 238 : 276, MulDiv(measured.bottom, 96, dpi) + 36);
-        footerTop = std::max(100, height - footerHeight);
-        MoveWindow(panel, S(24), S(78), S(width - 48), S(std::max(22, footerTop - 90)), TRUE);
-        MoveWindow(H(SettingsButton), S(width - 144), S(23), S(116), S(36), TRUE);
-        auto place = [&](int id, int x, int y, int w, int h) {
-            MoveWindow(H(id), S(x), S(y), S(w), S(h), TRUE);
+        RECT client{};
+        GetClientRect(window, &client);
+        const int width = MulDiv(client.right, 96, dpi);
+        MoveWindow(panel, S(18), S(78), std::max(1, static_cast<int>(client.right) - S(36)),
+                   std::max(1, static_cast<int>(client.bottom) - S(90)), FALSE);
+        MoveWindow(H(SettingsButton), S(width - 140), S(22), S(116), S(36), FALSE);
+        RECT viewport{};
+        GetClientRect(panel, &viewport);
+        const int w = std::max(320, MulDiv(viewport.right, 96, dpi)),
+                  h = std::max(1, MulDiv(viewport.bottom, 96, dpi));
+        HDC dc = GetDC(panel);
+        wrappedText.clear();
+        auto textHeight = [&](int id, int available, int minimum = 0) {
+            auto font = reinterpret_cast<HFONT>(SendMessageW(H(id), WM_GETFONT, 0, 0));
+            auto old = SelectObject(dc, font);
+            RECT r{0, 0, S(std::max(1, available)), 0};
+            const auto original = WindowText(H(id));
+            std::wstring text;
+            // Break an overlong path/token as well as ordinary words. Use this
+            // exact string for both measurement and drawing.
+            size_t at = 0;
+            while (at < original.size()) {
+                auto end = original.find(L'\n', at);
+                if (end == std::wstring::npos)
+                    end = original.size();
+                auto paragraph = original.substr(at, end - at);
+                if (!paragraph.empty() && paragraph.back() == L'\r')
+                    paragraph.pop_back();
+                size_t offset = 0;
+                while (offset < paragraph.size()) {
+                    int fit = 0;
+                    SIZE extent{};
+                    GetTextExtentExPointW(dc, paragraph.c_str() + offset,
+                                          static_cast<int>(paragraph.size() - offset), r.right, &fit, nullptr,
+                                          &extent);
+                    size_t count = std::max(1, fit);
+                    if (offset + count < paragraph.size()) {
+                        const auto split = paragraph.find_last_of(L" /\\", offset + count - 1);
+                        if (split != std::wstring::npos && split >= offset)
+                            count = split - offset + 1;
+                        if (count && offset + count < paragraph.size() &&
+                            IS_HIGH_SURROGATE(paragraph[offset + count - 1]) &&
+                            IS_LOW_SURROGATE(paragraph[offset + count]))
+                            count = count > 1 ? count - 1 : 2;
+                    }
+                    text.append(paragraph, offset, count);
+                    offset += count;
+                    if (offset < paragraph.size())
+                        text += L'\n';
+                }
+                if (end < original.size())
+                    text += L'\n';
+                at = end + 1;
+            }
+            wrappedText[id] = text;
+            DrawTextW(dc, text.c_str(), -1, &r, DT_CALCRECT | DT_WORDBREAK | DT_NOPREFIX);
+            SelectObject(dc, old);
+            return std::max(minimum, MulDiv(r.bottom + S(3), 96, dpi));
         };
-        place(ToolText, 32, footerTop + 14, column, 46);
-        place(StageText, 32, footerTop + 64, column, 46);
-        place(Logs, 32, footerTop + 112, 104, 30);
-        place(DetailsButton, 144, footerTop + 112, 90, 30);
-        place(CandidatesButton, 244, footerTop + 112, std::max(110, column - 212), 30);
-        place(RescanButton, 32, footerTop + 150, (column - 8) / 2, 32);
-        place(DeepSearchButton, 40 + (column - 8) / 2, footerTop + 150, (column - 8) / 2, 32);
-        place(Install, 32, footerTop + 190, (column - 8) / 2, 32);
-        place(Manual, 40 + (column - 8) / 2, footerTop + 190, (column - 8) / 2, 32);
-        LayoutPanel();
+        layoutRects.clear();
+        cards.clear();
+        auto place = [&](int id, int x, int y, int cw, int ch) { layoutRects[id] = {x, y, x + cw, y + ch}; };
+        auto line = [&](int id, int& y, int minimum = 20) {
+            const int th = textHeight(id, w - 40, minimum);
+            place(id, 20, y, w - 40, th);
+            y += th + 8;
+        };
+        int y = 18;
+        place(DropZone, 20, y, w - 194, 36);
+        place(Open, w - 158, y, 138, 36);
+        y += 50;
+        line(SourceLabel, y);
+        line(SourceText, y, 92);
+        if (queueInputs.size() > 1) {
+            ShowWindow(H(QueueText), SW_SHOW);
+            line(QueueText, y);
+        } else
+            ShowWindow(H(QueueText), SW_HIDE);
+        cards.push_back({0, 4, w, y + 8});
+        y += 30;
+        const int outputTop = y;
+        line(OutputLabel, y);
+        line(TargetLabel, y);
+        place(OutputEdit, 20, y, w - 198, 34);
+        place(ChooseOutput, w - 166, y, 146, 34);
+        y += 48;
+        place(ExposureLabel, 20, y + 3, 90, 28);
+        place(Exposure, 118, y, 152, 30);
+        y += 48;
+        place(Convert, 20, y, 184, 42);
+        place(Cancel, 216, y, 100, 42);
+        y += 56;
+        place(ProgressBar, 20, y, w - 40, 14);
+        y += 32;
+        cards.push_back({0, outputTop - 10, w, y});
+        y += 20;
+        const int statusTop = y;
+        line(ToolText, y);
+        line(CreativeText, y);
+        line(StageText, y);
+        place(Logs, 20, y, 110, 34);
+        place(DetailsButton, 142, y, 110, 34);
+        if (IsWindowVisible(H(CandidatesButton)))
+            place(CandidatesButton, 264, y, w - 284, 34);
+        y += 48;
+        if (IsWindowVisible(H(RescanButton))) {
+            const int half = (w - 52) / 2;
+            place(RescanButton, 20, y, half, 38);
+            place(DeepSearchButton, 32 + half, y, half, 38);
+            y += 50;
+            place(Install, 20, y, half, 38);
+            place(Manual, 32 + half, y, half, 38);
+            y += 50;
+        }
+        cards.push_back({0, statusTop - 8, w, y});
+        y += 20;
+        footerContentTop = y;
+        const int column = (w - 52) / 2;
+        const int left = textHeight(FooterLeft, column), right = textHeight(FooterRight, column);
+        place(FooterLeft, 20, y + 12, column, left);
+        place(FooterRight, 32 + column, y + 12, column, right);
+        contentHeight = y + std::max(left, right) + 28;
+        ReleaseDC(panel, dc);
+        scroll = std::clamp(scroll, 0, std::max(0, contentHeight - h));
+        SCROLLINFO si{sizeof(si),
+                      SIF_RANGE | SIF_PAGE | SIF_POS | SIF_DISABLENOSCROLL,
+                      0,
+                      contentHeight - 1,
+                      static_cast<UINT>(h),
+                      scroll};
+        SetScrollInfo(panel, SB_VERT, &si, TRUE);
+        auto batch = BeginDeferWindowPos(static_cast<int>(layoutRects.size()));
+        for (const auto& [id, r] : layoutRects) {
+            if (batch)
+                batch = DeferWindowPos(batch, H(id), nullptr, S(r.left), S(r.top - scroll),
+                                       S(r.right - r.left), S(id == Exposure ? 220 : r.bottom - r.top),
+                                       SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOCOPYBITS);
+            else
+                SetWindowPos(H(id), nullptr, S(r.left), S(r.top - scroll), S(r.right - r.left),
+                             S(id == Exposure ? 220 : r.bottom - r.top),
+                             SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOCOPYBITS);
+        }
+        if (batch)
+            EndDeferWindowPos(batch);
         layingOut = false;
-        InvalidateRect(window, nullptr, TRUE);
+        // Erase the old rectangles before repainting moved children. No stale
+        // status glyphs can survive a resize, theme, language or state change.
+        RedrawWindow(window, nullptr, nullptr, RDW_INVALIDATE | RDW_ERASE | RDW_ALLCHILDREN);
     }
     void LayoutPanel() {
-        if (!panel || controls.empty())
-            return;
-        RECT r{};
-        GetClientRect(panel, &r);
-        const int width = MulDiv(r.right, 96, dpi), height = MulDiv(r.bottom, 96, dpi), content = 418;
-        scroll = std::clamp(scroll, 0, std::max(0, content - height));
-        SCROLLINFO si{sizeof(si),  SIF_RANGE | SIF_PAGE | SIF_POS, 0,
-                      content - 1, static_cast<UINT>(height),      scroll};
-        SetScrollInfo(panel, SB_VERT, &si, TRUE);
-        auto place = [&](int id, int x, int y, int w, int h) {
-            MoveWindow(H(id), S(x), S(y - scroll), S(w), S(h), TRUE);
-        };
-        place(DropZone, 20, 20, width - 200, 34);
-        place(Open, width - 158, 18, 138, 38);
-        place(SourceText, 20, 92, width - 40, 86);
-        place(OutputEdit, 20, 258, width - 198, 34);
-        place(ChooseOutput, width - 166, 258, 146, 34);
-        place(Exposure, 108, 304, 152, 220);
-        place(ProgressBar, 20, 380, width - 342, 12);
-        place(Convert, width - 306, 365, 184, 42);
-        place(Cancel, width - 112, 365, 92, 42);
-        InvalidateRect(panel, nullptr, TRUE);
+        Layout();
     }
-    void Paint() {
+    void Draw(const DRAWITEMSTRUCT& item) {
+        const int saved = SaveDC(item.hDC);
+        struct Restore {
+            HDC dc;
+            int saved;
+            ~Restore() {
+                if (saved)
+                    RestoreDC(dc, saved);
+            }
+        } restore{item.hDC, saved};
+        if (item.CtlType != ODT_STATIC) {
+            style.DrawItem(item);
+            return;
+        }
+        const int id = GetDlgCtrlID(item.hwndItem);
+        const bool footer = id == FooterLeft || id == FooterRight;
+        FillRect(item.hDC, &item.rcItem, footer ? style.background : style.surface);
+        const bool compact = GetPropW(item.hwndItem, L"compact") != nullptr;
+        const auto flags = id == DropZone
+                               ? DT_LEFT | DT_VCENTER | DT_SINGLELINE | DT_END_ELLIPSIS | DT_NOPREFIX
+                               : DT_LEFT | DT_WORDBREAK | DT_NOPREFIX;
+        const auto text = wrappedText.contains(id) ? wrappedText.at(id) : WindowText(item.hwndItem);
+        style.Text(item.hDC, text, item.rcItem, compact, compact, flags);
+    }
+    void Paint(HDC printDC = nullptr) {
         PAINTSTRUCT ps{};
-        auto dc = BeginPaint(window, &ps);
+        auto dc = printDC ? printDC : BeginPaint(window, &ps);
         RECT r{};
         GetClientRect(window, &r);
         FillRect(dc, &r, style.background);
-        const int width = MulDiv(r.right, 96, dpi), height = MulDiv(r.bottom, 96, dpi),
-                  column = (width - 88) / 2;
+        const int width = MulDiv(r.right, 96, dpi);
         auto icon = static_cast<HICON>(LoadImageW(GetModuleHandleW(nullptr), MAKEINTRESOURCEW(101),
                                                   IMAGE_ICON, S(42), S(42), LR_SHARED));
         DrawIconEx(dc, S(28), S(20), icon, S(42), S(42), 0, nullptr, DI_NORMAL);
@@ -506,38 +745,27 @@ class MainWindow {
         DrawTextW(dc, L"LogForge", -1, &brand, DT_LEFT | DT_SINGLELINE | DT_VCENTER);
         SelectObject(dc, old);
         style.Text(dc, Wide(DisplayVersion), {S(252), S(31), S(width - 164), S(55)}, true);
-        HPEN pen = CreatePen(PS_SOLID, 1, style.colors.border);
-        old = SelectObject(dc, pen);
-        MoveToEx(dc, S(24), S(footerTop), nullptr);
-        LineTo(dc, S(width - 24), S(footerTop));
-        SelectObject(dc, old);
-        DeleteObject(pen);
-        style.Text(dc, RightFooter(), {S(56 + column), S(footerTop + 16), S(width - 32), S(height - 12)},
-                   true, true);
-        style.Text(dc, T(TextId::License), {S(32), S(height - 48), S(32 + column), S(height - 30)}, true,
-                   true);
-        style.Text(dc, T(TextId::Privacy), {S(32), S(height - 29), S(32 + column), S(height - 2)}, true,
-                   true);
-        EndPaint(window, &ps);
+        if (!printDC)
+            EndPaint(window, &ps);
     }
-    void PaintPanel() {
+    void PaintPanel(HDC printDC = nullptr) {
         PAINTSTRUCT ps{};
-        auto dc = BeginPaint(panel, &ps);
+        auto dc = printDC ? printDC : BeginPaint(panel, &ps);
         RECT r{};
         GetClientRect(panel, &r);
         FillRect(dc, &r, style.background);
-        const int width = MulDiv(r.right, 96, dpi);
-        auto rect = [&](int x, int y, int w, int h) {
-            return RECT{S(x), S(y - scroll), S(x + w), S(y + h - scroll)};
-        };
-        style.Card(dc, rect(0, 4, width, 184));
-        style.Card(dc, rect(0, 202, width, 146));
-        style.Text(dc, T(TextId::Source), rect(20, 67, width - 40, 22), true, true);
-        style.Text(dc, T(TextId::Output), rect(20, 214, 150, 20), true, true);
-        style.Text(dc, L"Apple Log · BT.2020 · ProRes 422 HQ · 10-bit 4:2:2 · MOV",
-                   rect(20, 234, width - 40, 24));
-        style.Text(dc, T(TextId::Exposure), rect(20, 309, 84, 24), true, true);
-        EndPaint(panel, &ps);
+        for (const auto& card : cards) {
+            RECT bounds{S(card.left), S(card.top - scroll), S(card.right), S(card.bottom - scroll)};
+            style.Card(dc, bounds);
+        }
+        HPEN pen = CreatePen(PS_SOLID, 1, style.colors.border);
+        auto old = SelectObject(dc, pen);
+        MoveToEx(dc, S(20), S(footerContentTop - scroll), nullptr);
+        LineTo(dc, r.right - S(20), S(footerContentTop - scroll));
+        SelectObject(dc, old);
+        DeleteObject(pen);
+        if (!printDC)
+            EndPaint(panel, &ps);
     }
     void OnEvent(std::unique_ptr<Event> e) {
         if (e->kind == Kind::Progress) {
@@ -567,6 +795,20 @@ class MainWindow {
             }
             return;
         }
+        if (e->kind == Kind::QueueItem) {
+            source = std::move(e->media);
+            Text(SourceText, source->Summary(settings.language));
+            Text(DropZone, source->path.filename().wstring());
+            currentProgress = e->progress;
+            stage = e->progress.stage;
+            SendMessageW(H(ProgressBar), PBM_SETPOS,
+                         static_cast<WPARAM>(std::clamp(e->progress.fraction, 0., 1.) * 1000), 0);
+            RefreshStatus();
+            Text(QueueText, T({TextId::QueueProgress,
+                               {std::to_string(e->itemIndex + 1), std::to_string(e->itemCount)}}));
+            Layout();
+            return;
+        }
         busy = false;
         if (worker.joinable())
             worker.join();
@@ -574,7 +816,22 @@ class MainWindow {
             DestroyWindow(window);
             return;
         }
+        if (e->kind == Kind::QueueDone) {
+            queueResults = e->queue;
+            rawDetails = Wide(queueResults.dump(2));
+            Stage(cancelled ? Message(TextId::Cancelled)
+                            : Message(TextId::QueueComplete,
+                                      {queueResults["successful"].dump(), queueResults["failed"].dump()}));
+            Buttons();
+            if (smoke)
+                Finish(queueResults["successful"].get<size_t>() > 0 &&
+                           queueResults["remaining"].get<size_t>() == 0,
+                       "Native queue completed; each item retains its own result");
+            return;
+        }
         if (e->kind == Kind::Failure) {
+            if (active == Kind::Probe && queueInputs.size() > 1)
+                Text(SourceText, T(TextId::QueueFirstFailed));
             detectionComplete = true;
             details = e->details;
             details.insert(details.begin(), e->error);
@@ -590,6 +847,12 @@ class MainWindow {
             if (!reviewAfterSearch.empty()) {
                 auto path = std::exchange(reviewAfterSearch, {});
                 InspectCandidate(path);
+                return;
+            }
+            if (smoke && active == Kind::Probe && queueInputs.size() > 1 && !smokeStarted) {
+                smokeStarted = true;
+                Text(OutputEdit, smokeOutput.wstring());
+                BeginConvert();
                 return;
             }
             if (smoke || (uiTest && !exercisingFlow))
@@ -652,7 +915,11 @@ class MainWindow {
                     Finish(false, "FFmpeg unavailable");
                     return;
                 }
-                const auto name = smokeInput.wstring();
+                auto name = smokeInput.wstring();
+                if (!smokeSecond.empty()) {
+                    name += L'\0';
+                    name += smokeSecond.wstring();
+                }
                 auto memory = GlobalAlloc(GHND, sizeof(DROPFILES) + (name.size() + 2) * sizeof(wchar_t));
                 if (!memory)
                     throw std::bad_alloc();
@@ -672,8 +939,9 @@ class MainWindow {
         if (e->kind == Kind::Probe) {
             source = std::move(e->media);
             if (!smoke && source->EffectiveChromaLocation().empty()) {
-                const auto answer = MessageBoxW(window, T(TextId::InputChromaChoose).c_str(),
-                                                T(TextId::InputChromaTitle).c_str(),
+                const auto question = T(TextId::InputChromaChoose) +
+                                      (queueInputs.size() > 1 ? L"\r\n\r\n" + T(TextId::QueueChroma) : L"");
+                const auto answer = MessageBoxW(window, question.c_str(), T(TextId::InputChromaTitle).c_str(),
                                                 MB_YESNOCANCEL | MB_ICONQUESTION | MB_DEFBUTTON3);
                 if (answer == IDYES)
                     source->inputChromaOverride = "left";
@@ -695,6 +963,8 @@ class MainWindow {
             return;
         }
         if (e->kind == Kind::Convert) {
+            lastValidation = e->validation;
+            rawDetails = e->validation ? Wide(e->validation->ToJson().dump(2)) : L"";
             lastSignalWarning = e->validation && e->validation->signalWarning;
             details = e->validation ? e->validation->warnings : std::vector<Message>{};
             Stage(lastSignalWarning ? TextId::CompleteWarning
@@ -724,6 +994,16 @@ class MainWindow {
         }
         if (id == DetailsButton) {
             std::wstring text;
+            if (source) {
+                text = source->Summary(settings.language) + L"\r\n\r\n";
+                text += T({TextId::DetailsRates,
+                           {std::to_string(source->averageFps.Value()),
+                            std::to_string(source->nominalFps.Value()), std::to_string(source->frames),
+                            BackendName(settings.backend), std::to_string(ExposureValues[exposureIndex])}}) +
+                        L"\r\n";
+                text += T(settings.tone.enabled ? TextId::GradeOn : TextId::GradeOff) + L"\r\n\r\n" +
+                        T(TextId::DetailsTarget) + L"\r\n\r\n";
+            }
             for (const auto& message : details)
                 text += T(message) + L"\r\n\r\n";
             text += rawDetails;
@@ -750,11 +1030,12 @@ class MainWindow {
             if (ShowSettings(window, settings))
                 ApplyAppearance();
         } else if (id == Open) {
-            if (auto path = SelectFile(window, false, false, settings.language))
-                ProbeInput(*path);
+            std::vector<fs::path> paths;
+            if (auto path = SelectFile(window, false, false, settings.language, {}, &paths))
+                SelectInputs(std::move(paths));
         } else if (id == ChooseOutput) {
-            if (auto path =
-                    SelectFile(window, true, false, settings.language, fs::path(WindowText(H(OutputEdit)))))
+            if (auto path = SelectFile(window, queueInputs.size() < 2, false, settings.language,
+                                       fs::path(WindowText(H(OutputEdit))), nullptr, queueInputs.size() > 1))
                 Text(OutputEdit, path->wstring());
         } else if (id == Convert)
             BeginConvert();
@@ -812,6 +1093,8 @@ class MainWindow {
                     {"ui_only", uiTest},
                     {"missing_scenario_injected", missingScenario}};
         report["reliability_checks"] = uiChecks;
+        if (!queueResults.is_null())
+            report["queue"] = queueResults;
         const auto path =
             uiTest ? uiDirectory / L"ui-test.json" : fs::path(smokeOutput.wstring() + L".gui-test.json");
         std::ofstream file(path);
@@ -821,7 +1104,136 @@ class MainWindow {
             exitCode = 1;
         PostMessageW(window, WM_CLOSE, 0, 0);
     }
+    void LayoutRegression() {
+        const auto saved = settings;
+        const auto savedTools = tools;
+        const auto savedStage = stage;
+        const auto gdiBefore = GetGuiResources(GetCurrentProcess(), GR_GDIOBJECTS);
+        Json cases = Json::array();
+        RECT original{};
+        GetWindowRect(window, &original);
+        for (int testScale : {96, 120, 144, 168, 192})
+            for (const auto size : {std::pair{1280, 720}, std::pair{1920, 1080}, std::pair{2560, 1440}})
+                for (auto language : {Language::English, Language::SimplifiedChinese})
+                    for (auto theme : {Theme::Dark, Theme::Light})
+                        for (bool creative : {false, true})
+                            for (bool ready : {false, true})
+                                for (auto state : {TextId::Ready, TextId::Converting, TextId::Failed,
+                                                   TextId::CompleteStandard}) {
+                                    settings.language = language;
+                                    settings.theme = theme;
+                                    settings.tone.enabled = creative;
+                                    if (ready)
+                                        tools.emplace();
+                                    else
+                                        tools.reset();
+                                    busy = state == TextId::Converting;
+                                    stage = state;
+                                    active = Kind::Convert;
+                                    RECT bounds{0, 0, size.first, size.second};
+                                    AdjustWindowRectExForDpi(&bounds, WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN,
+                                                             FALSE, WS_EX_ACCEPTFILES | WS_EX_CONTROLPARENT,
+                                                             testScale);
+                                    bounds.right -= bounds.left;
+                                    bounds.bottom -= bounds.top;
+                                    bounds.left = 0;
+                                    bounds.top = 0;
+                                    SendMessageW(window, WM_DPICHANGED, MAKELONG(testScale, testScale),
+                                                 reinterpret_cast<LPARAM>(&bounds));
+                                    ApplyAppearance();
+                                    Buttons();
+                                    Layout();
+                                    if (dpi != testScale || style.theme != theme)
+                                        throw std::runtime_error("DPI/theme state changed during layout");
+                                    Text(StageText, T(state) + L"\r\n" + std::wstring(180, L'W'));
+                                    Layout();
+                                    bool valid = true;
+                                    RECT viewport{};
+                                    GetClientRect(panel, &viewport);
+                                    for (const auto& [id, r] : layoutRects) {
+                                        valid &= r.left >= 0 && r.right <= MulDiv(viewport.right, 96, dpi) &&
+                                                 r.top >= 0 && r.bottom <= contentHeight;
+                                        for (const auto& [other, b] : layoutRects)
+                                            if (id < other) {
+                                                RECT intersection{};
+                                                if (IntersectRect(&intersection, &r, &b))
+                                                    valid = false;
+                                            }
+                                        // Scroll content is clipped by its viewport. Every logical item
+                                        // must be reachable and the footer must follow the status card.
+                                        if (id == FooterLeft || id == FooterRight)
+                                            valid &=
+                                                r.top >= footerContentTop && r.top >= cards.back().bottom;
+                                    }
+                                    auto status = layoutRects.at(StageText);
+                                    scroll = std::max(0, static_cast<int>(status.top) - 20);
+                                    Layout();
+                                    RECT actual{};
+                                    GetWindowRect(H(StageText), &actual);
+                                    MapWindowPoints(nullptr, panel, reinterpret_cast<POINT*>(&actual), 2);
+                                    // Very long errors can exceed one viewport; scrolling must expose
+                                    // both ends, and content range includes every rendered line.
+                                    valid &= actual.bottom > 0 && actual.top < viewport.bottom;
+                                    if (!valid)
+                                        throw std::runtime_error(
+                                            "Production layout overlap / unreachable control");
+                                    cases.push_back(
+                                        {{"dpi", testScale},
+                                         {"size", {size.first, size.second}},
+                                         {"language", language == Language::English ? "en" : "zh-CN"},
+                                         {"theme", theme == Theme::Dark ? "dark" : "light"},
+                                         {"creative", creative},
+                                         {"ffmpeg_ready", ready},
+                                         {"state", MessageKey(state)},
+                                         {"passed", true}});
+                                    if (size.first == 1280 && !creative && ready && state == TextId::Failed) {
+                                        scroll =
+                                            std::max(0, contentHeight - MulDiv(viewport.bottom, 96, dpi));
+                                        Layout();
+                                        const auto name = std::to_wstring(testScale) +
+                                                          (language == Language::English ? L"-en" : L"-zh") +
+                                                          (theme == Theme::Dark ? L"-dark" : L"-light") +
+                                                          L".png";
+                                        if (!SaveWindowSnapshot(window, uiDirectory / name))
+                                            throw std::runtime_error("Layout snapshot failed");
+                                    }
+                                }
+        std::ofstream(uiDirectory / L"layout-matrix.json") << cases.dump(2);
+        settings = saved;
+        tools = savedTools;
+        stage = savedStage;
+        busy = false;
+        dpi = testDpi ? testDpi : 96;
+        scroll = 0;
+        SetWindowPos(window, nullptr, original.left, original.top, original.right - original.left,
+                     original.bottom - original.top, SWP_NOZORDER | SWP_NOACTIVATE);
+        uiChecks["layout_gdi_before"] = gdiBefore;
+        uiChecks["layout_gdi_after"] = GetGuiResources(GetCurrentProcess(), GR_GDIOBJECTS);
+        for (int repeat = 0; repeat < 20; ++repeat) {
+            ApplyAppearance();
+            Layout();
+        }
+        const auto warmed = GetGuiResources(GetCurrentProcess(), GR_GDIOBJECTS);
+        for (int repeat = 0; repeat < 50; ++repeat) {
+            ApplyAppearance();
+            Layout();
+        }
+        uiChecks["layout_gdi_stable_after_warmup"] =
+            GetGuiResources(GetCurrentProcess(), GR_GDIOBJECTS) == warmed;
+        if (!uiChecks["layout_gdi_stable_after_warmup"].get<bool>())
+            throw std::runtime_error("GDI resources grow after repeated layout/theme refresh");
+        ApplyAppearance();
+        Buttons();
+        Layout();
+        uiChecks["layout_matrix_cases"] = cases.size();
+        uiChecks["layout_nonoverlap_reachable_footer_separate"] = true;
+    }
     void UiTest() {
+        if (layoutOnly) {
+            LayoutRegression();
+            Finish(true, "Production layout matrix verified");
+            return;
+        }
         const auto original = settings;
         SetFocus(H(OutputEdit));
         uiChecks["keyboard_focus_visible"] = ScrollDeltaToReveal(panel, H(OutputEdit), dpi) == 0;
@@ -893,6 +1305,19 @@ class MainWindow {
         for (int i = 0; i < 20; ++i)
             ShowFFmpegCandidates(window, list, settings, {}, -1);
         settleDialogs();
+        auto windowInventory = [] {
+            Json result = Json::array();
+            const auto collect = [](HWND h, LPARAM context) -> BOOL {
+                wchar_t name[256]{};
+                GetClassNameW(h, name, 256);
+                reinterpret_cast<Json*>(context)->push_back(
+                    {{"hwnd", reinterpret_cast<uintptr_t>(h)}, {"class", Utf8(name)}});
+                return TRUE;
+            };
+            EnumThreadWindows(GetCurrentThreadId(), collect, reinterpret_cast<LPARAM>(&result));
+            return result;
+        };
+        uiChecks["native_windows_before"] = windowInventory();
         const auto gdiBefore = GetGuiResources(GetCurrentProcess(), GR_GDIOBJECTS);
         const auto userBefore = GetGuiResources(GetCurrentProcess(), GR_USEROBJECTS);
         for (int i = 0; i < 20; ++i)
@@ -900,6 +1325,7 @@ class MainWindow {
         settleDialogs();
         const auto gdiAfter = GetGuiResources(GetCurrentProcess(), GR_GDIOBJECTS);
         const auto userAfter = GetGuiResources(GetCurrentProcess(), GR_USEROBJECTS);
+        uiChecks["native_windows_after"] = windowInventory();
         uiChecks["dialog_cycles"] = 20;
         uiChecks["dialog_warmup_cycles"] = 20;
         uiChecks["gdi_before_after"] = {gdiBefore, gdiAfter};
@@ -998,6 +1424,9 @@ class MainWindow {
         if (!self)
             return DefWindowProcW(h, m, w, l);
         switch (m) {
+        case WM_PRINTCLIENT:
+            self->PaintPanel(reinterpret_cast<HDC>(w));
+            return 0;
         case FocusRevealMessage:
             self->scroll += ScrollDeltaToReveal(h, reinterpret_cast<HWND>(l), self->dpi);
             self->LayoutPanel();
@@ -1018,7 +1447,9 @@ class MainWindow {
         case WM_CTLCOLOREDIT:
         case WM_CTLCOLORLISTBOX:
         case WM_CTLCOLORBTN:
-            return self->style.Color(m, w, l, true);
+            return self->style.Color(m, w, l,
+                                     GetDlgCtrlID(reinterpret_cast<HWND>(l)) != FooterLeft &&
+                                         GetDlgCtrlID(reinterpret_cast<HWND>(l)) != FooterRight);
         case WM_MOUSEWHEEL:
             self->scroll -= GET_WHEEL_DELTA_WPARAM(w) / WHEEL_DELTA * 48;
             self->LayoutPanel();
@@ -1053,6 +1484,9 @@ class MainWindow {
             return DefWindowProcW(h, m, w, l);
         try {
             switch (m) {
+            case WM_PRINTCLIENT:
+                self->Paint(reinterpret_cast<HDC>(w));
+                return 0;
             case WM_CREATE:
                 self->Create();
                 return 0;
@@ -1070,7 +1504,7 @@ class MainWindow {
                 self->ApplyAppearance();
                 return 0;
             case WM_DRAWITEM:
-                self->style.DrawItem(*reinterpret_cast<DRAWITEMSTRUCT*>(l));
+                self->Draw(*reinterpret_cast<DRAWITEMSTRUCT*>(l));
                 return TRUE;
             case WM_MEASUREITEM:
                 reinterpret_cast<MEASUREITEMSTRUCT*>(l)->itemHeight = self->S(25);
@@ -1085,8 +1519,8 @@ class MainWindow {
                 MONITORINFO monitor{sizeof(monitor)};
                 GetMonitorInfoW(MonitorFromWindow(h, MONITOR_DEFAULTTONEAREST), &monitor);
                 info->ptMinTrackSize = {
-                    std::min(self->S(820), static_cast<int>(monitor.rcWork.right - monitor.rcWork.left)),
-                    std::min(self->S(620), static_cast<int>(monitor.rcWork.bottom - monitor.rcWork.top))};
+                    std::min(self->S(560), static_cast<int>(monitor.rcWork.right - monitor.rcWork.left)),
+                    std::min(self->S(360), static_cast<int>(monitor.rcWork.bottom - monitor.rcWork.top))};
                 return 0;
             }
             case WM_DPICHANGED: {
@@ -1108,18 +1542,16 @@ class MainWindow {
             case WM_DROPFILES: {
                 auto drop = reinterpret_cast<HDROP>(w);
                 const auto count = DragQueryFileW(drop, 0xffffffff, nullptr, 0);
-                std::wstring name;
-                if (count == 1) {
-                    const auto size = DragQueryFileW(drop, 0, nullptr, 0);
-                    name.resize(size + 1);
-                    DragQueryFileW(drop, 0, name.data(), size + 1);
+                std::vector<fs::path> paths;
+                for (UINT i = 0; i < count; ++i) {
+                    const auto size = DragQueryFileW(drop, i, nullptr, 0);
+                    std::wstring name(size + 1, L'\0');
+                    DragQueryFileW(drop, i, name.data(), size + 1);
                     name.resize(size);
+                    paths.emplace_back(name);
                 }
                 DragFinish(drop);
-                if (count == 1)
-                    self->ProbeInput(name);
-                else
-                    self->Stage(TextId::OneFile);
+                self->SelectInputs(std::move(paths));
                 return 0;
             }
             case WM_TIMER:
@@ -1143,14 +1575,20 @@ class MainWindow {
                 return 0;
             }
         } catch (const AppError& e) {
-            self->logger.Write(e.what());
+            try {
+                self->logger.Write(e.what());
+            } catch (...) {
+            }
             if (m == WM_CREATE)
                 return -1;
             self->Failure(e);
             if (self->uiTest || self->smoke)
                 self->Finish(false, e.what());
         } catch (const std::exception& e) {
-            self->logger.Write(e.what());
+            try {
+                self->logger.Write(e.what());
+            } catch (...) {
+            }
             if (m == WM_CREATE)
                 return -1;
             self->Failure(AppError({TextId::Unexpected, {e.what()}}));
@@ -1183,7 +1621,9 @@ int Run(HINSTANCE instance) {
                 throw AppError(TextId::InvalidExposureChoice);
             app.exposureIndex = static_cast<int>(it - std::begin(ExposureValues));
         }
-    } else if (args.size() >= 2 && args[0] == L"--ui-test") {
+    } else if (args.size() >= 2 && (args[0] == L"--ui-test" || args[0] == L"--layout-test")) {
+        app.layoutOnly = args[0] == L"--layout-test";
+        app.missingScenario = app.layoutOnly;
         app.uiTest = true;
         app.uiDirectory = args[1];
         fs::create_directories(app.uiDirectory);
@@ -1192,6 +1632,8 @@ int Run(HINSTANCE instance) {
     for (; option < args.size(); ++option) {
         if (args[option] == L"--tone")
             app.settings.tone.enabled = true;
+        else if (args[option] == L"--queue-next" && app.smoke && option + 1 < args.size())
+            app.smokeSecond = args[++option];
         else if (args[option] == L"--input-chroma-location" && option + 1 < args.size()) {
             app.explicitInputChroma = Utf8(args[++option]);
             if (app.explicitInputChroma != "left" && app.explicitInputChroma != "center")

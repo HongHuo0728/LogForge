@@ -1,0 +1,14 @@
+{
+  "source_sha256": "ba04b0dee2e9fe42b4ff1b48d8879242d0845f23f588e93982fa172855f09519",
+  "ptx_sha256": "8ab8afc1f60df9b453434ca2002283072bd8d8920b77ae55990ef53cbf28a20a",
+  "nvrtc_version": "12.8",
+  "compiler_sha256": "ec2a860422b7d0396b45c29a1848faecc3788041ba52f166f0fc52c1b47e8245",
+  "options": [
+    "--std=c++17",
+    "--gpu-architecture=compute_75",
+    "--fmad=false",
+    "--ftz=false",
+    "--prec-div=true",
+    "--prec-sqrt=true"
+  ]
+}

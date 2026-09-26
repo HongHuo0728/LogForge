@@ -90,8 +90,9 @@ std::wstring CommandLine(const fs::path& exe, const std::vector<std::wstring>& a
     return cmd;
 }
 Logger::Logger() {
+    MaintainOwnedStorage();
     auto dir = DataDirectory() / L"logs";
-    fs::create_directories(dir);
+    RequireWritableDirectory(dir);
     SYSTEMTIME t{};
     GetLocalTime(&t);
     wchar_t name[100]{};
@@ -118,6 +119,8 @@ void Logger::Write(const std::string& text) {
     file_ << std::setfill('0') << std::setw(2) << t.wHour << ':' << std::setw(2) << t.wMinute << ':'
           << std::setw(2) << t.wSecond << ' ' << text << '\n';
     file_.flush();
+    if (!file_)
+        throw AppError(TextId::LogCreate);
 }
 FFmpegProcess::FFmpegProcess(const fs::path& exe, const std::vector<std::wstring>& args, bool pipeIn) {
     SECURITY_ATTRIBUTES sa{sizeof(sa), nullptr, TRUE};
@@ -185,6 +188,14 @@ FFmpegProcess::FFmpegProcess(const fs::path& exe, const std::vector<std::wstring
         Terminate();
         throw AppError(TextId::ProcessResume);
     }
+}
+double FFmpegProcess::CpuSeconds() const {
+    FILETIME created{}, exit{}, kernel{}, user{};
+    if (!GetProcessTimes(process_.get(), &created, &exit, &kernel, &user))
+        return 0;
+    return (static_cast<double>((uint64_t(kernel.dwHighDateTime) << 32) | kernel.dwLowDateTime) +
+            static_cast<double>((uint64_t(user.dwHighDateTime) << 32) | user.dwLowDateTime)) /
+           10000000.0;
 }
 FFmpegProcess::~FFmpegProcess() {
     if (Running())
