@@ -28,7 +28,7 @@ Actual Resolve Studio 20.3.2.9 managed imports verified `logs` alone is sufficie
 
 ## Chroma siting evidence
 
-Input filters explicitly set `chromalin=left` or `center`. Missing siting requires an explicit user declaration (GUI prompt or CLI `--input-chroma-location`), otherwise conversion is refused. The original probe field and override remain separate in reports; an override never replaces a supported native declaration.
+Input filters explicitly set `chromalin=left` or `center`. Missing siting defaults to left in the camera compatibility policy. CLI `--input-chroma-location` can explicitly select left or center. The original probe field and override remain separate in reports; an override never replaces a supported native declaration.
 
 Output uses `chromal=left`. **FFmpeg 8.1.2 ProRes MOV does not expose chroma_location on re-probe even when the encoder option requests it.** This tested limitation is recorded honestly. LogForge writes its own `logforge.chroma_location=left`. When ffprobe omits siting, validation requires that declaration plus successful numeric verification of the actual output sampling phase; a conflicting center field, absent declaration or absent qualification fails. Integer linear ramps distinguish a half-pixel shift for both input sitings and post-encode output. No undocumented chroma atom is written, and native editor recognition of the custom key is not claimed.
 
@@ -50,14 +50,15 @@ Additional evidence still needed:
 3. Repeat the verified Resolve managed-import/range test in Premiere, Final Cut and other Resolve versions; compare actual LUT/CST workflows separately.
 4. Tie any further atom changes to observed editor behavior. The existing native-reference/A/B evidence supports only the implemented minimal identification field.
 
-Version 1.2.0 copies chapter positions and titles with explicit validation, and
-records removed nonessential camera metadata/data streams. Dolby Vision/GPS
-tracks, anamorphic or mirrored display transforms and complex edit lists are not
-copied. Unsafe timeline edits are rejected before processing. The accepted edit
-list is a unit-rate zero-origin duration declaration or packet-verified AAC
-priming, never an arbitrary trim. We do not claim binary equality with an iPhone.
+Chapters are copied and validated. Nonessential camera metadata/data streams,
+including iPhone mebx tracks, are omitted and recorded. Since the 1.2.1 camera
+compatibility follow-up, edit-list patterns are diagnostic information, not an
+admission gate. FFmpeg interprets the actual video/audio playback timeline; the
+source movie clock is retained to preserve audio start offsets. Available timecode
+is regenerated, but a file does not need a timecode track. We do not claim binary
+equality with an iPhone MOV.
 
-Version 1.2.0 records `logforge.version=1.2.0` and `logforge.build=26926A`. These are application version identifiers, not camera-model or Apple compatibility identifiers.
+Version 1.2.1 records `logforge.version=1.2.1` and `logforge.build=26927B`. These are application version identifiers, not camera-model or Apple compatibility identifiers.
 
 Creation-time validation compares timezone-aware ISO 8601 instants exactly at
 microsecond precision, accepting trailing-zero fractional formatting differences.
@@ -70,3 +71,9 @@ remains a separate whitelisted metadata field, including its timezone informatio
 During rotation remux only the encoded video and copied audio streams are mapped;
 chapters and timecode are rebuilt explicitly. This avoids copying an old tmcd
 track that causes FFmpeg to ignore the source drop-frame timecode metadata.
+
+Standard cardinal rotation is applied to float32 pixels before encoding. The
+output matrix is identity and its width/height are exchanged for 90/270 degrees.
+The header writer verifies that identity matrix alongside restored creation fields.
+Other matrices remain metadata. No atom resizing or media sample rewriting occurs
+in this header stage.

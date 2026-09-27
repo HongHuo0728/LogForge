@@ -123,3 +123,15 @@ The optional 0.1.3 `creative-luma-v1` curve is a LogForge creative adjustment re
 - [Microsoft: Application Registration / App Paths](https://learn.microsoft.com/en-us/windows/win32/shell/app-registration) — per-user/machine executable registration; read-only inspection.
 - [Microsoft: Querying the index with ADO](https://learn.microsoft.com/en-us/previous-versions/windows/desktop/legacy/ff684395(v=vs.85)) — optional Windows Search SQL query; not a complete inventory of installed executables.
 - Windows Known Folder APIs resolve LocalAppData, Profile, ProgramFiles and ProgramData. Package directories are inspected without invoking WinGet, Scoop, Chocolatey or a shim. A stale/non-indexed path does not grant trust.
+
+## QuickTime rotation and audio synchronization (1.2.1)
+
+- [Apple QTFF: Matrices](https://developer.apple.com/documentation/quicktime-file-format/matrices)
+  defines the row-vector rotation/translation layout and 16.16/2.30 fields. The
+  supported origin-correction translation is calculated from the rotated raster
+  bounds, not inferred solely from ffprobe's rotation angle.
+- [Apple QTFF: Edit list atom](https://developer.apple.com/documentation/quicktime-file-format/edit_list_atom)
+  and [edit list table](https://developer.apple.com/documentation/quicktime-file-format/edit_list_atom/edit_list_table)
+  distinguish movie duration, media origin and playback rate. LogForge accepts
+  only a timestamp-confirmed leading audio delay plus full unit-rate media, in
+  addition to its existing duration/packet-confirmed AAC priming cases.

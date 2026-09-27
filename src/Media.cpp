@@ -121,7 +121,7 @@ MediaInfo MediaInfo::Parse(const Json& j, const fs::path& path) {
                 if (side.contains("rotation"))
                     m.rotation = number(side, "rotation");
                 if (side.contains("displaymatrix"))
-                    m.displayMatrixSupported &= SupportedDisplayMatrix(str(side, "displaymatrix"));
+                    m.displayMatrixSupported &= SupportedDisplayMatrix(str(side, "displaymatrix"), m.width, m.height);
             }
         } else if (type == "audio") {
             m.audio.push_back({str(s, "codec_name"), str(s, "channel_layout"), integer(s, "channels"),
@@ -136,42 +136,19 @@ MediaInfo MediaInfo::Parse(const Json& j, const fs::path& path) {
 }
 std::string MediaInfo::EffectiveChromaLocation() const {
     if (chromaLocation.empty() || chromaLocation == "unknown" || chromaLocation == "unspecified")
-        return inputChromaOverride;
+        return inputChromaOverride.empty() ? "left" : inputChromaOverride;
     return chromaLocation;
 }
 std::vector<Message> MediaInfo::UnsupportedReasons() const {
     std::vector<Message> e;
-    if ((container != "mov,mp4,m4a,3gp,3g2,mj2" && container != "mov") ||
-        tags.value("major_brand", std::string()) != "qt  ")
-        e.emplace_back(TextId::InputContainer);
-    if (!displayMatrixSupported || std::abs(std::remainder(rotation, 90.0)) > 0.001)
-        e.emplace_back(TextId::InputDisplayMatrix);
-    if (videoStreams != 1)
-        e.emplace_back(TextId::InputVideoCount);
+    // Admission is deliberately limited to the recording format. Auxiliary
+    // metadata, camera tags, timecode and edit-list shapes are not prerequisites.
     if (codec != "prores")
         e.emplace_back(TextId::InputCodec);
     if (profile != "Standard" && profile != "HQ")
         e.emplace_back(TextId::InputProfile);
-    if (bitDepth != 10 || pixelFormat != "yuv422p10le")
-        e.emplace_back(TextId::InputDepth);
-    if (primaries != "bt2020")
-        e.emplace_back(TextId::InputPrimaries);
     if (transfer != "arib-std-b67")
         e.emplace_back(TextId::InputTransfer);
-    if (matrix != "bt2020nc")
-        e.emplace_back(TextId::InputMatrix);
-    if (range != "tv" && range != "pc")
-        e.emplace_back(TextId::InputRange);
-    if (width <= 0 || height <= 0 || width % 2 || width > 8192 || height > 8192)
-        e.emplace_back(TextId::InputResolution);
-    if (timeBase.Value() <= 0 || videoDuration <= 0)
-        e.emplace_back(TextId::InputTiming);
-    if (fieldOrder != "progressive" && fieldOrder != "unknown" && !fieldOrder.empty())
-        e.emplace_back(TextId::InputProgressive);
-    if (!sampleAspect.empty() && sampleAspect != "1:1" && sampleAspect != "0:1" && sampleAspect != "N/A")
-        e.emplace_back(TextId::InputAspect);
-    if (EffectiveChromaLocation() != "left" && EffectiveChromaLocation() != "center")
-        e.emplace_back(TextId::InputChroma);
     return e;
 }
 std::wstring MediaInfo::Summary(Language language) const {
@@ -344,7 +321,6 @@ ValidationReport ValidateOutput(const MediaInfo& in, const MediaInfo& out, int64
         require(std::abs((a.start - in.startTime) - (b.start - out.startTime)) < 0.05,
                 TextId::OutputAudioOffset);
     }
-    require(out.displayMatrixSupported, TextId::InputDisplayMatrix);
     require(std::abs(std::remainder(out.rotation - in.rotation, 360.0)) < 0.1, TextId::OutputRotation);
     if (!in.timecode.empty())
         require(in.timecode == out.timecode, TextId::OutputTimecode);

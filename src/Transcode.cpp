@@ -36,6 +36,25 @@ ValidationReport TranscodeJob::Run(const FFmpegInstallation& tools, const MediaI
     ValidateToneAdjustments(options.tone);
     if (auto errors = m.UnsupportedReasons(); !errors.empty())
         throw AppError(TextId::InputRejected, errors);
+    // These are memory/timing requirements for the actual processing buffers,
+    // not optional camera-metadata admission checks.
+    if (m.width <= 0 || m.height <= 0 || m.width % 2 || m.width > 8192 || m.height > 8192)
+        throw AppError(TextId::InputResolution);
+    if (m.timeBase.Value() <= 0 || m.videoDuration <= 0)
+        throw AppError(TextId::InputTiming);
+    std::wstring orientationFilter;
+    const double sourceRotation = m.rotation;
+    if (m.displayMatrixSupported && std::abs(std::remainder(m.rotation, 90.0)) < 0.001) {
+        const auto turns = (static_cast<int>(std::lround(std::remainder(m.rotation, 360.0) / 90)) + 4) % 4;
+        if (turns == 1 || turns == 3) {
+            if (m.height % 2)
+                throw AppError(TextId::InputResolution);
+            std::swap(m.width, m.height);
+            orientationFilter = turns == 1 ? L",transpose=cclock" : L",transpose=clock";
+        } else if (turns == 2)
+            orientationFilter = L",hflip,vflip";
+        m.rotation = 0;
+    }
     const auto dest = fs::absolute(output);
     if (_wcsicmp(dest.extension().c_str(), L".mov") != 0)
         throw AppError(TextId::OutputExtension);
@@ -121,7 +140,8 @@ ValidationReport TranscodeJob::Run(const FFmpegInstallation& tools, const MediaI
     std::wstring decodeFilter = L"zscale=matrixin=2020_ncl:matrix=gbr:rangein=" + range +
                                 L":range=full:transferin=arib-std-b67:transfer=arib-std-b67:primariesin=2020:"
                                 L"primaries=2020:chromalin=" +
-                                Wide(m.EffectiveChromaLocation()) + L":filter=spline36,format=gbrpf32le";
+                                Wide(m.EffectiveChromaLocation()) + L":filter=spline36,format=gbrpf32le" +
+                                orientationFilter;
     std::vector<std::wstring> decode{L"-hide_banner",
                                      L"-loglevel",
                                      L"warning",
@@ -166,7 +186,11 @@ ValidationReport TranscodeJob::Run(const FFmpegInstallation& tools, const MediaI
         L"yuv422p10le", L"-threads:v", std::to_wstring(threads.encode), L"-filter_threads", L"1",
         L"-fps_mode", L"passthrough", L"-c:a", L"copy", L"-avoid_negative_ts", L"disabled", L"-progress",
         L"pipe:1", L"-stats_period", L"0.25", L"-nostats"};
-    const auto metadata = AppleLogMetadataWriter::Arguments(m, options.exposureStops, options.tone);
+    auto metadata = AppleLogMetadataWriter::Arguments(m, options.exposureStops, options.tone);
+    if (timeline.contains("preserve_movie_timescale")) {
+        metadata.push_back(L"-movie_timescale");
+        metadata.push_back(std::to_wstring(timeline.at("preserve_movie_timescale").get<uint32_t>()));
+    }
     encode.insert(encode.end(), metadata.begin(), metadata.end());
     encode.push_back(partial.wstring());
     logCommand(log, tools.ffmpeg, decode);
@@ -398,7 +422,7 @@ ValidationReport TranscodeJob::Run(const FFmpegInstallation& tools, const MediaI
     }
     const double remuxSeconds = elapsed(remuxStart);
     const auto headerStart = std::chrono::steady_clock::now();
-    const auto headerTimes = PreserveMovCreationTimes(sourceAtoms, partial, cancel);
+    const auto headerTimes = PreserveMovCreationTimes(sourceAtoms, partial, cancel, !orientationFilter.empty());
     const double headerSeconds = elapsed(headerStart);
     const auto identificationStart = std::chrono::steady_clock::now();
     progress({Message(TextId::WritingIdentification)});
@@ -421,6 +445,14 @@ ValidationReport TranscodeJob::Run(const FFmpegInstallation& tools, const MediaI
     }
     report.ffmpeg = tools.ToJson();
     report.metadata["timeline_policy"] = timeline;
+    report.metadata["orientation"] = {{"source_degrees", sourceRotation},
+                                       {"applied_to_pixels", !orientationFilter.empty()},
+                                       {"output_width", out.width}, {"output_height", out.height},
+                                       {"output_degrees", out.rotation}};
+    report.metadata["input_policy"] = {{"required", "ProRes Standard/HQ + HLG"},
+                                        {"color_interpretation", "BT.2020 NCL HLG"},
+                                        {"range_used", m.range == "pc" ? "full" : "video"},
+                                        {"chroma_used", m.EffectiveChromaLocation()}};
     report.metadata["creation_headers"] = headerTimes;
     report.metadata["chroma"] = {
         {"input_ffprobe", m.chromaLocation},

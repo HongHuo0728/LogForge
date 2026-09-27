@@ -1,5 +1,60 @@
 # Validation record
 
+## 1.2.1 (26927B): camera compatibility follow-up
+
+Local verification: **2026-09-27**, following reports of sideways Blackmagic
+playback and an iPhone mebx edit-list rejection. Release build succeeded and
+**18/18 selected CTests passed in 22.71 seconds**. Tests now follow the explicitly
+requested relaxed format-admission policy; numerical/color tolerances did not change.
+
+- Generated orientation tests compare the four distinct grayscale quadrant
+  positions in source autorotated playback against the unrotated output pixels.
+  Both -180 degrees with translation and 90 degrees pass; output matrices are
+  identity, creation headers are preserved, and the 500/48000-second audio offset
+  and PCM payload are unchanged. FFmpeg's transpose stage accepts gbrpf32le
+  directly, without an intervening 8/16-bit format conversion.
+- The local **Blackmagic camera original** completed CPU conversion: 76 frames,
+  output **2160x3840**, **0-degree orientation**, unchanged stream-copy PCM SHA-256,
+  audio start offset, timecode and creation metadata.
+- The local **iPhone Camera original** completed CPU conversion: 82 frames,
+  output **2160x3840**, **0-degree orientation**, unchanged stream-copy PCM SHA-256,
+  audio start offset and creation metadata. This file has no timecode and multiple
+  mebx metadata tracks, including the previously rejected nonzero-origin edit.
+- Both actual outputs passed the unchanged first/middle/last scalar pixel sanity
+  checks, packet/output validation and Apple Log identification checks.
+
+Camera originals were read in place and left untouched. Temporary output media,
+logs and test configurations were deleted; no personal footage is distributed.
+No new GUI/Resolve/performance campaign was run. The following earlier 1.2.1
+matrix-preservation result predates the new baked-pixel orientation policy.
+
+## Earlier 1.2.1 (26927B): initial two MOV compatibility fixes
+
+Local verification: **2026-09-27**, Windows 11 x64, MSVC Release with static
+runtime. Configure and Release build succeeded. **18/18 selected CTests passed**
+in 23.05 seconds: the 16 existing core tests and two new generated-media tests.
+Application resource and CLI checks confirm `1.2.1 (26927B)` and Windows
+FileVersion/ProductVersion `1.2.1.0`.
+
+- `compatibility_iphone_v121`: a 128x64, 12-frame HLG ProRes HQ MOV with a
+  -180-degree unit rotation and `(width,height)` translation completes conversion.
+  The entire matrix and all movie/video/audio/timecode creation header fields
+  remain identical after remux. Timecode, creationdate and PCM payload are preserved.
+- `compatibility_blackmagic_v121`: a 24 fps HLG ProRes Standard MOV with stereo
+  48 kHz PCM and a leading empty audio edit of **500/48000 seconds** completes
+  conversion. The test includes a 90-degree rotation to exercise remux. Independent
+  integer timestamp checks find exactly the same audio/video relative start;
+  extracted stream-copy PCM bytes have identical SHA-256. Timecode, full matrix
+  and creation metadata remain unchanged.
+- Existing independent color math, cadence, metadata, identification, unsupported
+  matrix/edit-list rejection, security and other core checks passed. The existing
+  CUDA numerical qualification was included; no CUDA implementation was changed.
+
+Tests use generated structures, not the user's actual iPhone/Blackmagic originals.
+No new GUI, editor-import, performance benchmark or sustained-media campaign was
+run for this narrow patch. Historical results below remain explicitly historical.
+Generated source/output videos are deleted by the two tests after success.
+
 ## 1.2.0 (26926A): portrait MOV, CUDA, stability and interface
 
 Local verification: **2026-09-26**, Windows 11 x64 build 26200, 20 logical CPUs,

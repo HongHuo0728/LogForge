@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.2.1 (26927B)
+
+- Apply cardinal camera orientation to float32 pixels before encoding. Portrait
+  output uses portrait raster dimensions and an identity display matrix, avoiding
+  sideways playback when a player ignores rotation metadata.
+- Limit recording-format admission to ProRes Standard/HQ + HLG. Remove edit-list
+  pattern and optional metadata gates, including iPhone auxiliary mebx tracks
+  with nonzero origins; timecode is optional.
+- Retain source movie timescale, audio stream copy, relative audio timing,
+  available timecode and creation metadata. Missing chroma defaults to left.
+- Update regressions for the new admission and pixel-orientation contract.
+  Color equations, precision, output numerical tolerances, CUDA, FFmpeg discovery,
+  UI and queue implementation remain unchanged.
+- Correct obsolete CPU-only/no-queue wording in README.
+- Update UI/CLI to 1.2.1 (26927B) and Windows versions/manifest to 1.2.1.0.
+  See [release details](docs/RELEASE_1.2.1.md) and [verification](docs/VALIDATION.md).
+
 ## 1.2.0 (26926A)
 
 - Fix portrait MOV creation-time loss during rotation remux. Compare ISO 8601

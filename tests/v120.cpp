@@ -41,16 +41,20 @@ void Semantics() {
               {{{"media_time", -1}, {"duration_ticks", 1}, {"rate_integer", 1}, {"rate_fraction", 0}}}),
           Json::array(
               {{{"media_time", 0}, {"duration_ticks", 1}, {"rate_integer", 0}, {"rate_fraction", 0}}})}) {
-        bool refused = false;
-        try {
-            InspectMovTimeline(m, {{"atoms", Json::array({{{"type", "elst"},
+        const auto inspected = InspectMovTimeline(m, {{"atoms", Json::array({{{"type", "elst"},
                                                            {"path", "/moov[0]/trak[0]/edts[0]/elst[0]"},
                                                            {"edits", edits}}})}});
-        } catch (...) {
-            refused = true;
-        }
-        Check(refused, "Unsafe edit list accepted");
+        Check(inspected.at("edit_lists")[0].at("edits") == edits,
+              "Edit-list diagnostics were lost under the relaxed admission policy");
     }
+    auto auxiliary = InspectMovTimeline(m, {{"atoms", Json::array({
+        {{"type", "hdlr"}, {"path", "/moov[0]/trak[3]/mdia[0]/hdlr[0]"}, {"handler_type", "meta"}},
+        {{"type", "elst"}, {"path", "/moov[0]/trak[3]/edts[0]/elst[0]"},
+         {"edits", Json::array({{{"media_time", 100}, {"duration_ticks", 2050},
+                                 {"rate_integer", 1}, {"rate_fraction", 0}}})}}
+    })}});
+    Check(auxiliary.at("edit_lists")[0].at("handler") == "meta",
+          "iPhone auxiliary edit list was incorrectly used as an admission gate");
 }
 void Storage() {
     const auto root = DataDirectory() / L"storage-fixtures";
@@ -265,7 +269,10 @@ void Pipeline(const fs::path& ff) {
     int checks = 0;
     JobIOHooks remux;
     remux.availableSpace = [&](const fs::path&) { return ++checks == 1 ? UINTMAX_MAX : 0; };
-    reject(root / L"portrait-90.mov", L"rotation-full", remux, TextId::RotationSpace);
+    options.io = &remux;
+    convert(root / L"portrait-90.mov", L"rotation-no-second-copy", options);
+    Check(checks == 1, "Baked rotation unexpectedly requested a second full file copy");
+    options.io = nullptr;
     JobIOHooks gpu;
     gpu.cudaCheckpoint = [](const char*) {
         throw std::runtime_error("Injected CUDA initialization/OOM failure");
@@ -331,9 +338,10 @@ void Pipeline(const fs::path& ff) {
             }
         f.close();
         Check(changed, "MOV matrix/edit-list fixture missing");
-        JobIOHooks none;
-        reject(bad, mirror ? L"refused-mirror" : L"refused-trim", none,
-               mirror ? TextId::InputRejected : TextId::InputEditList);
+        const auto media = Probe(tools.ffprobe, bad);
+        Check(media.UnsupportedReasons().empty(), "Auxiliary metadata blocked HLG ProRes admission");
+        Check(InspectMovTimeline(media, ReferenceMovAnalyzer::Analyze(bad)).contains("edit_lists"),
+              "Timeline diagnostics missing");
     }
     auto queue = RunQueue(tools, {root / L"missing.mov", base}, root, logger, cancel, options, "left",
                           [](auto, auto, const auto&, const auto&) {});

@@ -38,11 +38,15 @@ void MediaTests() {
     Near(m.fps.Value(), 30000.0 / 1001, 1e-10, "Rational fps parser");
     check(m.audio.size() == 1 && m.audio[0].sampleRate == 48000 && m.audio[0].channels == 2, "Audio parser");
     check(m.timecode == "01:00:00:00", "Timecode parser");
-    for (auto key : {"codec_name", "profile", "pix_fmt", "color_primaries", "color_transfer", "color_space",
-                     "color_range"}) {
+    for (auto key : {"codec_name", "profile", "color_transfer"}) {
         auto bad = j;
         bad["streams"][0][key] = "unsupported";
         check(!MediaInfo::Parse(bad).UnsupportedReasons().empty(), "Unsupported media accepted");
+    }
+    for (auto key : {"color_primaries", "color_space", "color_range", "chroma_location"}) {
+        auto absent = j;
+        absent["streams"][0].erase(key);
+        check(MediaInfo::Parse(absent).UnsupportedReasons().empty(), "Optional tag blocked HLG ProRes");
     }
     auto missing = j;
     missing["streams"][0].erase("color_transfer");
@@ -148,14 +152,16 @@ void MediaTests() {
     }
     auto unknown = j;
     unknown["streams"][0]["chroma_location"] = "unknown";
-    check(!MediaInfo::Parse(unknown).UnsupportedReasons().empty(), "Unknown chroma silently guessed");
+    check(MediaInfo::Parse(unknown).UnsupportedReasons().empty() &&
+              MediaInfo::Parse(unknown).EffectiveChromaLocation() == "left",
+          "Camera compatibility chroma default failed");
     auto explicitSiting = MediaInfo::Parse(unknown);
     explicitSiting.inputChromaOverride = "center";
     check(explicitSiting.UnsupportedReasons().empty() && explicitSiting.EffectiveChromaLocation() == "center",
           "Explicit siting failed");
     explicitSiting.chromaLocation = "topleft";
-    check(!explicitSiting.UnsupportedReasons().empty(),
-          "Override replaced an unsupported native declaration");
+    check(explicitSiting.EffectiveChromaLocation() == "topleft",
+          "Override replaced a native declaration");
     auto wrongChroma = output;
     wrongChroma["streams"][0]["chroma_location"] = "center";
     check(!ValidateOutput(m, validated(wrongChroma), 30).passed, "Wrong output chroma validated");

@@ -219,16 +219,16 @@ void Resources() {
         UINT length = 0;
         Require(VerQueryValueW(bytes.data(), L"\\", reinterpret_cast<void**>(&fixed), &length) != FALSE,
                 "Missing numeric version");
-        Require(fixed->dwFileVersionMS == MAKELONG(2, 1) && fixed->dwFileVersionLS == MAKELONG(0, 0) &&
+        Require(fixed->dwFileVersionMS == MAKELONG(2, 1) && fixed->dwFileVersionLS == MAKELONG(0, 1) &&
                     fixed->dwProductVersionMS == MAKELONG(2, 1) &&
-                    fixed->dwProductVersionLS == MAKELONG(0, 0),
-                "Numeric Windows version is not 1.2.0.0");
+                    fixed->dwProductVersionLS == MAKELONG(0, 1),
+                "Numeric Windows version is not 1.2.1.0");
         for (const auto* key : {L"FileVersion", L"ProductVersion"}) {
             wchar_t* value = nullptr;
             const auto query = std::wstring(L"\\StringFileInfo\\040904b0\\") + key;
             Require(VerQueryValueW(bytes.data(), query.c_str(), reinterpret_cast<void**>(&value), &length) &&
-                        std::wstring(value) == L"1.2.0.0",
-                    "Windows version text is not 1.2.0.0");
+                        std::wstring(value) == L"1.2.1.0",
+                    "Windows version text is not 1.2.1.0");
         }
         HMODULE module =
             LoadLibraryExW(path.c_str(), nullptr, LOAD_LIBRARY_AS_DATAFILE | LOAD_LIBRARY_AS_IMAGE_RESOURCE);
@@ -239,7 +239,7 @@ void Resources() {
         Require(data && data[2] == 9, "Application icon does not contain nine DPI sizes");
         FreeLibrary(module);
     }
-    Require(std::string(DisplayVersion) == "1.2.0 (26926A)", "Incorrect displayed build number");
+    Require(std::string(DisplayVersion) == "1.2.1 (26927B)", "Incorrect displayed build number");
     std::cout << "PASS: GUI / CLI Windows versions, build number and embedded multiresolution icons\n";
 }
 } // namespace

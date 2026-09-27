@@ -76,7 +76,7 @@ bool SameMetadataValue(const std::string& key, const Json& a, const Json& b) {
     const auto x = Timestamp(a.get<std::string>()), y = Timestamp(b.get<std::string>());
     return x && y && *x == *y;
 }
-bool SupportedDisplayMatrix(const std::string& matrix) {
+bool SupportedDisplayMatrix(const std::string& matrix, int width, int height) {
     std::istringstream input(matrix);
     std::string line;
     std::vector<int64_t> v;
@@ -95,19 +95,28 @@ bool SupportedDisplayMatrix(const std::string& matrix) {
             return false;
         v.insert(v.end(), {a, b, c});
     }
-    if (v.size() != 9 || v[2] != 0 || v[5] != 0 || v[8] != 1073741824 || v[6] != 0 || v[7] != 0)
+    if (v.size() != 9 || v[2] != 0 || v[5] != 0 || v[8] != 1073741824)
         return false;
-    // Only the four exact unit rotations. Reflections and translated/cropped
-    // matrices are not reduced to an angle and silently discarded.
+    // QTFF row-vector convention: x'=a*x+c*y+tx, y'=b*x+d*y+ty.
+    // Accept a pure unit rotation, or its exact translation that rebases the
+    // rotated raster to (0,0). Arbitrary placement/cropping remains unsupported.
     for (const auto& r : {std::array<int64_t, 4>{65536, 0, 0, 65536},
                           {0, -65536, 65536, 0},
                           {-65536, 0, 0, -65536},
                           {0, 65536, -65536, 0}})
-        if (v[0] == r[0] && v[1] == r[1] && v[3] == r[2] && v[4] == r[3])
-            return true;
+        if (v[0] == r[0] && v[1] == r[1] && v[3] == r[2] && v[4] == r[3]) {
+            if (v[6] == 0 && v[7] == 0)
+                return true;
+            if (width <= 0 || height <= 0)
+                return false;
+            const auto tx = -std::min<int64_t>(0, v[0] * width) - std::min<int64_t>(0, v[3] * height);
+            const auto ty = -std::min<int64_t>(0, v[1] * width) - std::min<int64_t>(0, v[4] * height);
+            return v[6] == tx && v[7] == ty;
+        }
     return false;
 }
-Json PreserveMovCreationTimes(const Json& source, const fs::path& partial, const std::atomic_bool& cancel) {
+Json PreserveMovCreationTimes(const Json& source, const fs::path& partial, const std::atomic_bool& cancel,
+                              bool orientationBaked) {
     // FFmpeg MOV currently assigns the global creation time to every track.
     // Restore only documented fixed-width header fields from the source. No
     // atom resizing, media offsets, sample tables or mdat bytes are changed.
@@ -157,6 +166,21 @@ Json PreserveMovCreationTimes(const Json& source, const fs::path& partial, const
             throw AppError(TextId::MovSize);
         patches.push_back(
             {{"header", key}, {"offset", offset}, {"bytes", bytes}, {"creation_time_1904_seconds", value}});
+        if (key.starts_with("vide/") && a.value("type", "") == "tkhd") {
+            // Rotation remux can replace a valid translated matrix with an
+            // angle-only matrix. Restore the complete, validated video matrix.
+            const auto matrix = orientationBaked
+                                    ? Json::array({65536, 0, 0, 0, 65536, 0, 0, 0, 1073741824})
+                                    : a.at("display_matrix");
+            if (matrix.size() != 9)
+                throw AppError(TextId::InputDisplayMatrix);
+            const auto at = b.at("offset").get<uint64_t>() + b.at("header_size").get<uint64_t>() +
+                            (b.at("version") == 1 ? 52 : 40);
+            if (at + 36 > b.at("offset").get<uint64_t>() + b.at("size").get<uint64_t>())
+                throw AppError(TextId::MovSize);
+            patches.back()["display_matrix"] = matrix;
+            patches.back()["matrix_offset"] = at;
+        }
     }
     std::fstream file(partial, std::ios::binary | std::ios::in | std::ios::out);
     if (!file)
@@ -171,6 +195,16 @@ Json PreserveMovCreationTimes(const Json& source, const fs::path& partial, const
             b[i] = static_cast<char>(value >> ((bytes - 1 - i) * 8));
         file.seekp(p.at("offset").get<std::streamoff>());
         file.write(b.data(), bytes);
+        if (p.contains("display_matrix")) {
+            file.seekp(p.at("matrix_offset").get<std::streamoff>());
+            for (const auto& element : p.at("display_matrix")) {
+                const auto word = static_cast<uint32_t>(element.get<int32_t>());
+                char encoded[4];
+                for (unsigned i = 0; i < 4; ++i)
+                    encoded[i] = static_cast<char>(word >> ((3 - i) * 8));
+                file.write(encoded, 4);
+            }
+        }
         if (!file)
             throw AppError(TextId::MovWrite);
     }
@@ -183,6 +217,13 @@ Json PreserveMovCreationTimes(const Json& source, const fs::path& partial, const
         const auto key = p.at("header").get<std::string>();
         p["verified"] = verified.contains(key) && verified.at(key).at("creation_time_1904_seconds") ==
                                                       p.at("creation_time_1904_seconds");
+        if (p.contains("display_matrix")) {
+            p["display_matrix_verified"] = verified.contains(key) &&
+                                           verified.at(key).at("display_matrix") == p.at("display_matrix");
+            if (!p.at("display_matrix_verified").get<bool>())
+                throw AppError(TextId::InputDisplayMatrix);
+            p.erase("matrix_offset");
+        }
         if (!p.at("verified").get<bool>())
             throw AppError(
                 Message(TextId::OutputMetadataPreserve, {key + ": creation_time header verification"}));
@@ -190,92 +231,41 @@ Json PreserveMovCreationTimes(const Json& source, const fs::path& partial, const
     }
     return patches;
 }
-Json InspectMovTimeline(const MediaInfo& in, const Json& analysis, const fs::path& ffprobe,
-                        const std::atomic_bool* cancel) {
+Json InspectMovTimeline(const MediaInfo& in, const Json& analysis, const fs::path&,
+                        const std::atomic_bool*) {
     Json result{{"chapters", "copied and validated"},
-                {"edit_lists", Json::array()},
-                {"removed_streams", Json::array()}};
+                {"policy", "FFmpeg playback timestamps; edit lists are informational, not admission gates"},
+                {"edit_lists", Json::array()}, {"removed_streams", Json::array()}};
     for (const auto& a : analysis.at("atoms")) {
-        if (a.value("type", "") == "mvhd" && a.contains("display_matrix") &&
-            a.at("display_matrix") != Json::array({65536, 0, 0, 0, 65536, 0, 0, 0, 1073741824}))
-            throw AppError(TextId::InputDisplayMatrix);
-        if (a.value("type", "") == "moof")
-            throw AppError(Message(TextId::InputEditList, {"fragmented MOV"}));
+        if (a.value("type", "") == "mvhd") {
+            const auto scale = a.value("timescale", uint64_t{});
+            if (scale > 0 && scale <= INT32_MAX)
+                result["preserve_movie_timescale"] = scale;
+        }
         if (a.value("type", "") != "elst")
             continue;
-        const auto& edits = a.at("edits");
-        // A single unit-rate, zero-origin entry is a muxer duration declaration.
-        // Trims, empty edits, repeats, speed changes and segmented timelines
-        // require a timeline-aware remux and are rejected before encoding.
-        if (edits.size() != 1 || edits[0].at("media_time").get<int64_t>() < 0 ||
-            edits[0].at("rate_integer") != 1 || edits[0].at("rate_fraction") != 0)
-            throw AppError(Message(TextId::InputEditList, {a.at("path").get<std::string>()}));
         const auto path = a.at("path").get<std::string>();
         const auto track = path.substr(0, path.find("/edts"));
-        uint64_t trackId = 0, movieScale = 0, mediaScale = 0, duration = 0;
-        for (const auto& header : analysis.at("atoms")) {
-            const auto p = header.value("path", "");
-            if (header.value("type", "") == "mvhd")
-                movieScale = header.value("timescale", uint64_t{});
-            if (p.starts_with(track + "/")) {
-                if (header.value("type", "") == "tkhd")
-                    trackId = header.value("track_id", uint64_t{});
-                if (header.value("type", "") == "mdhd") {
-                    mediaScale = header.value("timescale", uint64_t{});
-                    duration = header.value("duration_ticks", uint64_t{});
-                }
-            }
-        }
-        const auto mediaTime = edits[0].at("media_time").get<uint64_t>();
-        if (!movieScale || !mediaScale || duration < mediaTime ||
-            std::abs(static_cast<long double>(edits[0].at("duration_ticks").get<uint64_t>()) -
-                     static_cast<long double>(duration - mediaTime) * movieScale / mediaScale) > 1.0L)
-            throw AppError(Message(TextId::InputEditList, {path + ": trimmed or inconsistent duration"}));
-        if (mediaTime) {
-            // Preserve AAC encoder priming only when the actual first packet
-            // confirms exactly this skip. Positive edits are otherwise trims.
-            int streamIndex = -1;
-            for (const auto& s : in.raw.value("streams", Json::array())) {
-                const auto id = s.value("id", std::string());
-                if (!id.empty() && std::stoull(id, nullptr, 0) == trackId &&
-                    s.value("codec_name", "") == "aac")
-                    streamIndex = s.value("index", -1);
-            }
-            if (streamIndex < 0 || ffprobe.empty())
-                throw AppError(Message(TextId::InputEditList, {path + ": nonzero media origin"}));
-            auto p = RunProcess(ffprobe,
-                                {L"-v", L"error", L"-select_streams", std::to_wstring(streamIndex),
-                                 L"-read_intervals", L"%+#1", L"-show_packets", L"-of", L"json",
-                                 in.path.wstring()},
-                                cancel, 30);
-            bool priming = false;
-            if (!p.exitCode)
-                for (const auto& packet : Json::parse(p.output).value("packets", Json::array()))
-                    for (const auto& side : packet.value("side_data_list", Json::array()))
-                        priming |= side.value("side_data_type", "") == "Skip Samples" &&
-                                   side.value("skip_samples", uint64_t{}) == mediaTime;
-            if (!priming)
-                throw AppError(Message(TextId::InputEditList,
-                                       {path + ": priming not confirmed by packet skip samples"}));
-        }
-        result["edit_lists"].push_back({{"path", a.at("path")},
-                                        {"policy", mediaTime ? "packet-verified AAC priming copied"
-                                                             : "zero-origin, unit-rate duration declaration"},
-                                        {"edits", edits}});
+        std::string handler;
+        for (const auto& header : analysis.at("atoms"))
+            if (header.value("path", "") == track + "/mdia[0]/hdlr[0]")
+                handler = header.value("handler_type", "");
+        // In particular, iPhone mebx tracks can have nonzero origins. They are
+        // not copied, and must not prevent conversion of the video/audio.
+        result["edit_lists"].push_back(
+            {{"path", path}, {"handler", handler}, {"edits", a.at("edits")},
+             {"policy", handler == "vide" || handler == "soun"
+                            ? "playback timeline interpreted by FFmpeg"
+                            : "auxiliary track omitted; timecode regenerated if present"}});
     }
-    for (const auto& s : in.raw.value("streams", Json::array())) {
-        const auto type = s.value("codec_type", "");
-        if (type == "video" || type == "audio")
+    for (const auto& stream : in.raw.value("streams", Json::array())) {
+        const auto type = stream.value("codec_type", "");
+        if (type == "video" || type == "audio" || stream.value("codec_tag_string", "") == "tmcd")
             continue;
-        if (s.value("codec_tag_string", "") == "tmcd")
-            continue;
-        // Text chapters are regenerated from the chapter list; timed metadata
-        // does not participate in the accepted video/audio timeline.
         result["removed_streams"].push_back(
-            {{"index", s.value("index", -1)},
-             {"type", type},
-             {"codec_tag", s.value("codec_tag_string", "")},
-             {"reason", "not video/audio/timecode; chapters copied separately"}});
+            {{"index", stream.value("index", -1)}, {"type", type},
+             {"codec_tag", stream.value("codec_tag_string", "")},
+             {"reason", "auxiliary metadata/data; not required for conversion"}});
     }
     return result;
 }

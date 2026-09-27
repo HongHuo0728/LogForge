@@ -100,7 +100,7 @@ joins on cancellation/failure, including partial reader-thread construction.
 
 ## Version and resources
 
-CMake defines version 1.2.0 and build 26926A. Generated headers feed both the C++ display/logs/metadata and Windows VERSIONINFO. FileVersion/ProductVersion and manifest use 1.2.0.0; UI/CLI use 1.2.0 (26926A). Both executables embed the same nine-size icon. Portable packaging uses an explicit document/image allowlist. The independent ZIP audit checks the actual checksum sidecar, CRC integrity and equality with the tested Release executable.
+CMake defines version 1.2.1 and build 26927B. Generated headers feed both the C++ display/logs/metadata and Windows VERSIONINFO. FileVersion/ProductVersion and manifest use 1.2.1.0; UI/CLI use 1.2.1 (26927B). Both executables embed the same nine-size icon. Portable packaging uses an explicit document/image allowlist. The independent ZIP audit checks the actual checksum sidecar, CRC integrity and equality with the tested Release executable.
 
 ## 1.2.0 processing and storage
 

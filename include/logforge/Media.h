@@ -54,9 +54,9 @@ struct MediaInfo {
     std::wstring Summary(Language language = Language::English) const;
 };
 bool SameMetadataValue(const std::string& key, const Json& a, const Json& b);
-bool SupportedDisplayMatrix(const std::string& matrix);
+bool SupportedDisplayMatrix(const std::string& matrix, int width = 0, int height = 0);
 Json PreserveMovCreationTimes(const Json& sourceAtoms, const fs::path& encodedPartial,
-                              const std::atomic_bool& cancel);
+                              const std::atomic_bool& cancel, bool orientationBaked = false);
 Json InspectMovTimeline(const MediaInfo& input, const Json& atoms, const fs::path& ffprobe = {},
                         const std::atomic_bool* cancel = nullptr);
 MediaInfo Probe(const fs::path& ffprobe, const fs::path& path, const std::atomic_bool* cancel = nullptr);
