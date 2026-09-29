@@ -1,0 +1,337 @@
+{
+  "pages": 63,
+  "issues": [],
+  "page_stats": [
+    {
+      "page": 1,
+      "characters": 350,
+      "first_text": "SOURCE CODE MONOGRAPH\nLogForge\nHLG 至 Apple Log 转换的\n数学原理、源码实现与验证\n从颜色传递函数到可靠媒体交付的逐层论证\n研究对象\n固定版本与证据\n仓库\nHongHuo0728 / LogForge\n版本\n1.2.1（26927B）\n提交\n6b43a93"
+    },
+    {
+      "page": 2,
+      "characters": 721,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1 · 26927B · 6b43a93\n固定版本研究  ·  2026-09-29\n2\n目录\n4\n摘要\n5\nAbstract\n6\n第一章 研究对象、证据方法与论证边界\n8\n第二章 信号域、颜色空间与端到端契约\n10\n第三章"
+    },
+    {
+      "page": 3,
+      "characters": 374,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1 · 26927B · 6b43a93\n固定版本研究  ·  2026-09-29\n3\n图表说明与证据约定\n本文的数学曲线按公开常数和当前源码公式直接计算。架构图与状态图为实现关系的抽象示意。标明\n“历史”的性能图使用仓库"
+    },
+    {
+      "page": 4,
+      "characters": 934,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1 · 26927B · 6b43a93\n固定版本研究  ·  2026-09-29\n4\n摘要\n面向移动影像与专业后期制作之间的色彩交接，LogForge 将十位 BT.2020 HLG ProRes 素材转换为\nApple"
+    },
+    {
+      "page": 5,
+      "characters": 806,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1 · 26927B · 6b43a93\n固定版本研究  ·  2026-09-29\n5\nAbstract\nLogForge is a native Windows application that converts BT."
+    },
+    {
+      "page": 6,
+      "characters": 1572,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1 · 26927B · 6b43a93\n固定版本研究  ·  2026-09-29\n6\n第一章 研究对象、证据方法与论证边界\n1.1 从产品需求到研究问题\n视频后期中的“统一到 Log”至少包含三个不同目标。第一，给所有像"
+    },
+    {
+      "page": 7,
+      "characters": 649,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1 · 26927B · 6b43a93\n固定版本研究  ·  2026-09-29\n7\n证据类型\n典型实例\n可以支持\n不能直接支持\n源码核对\nHLGToAppleLog 调用顺序\n当前实现的计算关系\n任意相机的曝光真实性\n"
+    },
+    {
+      "page": 8,
+      "characters": 953,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1 · 26927B · 6b43a93\n固定版本研究  ·  2026-09-29\n8\n第二章 信号域、颜色空间与端到端契约\n2.1 五个不能混用的量\n为避免同一个字母同时表示线性光和视频码值，本文分别使用 H 表示归一化"
+    },
+    {
+      "page": 9,
+      "characters": 1160,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1 · 26927B · 6b43a93\n固定版本研究  ·  2026-09-29\n9\n2.3 为什么不做色域变换\n输入解释和输出目标均采用 BT.2020／D65。改变曲线并不要求改变基色，因此程序没有在中间插入\nBT."
+    },
+    {
+      "page": 10,
+      "characters": 1090,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1 · 26927B · 6b43a93\n固定版本研究  ·  2026-09-29\n10\n第三章 HLG 逆函数的推导与参考曝光\n3.1 从分段 OETF 求逆\nHLG 的低亮度区使用平方根型编码，高亮度区使用对数型编码。"
+    },
+    {
+      "page": 11,
+      "characters": 942,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1 · 26927B · 6b43a93\n固定版本研究  ·  2026-09-29\n11\n(10)\n曝光参数 e 的单位是档。每增加一档，场景线性量乘二；减少一档则除二。将曝光放在线性域可以保\n留标准模式下非零 RGB 通"
+    },
+    {
+      "page": 12,
+      "characters": 1127,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1 · 26927B · 6b43a93\n固定版本研究  ·  2026-09-29\n12\n第四章 Apple Log 编码、逆映射与可证明性质\n4.1 常数、阈值与三个分支\nColor.h 集中定义 Apple Log 常"
+    },
+    {
+      "page": 13,
+      "characters": 859,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1 · 26927B · 6b43a93\n固定版本研究  ·  2026-09-29\n13\n(20)\n图 3 Apple Log 传递函数的阴影二次段与高端对数段。图中标出下限、连接点、18% 灰和名义高端；曲线按源码常数计"
+    },
+    {
+      "page": 14,
+      "characters": 290,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1 · 26927B · 6b43a93\n固定版本研究  ·  2026-09-29\n14\n(21)\n因此，论文能够证明的是指定映射被实现以及某些结构性质成立，而不是整个转码链无损。保留更多\n中间精度、禁止隐式色调映射、验证"
+    },
+    {
+      "page": 15,
+      "characters": 1139,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1 · 26927B · 6b43a93\n固定版本研究  ·  2026-09-29\n15\n第五章 YCbCr、数据范围与色度重采样\n5.1 BT.2020 NCL 矩阵的物理位置\n输入 ProRes 的三个平面通常不是 R"
+    },
+    {
+      "page": 16,
+      "characters": 906,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1 · 26927B · 6b43a93\n固定版本研究  ·  2026-09-29\n16\n图 4 亮度采样点与 left／center 色度采样点的空间关系。半像素位移会在色度斜坡中形成可测差值；图为采样几何示意，不代\n表"
+    },
+    {
+      "page": 17,
+      "characters": 1161,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1 · 26927B · 6b43a93\n固定版本研究  ·  2026-09-29\n17\n第六章 创意调整的模型、证明与局限\n6.1 为什么创意处理单独开关\n标准转换希望尽量忠实实现声明的函数关系，创意处理则主动改变场景线"
+    },
+    {
+      "page": 18,
+      "characters": 629,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1 · 26927B · 6b43a93\n固定版本研究  ·  2026-09-29\n18\n(34)\n(35)\n这个结论意味着正中性亮度的先后顺序不会被创意曲线颠倒。六档之外权重为常量，导数回到一；中\n灰和六档边界处权重的一"
+    },
+    {
+      "page": 19,
+      "characters": 814,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1 · 26927B · 6b43a93\n固定版本研究  ·  2026-09-29\n19\n第七章 浮点精度、误差预算与数值验证\n7.1 精度沿管线如何分配\n程序选择 float32 作为进程间传输格式，颜色表达式提升为 d"
+    },
+    {
+      "page": 20,
+      "characters": 1073,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1 · 26927B · 6b43a93\n固定版本研究  ·  2026-09-29\n20\n7.3 参考信号如何避免自证循环\nFFmpegNumeric 构造十六个明确的整数 YCbCr 色块，包含近黑、中灰、白、超白与色差"
+    },
+    {
+      "page": 21,
+      "characters": 871,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1 · 26927B · 6b43a93\n固定版本研究  ·  2026-09-29\n21\n第八章 C++20 核心与外部进程架构\n8.1 模块划分与依赖方向\nLogForge 使用 C++20 和 Win32，不链接 FF"
+    },
+    {
+      "page": 22,
+      "characters": 1062,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1 · 26927B · 6b43a93\n固定版本研究  ·  2026-09-29\n22\n8.3 两个 FFmpeg 进程的分工\n解码器显式关闭自动旋转，选择第一视频流并去掉音频、字幕和数据，输出 gbrpf32le。必要"
+    },
+    {
+      "page": 23,
+      "characters": 776,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1 · 26927B · 6b43a93\n固定版本研究  ·  2026-09-29\n23\n第九章 三缓冲流水线与内存上界\n9.1 为什么逐帧串行处理不够\n若主线程先读一帧，再计算整帧，再把整帧写出，那么等待解码时颜色线程闲"
+    },
+    {
+      "page": 24,
+      "characters": 1331,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1 · 26927B · 6b43a93\n固定版本研究  ·  2026-09-29\n24\n9.3 流结束与完整性\n解码管道的一次 Read 不保证返回请求的全部字节，所以读线程循环填充缓冲。标准模式允许最后一\n块短于容量，"
+    },
+    {
+      "page": 25,
+      "characters": 1352,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1 · 26927B · 6b43a93\n固定版本研究  ·  2026-09-29\n25\n第十章 持久 CPU 工作线程与确定性\n10.1 避免每块创建线程\nFloatTransformer 在构造时创建一组持久 jthr"
+    },
+    {
+      "page": 26,
+      "characters": 392,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1 · 26927B · 6b43a93\n固定版本研究  ·  2026-09-29\n26\n10.5 CPU 优化的适用边界\n持久工作线程能减少调度开销，但不能保证线程越多越快。小分辨率容易受固定成本限制，大分辨率\n可能受指"
+    },
+    {
+      "page": 27,
+      "characters": 1366,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1 · 26927B · 6b43a93\n固定版本研究  ·  2026-09-29\n27\n第十一章 CUDA 后端、资格验证与失败原子性\n11.1 动态驱动接口与部署边界\nCudaTransformer 只从系统目录载入 "
+    },
+    {
+      "page": 28,
+      "characters": 863,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1 · 26927B · 6b43a93\n固定版本研究  ·  2026-09-29\n28\n11.5 主机数据的提交时刻\nApply 先把原始块复制到独立锁页主机缓冲，再异步上传、运行核函数、下载结果与统计。同步完成\n后检查"
+    },
+    {
+      "page": 29,
+      "characters": 1112,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1 · 26927B · 6b43a93\n固定版本研究  ·  2026-09-29\n29\n第十二章 固定帧率验证与时间轴重建\n12.1 rawvideo 丢失了哪些信息\nrawvideo 管道只输送样本字节，既没有每帧原始"
+    },
+    {
+      "page": 30,
+      "characters": 659,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1 · 26927B · 6b43a93\n固定版本研究  ·  2026-09-29\n30\n图 10 固定节奏、量化交替节奏与持续漂移的相位示例。虚线表示 1.05 tick 预算；曲线为教学构造数据，展示局部误差小并不\n保"
+    },
+    {
+      "page": 31,
+      "characters": 1395,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1 · 26927B · 6b43a93\n固定版本研究  ·  2026-09-29\n31\n第十三章 音画同步、编辑列表与旋转几何\n13.1 音频复制不等于同步自动正确\n音频使用 stream copy 可以避免再次有损编码"
+    },
+    {
+      "page": 32,
+      "characters": 876,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1 · 26927B · 6b43a93\n固定版本研究  ·  2026-09-29\n32\n(53)\n(54)\n13.5 浮点域中的方向烘焙\n对九十度和二百七十度旋转，程序交换输出宽高，并在解码滤镜的 gbrpf32le 阶"
+    },
+    {
+      "page": 33,
+      "characters": 1140,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1 · 26927B · 6b43a93\n固定版本研究  ·  2026-09-29\n33\n第十四章 MOV 原子解析与语义比较\n14.1 为什么需要独立容器分析器\nffprobe 能提供大量媒体字段，但不会把所有样本描述扩"
+    },
+    {
+      "page": 34,
+      "characters": 813,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1 · 26927B · 6b43a93\n固定版本研究  ·  2026-09-29\n34\n图 12 与 Apple Log 识别有关的 MOV 层级。logs 与 colr 是 ProRes 样本项的直接子原子；电影级 m"
+    },
+    {
+      "page": 35,
+      "characters": 1492,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1 · 26927B · 6b43a93\n固定版本研究  ·  2026-09-29\n35\n第十五章 Apple Log 识别字段与元数据写入证明\n15.1 三种声明承担不同职责\n输出同时包含标准颜色描述、项目自有说明与原生"
+    },
+    {
+      "page": 36,
+      "characters": 843,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1 · 26927B · 6b43a93\n固定版本研究  ·  2026-09-29\n36\n15.5 尾部移动的方向与内存\n要在现有文件中向后挪动一段重叠区间，必须从末尾向前复制，否则先写入的字节可能覆盖尚未读取\n的数据。源"
+    },
+    {
+      "page": 37,
+      "characters": 1463,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1 · 26927B · 6b43a93\n固定版本研究  ·  2026-09-29\n37\n第十六章 元数据白名单、创建时间与保真语义\n16.1 从全量复制转向显式计划\n把源文件所有元数据原样复制最简单，却容易保留已经不再成"
+    },
+    {
+      "page": 38,
+      "characters": 532,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1 · 26927B · 6b43a93\n固定版本研究  ·  2026-09-29\n38\n章节映射来自源输入，自动元数据复制被禁用后再逐项恢复标题。输出验证比较章节数量、起止时间\n与标题，时间容差为一毫秒。章节、时间码与音"
+    },
+    {
+      "page": 39,
+      "characters": 1346,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1 · 26927B · 6b43a93\n固定版本研究  ·  2026-09-29\n39\n第十七章 工具发现、执行信任与数值资格\n17.1 发现路径不是授权执行\n桌面工具经常在 PATH 或磁盘上搜索 ffmpeg.exe"
+    },
+    {
+      "page": 40,
+      "characters": 851,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1 · 26927B · 6b43a93\n固定版本研究  ·  2026-09-29\n40\n17.5 能力检查与数值检查\n允许执行之后，程序检查 ProRes 解码器、prores_ks、gbrpf32le、yuv422p1"
+    },
+    {
+      "page": 41,
+      "characters": 1412,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1 · 26927B · 6b43a93\n固定版本研究  ·  2026-09-29\n41\n第十八章 进程监督、管道死锁与取消正确性\n18.1 受监督启动顺序\nPlatform.cpp 创建子进程时先设为 suspended"
+    },
+    {
+      "page": 42,
+      "characters": 615,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1 · 26927B · 6b43a93\n固定版本研究  ·  2026-09-29\n42\n进度数据本身也按有界文本处理。frame、fps、out_time_us 与 speed 分别解析，无法解析的单个值\n不应直接产生虚"
+    },
+    {
+      "page": 43,
+      "characters": 920,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1 · 26927B · 6b43a93\n固定版本研究  ·  2026-09-29\n43\n第十九章 文件事务、磁盘规划与崩溃恢复\n19.1 最终路径与临时路径分离\nTranscodeJob 要求目标为新 MOV 文件，并在"
+    },
+    {
+      "page": 44,
+      "characters": 1139,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1 · 26927B · 6b43a93\n固定版本研究  ·  2026-09-29\n44\n(62)\n预检通过后仍可能因其他进程占用空间、设备断开或实际码率偏高而写入失败。因此运行时写错误必\n须继续致命处理。tests/v1"
+    },
+    {
+      "page": 45,
+      "characters": 1437,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1 · 26927B · 6b43a93\n固定版本研究  ·  2026-09-29\n45\n第二十章 GUI、CLI、队列与可复核交互\n20.1 一个后台任务拥有者\nMainWindow 以一个后台 worker 承担探测、"
+    },
+    {
+      "page": 46,
+      "characters": 631,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1 · 26927B · 6b43a93\n固定版本研究  ·  2026-09-29\n46\n默认输出名基于源文件 stem 加 AppleLog 后缀，不做自动覆盖。不同来源同名文件可能产生目标冲\n突，此时对应项目失败而不是"
+    },
+    {
+      "page": 47,
+      "characters": 1447,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1 · 26927B · 6b43a93\n固定版本研究  ·  2026-09-29\n47\n第二十一章 测试体系、本文复测与失败分析\n21.1 测试不是一个总分\n仓库测试覆盖数学、媒体解析、工具信任、进程监督、时间节奏、MO"
+    },
+    {
+      "page": 48,
+      "characters": 1072,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1 · 26927B · 6b43a93\n固定版本研究  ·  2026-09-29\n48\n测试名称\n结果\n耗时／秒\nhardening_cadence\n通过\n0.085\nhardening_security\n通过\n0.54"
+    },
+    {
+      "page": 49,
+      "characters": 975,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1 · 26927B · 6b43a93\n固定版本研究  ·  2026-09-29\n49\n21.5 失败不能被简单归为无害\n从测试维护角度看，这是过时预期导致的失败；从信号解释角度看，它也暴露了宽松准入的实际代价。\n一个明"
+    },
+    {
+      "page": 50,
+      "characters": 1005,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1 · 26927B · 6b43a93\n固定版本研究  ·  2026-09-29\n50\n第二十二章 性能数据、复杂度与可重复比较\n22.1 历史矩阵的工作负载\ndocs/benchmarks/1.2.0.json 记录二"
+    },
+    {
+      "page": 51,
+      "characters": 1007,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1 · 26927B · 6b43a93\n固定版本研究  ·  2026-09-29\n51\n(65)\n流水线重叠也会改变如何理解 p：阶段并非全部串行相加，某阶段缩短可能只减少一部分墙钟时间。\n报告中的 read、write"
+    },
+    {
+      "page": 52,
+      "characters": 1281,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1 · 26927B · 6b43a93\n固定版本研究  ·  2026-09-29\n52\n第二十三章 从一帧样本到最终文件的实现演练\n23.1 建立一个明确的输入实例\n考虑一个 3840×2160、二十四帧每秒、两秒时长的"
+    },
+    {
+      "page": 53,
+      "characters": 794,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1 · 26927B · 6b43a93\n固定版本研究  ·  2026-09-29\n53\n23.5 追踪一个 GPU 失败分支\n将同一实例改为 Auto，如果初始化失败则一开始选择 CPU；如果第若干块的 CUDA 运算失"
+    },
+    {
+      "page": 54,
+      "characters": 1464,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1 · 26927B · 6b43a93\n固定版本研究  ·  2026-09-29\n54\n第二十四章 讨论、实现局限与研究结论\n24.1 能够成立的核心论证\n本文的第一项论证是数学一致性。HLG 逆函数、参考白尺度、曝光和"
+    },
+    {
+      "page": 55,
+      "characters": 479,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1 · 26927B · 6b43a93\n固定版本研究  ·  2026-09-29\n55\n24.5 结论\nLogForge 展示了一种可理解的工程路径：以公开颜色数学定义信号转换，以独立多媒体工具完成编解\n码，以有限内存和"
+    },
+    {
+      "page": 56,
+      "characters": 1072,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1 · 26927B · 6b43a93\n固定版本研究  ·  2026-09-29\n56\n附录 A 符号、单位与复核指南\nA.1 统一符号表\n表 4 主要符号与单位\n符号\n含义\n单位或定义域\nH\nHLG 编码分量\n归一化；"
+    },
+    {
+      "page": 57,
+      "characters": 379,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1 · 26927B · 6b43a93\n固定版本研究  ·  2026-09-29\n57\nA.4 实验记录的读取方式\n本次回归 XML 是当前运行结果；持续测试 JSON 包含转换耗时、应用私有内存序列和抽样误差；历史\n性"
+    },
+    {
+      "page": 58,
+      "characters": 1418,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1 · 26927B · 6b43a93\n固定版本研究  ·  2026-09-29\n58\n附录 B 全仓库文件与研究章节对应\n以下索引覆盖固定提交中的全部受版本控制文件。它说明文件在实现、测试、构建或文献证据中的角\n色，并"
+    },
+    {
+      "page": 59,
+      "characters": 1726,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1 · 26927B · 6b43a93\n固定版本研究  ·  2026-09-29\n59\n文件路径与行数\n实现责任／研究用途\ndocs/benchmarks/1.2.0.json 2805 行\n项目说明、历史证据或开发流程"
+    },
+    {
+      "page": 60,
+      "characters": 1527,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1 · 26927B · 6b43a93\n固定版本研究  ·  2026-09-29\n60\n文件路径与行数\n实现责任／研究用途\nsrc/Cli.cpp 223 行\n命令与数值参数、核心自动化入口；第20章\nsrc/Disco"
+    },
+    {
+      "page": 61,
+      "characters": 1209,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1 · 26927B · 6b43a93\n固定版本研究  ·  2026-09-29\n61\n文件路径与行数\n实现责任／研究用途\ntests/benchmark.py 97 行\n正式吞吐矩阵与过程观测；第22章\ntests/c"
+    },
+    {
+      "page": 62,
+      "characters": 1699,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1 · 26927B · 6b43a93\n固定版本研究  ·  2026-09-29\n62\n参考文献与源码定位\n正文的实现论述以固定提交源码为主要依据，章节末的源码定位列出主要文件；下面给出完整的项目\n资料和关键外部原始参考"
+    },
+    {
+      "page": 63,
+      "characters": 1180,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1 · 26927B · 6b43a93\n固定版本研究  ·  2026-09-29\n63\n参考文献与源码定位（续）\n[11] Apple提供的ACES IDT，固定提交528c78fe：Apple Log解码常数。\nhtt"
+    }
+  ],
+  "embedded_font_names": [
+    "AAAAAA+SimHei",
+    "AAAAAA+SimSun-0",
+    "AAAAAA+TimesNewRomanPS-BoldMT",
+    "AAAAAA+TimesNewRomanPSMT",
+    "AAAAAB+SimHei",
+    "AAAAAB+SimSun-0",
+    "AAAAAC+SimHei",
+    "AAAAAC+SimSun-0",
+    "AAAAAD+SimSun-0",
+    "AAAAAE+SimSun-0",
+    "Helvetica",
+    "Times-Roman"
+  ],
+  "outline_entries": 31,
+  "pdf_bytes": 1237267
+}

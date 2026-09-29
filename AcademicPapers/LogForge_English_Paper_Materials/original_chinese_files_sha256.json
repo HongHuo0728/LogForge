@@ -1,0 +1,894 @@
+[
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\本次回归测试.xml",
+    "SHA256": "E23050C5772AF6108D2406C8C52B05B55EF897A98D56E35D094E36ABF09FCABB"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\论文正文.md",
+    "SHA256": "3B66C8AA94530A561C444E907935602AF1228C876AA87C2486E1B9EC4F9CC43A"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\全仓库源码清单.json",
+    "SHA256": "7E47076A485472C9519E572F8952C5BF7D2E1DF34F740B298D20BDE4B1B4F586"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\全仓库源码清单.tsv",
+    "SHA256": "B6A4D9C3AF02BEEC7B2842FA8DB3BF5D1A48E39672ED481FFE00FF69798C8510"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\图表目录.json",
+    "SHA256": "5B63478A58C3C668FBF2E39F0BED2F01B83F4BBBA9D4D01AA815DB9799507052"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\阅读与复现说明.md",
+    "SHA256": "7E65A930CA7590A3E4D04D507DCE771BE07E8D1CCC6B0E6AEEEB747A4B2CC2E1"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\制作与验证统计.json",
+    "SHA256": "39C706C802011967354DB3D40CFCD4454E8DCC73D9FFCB1236BDCEFF1037A9B8"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\build_paper.py",
+    "SHA256": "44605AF2F111123F7CAF872DE9BC5A6844DCE40B1962D4A619EE699C56F6D937"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\check_math.py",
+    "SHA256": "30A5872EDB0A1DFD5F940F7506A36DD98B6D8C7ACF0E845CBC89D0DC24B3E2AA"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\LogForge_6b43a93_源码快照.zip",
+    "SHA256": "012C21006C8047ED8D16F60CE6500D741F43D07064715352949F5CAF9E160B33"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\LogForge_技术论文.tex",
+    "SHA256": "BB7811C54530BC310BC1AFD1E290E77B8685DDDF62AA09426CE9CF13FF69FA3F"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\verify_pdf.py",
+    "SHA256": "88C644C27AA71688BA126C10E0C160B81220EE1B0C04078EC77AC01840CCE2C0"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\evidence\\benchmark_historical_1.2.0.json",
+    "SHA256": "3347A311D28E712752661B4A2615725251DAE4488EECED1565BF63390518CB27"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\evidence\\ctest_current.log",
+    "SHA256": "733E42A592D6EB7436E4B5487A848FB616D5DE66ACB503171E0487FDF292A1E5"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\evidence\\sustained_current.json",
+    "SHA256": "CEDD42705297C195BB9D27718959743D197D0A4525E30F5743A7DBDAACFE8C8B"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\evidence\\verification_historical_1.2.0.json",
+    "SHA256": "C054D034C823C62E9365EC2C20A440F1826E59A83664F45EF39CC0264A6E79F3"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\apple.pdf",
+    "SHA256": "065FBE1CC2055B884FA332CC289FC8FD6D333EB116CF3844F91F2181FDC777D2"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\apple.png",
+    "SHA256": "A3FE31CB0B5A2D39B7D54625E61451A3B5D4C8F7A157B2E03D0359BB706FF39A"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\apple.svg",
+    "SHA256": "A8BC24027D69A20B26BAC4EAAD5893849D033A036B22896EBA6F3F26286C151A"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\architecture.pdf",
+    "SHA256": "A121E700FFFFFF4A8B813F9E97FB8B86E6C9B096E1FCAC5208BAC12E3FC82C5A"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\architecture.png",
+    "SHA256": "17DBBB183E05F228A50C3FEB00478F0D8C61EB3D2393FDEFEFDAB36A7CEBF515"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\architecture.svg",
+    "SHA256": "76D8E80AE6ADA2E75252836D133447EAE09AFDD381A9715CE92EA90938A5B8F1"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\benchmark.pdf",
+    "SHA256": "462C2DF1C3F1BD956871DC2B52923A92E4858679D2DC0AE71988C778919C0F80"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\benchmark.png",
+    "SHA256": "A86296C2A551C76A94D233ACAC68A3C677368E0F2D582C08463BAD32E6248B46"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\benchmark.svg",
+    "SHA256": "7FF9DE0A184BBBB410DC90616D7C7553C1E5A21BDC7C73210FF13D82BF11D277"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\bridge.pdf",
+    "SHA256": "EA7B66BF77F16A0DDCF10DA320BA3C67B87525426DF79976E5FA3CC78C3606D5"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\bridge.png",
+    "SHA256": "3AA694C47DC9A6F5FEC253F99072FA780D026B07657F3CE6CEE9C9DE1B4B8537"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\bridge.svg",
+    "SHA256": "123F376B0C88B9ED42BFC50650215F87EA0BA17FE92131333CBE9E17382A6424"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\cadence.pdf",
+    "SHA256": "DC353F786043ED7F88F20CCA0F102FE191D989C219304E32B9E3BC162746A019"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\cadence.png",
+    "SHA256": "9386B21F96DB3ADC3653DC833F41F1FC2FA03D3C22111B6B64E028B8BB375CFB"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\cadence.svg",
+    "SHA256": "85C5D042C9F05B71153AD79EEA1037BA354998ED3D853B42047892B8E52A3ED0"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\chroma.pdf",
+    "SHA256": "1A2CAA269C384314FD70A69E36B2B611848F3BBF4E2FB68C6A2F081978044778"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\chroma.png",
+    "SHA256": "59763DEE025B3622C9290E33C6251E0BBF08BDFD1A8849342790D4BDCBBCB47B"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\chroma.svg",
+    "SHA256": "BF438D6416C47BAC18F6A71DB3EC0F2939BD59CB1FE4683EE5EAAAAAA6A61650"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\creative.pdf",
+    "SHA256": "521FF61A0DEF55A931A84922D96D999EFA291EDB9A809E59D28725E277E547AF"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\creative.png",
+    "SHA256": "48EE5876C67EBC64C6C5721FCC1E0EBFB13C9EE2D05E9DCF209E61FCF17B5924"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\creative.svg",
+    "SHA256": "A5C3449F063EE02535FF516F0A43C47C05D11F6460237E55235EE4BA5EE2FED1"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\cuda.pdf",
+    "SHA256": "1AEBABAE7BB575C332DE03EB7AB140FD3D8C6D8BA282CF498E52ABDCC58B6A66"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\cuda.png",
+    "SHA256": "E7064DACAAF9821941060878DDE2F6176009823244B31E747D886ACD8B969156"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\cuda.svg",
+    "SHA256": "B24AC49C7B39DC073DE1623594BF3D5FF208D40EB88CA152ACD49721AF608DC6"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_001.svg",
+    "SHA256": "211A0CC6E4332413B8A548A91603C4DF8D5495F20F721F9348C3932ABA7B76B3"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_002.svg",
+    "SHA256": "50DDF5931CE36281FCA7200379A846934E0B54A4288B4E4AA094D55A4A46EEAE"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_003.svg",
+    "SHA256": "C196867CE7E0F2E556623F02D621E89669E3F0663762179985F9AFBC20733F75"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_004.svg",
+    "SHA256": "6D8CAEB769F1EC1A8C12042B552124771D799E9618E9C0F95BD7C42281F436B5"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_005.svg",
+    "SHA256": "88730F4B64786127C79907AEEF0869126753A7AE14AE006BBFC7D95C11EB7ADE"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_006.svg",
+    "SHA256": "4F904D6C028CA23D1CAA821C5CD51B342A57138872AD9AEFE36D003A21D84FBD"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_007.svg",
+    "SHA256": "FD10936546A7BF34E92CF2AB80F7866895F642B164E41046090825F908057EB4"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_008.svg",
+    "SHA256": "D050432C6BF46FB9E7D03236842B6C3A3650E8128FF4C6AB77E6D7D1BED34D68"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_009.svg",
+    "SHA256": "C356D579E4C5EF5EA9F29D0C49660C44519DD7AB5C5E6D45018D52BE3C9847AC"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_010.svg",
+    "SHA256": "7102FF33C0ACBF8FF56E876B96297B5ACB2D509CA44D58678A491191FC46FD4A"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_011.svg",
+    "SHA256": "EFC9C218DE6A116CF89EBE562C12BADBD17157811A210D15A74829E7A8E6E97B"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_012.svg",
+    "SHA256": "CCD26EF6A54DF90A61CD972F90D685B498E217A2B8DC3DEBB69FB5DED52B2047"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_013.svg",
+    "SHA256": "F0C1E304988ABD6AC2F787C0AB7024390CD96773A3E6357557EEA85B951400D5"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_014.svg",
+    "SHA256": "FCEB3DAC9B6F6A57AD144E17D4A9274E6DC4375A4F77E597FB27663842A8F34F"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_015.svg",
+    "SHA256": "C8539F32FF008A1C525F910BC536B0D5E89D30EFC06F7128845C8F8A67357FD7"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_016.svg",
+    "SHA256": "3C5550B20483269B992BF5B579D16A51331A544B47A1F725DAE029A576C758E6"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_017.svg",
+    "SHA256": "2ED94A84F452285B450DFDCC32B919AF62BD82DCC87B770CD5EC2D9B76C29104"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_018.svg",
+    "SHA256": "5CC1B59988E42E6A5266FD0A34893E3118BB656507D7AF5542DE27BFAC0DBE78"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_019.svg",
+    "SHA256": "7B4960D5D9ADE15A391531C3F6A8E44BBDEDA0A2F3FA7998F916F0710F1A5577"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_020.svg",
+    "SHA256": "358C68A424DFC3BCD9087CCC16896AA60AB98D5AA1C77CA23365221C4A041292"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_021.svg",
+    "SHA256": "82204ECE8A4A4B225CC334D59F2BE3B2E107CF25DE7E4BC81BE9DD63D8B07205"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_022.svg",
+    "SHA256": "495B5A0D075BC49145EF08CB294A594AE4746E87C9FCF82883DB7B71114739D2"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_023.svg",
+    "SHA256": "AE915826BDD11BF9A2B1C188B5033B665859B4F58F75A8C5ABAC081E8E965E43"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_024.svg",
+    "SHA256": "823BCBCC5CB8FC3DA6DF227A937CB0C0D1F0A304D06EC1DA3DE6A03139D26447"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_025.svg",
+    "SHA256": "D855966933089DE537A521E0885BFC992751AF327EF4A563057B2F81475EBDED"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_026.svg",
+    "SHA256": "FD73D5ACE9699D72B786158365050B5A08A83A0E07404BFEA7625BE2B04530BA"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_027.svg",
+    "SHA256": "3ECC480B736CD868D7A24C6B17E8F743303F75A08A971BA39BAA16C16C63EB9A"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_028.svg",
+    "SHA256": "5C34387734B6D62D836AC1751771729399B091151C824C627ACB58CA45377AF9"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_029.svg",
+    "SHA256": "796CA8A55C8211C5114DF9E6EC07C6E89FEA8D52828CBD86D108B9C4016DCD50"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_030.svg",
+    "SHA256": "4EFCFCB81A4557B6FFB09F335FB2217633C4FB416A40668545D4BF2F37706C2D"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_031.svg",
+    "SHA256": "43038E75E4A2FBF370FCB97B4031CD90A79D868C05F1C1D8EE1EB9A6089B9AAD"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_032.svg",
+    "SHA256": "60C9CD4CB213B0D35ED4598EC478898A5F5F37E35E08687AD70CADEEA177BF4D"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_033.svg",
+    "SHA256": "176B075A8BC444B5F57CBD7529802DB226D78892652BB96911E282BE8528483C"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_034.svg",
+    "SHA256": "AECD380310FA247FC7157980C27AECB752EE4965EACA163C8A32478DC3559728"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_035.svg",
+    "SHA256": "8EFAA8413287C33BDD27E38CDE30B97D1A4296A4BA9D2F2CB8A5F12DECFF0248"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_036.svg",
+    "SHA256": "55584A466499D31D03CA7ED4AF528E98E5646E9FD04F02D5191B7AE6940DAAEF"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_037.svg",
+    "SHA256": "1F8051C19E61578E689A1852AD65771F4F3B63D067F1662EED2C96601C8D545E"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_038.svg",
+    "SHA256": "7F8085EE85F8C994CF77E4D342E84DEEEE408B3B4A57BD072283465C01978C37"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_039.svg",
+    "SHA256": "DD1D55314A21BE591100F5BD50EB1128885A9ABA63E8B90FF76963A41349E063"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_040.svg",
+    "SHA256": "A788700F3A693F04B30D72E3DD37B31E61318D2B69C26E81784D2D78FC073916"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_041.svg",
+    "SHA256": "AC62FEC71B148470678F0BD80171E7C7FDC7AB9DA665C096B631F8C4DBC9FFC5"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_042.svg",
+    "SHA256": "74CF5E364E0EA50DC17925E0D71FA65E0AAAC75BF06B8E319F2D35ED8721916E"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_043.svg",
+    "SHA256": "0A3D73FA8AE2722AA222DC799FA7BDB7E683C573A593C3A0FCE7D1296F96F2FE"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_044.svg",
+    "SHA256": "4873787196B7A5DA66569C48F05DB57FBDD27BBAF7C39BD95CB573BBDB065C2F"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_045.svg",
+    "SHA256": "E5207EFA4205B9B0D9063EA1B21D715D3E04071B3106780C4FA4794991E491FD"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_046.svg",
+    "SHA256": "552C33C45049FF163F617F779487CC005637BBCA0B59EA8AA2419757225B028E"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_047.svg",
+    "SHA256": "4466626C725E59E14A2D94A4F0E8A8180EC54C1302BF4C316F5B101B0621B2CD"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_048.svg",
+    "SHA256": "6897B76BFBBD60AB921A7E6DA66A7004B5139B8D619755E32BE45494EC3EBC7A"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_049.svg",
+    "SHA256": "E8913B669CD2C88F81282493746A4E7D333003A4E5EE513205BB19F860BF79E5"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_050.svg",
+    "SHA256": "80C29D96DBFD5D4F6621C95740AD935438640C01AC22F75C263C4E861524C404"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_051.svg",
+    "SHA256": "80B63B9750987852FA78F65D168BF83515B3BBCDFD5AEC26DF9A89B6242CDED3"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_052.svg",
+    "SHA256": "C9854EFB51D980FBB7A569ECA13BA7BF3A7A1C6AB955D73A25FCE567D9C16718"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_053.svg",
+    "SHA256": "272F1048C66D130D6F5AE209D3B0C9CD5A404F85CFC1917EA2C19BE4EB458D0F"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_054.svg",
+    "SHA256": "5E4A1B1643F2664692477B62168DF0BFDFD94F1460EE7470537F9B7C40F903A7"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_055.svg",
+    "SHA256": "E3E573A8C17E6E3FA299E6D6DE6BC8ECE2148A250C51696A62E8CC75DB801773"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_056.svg",
+    "SHA256": "16386DBD6D848512C981F7A6E5EF03AFDB42566D3EB76A60D902556BC7307795"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_057.svg",
+    "SHA256": "520AE0179557D0802ECE72B0E7917156D6FD9A68F865440CB3602C0227D25C3E"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_058.svg",
+    "SHA256": "3A4B46BC51779AFE0E44D69BBEF5EB79CFEA3B68E54D69F60A804B075BC5AF97"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_059.svg",
+    "SHA256": "B9B40AA0A6A085A78BA6AD570871D6EF810511361BD63C2B9416E40CE470322B"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_060.svg",
+    "SHA256": "DFC4B5957DCFE05C1CAAD984F53AA2C33AEA29BDF5FF75008127C5F21DE1AFF6"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_061.svg",
+    "SHA256": "40F3AD6773C3499AEFCFC3D37C8E22F49ECFE93D819CAAC32B71A3E7B0C641C6"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_062.svg",
+    "SHA256": "9C6836D0535E20598991F9C36E6FDF5B9C88E07894CC337A0470E8A565E50FF4"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_063.svg",
+    "SHA256": "1EB6B2EAD7E82520533B0D35785188BF19AAA8FF070D1C03048D40D8605BB9C6"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_064.svg",
+    "SHA256": "A01E9F6C0510DE692D1C85CBFE6EBEE760AEC824B01F922F3144EB512B1F074E"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_065.svg",
+    "SHA256": "20A4B4449183407542AB8120B417E441A71FFFEA64D12F6A093EFA619C6C5198"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\equation_066.svg",
+    "SHA256": "31E4ED6D8FC3C8C14B45BD30FEA8DDA872EE61DC1D1A50AD2DC4DF0C43DADC65"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\hlg.pdf",
+    "SHA256": "A78D47055969F216CB8B58B4C9DDAC2D9DFDAABAA1426399EFBE10F560E94DD8"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\hlg.png",
+    "SHA256": "5C2A666AACBA8DA842BC5589773817C8266BA2F8CFB3A709805A7CFDA50C20E7"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\hlg.svg",
+    "SHA256": "B8BD38F7B1ED3F7B7481F8331C81E80A6B1683BD286680EDF286BA657E3FDAC6"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\insertion.pdf",
+    "SHA256": "0C89B01A9677913641E8F05C55050901350F2A9417C42AFE620D125E5F749114"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\insertion.png",
+    "SHA256": "3E217F1BB11DA39E653369C142B609AB061645C6CF6040E754D4C617148D03FA"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\insertion.svg",
+    "SHA256": "3615BF27DC555F0AA52C4801353F160685153B314AF8205FA9FCD5C4FF1FBAE1"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\memory.pdf",
+    "SHA256": "902EA8F17F6310E6E7FB85363DA582F85257A632277F7C5E67C6445E763FB4C2"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\memory.png",
+    "SHA256": "B89E2D2A3A085E5C18E6255AEED6D70E2F6821F0698782966DFE38C2AA676170"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\memory.svg",
+    "SHA256": "3FC1FECF06291F0FD679AEC852EDE84B250E9CD02C3DF28A5563B42043D69AE6"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\movtree.pdf",
+    "SHA256": "B9CBE300C29B698D45F262EA6E112A4C39C249D22EB9661614568BCFFD1D06B4"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\movtree.png",
+    "SHA256": "15EA9E966994F3CFB44DCBCA98F830333524BB79E86242B7049CF8DB48F9954F"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\movtree.svg",
+    "SHA256": "C37D1ED7E6B81D397C93688CEE97A5C2EE23C6A615F1A832D1C6F6ED91254985"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\perf_memory.pdf",
+    "SHA256": "9CD3F2912489730E5C3E896100365DD244E60EE20F06B68D1785CC28C394D902"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\perf_memory.png",
+    "SHA256": "7B8FB63B699649CAD05D6F9B1F2D60960C03E19F5B6572A93A3E7B4E30B82776"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\perf_memory.svg",
+    "SHA256": "5389ED5D7A2EDDB22876107819300DB0C5FBEC602309091505C0C91ABA2CB00B"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\pipeline.pdf",
+    "SHA256": "7355E7B6BBD77A6B808E80BD2ACB2C1AFEFC1AF10D028B2814803A60AF230184"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\pipeline.png",
+    "SHA256": "978372C5A037B030F704B3F627968468B4818701A473ABA8E6DE25E09206F5CE"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\pipeline.svg",
+    "SHA256": "61973AC1A74A9FE6F151378D8EEE6E8E4C824C22D0CC4CF67BA556E191B8B2BE"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\publication.pdf",
+    "SHA256": "1842E5485E4DBCCC2AC0C7DB8677D007C197389F407273B6E44A783D68A45AC1"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\publication.png",
+    "SHA256": "A733074758B5CE628280ED81D23671A9A0D8CD431CAA856277910F1896DE0C5C"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\publication.svg",
+    "SHA256": "F0826751347D9D6F2F2E022454CAB88F2B74121816124B15FCAF3317144D31FD"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\quantization.pdf",
+    "SHA256": "54B12AFAD1FD34EFA17F07F410D9618FC46EA0BEA454A569D035BD9A9C9E077C"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\quantization.png",
+    "SHA256": "9FD8E0E312D12298AF65C42F2CE0EB04F9AFD1095C91E8B20FB8B1D77623D314"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\quantization.svg",
+    "SHA256": "FE49580C1C52E6A508B9FDD63C529EE5CAF8958FB8990F9A1008AAE1F5243D39"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\rotation.pdf",
+    "SHA256": "E5123449DD9AB225ED79E1B2D0D9C3F8CFF36C2E8529F6E016842274DE7BBDB2"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\rotation.png",
+    "SHA256": "C7F2663F567CE97CE1FF467C57E1DC432EEA7D42D5A2B9001AEA0263C343E375"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\rotation.svg",
+    "SHA256": "B532C15A6EDC461FFB9216CFA453B003FCCD4E6DBA2323C2C127E012F1BB9B84"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\trust.pdf",
+    "SHA256": "7E42B96CFF0928ABC94E1994931C62754E36058ADE13796AF9812AEA30432014"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\trust.png",
+    "SHA256": "161AFC90958561D6D7E15ABBF734B0494E2CBB783B5F5F2DAE59E10DB31ED5F6"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\figures\\trust.svg",
+    "SHA256": "01CB80BF9C91FD2C74379501588CF55CEBA1B71D70A55FDF2325FC5BAF24C0A4"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\__pycache__\\build_paper.cpython-312.pyc",
+    "SHA256": "C73D0DCAB4D3D35A46A99BCD96BDE9461D9A32F2B82D45EF8C59B2F59BB0FEC5"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\结构检查.json",
+    "SHA256": "C4EDCE214FF401F2A17CE6BEC06924FDC7C0ABDCC2E07133D568814DF5B1A466"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\contact_01.jpg",
+    "SHA256": "52420E9ABF6EB53A0EFF83196F6E97033A3C0DA1167D7E092C85079F2E0D9214"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\contact_02.jpg",
+    "SHA256": "D045C62D19F3368C8C39C23BC8365F301C55378B08E2073D4738A9197468B730"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\contact_03.jpg",
+    "SHA256": "A1498D3827D40E92C85ECB20F258ECE41DCDF6D46CBB3A42B0CC7997812767F0"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\contact_04.jpg",
+    "SHA256": "0DB165C26325071D5FFCCB20466358F958F5B2205A207FA05A5641F0A59DA61C"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\contact_05.jpg",
+    "SHA256": "C33EDFE45E93703A66430E9230B7780C06CE8940403A40512C81AC37BAFD7360"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\contact_06.jpg",
+    "SHA256": "1FA083692098658B630D22B0ACE6B874DC584C19DF69A3E93F8863D821CCAC9C"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\detail_01.png",
+    "SHA256": "A2A018298FD87A8F9189C04126657E5B74E878BA34C930BA8633E3B66FE8C2CB"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\detail_02.png",
+    "SHA256": "168C5CFA3CF761ABBF8CD5D61134267DCC813DF0EBB30D0841339AC4FE07FC26"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\detail_06.png",
+    "SHA256": "C33FDECE9D2E0FB608C65A96A11620FD09138FB92526987053B5483856A2C476"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\detail_09.png",
+    "SHA256": "C63552D6189F163DEE452C1FA35B41E9B87286E50292DBF15EBA5A30E32A286A"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\detail_12.png",
+    "SHA256": "6C74229A251086FFB2CF1AAA758CDDC2EEB866F85CB0FAE0DE7A7FCE72CB8B25"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\detail_13.png",
+    "SHA256": "BDBC5B5DBCCA3D9C7246F45631F74B04972030E135EBE65D1E2D49A47DE718EF"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\detail_19.png",
+    "SHA256": "FA4F710CDBB4A66319BFA8405EA3730E93E10483CA365AB5B721523A814A7C33"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\detail_22.png",
+    "SHA256": "4AA95927821B86DD09020001BC3ABD822FF8C6C2A7AF3D4D60111315DEF6ED0A"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\detail_26.png",
+    "SHA256": "D83078554D5EA20D3FE7DF1B331017B352A020557C1B653C9FBD940215AB08A2"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\detail_29.png",
+    "SHA256": "DE2A86308D76B1EA9F1ACFCE3BFA2346E3D7F8357C6F1E90749382EA908074B1"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\detail_33.png",
+    "SHA256": "4D667BC8C3AC476D1479E5E48E1C71D3A2B2AD2BA80E08B198121E6382D13516"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\detail_41.png",
+    "SHA256": "2954A4123AECC26DA9C9FB44781D0D5FAC8626B5CEE4E1DCA1127F3B7C2786E4"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\detail_46.png",
+    "SHA256": "820641073003476639A6A4B8A439F3CDCDD71F801BBC54DEBF47CA12B73BD339"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\detail_49.png",
+    "SHA256": "FFB92B832C3662A9BD313EA8086743021FF17C377A184EBE49B36D0E33BE93F0"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\detail_55.png",
+    "SHA256": "C64514A6E77010A4262AFDE5049B8FA6E5FCA01935F6A3814F77D71598BBE668"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\detail_61.png",
+    "SHA256": "9A8E89DA88BE8DFD83A4E8C9F13C51992B41581B317A75BAC3D8C425EDB98031"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\page-01.png",
+    "SHA256": "7C815F04B7A3E3B15ECC92B7DA8753C23549071A851DF7D251D115534F9FBB7E"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\page-02.png",
+    "SHA256": "414135B6DB731ADE2A567E6760A295900CA26CD592844D9C7E9FDFCA80ADC868"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\page-03.png",
+    "SHA256": "0070E16FFB81895411FDBDCD1607216572CAAA53475512D3CE8BD00AA5820F7D"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\page-04.png",
+    "SHA256": "3463C498EBEE114886BBB84EAB1F4D75F465A724BEA1A6D10861350A8BEC2899"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\page-05.png",
+    "SHA256": "88212894BF498C65109EEADF9AD1367A5956F5A7223F38F8D994C8595BA47B10"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\page-06.png",
+    "SHA256": "03B833335B4FFFE23ACF5C7EE36FD19181A40A65DA2A577094069478E199005F"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\page-07.png",
+    "SHA256": "546AF3BA33FBD5669AB64E1A63D088DA6D08BD919C5C45E26673339475121940"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\page-08.png",
+    "SHA256": "D668E56DC8D7E636AFD64E9295811864AED0045E58CB8737CF6B3655E74ABAF4"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\page-09.png",
+    "SHA256": "61A834C2AD20E04566287F6AAE1DF574C968210AB15E6AF11DE410E711FAC262"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\page-10.png",
+    "SHA256": "BB7322F333AF0980E0C437EC1FFF882115C2F222258AECE2D58AF897ED66E150"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\page-11.png",
+    "SHA256": "7C72D7F3F27E3DD4530D24E97F3EECDE569109FCB8F30B00254CB52E4AB855FB"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\page-12.png",
+    "SHA256": "D0A14FCC474F9EF1EC429ED55D906D6794501FDD75A8FB3BD8BA094EBCB50278"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\page-13.png",
+    "SHA256": "1904577C01C9178583C654BD3720D3120FFC25F9ACAEC2F654AA8B9D22C49F5B"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\page-14.png",
+    "SHA256": "34AB6113EC0A23D6EDD2C468E6A2D1ACDD31BAFA8D7B8B7B6B657C5DDD9DC0E6"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\page-15.png",
+    "SHA256": "907052F3239EBFED5821391CFF5795E0F20FC23DA4975810D2ABC94C75D55E0C"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\page-16.png",
+    "SHA256": "72DF362DB8A404CA485492075BD40F6CD21AE604CB9D95619D3EDACCB6E3BDAD"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\page-17.png",
+    "SHA256": "62D7B618C2222AA10E3CF35768B1289BFB7382CD8999FB36C4DFE98D5D8E3962"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\page-18.png",
+    "SHA256": "758F3D300154AB71EC8DC231651ADD193312E63B5F882E68BDB21E191A1BAAB3"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\page-19.png",
+    "SHA256": "B21706468BFCB22F98F7FCE75166310B2EAF14A0AB1C9B1DD1D97AD0012421E4"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\page-20.png",
+    "SHA256": "186743624A378654A3C38A22AB19FBF396F7631DDD30E8ACBCBCF324FB65921E"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\page-21.png",
+    "SHA256": "01C63F5EDAE41FA4F6863409E46F522CB9EDA635F983E93657FA4C8A0AE001D1"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\page-22.png",
+    "SHA256": "DDC33CCB5C50B05BE9C09946A0B7F1E1FED634890D9FCF27FED9082FFAFFB233"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\page-23.png",
+    "SHA256": "7A6B709C0831EAA973B27406B81BC3E82122198887F9B1C3A96614753A0414A8"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\page-24.png",
+    "SHA256": "ED26837EEE98C2B0FC1ED87F20492A3575A54CE6C953BC8B8CDC2CA5F8DD436B"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\page-25.png",
+    "SHA256": "A3F0109229EB248AD6802A2B0010326B73E269297835B7ECEA147BADDCE46328"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\page-26.png",
+    "SHA256": "411E864641AE3B7403D2BF5E8AD1A4C5A7DF4581240F305E209F3AD8AE390A38"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\page-27.png",
+    "SHA256": "BEFCEA3D000A87F9B4590BC105E81136FCB7630E85221E7A57BC0CAA5D0279ED"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\page-28.png",
+    "SHA256": "09F263B1664C090C0FE28704F9A9776819B5E47AF9FE171D4A9DC13898B3B5EA"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\page-29.png",
+    "SHA256": "10F2804776AEE0863835B0EB213DE32BD9621540A7D33A5B8813EBEF872E4783"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\page-30.png",
+    "SHA256": "DA2A3FAE8860D69000C74A32D8E96F7406C8384EB7EB33FCA86B83A2D538825F"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\page-31.png",
+    "SHA256": "93E1A27630FD4D5E81B7E8C761E79DB5D2DB5459CC46510D95215A6E16E9EA12"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\page-32.png",
+    "SHA256": "E37ECE0E670DF9A727221F9424B9C6B7BFF931D11B841DCC1E2342A5C4797B7A"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\page-33.png",
+    "SHA256": "8FB0D5D0DBCB53BC0EECF4E5A9B6DEF2C52FBA74E4A55C11D181824CBC3F67B9"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\page-34.png",
+    "SHA256": "CAC49A42C47E84B73E768799F1F69A28B229FBBE6D43BD10D9D8CC177C653885"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\page-35.png",
+    "SHA256": "13C8CB640647BE09F336CAC7277D218BE481DBBC57BD5A097FCBAFB85D886379"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\page-36.png",
+    "SHA256": "2CE7D99D5B7128EAC75E4660386C43E15128B61D1C98E22D9282FD553E64E5D0"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\page-37.png",
+    "SHA256": "37D415F3B4A12855075C33A19EBA241291D526FF3D38E26C487ECA1C5E99C14C"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\page-38.png",
+    "SHA256": "25E9862314C54415F8BF15207735E83304310E35E3F04480190D2B44A1CD295C"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\page-39.png",
+    "SHA256": "ECDA4E49CE6D1E21B5C70D4D694B038A3E1B51843491DEA5A34879956C928CC9"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\page-40.png",
+    "SHA256": "E79CDC9897C3158129EC5192A40F8338EEAA7022D6E9FC0A32BF76DBAE503342"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\page-41.png",
+    "SHA256": "96BCA348C5C91479A7F381C7843A9FF12AB0EA1DF7FEB435BE4B421AC6179D50"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\page-42.png",
+    "SHA256": "3994164EA3F82E13DC61D871396F43D1966F7AA8853A08BC5EA69E24B77FF287"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\page-43.png",
+    "SHA256": "6EA32E4CE53FF29F48D72144B8C91102B20BCAADAA0D51C65A30983B6311E538"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\page-44.png",
+    "SHA256": "E8C45247BEA7F27BB679B1EA6356BB3030C3DFF62D5AD896516D8E3CFDAB82D3"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\page-45.png",
+    "SHA256": "BB1D578174123920B7C7D8ADE686DB1AAD4DA333F9B0909925D916941B125FF1"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\page-46.png",
+    "SHA256": "766FDEA4E2A60B20FB62FDF4AFC96D91C19E58C5CB5688BBD90687C3A6819442"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\page-47.png",
+    "SHA256": "A7943FDB55516EB393C8CD882BE3D1798D2D58860FF6BC0C6718B1BCAC3101F6"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\page-48.png",
+    "SHA256": "3C0DB8DB4D6584B1E5C26514485B8A3564CF47430CD05CB73564C3AE594616F7"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\page-49.png",
+    "SHA256": "1AFA00C9E5536CBACA3D6DEFDE9F03A57DC306F071E4F76AFB625DF1410AAB11"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\page-50.png",
+    "SHA256": "71F29BCD3C99797D87D244DC493BD4E25E1268C23964C13C894C7DDF7053AA6A"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\page-51.png",
+    "SHA256": "A51FF36CC75B2E9B5F3227B49DF25BD7D589C5324960EC8F20D33B4DA6E574F8"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\page-52.png",
+    "SHA256": "B15B5F2C6AD147E77A850BC1570F0BE1EF088F9F1E3B93A3C05CB68614ED9B6A"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\page-53.png",
+    "SHA256": "B17E0FF63ED8DA151FBD446DFFB731558C54B43BE050C4427C840BBF4249EF26"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\page-54.png",
+    "SHA256": "375320DADE450828804EA0FD56354D57671841E2D7737A3C1D6B05D7A4031B90"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\page-55.png",
+    "SHA256": "1BC38F9E52C091AF6E8369F29A865420EFDB9526BA244797B0367B22E62F686D"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\page-56.png",
+    "SHA256": "BFB6956EFAF628A97B741A0F0A060C21D04C5CEBBA97B854A4BDADC25C0F6443"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\page-57.png",
+    "SHA256": "2A407DC6B4198B59F5A758605B0097A1E7D06AA2CAC96C15B5887BB165BD71EC"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\page-58.png",
+    "SHA256": "132CE08096DDAE3AFC8C402393D00A573F2690F8CA3785EFF0632561B64AEB88"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\page-59.png",
+    "SHA256": "AE40EC57358BE5247669FA5675F83446EC5056DCB582A335D73679661DAFDACB"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\page-60.png",
+    "SHA256": "C0B9436B6E8499441AFA690ED9BC6B37251DD84D099B4D93EEA6A501A2C5C8CF"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\page-61.png",
+    "SHA256": "CDC48E0237CB03986BF3AF687013E73E88F1DE7FE8E09216FE6769300FB26D94"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\page-62.png",
+    "SHA256": "589F92F42E0512534B81604AD4F67B0A253F1BB123A01C20B2F8E1D1E243042D"
+  },
+  {
+    "Path": "C:\\Users\\ZhuanZ\\Videos\\LogForge_论文资料\\版式检查\\page-63.png",
+    "SHA256": "2F4EC61BEEB058280C4E5811DDAA6E268F3830CCD2E3C9BFE445916AB767E303"
+  }
+]

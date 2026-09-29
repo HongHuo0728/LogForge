@@ -1,0 +1,821 @@
+{
+  "commit": "6b43a93fbd4d1457ff20b4c99a030c0e398f520a",
+  "files": [
+    {
+      "path": ".clang-format",
+      "bytes": 247,
+      "lines": 9,
+      "sha256": "12a067c4b568871a6bd38656578ed2df62eac5ce86bee50d50e36fddd119a95a",
+      "kind": "text",
+      "role": "Repository formatting, line endings, and ignore rules; reproduction infrastructure"
+    },
+    {
+      "path": ".gitattributes",
+      "bytes": 169,
+      "lines": 10,
+      "sha256": "343b613987797cb64c9bb6dcaf0ddba2b808eddcf770e7fe85fb569b9a589383",
+      "kind": "text",
+      "role": "Repository formatting, line endings, and ignore rules; reproduction infrastructure"
+    },
+    {
+      "path": ".github/workflows/build-windows.yml",
+      "bytes": 2764,
+      "lines": 71,
+      "sha256": "43e7e6f85a681e3408703ab7fd3d84d0ee34a664590ea3878a53a0b7cf4dbd6d",
+      "kind": "text",
+      "role": "C++20/MSVC targets, test registration, build and release allowlists; Chapters 8, 21"
+    },
+    {
+      "path": ".gitignore",
+      "bytes": 751,
+      "lines": 48,
+      "sha256": "cd7c853953c287a70021938c3c2cd82cda999f8c1a12abb701bd8bc78a0cdc4c",
+      "kind": "text",
+      "role": "Repository formatting, line endings, and ignore rules; reproduction infrastructure"
+    },
+    {
+      "path": "CHANGELOG.md",
+      "bytes": 9659,
+      "lines": 141,
+      "sha256": "368b93867efae369da60e7946ccc8e4fb87752a2b81456c0d2a43eddbb3a6f76",
+      "kind": "text",
+      "role": "Project documentation, historical evidence, or development procedures; cross-checked by chapter topic"
+    },
+    {
+      "path": "CMakeLists.txt",
+      "bytes": 9296,
+      "lines": 124,
+      "sha256": "6a12fd2be0dd2bbca7b78cc601635a8222cf6856d5ca81dab0010064daace506",
+      "kind": "text",
+      "role": "C++20/MSVC targets, test registration, build and release allowlists; Chapters 8, 21"
+    },
+    {
+      "path": "CONTRIBUTING.md",
+      "bytes": 2953,
+      "lines": 19,
+      "sha256": "0a2abd0219b7776edd6e56a7d3fc25b032de91291e1200652c1bd275c8cbcb8d",
+      "kind": "text",
+      "role": "Project documentation, historical evidence, or development procedures; cross-checked by chapter topic"
+    },
+    {
+      "path": "LICENSE",
+      "bytes": 1078,
+      "lines": 21,
+      "sha256": "d2b1a524541b73ddb7474654410dbe5dd782d481959fe237d749f1e3d1136dcd",
+      "kind": "text",
+      "role": "Project or third-party licensing and attribution; distribution boundaries"
+    },
+    {
+      "path": "README.md",
+      "bytes": 27355,
+      "lines": 233,
+      "sha256": "efb454924028a502302bb5b751cb43e70289fd0935d36989dc4e0b99c0a63fab",
+      "kind": "text",
+      "role": "Project documentation, historical evidence, or development procedures; cross-checked by chapter topic"
+    },
+    {
+      "path": "THIRD_PARTY_NOTICES.md",
+      "bytes": 2715,
+      "lines": 41,
+      "sha256": "70926562afcfa9b4bba6129a544e3547bc7919e9dc51ec9f30ef4bb09351da7c",
+      "kind": "text",
+      "role": "Project or third-party licensing and attribution; distribution boundaries"
+    },
+    {
+      "path": "docs/APPLE_LOG_IDENTIFICATION.md",
+      "bytes": 9133,
+      "lines": 153,
+      "sha256": "ecdc0896f24584b97c439fdb2d78453a9fd798e7ce0b0b9696306acb91181390",
+      "kind": "text",
+      "role": "Project documentation, historical evidence, or development procedures; cross-checked by chapter topic"
+    },
+    {
+      "path": "docs/ARCHITECTURE.md",
+      "bytes": 14614,
+      "lines": 147,
+      "sha256": "7972eaf13401ff9a212d5f26554edf14b7a8cfa49a2d999737ab4edaf6145fb8",
+      "kind": "text",
+      "role": "Project documentation, historical evidence, or development procedures; cross-checked by chapter topic"
+    },
+    {
+      "path": "docs/BENCHMARK_1.2.0.md",
+      "bytes": 6010,
+      "lines": 62,
+      "sha256": "5c289167580dd1c7b504ecea0227a8024714251ee931768c889eaa1be1854cdc",
+      "kind": "text",
+      "role": "Project documentation, historical evidence, or development procedures; cross-checked by chapter topic"
+    },
+    {
+      "path": "docs/BUG_AUDIT_1.1.1.md",
+      "bytes": 7273,
+      "lines": 63,
+      "sha256": "063144bb62910596895ac7e172c7dc372483d0cb4bc4a5eead1c6f886afca4c8",
+      "kind": "text",
+      "role": "Project documentation, historical evidence, or development procedures; cross-checked by chapter topic"
+    },
+    {
+      "path": "docs/COLOR_PIPELINE.md",
+      "bytes": 8085,
+      "lines": 97,
+      "sha256": "a26e0740881c1b9a00819e30d15e2f6cf8c9740c93af14a77573ef3b11fbc745",
+      "kind": "text",
+      "role": "Project documentation, historical evidence, or development procedures; cross-checked by chapter topic"
+    },
+    {
+      "path": "docs/CREATIVE_ADJUSTMENTS.md",
+      "bytes": 4895,
+      "lines": 46,
+      "sha256": "88102a849700142217dd0fcb225ea684b9f213c17949205b61433ad862676f87",
+      "kind": "text",
+      "role": "Project documentation, historical evidence, or development procedures; cross-checked by chapter topic"
+    },
+    {
+      "path": "docs/FFMPEG_PROVIDER.md",
+      "bytes": 6952,
+      "lines": 54,
+      "sha256": "ac40882a24bba073b2d3767f5143b0b68708cda219f6ff7a7a01f42837f0e8c1",
+      "kind": "text",
+      "role": "Project documentation, historical evidence, or development procedures; cross-checked by chapter topic"
+    },
+    {
+      "path": "docs/ICON.md",
+      "bytes": 1600,
+      "lines": 28,
+      "sha256": "4cb31a795651fe66817112de2014ccfde21a0f0f48521e339cf17ef2897c0c2d",
+      "kind": "text",
+      "role": "Project documentation, historical evidence, or development procedures; cross-checked by chapter topic"
+    },
+    {
+      "path": "docs/METADATA.md",
+      "bytes": 9176,
+      "lines": 79,
+      "sha256": "a264ddece54935d751a25700cef4b8114bf198c771a222583e52398318924fe0",
+      "kind": "text",
+      "role": "Project documentation, historical evidence, or development procedures; cross-checked by chapter topic"
+    },
+    {
+      "path": "docs/RELEASE_1.2.0.md",
+      "bytes": 5550,
+      "lines": 92,
+      "sha256": "8510c1d929444cbdb7287fa93792be0c9ddb54696d5a9a68b8d2f7d37d9274fa",
+      "kind": "text",
+      "role": "Project documentation, historical evidence, or development procedures; cross-checked by chapter topic"
+    },
+    {
+      "path": "docs/RELEASE_1.2.1.md",
+      "bytes": 2522,
+      "lines": 46,
+      "sha256": "9eb3de52ff8ef9b1a520539724b2a83e3ac67f77cc3ab1c5d51f926d49932aea",
+      "kind": "text",
+      "role": "Project documentation, historical evidence, or development procedures; cross-checked by chapter topic"
+    },
+    {
+      "path": "docs/TECHNICAL_REFERENCES.md",
+      "bytes": 16149,
+      "lines": 137,
+      "sha256": "c97054741275e8a67750110e0cb133d3e441dfdd0ae15eea9bd21d6bbfafa24e",
+      "kind": "text",
+      "role": "Project documentation, historical evidence, or development procedures; cross-checked by chapter topic"
+    },
+    {
+      "path": "docs/VALIDATION.md",
+      "bytes": 47231,
+      "lines": 598,
+      "sha256": "f35088aa312376842c8980fa08d80f604bc6ad64b9c397fdd837a5a6901b0341",
+      "kind": "text",
+      "role": "Project documentation, historical evidence, or development procedures; cross-checked by chapter topic"
+    },
+    {
+      "path": "docs/benchmarks/1.2.0.json",
+      "bytes": 95920,
+      "lines": 2805,
+      "sha256": "3347a311d28e712752661b4a2615725251dae4488eeced1565bf63390518cb27",
+      "kind": "text",
+      "role": "Project documentation, historical evidence, or development procedures; cross-checked by chapter topic"
+    },
+    {
+      "path": "docs/images/LogForge.png",
+      "bytes": 37255,
+      "lines": null,
+      "sha256": "7cfc452f64600478b7944f7787b7ce3ba2a8aa2a60a9d7b03134ab22d15521dc",
+      "kind": "binary",
+      "role": "Project documentation, historical evidence, or development procedures; cross-checked by chapter topic"
+    },
+    {
+      "path": "docs/verification/1.2.0.json",
+      "bytes": 8602,
+      "lines": 320,
+      "sha256": "c054d034c823c62e9365ec2c20a440f1826e59a83664f45ef39cc0264a6e79f3",
+      "kind": "text",
+      "role": "Project documentation, historical evidence, or development procedures; cross-checked by chapter topic"
+    },
+    {
+      "path": "include/logforge/AppleLogIdentification.h",
+      "bytes": 538,
+      "lines": 14,
+      "sha256": "f680e727764b585577ac0b1c279d40e5fd79094a706c606c766a174873fee5e0",
+      "kind": "text",
+      "role": "Writing the 35-byte identification extension and checking structure; Chapter 15"
+    },
+    {
+      "path": "include/logforge/Color.h",
+      "bytes": 2298,
+      "lines": 53,
+      "sha256": "b84b959a93c7ba1724b57628df0d7af9fa4277b8596079b7e18d5b612c259bfa",
+      "kind": "text",
+      "role": "Color-model interfaces, constants, parameters, and statistics; Chapters 3-7"
+    },
+    {
+      "path": "include/logforge/CudaTransformer.h",
+      "bytes": 757,
+      "lines": 24,
+      "sha256": "cb3c78e9fda67240d2ab04304054d6e0c37379f926d88d879b62fe8203156181",
+      "kind": "text",
+      "role": "Dynamic driver interface, qualification, and transactional commit; Chapter 11"
+    },
+    {
+      "path": "include/logforge/Discovery.h",
+      "bytes": 2992,
+      "lines": 61,
+      "sha256": "c9ec233f7adf1a54438bdc9ecc36fccc2b5efa8a15479663018d4fac909b9c01",
+      "kind": "text",
+      "role": "Local volume and directory traversal; Chapter 17"
+    },
+    {
+      "path": "include/logforge/FFmpeg.h",
+      "bytes": 2368,
+      "lines": 62,
+      "sha256": "e800495087beaab28f6ac7b0e3f3de6876adeef277e1ce2b3b3cc5ef26c7569d",
+      "kind": "text",
+      "role": "Tool capabilities, discovery scheduling, and fixed downloads; Chapter 17"
+    },
+    {
+      "path": "include/logforge/FloatBridge.h",
+      "bytes": 830,
+      "lines": 21,
+      "sha256": "fbb7866da4acc35c702328d8511492313febaef42c899653d139e716076032e0",
+      "kind": "text",
+      "role": "Three-slot read/transform/write state machine and thread budgeting; Chapter 9"
+    },
+    {
+      "path": "include/logforge/FloatTransformer.h",
+      "bytes": 564,
+      "lines": 18,
+      "sha256": "57d45cefb02514d76d90653b9ee76502d06a942c1b8a42e62efd8b756bae4246",
+      "kind": "text",
+      "role": "Persistent CPU workers, tile pairing, and statistics merging; Chapter 10"
+    },
+    {
+      "path": "include/logforge/Localization.h",
+      "bytes": 1170,
+      "lines": 34,
+      "sha256": "05b79d1b1b53f8f65b5ef0ea65b2e2e3bed42036e1f0fb53adce79661b29a4ca",
+      "kind": "text",
+      "role": "Stable message keys and single-pass argument replacement; Chapter 20"
+    },
+    {
+      "path": "include/logforge/Media.h",
+      "bytes": 3821,
+      "lines": 87,
+      "sha256": "08e504ba764534e33beba756527126ec76bd52adc4f03cab7c9db17e785276f2",
+      "kind": "text",
+      "role": "Probe parsing, admission, metadata arguments, and output validation; Chapters 2, 16"
+    },
+    {
+      "path": "include/logforge/Messages.inc",
+      "bytes": 29793,
+      "lines": 262,
+      "sha256": "55f1ee07f6da30e7cbc368628c95b7ea84b55871f4937c05ac25e5f492d023ea",
+      "kind": "text",
+      "role": "Bilingual message macro table, stable keys, and placeholders; Chapter 20"
+    },
+    {
+      "path": "include/logforge/PixelSanity.h",
+      "bytes": 640,
+      "lines": 24,
+      "sha256": "8cd7d0a6e8b47b8885a016bd2c5c64f8b8ed680765a01f264353bb6f480d09dd",
+      "kind": "text",
+      "role": "Nine-block gross-error checks on first, middle, and last encoded frames; Chapter 7"
+    },
+    {
+      "path": "include/logforge/Platform.h",
+      "bytes": 3353,
+      "lines": 115,
+      "sha256": "2b97344db3740ccb4d16806fc573384d70ae7c449322219e17b5b99b656ec3d9",
+      "kind": "text",
+      "role": "Wide strings, handles, process supervision, pipes, and hashing; Chapter 18"
+    },
+    {
+      "path": "include/logforge/Queue.h",
+      "bytes": 465,
+      "lines": 8,
+      "sha256": "3cc33ff450339cbeb5eee098dd78d615310798674496b42935fd0ed2ddb84378",
+      "kind": "text",
+      "role": "Serial multi-file tasks and per-item failure recording; Chapter 20"
+    },
+    {
+      "path": "include/logforge/Settings.h",
+      "bytes": 643,
+      "lines": 23,
+      "sha256": "359c8126a827a14ffc5a125ceed67c14676daf6ec674f3746e5e5124f4a18fa2",
+      "kind": "text",
+      "role": "Field merging, concurrency locks, and atomic preference persistence; Chapters 19, 20"
+    },
+    {
+      "path": "include/logforge/StorageSafety.h",
+      "bytes": 489,
+      "lines": 18,
+      "sha256": "07ee1b5548d9c48a77e472ed5133c2c3b98d0eb70cae198fb6f76a179c3007d3",
+      "kind": "text",
+      "role": "File-identity journals, state locks, and ownership-based recovery; Chapter 19"
+    },
+    {
+      "path": "include/logforge/ToolTrust.h",
+      "bytes": 997,
+      "lines": 29,
+      "sha256": "4b89a357d1d8a95a44fdddeab703c7e28a3080bee7c96c7ed7657ee281b93265",
+      "kind": "text",
+      "role": "Identity, approval, and leases for the executable pair; Chapter 17"
+    },
+    {
+      "path": "include/logforge/Transcode.h",
+      "bytes": 1287,
+      "lines": 33,
+      "sha256": "c786cdbeffda746793f7c0bf5a1adef40b00a60c0b3c4bb037b809647886acff",
+      "kind": "text",
+      "role": "Complete media task, backends, validation reports, and final publication; Chapters 8, 23"
+    },
+    {
+      "path": "include/logforge/Ui.h",
+      "bytes": 2145,
+      "lines": 49,
+      "sha256": "bcf4657680d358717bd7f505b5731db93a7bea684eb2110c6304d2bafdebff00",
+      "kind": "text",
+      "role": "Themes, DPI, native drawing, and screenshots; Chapter 20"
+    },
+    {
+      "path": "resources/LogForge.ico",
+      "bytes": 103909,
+      "lines": null,
+      "sha256": "1e262b4ac403e2d843d0b261857d485a830126a1be92c5652285692cb2ae6ee7",
+      "kind": "binary",
+      "role": "Icons, manifests, version resources, and generated templates; build and interface"
+    },
+    {
+      "path": "resources/LogForge.manifest",
+      "bytes": 1218,
+      "lines": 9,
+      "sha256": "7a4b2b2a6dcce95772d18d3a9bd833234b116f60dd743edf40777ed1e8650429",
+      "kind": "text",
+      "role": "Icons, manifests, version resources, and generated templates; build and interface"
+    },
+    {
+      "path": "resources/LogForge.png",
+      "bytes": 1161472,
+      "lines": null,
+      "sha256": "12f8ffa70b1f275385d98aa901c5f17441dfcabdd0b5a78c27468e49cdeb8b9f",
+      "kind": "binary",
+      "role": "Icons, manifests, version resources, and generated templates; build and interface"
+    },
+    {
+      "path": "resources/LogForge.rc",
+      "bytes": 853,
+      "lines": 34,
+      "sha256": "cafd9451b9f69b77d1c9b3e4e1a0a67bddccfd5b8b4e3e55693eaa6d3e5b2fff",
+      "kind": "text",
+      "role": "Icons, manifests, version resources, and generated templates; build and interface"
+    },
+    {
+      "path": "resources/Version.h.in",
+      "bytes": 244,
+      "lines": 6,
+      "sha256": "6ff776788c331bc1784449eb7bfda980c028bf47b31c45ab86d1dbfb1a7ae15d",
+      "kind": "text",
+      "role": "Icons, manifests, version resources, and generated templates; build and interface"
+    },
+    {
+      "path": "resources/VersionResource.h.in",
+      "bytes": 305,
+      "lines": 4,
+      "sha256": "8aac898816910f0604f7f07934b3330e382811025b877a20fbe212080803cb82",
+      "kind": "text",
+      "role": "Icons, manifests, version resources, and generated templates; build and interface"
+    },
+    {
+      "path": "src/AppleLogIdentification.cpp",
+      "bytes": 9669,
+      "lines": 194,
+      "sha256": "7e4e8bde35e9f959261de0fd3d7d46372e6d632093400f627c1fe3ae993dc52d",
+      "kind": "text",
+      "role": "Writing the 35-byte identification extension and checking structure; Chapter 15"
+    },
+    {
+      "path": "src/Cadence.cpp",
+      "bytes": 7954,
+      "lines": 168,
+      "sha256": "e323be3a9a3500254a8d5dcc8d04f31173ed72368d32f0a997b59553c991b00e",
+      "kind": "text",
+      "role": "All-packet period, phase, and fixed-clock validation; Chapter 12"
+    },
+    {
+      "path": "src/Cli.cpp",
+      "bytes": 11521,
+      "lines": 223,
+      "sha256": "63a897aea0a2406ce77ffa18f83ca37eadab3ecaf144e8ef65c370ea8eac6bb2",
+      "kind": "text",
+      "role": "Commands, numeric arguments, and automation entry points; Chapter 20"
+    },
+    {
+      "path": "src/Discovery.cpp",
+      "bytes": 5625,
+      "lines": 141,
+      "sha256": "5a1158a97ce9760d16d49ab459cd909299f8a86876f387a4d386d819ed9b34b6",
+      "kind": "text",
+      "role": "Local volume and directory traversal; Chapter 17"
+    },
+    {
+      "path": "src/DiscoveryHelper.cpp",
+      "bytes": 21631,
+      "lines": 501,
+      "sha256": "79ab057331767ec3547cbc76bb75cbf1b47575abff7ba1e62da5548ea5abfb4b",
+      "kind": "text",
+      "role": "Supervised hidden discovery entry point and source budgets; Chapter 17"
+    },
+    {
+      "path": "src/FFmpeg.cpp",
+      "bytes": 19743,
+      "lines": 416,
+      "sha256": "796f085a9bc8d5bbb4859470189b6eef8a1514f110cbce005ecaf8848d561247",
+      "kind": "text",
+      "role": "Tool capabilities, discovery scheduling, and fixed downloads; Chapter 17"
+    },
+    {
+      "path": "src/FFmpegNumeric.cpp",
+      "bytes": 12546,
+      "lines": 234,
+      "sha256": "369c388412c0eb181e8de62666fc1ea31159022729bae4c56c8469db8b150c1f",
+      "kind": "text",
+      "role": "Independent integer signals and actual codec numerical qualification; Chapters 5, 7"
+    },
+    {
+      "path": "src/FloatBridge.cpp",
+      "bytes": 6615,
+      "lines": 183,
+      "sha256": "c9c1a362141507e0eaa9f62d2269304afb005caaecd4c330437b4981d48d668c",
+      "kind": "text",
+      "role": "Three-slot read/transform/write state machine and thread budgeting; Chapter 9"
+    },
+    {
+      "path": "src/Localization.cpp",
+      "bytes": 2601,
+      "lines": 77,
+      "sha256": "226577c38c748dc0ad00f0932903844a1b8c411706967188147c0c23be82f482",
+      "kind": "text",
+      "role": "Stable message keys and single-pass argument replacement; Chapter 20"
+    },
+    {
+      "path": "src/MainWindow.cpp",
+      "bytes": 81800,
+      "lines": 1710,
+      "sha256": "a548eece7ef0e4422934fc0383ca00153197b9420a66bad6d8e5a61cf957c179",
+      "kind": "text",
+      "role": "Single background worker, events, and measured layout; Chapter 20"
+    },
+    {
+      "path": "src/Media.cpp",
+      "bytes": 19862,
+      "lines": 400,
+      "sha256": "6d6e7cfcc7b269cfd7a984bb2ac851755c3e8f685428e0cae826660b1b6a8a6a",
+      "kind": "text",
+      "role": "Probe parsing, admission, metadata arguments, and output validation; Chapters 2, 16"
+    },
+    {
+      "path": "src/MediaSafety.cpp",
+      "bytes": 12964,
+      "lines": 272,
+      "sha256": "60b21485eecea443deef5b2f338d1e968c0aa57eded463113884ddafa8cb27a1",
+      "kind": "text",
+      "role": "Time semantics, display matrices, and fixed-width header repair; Chapters 13, 16"
+    },
+    {
+      "path": "src/MetadataPolicy.cpp",
+      "bytes": 2525,
+      "lines": 53,
+      "sha256": "6ee23ddd4f1852c0e77b9ed7b452abdd7488cd77d15a6472851bc933e2a8d0c6",
+      "kind": "text",
+      "role": "Metadata allowlists and conflict classification; Chapter 16"
+    },
+    {
+      "path": "src/MovAnalyzer.cpp",
+      "bytes": 21512,
+      "lines": 433,
+      "sha256": "e3c05f84f886015445f2d456caeb1d8169cc5e7f682d70e18792a809c91c729d",
+      "kind": "text",
+      "role": "Bounded atom parsing and typed semantic comparison; Chapter 14"
+    },
+    {
+      "path": "src/PixelSanity.cpp",
+      "bytes": 8726,
+      "lines": 184,
+      "sha256": "feb7a1d41c169c56e567d67c1fdc0706e702c362dfd611ee5e1951014515f41c",
+      "kind": "text",
+      "role": "Nine-block gross-error checks on first, middle, and last encoded frames; Chapter 7"
+    },
+    {
+      "path": "src/Platform.cpp",
+      "bytes": 14816,
+      "lines": 398,
+      "sha256": "8b453a11298d9e33e348eea4343364c6b336f2a482ae9627b987ce7a58c3534f",
+      "kind": "text",
+      "role": "Wide strings, handles, process supervision, pipes, and hashing; Chapter 18"
+    },
+    {
+      "path": "src/Queue.cpp",
+      "bytes": 2401,
+      "lines": 49,
+      "sha256": "d83dd93f45866f2a2c771439bed820cd663ce8a4e333a91de282611de1464175",
+      "kind": "text",
+      "role": "Serial multi-file tasks and per-item failure recording; Chapter 20"
+    },
+    {
+      "path": "src/Settings.cpp",
+      "bytes": 4486,
+      "lines": 120,
+      "sha256": "1683ff619a1314ae74fa902d8b49115daebb5268786df058eca4f1dd26bb8db6",
+      "kind": "text",
+      "role": "Field merging, concurrency locks, and atomic preference persistence; Chapters 19, 20"
+    },
+    {
+      "path": "src/SettingsWindow.cpp",
+      "bytes": 30348,
+      "lines": 659,
+      "sha256": "9f1bca19873f612fe38ed1ca9bbb9503eeed0cf9610cabbcb0f9d6f49a919ed6",
+      "kind": "text",
+      "role": "Settings drafts, save/cancel, candidate review, and dialogs; Chapter 20"
+    },
+    {
+      "path": "src/StorageSafety.cpp",
+      "bytes": 9503,
+      "lines": 214,
+      "sha256": "30a783479ca3e505c65ab10290266079c2e76a9fe4f88daf9096327542744b12",
+      "kind": "text",
+      "role": "File-identity journals, state locks, and ownership-based recovery; Chapter 19"
+    },
+    {
+      "path": "src/ToolTrust.cpp",
+      "bytes": 5115,
+      "lines": 124,
+      "sha256": "3a9905906290eb33ed1c67c109402ea1924e4c020369e26695f204ed3c969e9a",
+      "kind": "text",
+      "role": "Identity, approval, and leases for the executable pair; Chapter 17"
+    },
+    {
+      "path": "src/Transcode.cpp",
+      "bytes": 30850,
+      "lines": 584,
+      "sha256": "35882a70c5d2406359074a5ec98f096397206abe52ef51bb8377a58a9968e331",
+      "kind": "text",
+      "role": "Complete media task, backends, validation reports, and final publication; Chapters 8, 23"
+    },
+    {
+      "path": "src/Ui.cpp",
+      "bytes": 15575,
+      "lines": 322,
+      "sha256": "54098d2fafa50dbcd400563c3e469c092b423f6b932f1b7b31ad3dc41878e569",
+      "kind": "text",
+      "role": "Themes, DPI, native drawing, and screenshots; Chapter 20"
+    },
+    {
+      "path": "src/color/AppleLog.cpp",
+      "bytes": 533,
+      "lines": 19,
+      "sha256": "9b0e6342405cb45c7b4058f0a9fd744cd481e6555a1dd593c0c607c56983a711",
+      "kind": "text",
+      "role": "Piecewise Apple Log encoding/decoding and public constants; Chapter 4"
+    },
+    {
+      "path": "src/color/ColorKernel.cu",
+      "bytes": 2867,
+      "lines": 58,
+      "sha256": "ba04b0dee2e9fe42b4ff1b48d8879242d0845f23f588e93982fa172855f09519",
+      "kind": "text",
+      "role": "Device-side double color kernel and shared-memory reduction; Chapter 11"
+    },
+    {
+      "path": "src/color/ColorKernel.manifest.json",
+      "bytes": 465,
+      "lines": 14,
+      "sha256": "9d9adc2b2f38153fbca2aa45a0f6028a4d73108cf5b11e45db132cf1a7832cad",
+      "kind": "text",
+      "role": "CUDA source, PTX, compiler identity, and precise options; Chapter 11"
+    },
+    {
+      "path": "src/color/ColorKernel.ptx.h",
+      "bytes": 169037,
+      "lines": 1620,
+      "sha256": "b31bd7dbe2e58b157e722976947e7a56465d26a5b7d31a98011005b16a39d2e2",
+      "kind": "text",
+      "role": "Generated PTX byte array: content-hash and source-manifest checks; not handwritten algorithm code; Chapter 11"
+    },
+    {
+      "path": "src/color/CudaTransformer.cpp",
+      "bytes": 16161,
+      "lines": 333,
+      "sha256": "fa362f0de9a4dba956e6f8ca7859ea7ec4f23f261badf2ed8f09839354415cde",
+      "kind": "text",
+      "role": "Dynamic driver interface, qualification, and transactional commit; Chapter 11"
+    },
+    {
+      "path": "src/color/FloatTransformer.cpp",
+      "bytes": 5395,
+      "lines": 127,
+      "sha256": "9589f760dcbcd90f597a5c41f7bc5bf4966c664508499863ef3b49755fd856dd",
+      "kind": "text",
+      "role": "Persistent CPU workers, tile pairing, and statistics merging; Chapter 10"
+    },
+    {
+      "path": "src/color/HLG.cpp",
+      "bytes": 4638,
+      "lines": 98,
+      "sha256": "626936469d53efd5f9217b3819c9c71b227fc681b55727e575aca98b0fefc478",
+      "kind": "text",
+      "role": "Inverse HLG, reference scaling, creative adjustment, and signal counts; Chapters 3, 6"
+    },
+    {
+      "path": "tests/application.cpp",
+      "bytes": 13363,
+      "lines": 262,
+      "sha256": "fe055c27f053e4fa4454f356eba02e1aa259128df9bc9aeddcdaaa34d064ce2e",
+      "kind": "text",
+      "role": "Preferences, discovery, and version-resource tests; Chapter 21"
+    },
+    {
+      "path": "tests/benchmark.py",
+      "bytes": 5640,
+      "lines": 97,
+      "sha256": "486297f68cd94c2354da1ac77881571fc1c97e0bdee3bb88a826eb9ad59f335b",
+      "kind": "text",
+      "role": "Formal throughput matrix and process observations; Chapter 22"
+    },
+    {
+      "path": "tests/compatibility_v121.py",
+      "bytes": 8539,
+      "lines": 145,
+      "sha256": "57a927f3a0b289f006828dc49ce6799aaf43d4b388f9ef25fc0def97e825dbd6",
+      "kind": "text",
+      "role": "Portrait pixels, matrices, and audio-offset regression; Chapters 13, 21"
+    },
+    {
+      "path": "tests/cuda_artifact.py",
+      "bytes": 1017,
+      "lines": 18,
+      "sha256": "9b2b026d8e64a0f621e12054c0897cdd1acb13a49615c46529e2b4d46c2a4f54",
+      "kind": "text",
+      "role": "CUDA source, embedded PTX hashes, and option consistency; Chapter 11"
+    },
+    {
+      "path": "tests/fake_ffmpeg.cpp",
+      "bytes": 327,
+      "lines": 10,
+      "sha256": "d03976fec00fe86e846312f0ed8ac43f445785cea02f5afcc1d6225d0c38d3fe",
+      "kind": "text",
+      "role": "Marker fixture establishing non-execution of unknown tools; Chapter 17"
+    },
+    {
+      "path": "tests/gui_smoke.py",
+      "bytes": 7280,
+      "lines": 123,
+      "sha256": "99015b1d77e52e99a471d86631dbb66b8be446d305bce0222da78e870d8866f8",
+      "kind": "text",
+      "role": "Interactive desktop GUI scenarios; not rerun for this paper; Chapter 20"
+    },
+    {
+      "path": "tests/hardening.cpp",
+      "bytes": 17467,
+      "lines": 367,
+      "sha256": "c1e7a3104a91c902f6e683f19fa9981924082783bf3bde8147ea230533c1bbe8",
+      "kind": "text",
+      "role": "Cadence, tool trust, MOV, parallelism, and publication regressions; Chapter 21"
+    },
+    {
+      "path": "tests/identification.cpp",
+      "bytes": 4889,
+      "lines": 101,
+      "sha256": "f6df4ec1397510b5abfabe65110803aff5d108dc746eaaade1f477e84a641920",
+      "kind": "text",
+      "role": "Identification writing, idempotence, and structural-failure tests; Chapters 15, 21"
+    },
+    {
+      "path": "tests/integration.py",
+      "bytes": 18347,
+      "lines": 255,
+      "sha256": "825b629e9056a8e9cd546a86f165bb914ca18d77a6362d95d3d0df5e3228c686",
+      "kind": "text",
+      "role": "End-to-end synthetic media; the reported run fails at the old admission assertion on line 154; Chapter 21"
+    },
+    {
+      "path": "tests/layout_snapshots.py",
+      "bytes": 1738,
+      "lines": 35,
+      "sha256": "879e3dc61d11f99fd9390a7c1da7ecd50d121b0569df628b3dcb47e5ba6c55b9",
+      "kind": "text",
+      "role": "Production layout, theme, and DPI screenshot assertions; Chapter 20"
+    },
+    {
+      "path": "tests/package_audit.py",
+      "bytes": 2219,
+      "lines": 38,
+      "sha256": "7968c0ae2965bbe8eedc27cb34e575174b0e8a35af1a821270e1c14c658e7b1e",
+      "kind": "text",
+      "role": "Archive allowlist, CRC, executable, and SHA-256 audit; Appendix"
+    },
+    {
+      "path": "tests/process_fixture.cpp",
+      "bytes": 1926,
+      "lines": 51,
+      "sha256": "e37f441837d9e51c40f0516c863dd02fc69244f7653c2a99781f4ae341c2084a",
+      "kind": "text",
+      "role": "Descendant-held pipes, long lines, and exit-code fixtures; Chapter 18"
+    },
+    {
+      "path": "tests/reliability.cpp",
+      "bytes": 12380,
+      "lines": 246,
+      "sha256": "ed95cf31a3c19c90166072d160b8f1a2c6ad0c1701de016e23a1e6b4df77544a",
+      "kind": "text",
+      "role": "Process, discovery, and CLI abnormal-path regressions; Chapter 21"
+    },
+    {
+      "path": "tests/resolve_identification.py",
+      "bytes": 5726,
+      "lines": 110,
+      "sha256": "bddeee4d0b60e82cd3e6f81cc99a9c8ad94276b5aec011a963e78f5d36059510",
+      "kind": "text",
+      "role": "Real Resolve controlled-import script; not rerun for this paper; Chapter 15"
+    },
+    {
+      "path": "tests/signal_integrity.py",
+      "bytes": 8543,
+      "lines": 160,
+      "sha256": "c9771136e6c9d5cd4a03abb89215226bd40f401f0ad1d5b75fcafffccc85000d",
+      "kind": "text",
+      "role": "Independent integer patches, creative processing, and range counts; Chapters 7, 21"
+    },
+    {
+      "path": "tests/sustained.py",
+      "bytes": 5328,
+      "lines": 90,
+      "sha256": "8c3d77c24fc197f57f3d2760b6fe5561fac7f7e79b97ecf2ef30a0a7cbe4e92a",
+      "kind": "text",
+      "role": "240-frame 4K120, memory, and post-encoding luma; Chapter 21"
+    },
+    {
+      "path": "tests/tests.cpp",
+      "bytes": 21303,
+      "lines": 396,
+      "sha256": "af78f2035ba814374648a04cb1b15f4c2229c539bf590fe47a11cee5efc1a627",
+      "kind": "text",
+      "role": "Basic mathematical, media, and platform tests; Chapter 21"
+    },
+    {
+      "path": "tests/v120.cpp",
+      "bytes": 18321,
+      "lines": 386,
+      "sha256": "07e63cd2a09ea56f4a2c286cd913a2147038966e94da5c4a4fcecad21e9c2264",
+      "kind": "text",
+      "role": "Storage, matrices, CUDA faults, queues, and media regressions; Chapter 21"
+    },
+    {
+      "path": "third_party/NVIDIA-CUDA-NOTICE.txt",
+      "bytes": 1243,
+      "lines": 23,
+      "sha256": "502d5a8a622d63149048faf0b9100544e3b2d28910bf00a06fe0c7e6cabbba4b",
+      "kind": "text",
+      "role": "Project or third-party licensing and attribution; distribution boundaries"
+    },
+    {
+      "path": "third_party/nlohmann/LICENSE.MIT",
+      "bytes": 1075,
+      "lines": 21,
+      "sha256": "c0d068392ea65358b798b8c165103560f06e9e3b38c4ab4e2d8810a7b931af86",
+      "kind": "text",
+      "role": "Project or third-party licensing and attribution; distribution boundaries"
+    },
+    {
+      "path": "third_party/nlohmann/json.hpp",
+      "bytes": 953436,
+      "lines": 25526,
+      "sha256": "aaf127c04cb31c406e5b04a63f1ae89369fccde6d8fa7cdda1ed4f32dfc5de63",
+      "kind": "text",
+      "role": "Third-party JSON 3.12.0 single-header dependency for JSON I/O; not the project color algorithm"
+    },
+    {
+      "path": "tools/compile_cuda.py",
+      "bytes": 2905,
+      "lines": 48,
+      "sha256": "255e5af85e1054d08bbd1b45577999fe09220e4c0cb6e7e381b3210f07fa97bc",
+      "kind": "text",
+      "role": "NVRTC compilation with precise options and generated manifest; Chapter 11"
+    }
+  ]
+}

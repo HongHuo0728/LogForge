@@ -1,0 +1,92 @@
+[
+  {
+    "number": 1,
+    "id": "pipeline",
+    "caption": "End-to-end data flow and signal domains. Blue denotes FFmpeg processing, green denotes LogForge numerical results or container processing, and gray denotes the source material. Follow the arrows to the right, down, and then left. The audio bypass is not expanded here. MOV signaling is corrected after encoding."
+  },
+  {
+    "number": 2,
+    "id": "hlg",
+    "caption": "Inverse HLG and reference anchors. The left panel shows the relative scene quantity over the nominal input domain. The right panel shows reflectance coordinates after reference-white scaling. The marked values are model anchors, not measurements of camera exposure."
+  },
+  {
+    "number": 3,
+    "id": "apple",
+    "caption": "The quadratic shadow branch and logarithmic high branch of Apple Log. The floor, join, 18% gray, and nominal upper reference are marked. The curves are calculated from source-code constants and must not be interpreted as an experiment demonstrating dynamic-range recovery."
+  },
+  {
+    "number": 4,
+    "id": "chroma",
+    "caption": "Spatial relationships among luma samples and left- or center-sited chroma samples. A half-pixel displacement produces a measurable difference on a chroma ramp. This is a sampling-geometry illustration, not a claim of recovered chroma resolution."
+  },
+  {
+    "number": 5,
+    "id": "creative",
+    "caption": "Creative luminance mapping and its derivative. The mapping panel compares disabled and enabled processing in exposure coordinates; the derivative panel shows the local slope at the parameter limits. The horizontal dashed line marks the theoretical lower bound of 0.25."
+  },
+  {
+    "number": 6,
+    "id": "quantization",
+    "caption": "Quantization relationships after reference conversion of neutral 10-bit HLG codes. Several dark input levels may map to the same output integer, illustrating the non-invertibility of a finite-codeword mapping. The figure simulates rounding only and excludes ProRes compression."
+  },
+  {
+    "number": 7,
+    "id": "architecture",
+    "caption": "Source-module relationships. The GUI and CLI enter the same task core. Tool trust, temporal validation, color computation, and MOV structure handling provide distinct services. Arrows denote principal calls rather than every include relationship."
+  },
+  {
+    "number": 8,
+    "id": "bridge",
+    "caption": "Conceptual timing of the three-stage pipeline. Color processing commits blocks in order, while reads and writes can overlap adjacent blocks. The intervals are instructional illustrations, not an actual Gantt chart extracted from performance logs."
+  },
+  {
+    "number": 9,
+    "id": "cuda",
+    "caption": "CUDA block execution and its commit boundary. Caller data is overwritten only after synchronization, statistics, and error checks succeed. On failure, Auto can submit the original block to CPU; forced CUDA terminates the task."
+  },
+  {
+    "number": 10,
+    "id": "cadence",
+    "caption": "Phase examples for exact fixed cadence, quantized alternating cadence, and sustained drift. Dashed lines show the 1.05-tick budget. These instructional curves demonstrate that small local error does not guarantee small accumulated phase error."
+  },
+  {
+    "number": 11,
+    "id": "rotation",
+    "caption": "Pixel rotation illustrated with a four-quadrant fixture. A 90-degree path exchanges width and height and permutes pixels. The identity output matrix removes the player's need to interpret an orientation tag. The operation is geometric rather than a new color transform."
+  },
+  {
+    "number": 12,
+    "id": "movtree",
+    "caption": "MOV hierarchy relevant to Apple Log identification. logs and colr are direct children of the ProRes sample entry. Movie-level meta/keys/ilst supplies a separate key-value metadata system; the two locations must not be conflated."
+  },
+  {
+    "number": 13,
+    "id": "insertion",
+    "caption": "Insertion of logs into a trailing moov. The narrow colored block adds 35 bytes. Reading proceeds from right to left while writing to higher offsets, avoiding overlap corruption. The location of mdat is unchanged."
+  },
+  {
+    "number": 14,
+    "id": "trust",
+    "caption": "Admission of external tools. Each gate addresses a different question: bound identity, available functionality, numerical behavior, and validation of the actual task. Passing an earlier gate does not imply passing a later one."
+  },
+  {
+    "number": 15,
+    "id": "publication",
+    "caption": "Task states and the publication boundary. Encoding is followed by metadata repair, output validation, and report persistence. Failure returns to cleanup. Only the final no-overwrite move turns temporary media into the delivered file."
+  },
+  {
+    "number": 16,
+    "id": "memory",
+    "caption": "Application private-memory trace from the paper's 240-frame 4K120 reproduction in CPU Standard mode. Data comes from sustained-report.json and covers only the main application, excluding FFmpeg children and GPU device memory. This is an observation from one run."
+  },
+  {
+    "number": 17,
+    "id": "benchmark",
+    "caption": "Historical throughput matrix from repository version 1.2.0. Solid and dashed lines distinguish Standard and Creative modes; colors distinguish CPU and CUDA. The vertical axis is measured pipeline throughput, not input capture rate. Each case is a single observation on one machine."
+  },
+  {
+    "number": 18,
+    "id": "perf_memory",
+    "caption": "Historical version 1.2.0 peak application and process-tree memory for four 4K120 configurations. Both bar groups use the same units. GPU device buffers are reported separately; host private memory is not a measurement of video memory."
+  }
+]

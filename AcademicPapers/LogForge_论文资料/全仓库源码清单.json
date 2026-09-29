@@ -1,0 +1,3228 @@
+{
+  "commit": "6b43a93fbd4d1457ff20b4c99a030c0e398f520a",
+  "files": [
+    {
+      "path": ".clang-format",
+      "bytes": 247,
+      "lines": 9,
+      "sha256": "12a067c4b568871a6bd38656578ed2df62eac5ce86bee50d50e36fddd119a95a",
+      "kind": "text",
+      "role": "仓库格式、换行和忽略规则；复现基础",
+      "symbols": []
+    },
+    {
+      "path": ".gitattributes",
+      "bytes": 169,
+      "lines": 10,
+      "sha256": "343b613987797cb64c9bb6dcaf0ddba2b808eddcf770e7fe85fb569b9a589383",
+      "kind": "text",
+      "role": "仓库格式、换行和忽略规则；复现基础",
+      "symbols": []
+    },
+    {
+      "path": ".github/workflows/build-windows.yml",
+      "bytes": 2764,
+      "lines": 71,
+      "sha256": "43e7e6f85a681e3408703ab7fd3d84d0ee34a664590ea3878a53a0b7cf4dbd6d",
+      "kind": "text",
+      "role": "C++20/MSVC目标、测试注册、构建与发布允许列表；第8、21章",
+      "symbols": []
+    },
+    {
+      "path": ".gitignore",
+      "bytes": 751,
+      "lines": 48,
+      "sha256": "cd7c853953c287a70021938c3c2cd82cda999f8c1a12abb701bd8bc78a0cdc4c",
+      "kind": "text",
+      "role": "仓库格式、换行和忽略规则；复现基础",
+      "symbols": [
+        {
+          "line": 10,
+          "text": "# Generated / private media must not be added to the source repository."
+        },
+        {
+          "line": 11,
+          "text": "# Case-insensitive patterns also cover camera originals named *.MOV / *.MP4."
+        },
+        {
+          "line": 34,
+          "text": "# Local preferences, validation caches and build products are never source."
+        }
+      ]
+    },
+    {
+      "path": "CHANGELOG.md",
+      "bytes": 9659,
+      "lines": 141,
+      "sha256": "368b93867efae369da60e7946ccc8e4fb87752a2b81456c0d2a43eddbb3a6f76",
+      "kind": "text",
+      "role": "项目说明、历史证据或开发流程；按章节主题交叉核对",
+      "symbols": [
+        {
+          "line": 1,
+          "text": "# Changelog"
+        }
+      ]
+    },
+    {
+      "path": "CMakeLists.txt",
+      "bytes": 9296,
+      "lines": 124,
+      "sha256": "6a12fd2be0dd2bbca7b78cc601635a8222cf6856d5ca81dab0010064daace506",
+      "kind": "text",
+      "role": "C++20/MSVC目标、测试注册、构建与发布允许列表；第8、21章",
+      "symbols": []
+    },
+    {
+      "path": "CONTRIBUTING.md",
+      "bytes": 2953,
+      "lines": 19,
+      "sha256": "0a2abd0219b7776edd6e56a7d3fc25b032de91291e1200652c1bd275c8cbcb8d",
+      "kind": "text",
+      "role": "项目说明、历史证据或开发流程；按章节主题交叉核对",
+      "symbols": [
+        {
+          "line": 1,
+          "text": "# Contributing"
+        }
+      ]
+    },
+    {
+      "path": "LICENSE",
+      "bytes": 1078,
+      "lines": 21,
+      "sha256": "d2b1a524541b73ddb7474654410dbe5dd782d481959fe237d749f1e3d1136dcd",
+      "kind": "text",
+      "role": "项目或第三方许可与归属说明；发行边界",
+      "symbols": []
+    },
+    {
+      "path": "README.md",
+      "bytes": 27355,
+      "lines": 233,
+      "sha256": "efb454924028a502302bb5b751cb43e70289fd0935d36989dc4e0b99c0a63fab",
+      "kind": "text",
+      "role": "项目说明、历史证据或开发流程；按章节主题交叉核对",
+      "symbols": [
+        {
+          "line": 1,
+          "text": "# LogForge"
+        }
+      ]
+    },
+    {
+      "path": "THIRD_PARTY_NOTICES.md",
+      "bytes": 2715,
+      "lines": 41,
+      "sha256": "70926562afcfa9b4bba6129a544e3547bc7919e9dc51ec9f30ef4bb09351da7c",
+      "kind": "text",
+      "role": "项目或第三方许可与归属说明；发行边界",
+      "symbols": [
+        {
+          "line": 1,
+          "text": "# Third-party notices"
+        }
+      ]
+    },
+    {
+      "path": "docs/APPLE_LOG_IDENTIFICATION.md",
+      "bytes": 9133,
+      "lines": 153,
+      "sha256": "ecdc0896f24584b97c439fdb2d78453a9fd798e7ce0b0b9696306acb91181390",
+      "kind": "text",
+      "role": "项目说明、历史证据或开发流程；按章节主题交叉核对",
+      "symbols": [
+        {
+          "line": 1,
+          "text": "# Apple Log identification: native reference and Resolve A/B evidence"
+        }
+      ]
+    },
+    {
+      "path": "docs/ARCHITECTURE.md",
+      "bytes": 14614,
+      "lines": 147,
+      "sha256": "7972eaf13401ff9a212d5f26554edf14b7a8cfa49a2d999737ab4edaf6145fb8",
+      "kind": "text",
+      "role": "项目说明、历史证据或开发流程；按章节主题交叉核对",
+      "symbols": [
+        {
+          "line": 1,
+          "text": "# Architecture"
+        }
+      ]
+    },
+    {
+      "path": "docs/BENCHMARK_1.2.0.md",
+      "bytes": 6010,
+      "lines": 62,
+      "sha256": "5c289167580dd1c7b504ecea0227a8024714251ee931768c889eaa1be1854cdc",
+      "kind": "text",
+      "role": "项目说明、历史证据或开发流程；按章节主题交叉核对",
+      "symbols": [
+        {
+          "line": 1,
+          "text": "# LogForge 1.2.0 performance measurements"
+        }
+      ]
+    },
+    {
+      "path": "docs/BUG_AUDIT_1.1.1.md",
+      "bytes": 7273,
+      "lines": 63,
+      "sha256": "063144bb62910596895ac7e172c7dc372483d0cb4bc4a5eead1c6f886afca4c8",
+      "kind": "text",
+      "role": "项目说明、历史证据或开发流程；按章节主题交叉核对",
+      "symbols": [
+        {
+          "line": 1,
+          "text": "# LogForge 1.1.1 (26923D): defect audit"
+        }
+      ]
+    },
+    {
+      "path": "docs/COLOR_PIPELINE.md",
+      "bytes": 8085,
+      "lines": 97,
+      "sha256": "a26e0740881c1b9a00819e30d15e2f6cf8c9740c93af14a77573ef3b11fbc745",
+      "kind": "text",
+      "role": "项目说明、历史证据或开发流程；按章节主题交叉核对",
+      "symbols": [
+        {
+          "line": 1,
+          "text": "# Color pipeline and numerical contract"
+        }
+      ]
+    },
+    {
+      "path": "docs/CREATIVE_ADJUSTMENTS.md",
+      "bytes": 4895,
+      "lines": 46,
+      "sha256": "88102a849700142217dd0fcb225ea684b9f213c17949205b61433ad862676f87",
+      "kind": "text",
+      "role": "项目说明、历史证据或开发流程；按章节主题交叉核对",
+      "symbols": [
+        {
+          "line": 1,
+          "text": "# Optional creative adjustments"
+        }
+      ]
+    },
+    {
+      "path": "docs/FFMPEG_PROVIDER.md",
+      "bytes": 6952,
+      "lines": 54,
+      "sha256": "ac40882a24bba073b2d3767f5143b0b68708cda219f6ff7a7a01f42837f0e8c1",
+      "kind": "text",
+      "role": "项目说明、历史证据或开发流程；按章节主题交叉核对",
+      "symbols": [
+        {
+          "line": 1,
+          "text": "# FFmpeg build provider"
+        }
+      ]
+    },
+    {
+      "path": "docs/ICON.md",
+      "bytes": 1600,
+      "lines": 28,
+      "sha256": "4cb31a795651fe66817112de2014ccfde21a0f0f48521e339cf17ef2897c0c2d",
+      "kind": "text",
+      "role": "项目说明、历史证据或开发流程；按章节主题交叉核对",
+      "symbols": [
+        {
+          "line": 1,
+          "text": "# Application icon"
+        }
+      ]
+    },
+    {
+      "path": "docs/METADATA.md",
+      "bytes": 9176,
+      "lines": 79,
+      "sha256": "a264ddece54935d751a25700cef4b8114bf198c771a222583e52398318924fe0",
+      "kind": "text",
+      "role": "项目说明、历史证据或开发流程；按章节主题交叉核对",
+      "symbols": [
+        {
+          "line": 1,
+          "text": "# Metadata contract and reference-sample research"
+        }
+      ]
+    },
+    {
+      "path": "docs/RELEASE_1.2.0.md",
+      "bytes": 5550,
+      "lines": 92,
+      "sha256": "8510c1d929444cbdb7287fa93792be0c9ddb54696d5a9a68b8d2f7d37d9274fa",
+      "kind": "text",
+      "role": "项目说明、历史证据或开发流程；按章节主题交叉核对",
+      "symbols": [
+        {
+          "line": 1,
+          "text": "# LogForge 1.2.0 (26926A)"
+        }
+      ]
+    },
+    {
+      "path": "docs/RELEASE_1.2.1.md",
+      "bytes": 2522,
+      "lines": 46,
+      "sha256": "9eb3de52ff8ef9b1a520539724b2a83e3ac67f77cc3ab1c5d51f926d49932aea",
+      "kind": "text",
+      "role": "项目说明、历史证据或开发流程；按章节主题交叉核对",
+      "symbols": [
+        {
+          "line": 1,
+          "text": "# LogForge 1.2.1 (26927B)"
+        }
+      ]
+    },
+    {
+      "path": "docs/TECHNICAL_REFERENCES.md",
+      "bytes": 16149,
+      "lines": 137,
+      "sha256": "c97054741275e8a67750110e0cb133d3e441dfdd0ae15eea9bd21d6bbfafa24e",
+      "kind": "text",
+      "role": "项目说明、历史证据或开发流程；按章节主题交叉核对",
+      "symbols": [
+        {
+          "line": 1,
+          "text": "# Technical references"
+        }
+      ]
+    },
+    {
+      "path": "docs/VALIDATION.md",
+      "bytes": 47231,
+      "lines": 598,
+      "sha256": "f35088aa312376842c8980fa08d80f604bc6ad64b9c397fdd837a5a6901b0341",
+      "kind": "text",
+      "role": "项目说明、历史证据或开发流程；按章节主题交叉核对",
+      "symbols": [
+        {
+          "line": 1,
+          "text": "# Validation record"
+        },
+        {
+          "line": 593,
+          "text": "# Approve only a reviewed pair, or install the pinned build through --install-ffmpeg."
+        },
+        {
+          "line": 594,
+          "text": "# Use only a generated fixture with known left chroma siting for this declaration."
+        }
+      ]
+    },
+    {
+      "path": "docs/benchmarks/1.2.0.json",
+      "bytes": 95920,
+      "lines": 2805,
+      "sha256": "3347a311d28e712752661b4a2615725251dae4488eeced1565bf63390518cb27",
+      "kind": "text",
+      "role": "项目说明、历史证据或开发流程；按章节主题交叉核对",
+      "symbols": []
+    },
+    {
+      "path": "docs/images/LogForge.png",
+      "bytes": 37255,
+      "lines": null,
+      "sha256": "7cfc452f64600478b7944f7787b7ce3ba2a8aa2a60a9d7b03134ab22d15521dc",
+      "kind": "binary",
+      "role": "项目说明、历史证据或开发流程；按章节主题交叉核对",
+      "symbols": []
+    },
+    {
+      "path": "docs/verification/1.2.0.json",
+      "bytes": 8602,
+      "lines": 320,
+      "sha256": "c054d034c823c62e9365ec2c20a440f1826e59a83664f45ef39cc0264a6e79f3",
+      "kind": "text",
+      "role": "项目说明、历史证据或开发流程；按章节主题交叉核对",
+      "symbols": []
+    },
+    {
+      "path": "include/logforge/AppleLogIdentification.h",
+      "bytes": 538,
+      "lines": 14,
+      "sha256": "f680e727764b585577ac0b1c279d40e5fd79094a706c606c766a174873fee5e0",
+      "kind": "text",
+      "role": "35字节识别扩展写入及结构检查；第15章",
+      "symbols": [
+        {
+          "line": 8,
+          "text": "class AppleLogIdentificationWriter {"
+        }
+      ]
+    },
+    {
+      "path": "include/logforge/Color.h",
+      "bytes": 2298,
+      "lines": 53,
+      "sha256": "b84b959a93c7ba1724b57628df0d7af9fa4277b8596079b7e18d5b612c259bfa",
+      "kind": "text",
+      "role": "颜色模型接口、常数、参数与统计结构；第3至7章",
+      "symbols": [
+        {
+          "line": 29,
+          "text": "double HLGToReflectanceScale() noexcept;"
+        },
+        {
+          "line": 30,
+          "text": "void ValidateExposureStops(double stops);"
+        },
+        {
+          "line": 31,
+          "text": "double HLGToAppleLog(double encoded, double exposureStops = 0.0) noexcept;"
+        },
+        {
+          "line": 41,
+          "text": "void ValidateToneAdjustments(const ToneAdjustments& tone);"
+        },
+        {
+          "line": 51,
+          "text": "void TransformHLGToAppleLog(std::span<float> planarRgb, double exposureStops = 0.0,"
+        }
+      ]
+    },
+    {
+      "path": "include/logforge/CudaTransformer.h",
+      "bytes": 757,
+      "lines": 24,
+      "sha256": "cb3c78e9fda67240d2ab04304054d6e0c37379f926d88d879b62fe8203156181",
+      "kind": "text",
+      "role": "动态驱动接口、资格验证和事务提交；第11章",
+      "symbols": [
+        {
+          "line": 8,
+          "text": "const char* BackendName(ProcessingBackend backend);"
+        },
+        {
+          "line": 9,
+          "text": "class CudaTransformer {"
+        }
+      ]
+    },
+    {
+      "path": "include/logforge/Discovery.h",
+      "bytes": 2992,
+      "lines": 61,
+      "sha256": "c9ec233f7adf1a54438bdc9ecc36fccc2b5efa8a15479663018d4fac909b9c01",
+      "kind": "text",
+      "role": "本地卷与目录遍历；第17章",
+      "symbols": [
+        {
+          "line": 47,
+          "text": "DiscoveryReport DiscoverFFmpegPaths(const DiscoveryOptions&, const std::atomic_bool&,"
+        },
+        {
+          "line": 50,
+          "text": "int RunDiscoveryHelper(const std::vector<std::wstring>& args);"
+        },
+        {
+          "line": 52,
+          "text": "std::vector<fs::path> RegisteredFFmpegPaths("
+        },
+        {
+          "line": 54,
+          "text": "std::vector<fs::path> LocalDriveRoots();"
+        },
+        {
+          "line": 58,
+          "text": "DiscoveryProgress SearchFFmpegDirectories(const std::vector<fs::path>& roots, const std::atomic_bool& cancel,"
+        }
+      ]
+    },
+    {
+      "path": "include/logforge/FFmpeg.h",
+      "bytes": 2368,
+      "lines": 62,
+      "sha256": "e800495087beaab28f6ac7b0e3f3de6876adeef277e1ce2b3b3cc5ef26c7569d",
+      "kind": "text",
+      "role": "工具能力、发现调度和固定下载；第17章",
+      "symbols": [
+        {
+          "line": 16,
+          "text": "class FFmpegManager {"
+        },
+        {
+          "line": 47,
+          "text": "class FFmpegBuildProvider {"
+        },
+        {
+          "line": 52,
+          "text": "class GyanReleaseProvider final : public FFmpegBuildProvider {"
+        },
+        {
+          "line": 57,
+          "text": "class FFmpegDownloader {"
+        }
+      ]
+    },
+    {
+      "path": "include/logforge/FloatBridge.h",
+      "bytes": 830,
+      "lines": 21,
+      "sha256": "fbb7866da4acc35c702328d8511492313febaef42c899653d139e716076032e0",
+      "kind": "text",
+      "role": "三槽读算写状态机与线程预算；第9章",
+      "symbols": [
+        {
+          "line": 14,
+          "text": "int64_t RunFloatBridge(FFmpegProcess& decoder, FFmpegProcess& encoder, size_t frameSamples, bool creative,"
+        },
+        {
+          "line": 20,
+          "text": "ThreadPlan PlanThreads(bool cuda);"
+        }
+      ]
+    },
+    {
+      "path": "include/logforge/FloatTransformer.h",
+      "bytes": 564,
+      "lines": 18,
+      "sha256": "57d45cefb02514d76d90653b9ee76502d06a942c1b8a42e62efd8b756bae4246",
+      "kind": "text",
+      "role": "持久 CPU 工作线程、tile 配对及统计合并；第10章",
+      "symbols": [
+        {
+          "line": 7,
+          "text": "class FloatTransformer {"
+        }
+      ]
+    },
+    {
+      "path": "include/logforge/Localization.h",
+      "bytes": 1170,
+      "lines": 34,
+      "sha256": "05b79d1b1b53f8f65b5ef0ea65b2e2e3bed42036e1f0fb53adce79661b29a4ca",
+      "kind": "text",
+      "role": "稳定消息键和单遍参数替换；第20章",
+      "symbols": [
+        {
+          "line": 20,
+          "text": "std::string Translate(const Message& message, Language language = Language::English);"
+        },
+        {
+          "line": 21,
+          "text": "std::wstring TranslateWide(const Message& message, Language language = Language::English);"
+        },
+        {
+          "line": 22,
+          "text": "const char* MessageKey(TextId id);"
+        },
+        {
+          "line": 23,
+          "text": "bool ValidateTranslations();"
+        },
+        {
+          "line": 24,
+          "text": "std::string Describe(const Message& message, const std::vector<Message>& details, Language language);"
+        },
+        {
+          "line": 25,
+          "text": "class AppError : public std::runtime_error {"
+        }
+      ]
+    },
+    {
+      "path": "include/logforge/Media.h",
+      "bytes": 3821,
+      "lines": 87,
+      "sha256": "08e504ba764534e33beba756527126ec76bd52adc4f03cab7c9db17e785276f2",
+      "kind": "text",
+      "role": "探测解析、准入、元数据参数与输出验证；第2、16章",
+      "symbols": [
+        {
+          "line": 56,
+          "text": "bool SameMetadataValue(const std::string& key, const Json& a, const Json& b);"
+        },
+        {
+          "line": 57,
+          "text": "bool SupportedDisplayMatrix(const std::string& matrix, int width = 0, int height = 0);"
+        },
+        {
+          "line": 58,
+          "text": "Json PreserveMovCreationTimes(const Json& sourceAtoms, const fs::path& encodedPartial,"
+        },
+        {
+          "line": 60,
+          "text": "Json InspectMovTimeline(const MediaInfo& input, const Json& atoms, const fs::path& ffprobe = {},"
+        },
+        {
+          "line": 62,
+          "text": "MediaInfo Probe(const fs::path& ffprobe, const fs::path& path, const std::atomic_bool* cancel = nullptr);"
+        },
+        {
+          "line": 63,
+          "text": "CadenceReport AnalyzeCadence(std::span<const VideoPacketTiming> packets, const MediaInfo& media);"
+        },
+        {
+          "line": 64,
+          "text": "CadenceReport VerifyConstantFrameRate(const fs::path& ffprobe, const MediaInfo& media,"
+        },
+        {
+          "line": 74,
+          "text": "ValidationReport ValidateOutput(const MediaInfo& input, const MediaInfo& output, int64_t processedFrames);"
+        }
+      ]
+    },
+    {
+      "path": "include/logforge/Messages.inc",
+      "bytes": 29793,
+      "lines": 262,
+      "sha256": "55f1ee07f6da30e7cbc368628c95b7ea84b55871f4937c05ac25e5f492d023ea",
+      "kind": "text",
+      "role": "双语消息宏表、稳定键与占位符；第20章",
+      "symbols": []
+    },
+    {
+      "path": "include/logforge/PixelSanity.h",
+      "bytes": 640,
+      "lines": 24,
+      "sha256": "8cd7d0a6e8b47b8885a016bd2c5c64f8b8ed680765a01f264353bb6f480d09dd",
+      "kind": "text",
+      "role": "首中尾帧九块编码后粗差检查；第7章",
+      "symbols": [
+        {
+          "line": 4,
+          "text": "class PixelSanity {"
+        }
+      ]
+    },
+    {
+      "path": "include/logforge/Platform.h",
+      "bytes": 3353,
+      "lines": 115,
+      "sha256": "2b97344db3740ccb4d16806fc573384d70ae7c449322219e17b5b99b656ec3d9",
+      "kind": "text",
+      "role": "宽字符、句柄、进程监督、管道与哈希；第18章",
+      "symbols": [
+        {
+          "line": 14,
+          "text": "std::wstring Wide(const std::string& text);"
+        },
+        {
+          "line": 15,
+          "text": "std::string Utf8(const std::wstring& text);"
+        },
+        {
+          "line": 16,
+          "text": "std::string PathText(const fs::path& path);"
+        },
+        {
+          "line": 17,
+          "text": "std::wstring WinError(DWORD code = GetLastError());"
+        },
+        {
+          "line": 18,
+          "text": "fs::path DataDirectory();"
+        },
+        {
+          "line": 19,
+          "text": "fs::path ExecutableDirectory();"
+        },
+        {
+          "line": 20,
+          "text": "fs::path SystemExecutable(const wchar_t* filename);"
+        },
+        {
+          "line": 21,
+          "text": "std::wstring QuoteArgument(const std::wstring& arg);"
+        },
+        {
+          "line": 22,
+          "text": "std::wstring CommandLine(const fs::path& exe, const std::vector<std::wstring>& args);"
+        },
+        {
+          "line": 23,
+          "text": "class Handle {"
+        },
+        {
+          "line": 57,
+          "text": "class Logger {"
+        },
+        {
+          "line": 72,
+          "text": "class StateLock {"
+        },
+        {
+          "line": 83,
+          "text": "void RequireWritableDirectory(const fs::path& directory);"
+        },
+        {
+          "line": 84,
+          "text": "void MaintainOwnedStorage();"
+        },
+        {
+          "line": 85,
+          "text": "class FFmpegProcess {"
+        },
+        {
+          "line": 106,
+          "text": "void ReadLines(HANDLE pipe, const LineCallback& callback);"
+        },
+        {
+          "line": 111,
+          "text": "ProcessResult RunProcess(const fs::path& exe, const std::vector<std::wstring>& args,"
+        },
+        {
+          "line": 114,
+          "text": "std::string SHA256(const fs::path& file);"
+        }
+      ]
+    },
+    {
+      "path": "include/logforge/Queue.h",
+      "bytes": 465,
+      "lines": 8,
+      "sha256": "3cc33ff450339cbeb5eee098dd78d615310798674496b42935fd0ed2ddb84378",
+      "kind": "text",
+      "role": "串行多文件任务及逐项失败记录；第20章",
+      "symbols": [
+        {
+          "line": 5,
+          "text": "Json RunQueue(const FFmpegInstallation& tools, const std::vector<fs::path>& inputs, const fs::path& directory,"
+        }
+      ]
+    },
+    {
+      "path": "include/logforge/Settings.h",
+      "bytes": 643,
+      "lines": 23,
+      "sha256": "359c8126a827a14ffc5a125ceed67c14676daf6ec674f3746e5e5124f4a18fa2",
+      "kind": "text",
+      "role": "字段合并、并发锁及原子偏好保存；第19、20章",
+      "symbols": [
+        {
+          "line": 17,
+          "text": "class SettingsStore {"
+        }
+      ]
+    },
+    {
+      "path": "include/logforge/StorageSafety.h",
+      "bytes": 489,
+      "lines": 18,
+      "sha256": "07ee1b5548d9c48a77e472ed5133c2c3b98d0eb70cae198fb6f76a179c3007d3",
+      "kind": "text",
+      "role": "文件身份日志、状态锁与所有权恢复；第19章",
+      "symbols": [
+        {
+          "line": 7,
+          "text": "class OwnedJobFiles {"
+        },
+        {
+          "line": 17,
+          "text": "void MarkOwnedInstallDirectory(const fs::path& path);"
+        }
+      ]
+    },
+    {
+      "path": "include/logforge/ToolTrust.h",
+      "bytes": 997,
+      "lines": 29,
+      "sha256": "4b89a357d1d8a95a44fdddeab703c7e28a3080bee7c96c7ed7657ee281b93265",
+      "kind": "text",
+      "role": "双可执行文件身份、批准与租约；第17章",
+      "symbols": [
+        {
+          "line": 18,
+          "text": "class ToolTrust {"
+        }
+      ]
+    },
+    {
+      "path": "include/logforge/Transcode.h",
+      "bytes": 1287,
+      "lines": 33,
+      "sha256": "c786cdbeffda746793f7c0bf5a1adef40b00a60c0b3c4bb037b809647886acff",
+      "kind": "text",
+      "role": "完整媒体任务、后端、验证报告与最终发布；第8、23章",
+      "symbols": [
+        {
+          "line": 27,
+          "text": "class TranscodeJob {"
+        }
+      ]
+    },
+    {
+      "path": "include/logforge/Ui.h",
+      "bytes": 2145,
+      "lines": 49,
+      "sha256": "bcf4657680d358717bd7f505b5731db93a7bea684eb2110c6304d2bafdebff00",
+      "kind": "text",
+      "role": "主题、DPI、原生绘制与截图；第20章",
+      "symbols": [
+        {
+          "line": 10,
+          "text": "class UiStyle {"
+        },
+        {
+          "line": 35,
+          "text": "std::wstring WindowText(HWND window);"
+        },
+        {
+          "line": 36,
+          "text": "std::wstring EditLines(const std::wstring& text);"
+        },
+        {
+          "line": 38,
+          "text": "int ScrollDeltaToReveal(HWND parent, HWND focused, int dpi);"
+        },
+        {
+          "line": 39,
+          "text": "HWND MakeControl(HWND parent, int id, const wchar_t* klass, const std::wstring& text, DWORD style,"
+        },
+        {
+          "line": 41,
+          "text": "void SetCombo(HWND combo, const std::vector<std::wstring>& choices, int selected);"
+        },
+        {
+          "line": 42,
+          "text": "bool ShowSettings(HWND owner, AppSettings& settings, const fs::path& snapshot = {}, bool exercise = false);"
+        },
+        {
+          "line": 43,
+          "text": "void ShowDetails(HWND owner, const std::wstring& title, const std::wstring& text,"
+        },
+        {
+          "line": 45,
+          "text": "bool SaveWindowSnapshot(HWND window, const fs::path& destination);"
+        },
+        {
+          "line": 46,
+          "text": "std::optional<fs::path> ShowFFmpegCandidates(HWND owner, const std::vector<DiscoveryCandidate>& candidates,"
+        }
+      ]
+    },
+    {
+      "path": "resources/LogForge.ico",
+      "bytes": 103909,
+      "lines": null,
+      "sha256": "1e262b4ac403e2d843d0b261857d485a830126a1be92c5652285692cb2ae6ee7",
+      "kind": "binary",
+      "role": "图标、清单、版本资源及生成模板；构建与界面",
+      "symbols": []
+    },
+    {
+      "path": "resources/LogForge.manifest",
+      "bytes": 1218,
+      "lines": 9,
+      "sha256": "7a4b2b2a6dcce95772d18d3a9bd833234b116f60dd743edf40777ed1e8650429",
+      "kind": "text",
+      "role": "图标、清单、版本资源及生成模板；构建与界面",
+      "symbols": []
+    },
+    {
+      "path": "resources/LogForge.png",
+      "bytes": 1161472,
+      "lines": null,
+      "sha256": "12f8ffa70b1f275385d98aa901c5f17441dfcabdd0b5a78c27468e49cdeb8b9f",
+      "kind": "binary",
+      "role": "图标、清单、版本资源及生成模板；构建与界面",
+      "symbols": []
+    },
+    {
+      "path": "resources/LogForge.rc",
+      "bytes": 853,
+      "lines": 34,
+      "sha256": "cafd9451b9f69b77d1c9b3e4e1a0a67bddccfd5b8b4e3e55693eaa6d3e5b2fff",
+      "kind": "text",
+      "role": "图标、清单、版本资源及生成模板；构建与界面",
+      "symbols": []
+    },
+    {
+      "path": "resources/Version.h.in",
+      "bytes": 244,
+      "lines": 6,
+      "sha256": "6ff776788c331bc1784449eb7bfda980c028bf47b31c45ab86d1dbfb1a7ae15d",
+      "kind": "text",
+      "role": "图标、清单、版本资源及生成模板；构建与界面",
+      "symbols": []
+    },
+    {
+      "path": "resources/VersionResource.h.in",
+      "bytes": 305,
+      "lines": 4,
+      "sha256": "8aac898816910f0604f7f07934b3330e382811025b877a20fbe212080803cb82",
+      "kind": "text",
+      "role": "图标、清单、版本资源及生成模板；构建与界面",
+      "symbols": []
+    },
+    {
+      "path": "src/AppleLogIdentification.cpp",
+      "bytes": 9669,
+      "lines": 194,
+      "sha256": "7e4e8bde35e9f959261de0fd3d7d46372e6d632093400f627c1fe3ae993dc52d",
+      "kind": "text",
+      "role": "35字节识别扩展写入及结构检查；第15章",
+      "symbols": [
+        {
+          "line": 10,
+          "text": "void CheckCancel(const std::atomic_bool& cancel) {"
+        },
+        {
+          "line": 14,
+          "text": "void At(HANDLE file, uint64_t offset) {"
+        },
+        {
+          "line": 20,
+          "text": "void ReadAt(HANDLE file, uint64_t offset, void* bytes, DWORD size) {"
+        },
+        {
+          "line": 26,
+          "text": "void WriteAt(HANDLE file, uint64_t offset, const void* bytes, DWORD size) {"
+        },
+        {
+          "line": 32,
+          "text": "uint32_t U32(const unsigned char* p) {"
+        },
+        {
+          "line": 41,
+          "text": "bool DirectChild(const Json& atom, const std::string& parent) {"
+        },
+        {
+          "line": 47,
+          "text": "Json AppleLogIdentificationWriter::Validate(const Json& analysis) {"
+        },
+        {
+          "line": 78,
+          "text": "void AppleLogIdentificationWriter::WriteToEncodedPartial(const fs::path& partial,"
+        }
+      ]
+    },
+    {
+      "path": "src/Cadence.cpp",
+      "bytes": 7954,
+      "lines": 168,
+      "sha256": "e323be3a9a3500254a8d5dcc8d04f31173ed72368d32f0a997b59553c991b00e",
+      "kind": "text",
+      "role": "全包周期、相位与固定时钟验证；第12章",
+      "symbols": [
+        {
+          "line": 9,
+          "text": "Json CadenceReport::ToJson() const {"
+        },
+        {
+          "line": 21,
+          "text": "CadenceReport AnalyzeCadence(std::span<const VideoPacketTiming> p, const MediaInfo& m) {"
+        },
+        {
+          "line": 106,
+          "text": "CadenceReport VerifyConstantFrameRate(const fs::path& ffprobe, const MediaInfo& m,"
+        }
+      ]
+    },
+    {
+      "path": "src/Cli.cpp",
+      "bytes": 11521,
+      "lines": 223,
+      "sha256": "63a897aea0a2406ce77ffa18f83ca37eadab3ecaf144e8ef65c370ea8eac6bb2",
+      "kind": "text",
+      "role": "命令与数值参数、核心自动化入口；第20章",
+      "symbols": [
+        {
+          "line": 9,
+          "text": "BOOL WINAPI Ctrl(DWORD) {"
+        },
+        {
+          "line": 14,
+          "text": "int wmain(int argc, wchar_t** argv) {"
+        }
+      ]
+    },
+    {
+      "path": "src/Discovery.cpp",
+      "bytes": 5625,
+      "lines": 141,
+      "sha256": "5a1158a97ce9760d16d49ab459cd909299f8a86876f387a4d386d819ed9b34b6",
+      "kind": "text",
+      "role": "本地卷与目录遍历；第17章",
+      "symbols": [
+        {
+          "line": 8,
+          "text": "std::wstring Extended(const fs::path& path) {"
+        },
+        {
+          "line": 16,
+          "text": "std::wstring Key(const fs::path& path) {"
+        },
+        {
+          "line": 37,
+          "text": "std::vector<fs::path> LocalDriveRoots() {"
+        },
+        {
+          "line": 70,
+          "text": "DiscoveryProgress SearchFFmpegDirectories(const std::vector<fs::path>& roots, const std::atomic_bool& cancel,"
+        }
+      ]
+    },
+    {
+      "path": "src/DiscoveryHelper.cpp",
+      "bytes": 21631,
+      "lines": 501,
+      "sha256": "79ab057331767ec3547cbc76bb75cbf1b47575abff7ba1e62da5548ea5abfb4b",
+      "kind": "text",
+      "role": "受监督隐藏搜索入口与来源预算；第17章",
+      "symbols": [
+        {
+          "line": 14,
+          "text": "std::wstring Lower(std::wstring s) {"
+        },
+        {
+          "line": 19,
+          "text": "std::wstring Environment(const wchar_t* key) {"
+        },
+        {
+          "line": 30,
+          "text": "fs::path Known(REFKNOWNFOLDERID id) {"
+        },
+        {
+          "line": 38,
+          "text": "bool Local(const fs::path& p) {"
+        },
+        {
+          "line": 48,
+          "text": "fs::path NativePath(const fs::path& p) {"
+        },
+        {
+          "line": 53,
+          "text": "void Emit(const Json& value) {"
+        },
+        {
+          "line": 166,
+          "text": "std::vector<fs::path> RegisteredFFmpegPaths(const std::wstring& subkey) {"
+        },
+        {
+          "line": 214,
+          "text": "Value String(const wchar_t* s) {"
+        },
+        {
+          "line": 222,
+          "text": "Value Invoke(IDispatch* object, const wchar_t* name, WORD flags, std::initializer_list<VARIANT> args = {}) {"
+        },
+        {
+          "line": 236,
+          "text": "void Index(Collector& c) {"
+        },
+        {
+          "line": 291,
+          "text": "void Quick(Collector& c, bool preferredOnly, bool skipPreferred) {"
+        },
+        {
+          "line": 352,
+          "text": "nlohmann::json DiscoveryCandidate::ToJson() const {"
+        },
+        {
+          "line": 359,
+          "text": "nlohmann::json DiscoveryReport::ToJson() const {"
+        },
+        {
+          "line": 373,
+          "text": "int RunDiscoveryHelper(const std::vector<std::wstring>& args) {"
+        },
+        {
+          "line": 422,
+          "text": "DiscoveryReport DiscoverFFmpegPaths(const DiscoveryOptions& options, const std::atomic_bool& cancel,"
+        }
+      ]
+    },
+    {
+      "path": "src/FFmpeg.cpp",
+      "bytes": 19743,
+      "lines": 416,
+      "sha256": "796f085a9bc8d5bbb4859470189b6eef8a1514f110cbce005ecaf8848d561247",
+      "kind": "text",
+      "role": "工具能力、发现调度和固定下载；第17章",
+      "symbols": [
+        {
+          "line": 11,
+          "text": "Json VerifyFFmpegNumerics(const fs::path&, const std::atomic_bool&, Logger&);"
+        },
+        {
+          "line": 12,
+          "text": "Json FFmpegInstallation::ToJson() const {"
+        },
+        {
+          "line": 19,
+          "text": "fs::path FFmpegManager::ManagedExecutable() {"
+        },
+        {
+          "line": 22,
+          "text": "std::vector<std::string> FFmpegManager::MissingCapabilities(const std::string& d, const std::string& e,"
+        },
+        {
+          "line": 37,
+          "text": "FFmpegInstallation FFmpegManager::Check(const fs::path& exe, const std::atomic_bool& cancel, bool smoke) {"
+        },
+        {
+          "line": 124,
+          "text": "void FFmpegManager::SaveManual(const fs::path& executable) {"
+        },
+        {
+          "line": 127,
+          "text": "bool FFmpegManager::DiscoverCandidate(const fs::path& p, const std::atomic_bool& cancel,"
+        },
+        {
+          "line": 146,
+          "text": "std::optional<FFmpegInstallation> FFmpegManager::Detect(const std::atomic_bool& cancel,"
+        },
+        {
+          "line": 231,
+          "text": "DownloadSpec GyanReleaseProvider::Release() const {"
+        },
+        {
+          "line": 241,
+          "text": "class InternetHandle {"
+        },
+        {
+          "line": 254,
+          "text": "void download(const std::wstring& url, const fs::path& file, const std::atomic_bool& cancel,"
+        },
+        {
+          "line": 324,
+          "text": "FFmpegInstallation FFmpegDownloader::Install(const FFmpegBuildProvider& provider, Logger& log,"
+        }
+      ]
+    },
+    {
+      "path": "src/FFmpegNumeric.cpp",
+      "bytes": 12546,
+      "lines": 234,
+      "sha256": "369c388412c0eb181e8de62666fc1ea31159022729bae4c56c8469db8b150c1f",
+      "kind": "text",
+      "role": "独立整数信号与实际编解码数值资格；第5、7章",
+      "symbols": [
+        {
+          "line": 8,
+          "text": "Json VerifyFFmpegNumerics(const fs::path& ff, const std::atomic_bool& cancel, Logger& log) {"
+        }
+      ]
+    },
+    {
+      "path": "src/FloatBridge.cpp",
+      "bytes": 6615,
+      "lines": 183,
+      "sha256": "c9c1a362141507e0eaa9f62d2269304afb005caaecd4c330437b4981d48d668c",
+      "kind": "text",
+      "role": "三槽读算写状态机与线程预算；第9章",
+      "symbols": [
+        {
+          "line": 9,
+          "text": "ThreadPlan PlanThreads(bool cuda) {"
+        },
+        {
+          "line": 19,
+          "text": "int64_t RunFloatBridge(FFmpegProcess& decoder, FFmpegProcess& encoder, size_t frameSamples, bool creative,"
+        }
+      ]
+    },
+    {
+      "path": "src/Localization.cpp",
+      "bytes": 2601,
+      "lines": 77,
+      "sha256": "226577c38c748dc0ad00f0932903844a1b8c411706967188147c0c23be82f482",
+      "kind": "text",
+      "role": "稳定消息键和单遍参数替换；第20章",
+      "symbols": [
+        {
+          "line": 19,
+          "text": "std::set<std::string> Placeholders(const std::string& text) {"
+        },
+        {
+          "line": 32,
+          "text": "std::string Translate(const Message& m, Language language) {"
+        },
+        {
+          "line": 57,
+          "text": "std::wstring TranslateWide(const Message& m, Language language) {"
+        },
+        {
+          "line": 60,
+          "text": "std::string Describe(const Message& m, const std::vector<Message>& details, Language language) {"
+        },
+        {
+          "line": 66,
+          "text": "const char* MessageKey(TextId id) {"
+        },
+        {
+          "line": 70,
+          "text": "bool ValidateTranslations() {"
+        }
+      ]
+    },
+    {
+      "path": "src/MainWindow.cpp",
+      "bytes": 81800,
+      "lines": 1710,
+      "sha256": "a548eece7ef0e4422934fc0383ca00153197b9420a66bad6d8e5a61cf957c179",
+      "kind": "text",
+      "role": "单后台工作者、事件与可测量布局；第20章",
+      "symbols": [
+        {
+          "line": 78,
+          "text": "std::optional<fs::path> SelectFile(HWND owner, bool save, bool executable, Language language,"
+        },
+        {
+          "line": 153,
+          "text": "class MainWindow {"
+        },
+        {
+          "line": 1601,
+          "text": "int Run(HINSTANCE instance) {"
+        },
+        {
+          "line": 1696,
+          "text": "int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int) {"
+        }
+      ]
+    },
+    {
+      "path": "src/Media.cpp",
+      "bytes": 19862,
+      "lines": 400,
+      "sha256": "6d6e7cfcc7b269cfd7a984bb2ac851755c3e8f685428e0cae826660b1b6a8a6a",
+      "kind": "text",
+      "role": "探测解析、准入、元数据参数与输出验证；第2、16章",
+      "symbols": [
+        {
+          "line": 12,
+          "text": "std::string str(const Json& j, const char* k, const std::string& fallback = {}) {"
+        },
+        {
+          "line": 22,
+          "text": "double number(const Json& j, const char* k, double fallback = 0) {"
+        },
+        {
+          "line": 34,
+          "text": "Json ReadTags(const Json& j) {"
+        },
+        {
+          "line": 37,
+          "text": "int integer(const Json& j, const char* key) {"
+        },
+        {
+          "line": 43,
+          "text": "int64_t frameCount(const Json& j) {"
+        },
+        {
+          "line": 54,
+          "text": "Rational Rational::Parse(const std::string& value) {"
+        },
+        {
+          "line": 75,
+          "text": "MediaInfo MediaInfo::Parse(const Json& j, const fs::path& path) {"
+        },
+        {
+          "line": 137,
+          "text": "std::string MediaInfo::EffectiveChromaLocation() const {"
+        },
+        {
+          "line": 142,
+          "text": "std::vector<Message> MediaInfo::UnsupportedReasons() const {"
+        },
+        {
+          "line": 154,
+          "text": "std::wstring MediaInfo::Summary(Language language) const {"
+        },
+        {
+          "line": 179,
+          "text": "MediaInfo Probe(const fs::path& ffprobe, const fs::path& path, const std::atomic_bool* cancel) {"
+        },
+        {
+          "line": 195,
+          "text": "Json ValidationReport::ToJson() const {"
+        },
+        {
+          "line": 216,
+          "text": "ValidationReport ValidateOutput(const MediaInfo& in, const MediaInfo& out, int64_t frames) {"
+        },
+        {
+          "line": 335,
+          "text": "std::vector<std::wstring> AppleLogMetadataWriter::Arguments(const MediaInfo& in, double exposureStops,"
+        }
+      ]
+    },
+    {
+      "path": "src/MediaSafety.cpp",
+      "bytes": 12964,
+      "lines": 272,
+      "sha256": "60b21485eecea443deef5b2f338d1e968c0aa57eded463113884ddafa8cb27a1",
+      "kind": "text",
+      "role": "时间语义、显示矩阵和固定宽度头修补；第13、16章",
+      "symbols": [
+        {
+          "line": 13,
+          "text": "std::optional<int64_t> Timestamp(const std::string& s) {"
+        },
+        {
+          "line": 70,
+          "text": "bool SameMetadataValue(const std::string& key, const Json& a, const Json& b) {"
+        },
+        {
+          "line": 79,
+          "text": "bool SupportedDisplayMatrix(const std::string& matrix, int width, int height) {"
+        },
+        {
+          "line": 118,
+          "text": "Json PreserveMovCreationTimes(const Json& source, const fs::path& partial, const std::atomic_bool& cancel,"
+        },
+        {
+          "line": 234,
+          "text": "Json InspectMovTimeline(const MediaInfo& in, const Json& analysis, const fs::path&,"
+        }
+      ]
+    },
+    {
+      "path": "src/MetadataPolicy.cpp",
+      "bytes": 2525,
+      "lines": 53,
+      "sha256": "6ee23ddd4f1852c0e77b9ed7b452abdd7488cd77d15a6472851bc933e2a8d0c6",
+      "kind": "text",
+      "role": "元数据白名单和冲突分类；第16章",
+      "symbols": [
+        {
+          "line": 6,
+          "text": "std::string Lower(std::string s) {"
+        },
+        {
+          "line": 20,
+          "text": "bool AppleLogMetadataWriter::IsConflict(const std::string& key) {"
+        },
+        {
+          "line": 31,
+          "text": "Json AppleLogMetadataWriter::CopyPlan(const MediaInfo& in) {"
+        }
+      ]
+    },
+    {
+      "path": "src/MovAnalyzer.cpp",
+      "bytes": 21512,
+      "lines": 433,
+      "sha256": "e3c05f84f886015445f2d456caeb1d8169cc5e7f682d70e18792a809c91c729d",
+      "kind": "text",
+      "role": "有界原子解析与类型化语义比较；第14章",
+      "symbols": [
+        {
+          "line": 8,
+          "text": "uint32_t U32(const unsigned char* p) {"
+        },
+        {
+          "line": 11,
+          "text": "uint64_t U64(const unsigned char* p) {"
+        },
+        {
+          "line": 14,
+          "text": "std::string Hex(const std::vector<unsigned char>& b) {"
+        },
+        {
+          "line": 24,
+          "text": "std::string FourCC(uint32_t n) {"
+        },
+        {
+          "line": 42,
+          "text": "class Reader {"
+        },
+        {
+          "line": 394,
+          "text": "Json ReferenceMovAnalyzer::Analyze(const fs::path& path) {"
+        },
+        {
+          "line": 397,
+          "text": "Json ReferenceMovAnalyzer::SemanticDiff(const Json& a, const Json& b) {"
+        }
+      ]
+    },
+    {
+      "path": "src/PixelSanity.cpp",
+      "bytes": 8726,
+      "lines": 184,
+      "sha256": "feb7a1d41c169c56e567d67c1fdc0706e702c362dfd611ee5e1951014515f41c",
+      "kind": "text",
+      "role": "首中尾帧九块编码后粗差检查；第7章",
+      "symbols": [
+        {
+          "line": 25,
+          "text": "void PixelSanity::Observe(std::span<const float> decoded) {"
+        },
+        {
+          "line": 41,
+          "text": "Json PixelSanity::Validate(const fs::path& ffmpeg, const fs::path& output, const std::atomic_bool& cancel,"
+        }
+      ]
+    },
+    {
+      "path": "src/Platform.cpp",
+      "bytes": 14816,
+      "lines": 398,
+      "sha256": "8b453a11298d9e33e348eea4343364c6b336f2a482ae9627b987ce7a58c3534f",
+      "kind": "text",
+      "role": "宽字符、句柄、进程监督、管道与哈希；第18章",
+      "symbols": [
+        {
+          "line": 13,
+          "text": "std::wstring Wide(const std::string& s) {"
+        },
+        {
+          "line": 24,
+          "text": "std::string Utf8(const std::wstring& s) {"
+        },
+        {
+          "line": 33,
+          "text": "std::string PathText(const fs::path& p) {"
+        },
+        {
+          "line": 36,
+          "text": "std::wstring WinError(DWORD code) {"
+        },
+        {
+          "line": 46,
+          "text": "fs::path DataDirectory() {"
+        },
+        {
+          "line": 57,
+          "text": "fs::path ExecutableDirectory() {"
+        },
+        {
+          "line": 62,
+          "text": "fs::path SystemExecutable(const wchar_t* name) {"
+        },
+        {
+          "line": 67,
+          "text": "std::wstring QuoteArgument(const std::wstring& s) {"
+        },
+        {
+          "line": 86,
+          "text": "std::wstring CommandLine(const fs::path& exe, const std::vector<std::wstring>& args) {"
+        },
+        {
+          "line": 115,
+          "text": "void Logger::Write(const std::string& text) {"
+        },
+        {
+          "line": 192,
+          "text": "double FFmpegProcess::CpuSeconds() const {"
+        },
+        {
+          "line": 206,
+          "text": "size_t FFmpegProcess::Read(void* data, size_t bytes) {"
+        },
+        {
+          "line": 214,
+          "text": "void FFmpegProcess::Write(const void* data, size_t bytes) {"
+        },
+        {
+          "line": 225,
+          "text": "void FFmpegProcess::CloseInput() {"
+        },
+        {
+          "line": 228,
+          "text": "void FFmpegProcess::Terminate() noexcept {"
+        },
+        {
+          "line": 232,
+          "text": "bool FFmpegProcess::Running() const {"
+        },
+        {
+          "line": 235,
+          "text": "int FFmpegProcess::Wait() {"
+        },
+        {
+          "line": 241,
+          "text": "void ReadLines(HANDLE pipe, const LineCallback& fn) {"
+        },
+        {
+          "line": 270,
+          "text": "ProcessResult RunProcess(const fs::path& exe, const std::vector<std::wstring>& args,"
+        },
+        {
+          "line": 362,
+          "text": "std::string SHA256(const fs::path& path) {"
+        }
+      ]
+    },
+    {
+      "path": "src/Queue.cpp",
+      "bytes": 2401,
+      "lines": 49,
+      "sha256": "d83dd93f45866f2a2c771439bed820cd663ce8a4e333a91de282611de1464175",
+      "kind": "text",
+      "role": "串行多文件任务及逐项失败记录；第20章",
+      "symbols": [
+        {
+          "line": 3,
+          "text": "Json RunQueue(const FFmpegInstallation& tools, const std::vector<fs::path>& inputs, const fs::path& directory,"
+        }
+      ]
+    },
+    {
+      "path": "src/Settings.cpp",
+      "bytes": 4486,
+      "lines": 120,
+      "sha256": "1683ff619a1314ae74fa902d8b49115daebb5268786df058eca4f1dd26bb8db6",
+      "kind": "text",
+      "role": "字段合并、并发锁及原子偏好保存；第19、20章",
+      "symbols": [
+        {
+          "line": 11,
+          "text": "Json Read(bool* recovered = nullptr) {"
+        },
+        {
+          "line": 27,
+          "text": "void Write(const Json& data) {"
+        },
+        {
+          "line": 50,
+          "text": "AppSettings SettingsStore::Load() {"
+        },
+        {
+          "line": 99,
+          "text": "void SettingsStore::SavePreferences(const AppSettings& settings) {"
+        },
+        {
+          "line": 113,
+          "text": "void SettingsStore::SaveFFmpeg(const fs::path& path, bool automatic) {"
+        }
+      ]
+    },
+    {
+      "path": "src/SettingsWindow.cpp",
+      "bytes": 30348,
+      "lines": 659,
+      "sha256": "9f1bca19873f612fe38ed1ca9bbb9503eeed0cf9610cabbcb0f9d6f49a919ed6",
+      "kind": "text",
+      "role": "设置草稿、保存取消、候选审阅与对话框；第20章",
+      "symbols": [
+        {
+          "line": 13,
+          "text": "class SettingsWindow {"
+        },
+        {
+          "line": 302,
+          "text": "void RunModal(HWND owner, HWND dialog) {"
+        },
+        {
+          "line": 324,
+          "text": "RECT ModalRect(HWND owner, int width, int height, int dpi) {"
+        },
+        {
+          "line": 584,
+          "text": "std::optional<fs::path> ShowFFmpegCandidates(HWND owner, const std::vector<DiscoveryCandidate>& candidates,"
+        },
+        {
+          "line": 611,
+          "text": "bool ShowSettings(HWND owner, AppSettings& settings, const fs::path& snapshot, bool exercise) {"
+        },
+        {
+          "line": 638,
+          "text": "void ShowDetails(HWND owner, const std::wstring& title, const std::wstring& text,"
+        }
+      ]
+    },
+    {
+      "path": "src/StorageSafety.cpp",
+      "bytes": 9503,
+      "lines": 214,
+      "sha256": "30a783479ca3e505c65ab10290266079c2e76a9fe4f88daf9096327542744b12",
+      "kind": "text",
+      "role": "文件身份日志、状态锁与所有权恢复；第19章",
+      "symbols": [
+        {
+          "line": 9,
+          "text": "uint64_t Started(HANDLE process) {"
+        },
+        {
+          "line": 15,
+          "text": "Json Identity(HANDLE h) {"
+        },
+        {
+          "line": 25,
+          "text": "Json Owner() {"
+        },
+        {
+          "line": 30,
+          "text": "bool DeadOwner(const Json& j) {"
+        },
+        {
+          "line": 41,
+          "text": "bool EraseTracked(const Json& entry) {"
+        },
+        {
+          "line": 56,
+          "text": "void Recover() {"
+        },
+        {
+          "line": 78,
+          "text": "void InstallRetention() {"
+        },
+        {
+          "line": 124,
+          "text": "void OwnedJobFiles::Track(const fs::path& path) {"
+        },
+        {
+          "line": 153,
+          "text": "void MarkOwnedInstallDirectory(const fs::path& p) {"
+        },
+        {
+          "line": 175,
+          "text": "void RequireWritableDirectory(const fs::path& dir) {"
+        },
+        {
+          "line": 186,
+          "text": "void MaintainOwnedStorage() {"
+        }
+      ]
+    },
+    {
+      "path": "src/ToolTrust.cpp",
+      "bytes": 5115,
+      "lines": 124,
+      "sha256": "3a9905906290eb33ed1c67c109402ea1924e4c020369e26695f204ed3c969e9a",
+      "kind": "text",
+      "role": "双可执行文件身份、批准与租约；第17章",
+      "symbols": [
+        {
+          "line": 9,
+          "text": "std::string Key(const fs::path& p) {"
+        },
+        {
+          "line": 15,
+          "text": "Json Read() {"
+        },
+        {
+          "line": 26,
+          "text": "std::shared_ptr<ToolLease> Lock(const fs::path& p) {"
+        },
+        {
+          "line": 45,
+          "text": "void Save(const ToolIdentity& id) {"
+        },
+        {
+          "line": 72,
+          "text": "Json ToolIdentity::ToJson() const {"
+        },
+        {
+          "line": 77,
+          "text": "ToolIdentity ToolTrust::Inspect(const fs::path& p) {"
+        },
+        {
+          "line": 80,
+          "text": "void ToolTrust::ApproveManual(const ToolIdentity& approved) {"
+        },
+        {
+          "line": 89,
+          "text": "void ToolTrust::RecordDownload(const fs::path& p, const std::string& archiveHash) {"
+        },
+        {
+          "line": 95,
+          "text": "bool ToolTrust::HasApproval(const fs::path& p) {"
+        },
+        {
+          "line": 100,
+          "text": "std::shared_ptr<ToolLease> ToolTrust::Acquire(const fs::path& p) {"
+        }
+      ]
+    },
+    {
+      "path": "src/Transcode.cpp",
+      "bytes": 30850,
+      "lines": 584,
+      "sha256": "35882a70c5d2406359074a5ec98f096397206abe52ef51bb8377a58a9968e331",
+      "kind": "text",
+      "role": "完整媒体任务、后端、验证报告与最终发布；第8、23章",
+      "symbols": [
+        {
+          "line": 16,
+          "text": "void logCommand(Logger& log, const fs::path& exe, const std::vector<std::wstring>& args) {"
+        },
+        {
+          "line": 20,
+          "text": "ValidationReport TranscodeJob::Run(const FFmpegInstallation& tools, const MediaInfo& input,"
+        }
+      ]
+    },
+    {
+      "path": "src/Ui.cpp",
+      "bytes": 15575,
+      "lines": 322,
+      "sha256": "54098d2fafa50dbcd400563c3e469c092b423f6b932f1b7b31ad3dc41878e569",
+      "kind": "text",
+      "role": "主题、DPI、原生绘制与截图；第20章",
+      "symbols": [
+        {
+          "line": 13,
+          "text": "void DeleteStyle(UiStyle& s) {"
+        },
+        {
+          "line": 22,
+          "text": "LRESULT CALLBACK ComboProc(HWND h, UINT m, WPARAM w, LPARAM l, UINT_PTR, DWORD_PTR context) {"
+        },
+        {
+          "line": 49,
+          "text": "void UiStyle::Apply(Theme next, Language language, int dpi) {"
+        },
+        {
+          "line": 73,
+          "text": "void UiStyle::Window(HWND window) const {"
+        },
+        {
+          "line": 85,
+          "text": "void UiStyle::Control(HWND control, bool useSmall) const {"
+        },
+        {
+          "line": 102,
+          "text": "void UiStyle::Text(HDC dc, const std::wstring& text, RECT rect, bool muted, bool useSmall, UINT flags) const {"
+        },
+        {
+          "line": 109,
+          "text": "void UiStyle::Card(HDC dc, RECT rect) const {"
+        },
+        {
+          "line": 117,
+          "text": "LRESULT UiStyle::Color(UINT message, WPARAM w, LPARAM l, bool onSurface) const {"
+        },
+        {
+          "line": 125,
+          "text": "void UiStyle::DrawItem(const DRAWITEMSTRUCT& item) const {"
+        },
+        {
+          "line": 180,
+          "text": "std::wstring WindowText(HWND h) {"
+        },
+        {
+          "line": 186,
+          "text": "HWND MakeControl(HWND parent, int id, const wchar_t* klass, const std::wstring& text, DWORD flags,"
+        },
+        {
+          "line": 209,
+          "text": "std::wstring EditLines(const std::wstring& text) {"
+        },
+        {
+          "line": 219,
+          "text": "int ScrollDeltaToReveal(HWND parent, HWND focused, int dpi) {"
+        },
+        {
+          "line": 235,
+          "text": "void SetCombo(HWND combo, const std::vector<std::wstring>& choices, int selected) {"
+        },
+        {
+          "line": 241,
+          "text": "bool SaveWindowSnapshot(HWND window, const fs::path& destination) {"
+        }
+      ]
+    },
+    {
+      "path": "src/color/AppleLog.cpp",
+      "bytes": 533,
+      "lines": 19,
+      "sha256": "9b0e6342405cb45c7b4058f0a9fd744cd481e6555a1dd593c0c607c56983a711",
+      "kind": "text",
+      "role": "Apple Log 分段编解码与公开常数契约；第4章",
+      "symbols": [
+        {
+          "line": 5,
+          "text": "double AppleLogTransferFunction::EncodeLinearToAppleLog(double r) noexcept {"
+        },
+        {
+          "line": 12,
+          "text": "double AppleLogTransferFunction::DecodeAppleLogToLinear(double p) noexcept {"
+        }
+      ]
+    },
+    {
+      "path": "src/color/ColorKernel.cu",
+      "bytes": 2867,
+      "lines": 58,
+      "sha256": "ba04b0dee2e9fe42b4ff1b48d8879242d0845f23f588e93982fa172855f09519",
+      "kind": "text",
+      "role": "设备端double颜色核与共享内存归约；第11章",
+      "symbols": [
+        {
+          "line": 8,
+          "text": "__device__ double linear(double v) {"
+        },
+        {
+          "line": 13,
+          "text": "__device__ double apple(double v) {"
+        },
+        {
+          "line": 19,
+          "text": "__device__ void encode(float& value,double v,Statistics& s) {"
+        }
+      ]
+    },
+    {
+      "path": "src/color/ColorKernel.manifest.json",
+      "bytes": 465,
+      "lines": 14,
+      "sha256": "9d9adc2b2f38153fbca2aa45a0f6028a4d73108cf5b11e45db132cf1a7832cad",
+      "kind": "text",
+      "role": "CUDA源、PTX、编译器身份与精确参数记录；第11章",
+      "symbols": []
+    },
+    {
+      "path": "src/color/ColorKernel.ptx.h",
+      "bytes": 169037,
+      "lines": 1620,
+      "sha256": "b31bd7dbe2e58b157e722976947e7a56465d26a5b7d31a98011005b16a39d2e2",
+      "kind": "text",
+      "role": "生成PTX字节数组：检查内容哈希及源清单，不视为手写算法；第11章",
+      "symbols": []
+    },
+    {
+      "path": "src/color/CudaTransformer.cpp",
+      "bytes": 16161,
+      "lines": 333,
+      "sha256": "fa362f0de9a4dba956e6f8ca7859ea7ec4f23f261badf2ed8f09839354415cde",
+      "kind": "text",
+      "role": "动态驱动接口、资格验证和事务提交；第11章",
+      "symbols": [
+        {
+          "line": 11,
+          "text": "const char* BackendName(ProcessingBackend b) {"
+        },
+        {
+          "line": 317,
+          "text": "void CudaTransformer::Apply(std::span<float> p, SignalStatistics& s) {"
+        },
+        {
+          "line": 320,
+          "text": "nlohmann::json CudaTransformer::Report() const {"
+        },
+        {
+          "line": 330,
+          "text": "nlohmann::json CudaTransformer::Qualify() {"
+        }
+      ]
+    },
+    {
+      "path": "src/color/FloatTransformer.cpp",
+      "bytes": 5395,
+      "lines": 127,
+      "sha256": "9589f760dcbcd90f597a5c41f7bc5bf4966c664508499863ef3b49755fd856dd",
+      "kind": "text",
+      "role": "持久 CPU 工作线程、tile 配对及统计合并；第10章",
+      "symbols": [
+        {
+          "line": 11,
+          "text": "void Merge(SignalStatistics& a, const SignalStatistics& b) {"
+        },
+        {
+          "line": 101,
+          "text": "unsigned FloatTransformer::Workers() const {"
+        },
+        {
+          "line": 104,
+          "text": "void FloatTransformer::Apply(std::span<float> p, SignalStatistics& cumulative) {"
+        }
+      ]
+    },
+    {
+      "path": "src/color/HLG.cpp",
+      "bytes": 4638,
+      "lines": 98,
+      "sha256": "626936469d53efd5f9217b3819c9c71b227fc681b55727e575aca98b0fefc478",
+      "kind": "text",
+      "role": "HLG 逆变换、参考尺度、创意调整和信号计数；第3、6章",
+      "symbols": [
+        {
+          "line": 8,
+          "text": "double HLG::DecodeToSceneLinear(double v) noexcept {"
+        },
+        {
+          "line": 16,
+          "text": "double HLG::EncodeSceneLinear(double v) noexcept {"
+        },
+        {
+          "line": 23,
+          "text": "double HLGToReflectanceScale() noexcept {"
+        },
+        {
+          "line": 26,
+          "text": "double HLGToAppleLog(double v, double stops) noexcept {"
+        },
+        {
+          "line": 30,
+          "text": "void ValidateExposureStops(double stops) {"
+        },
+        {
+          "line": 34,
+          "text": "void ValidateToneAdjustments(const ToneAdjustments& tone) {"
+        },
+        {
+          "line": 57,
+          "text": "void TransformHLGToAppleLog(std::span<float> pixels, double stops, const ToneAdjustments& tone,"
+        }
+      ]
+    },
+    {
+      "path": "tests/application.cpp",
+      "bytes": 13363,
+      "lines": 262,
+      "sha256": "fe055c27f053e4fa4454f356eba02e1aa259128df9bc9aeddcdaaa34d064ce2e",
+      "kind": "text",
+      "role": "偏好、发现和版本资源测试；第21章",
+      "symbols": [
+        {
+          "line": 11,
+          "text": "void Require(bool ok, const char* message) {"
+        },
+        {
+          "line": 37,
+          "text": "void Write(const fs::path& path, const std::string& text) {"
+        },
+        {
+          "line": 43,
+          "text": "Json Read(const fs::path& path) {"
+        },
+        {
+          "line": 47,
+          "text": "void Preferences() {"
+        },
+        {
+          "line": 111,
+          "text": "void Discovery(const fs::path& realFFmpeg) {"
+        },
+        {
+          "line": 209,
+          "text": "void Resources() {"
+        },
+        {
+          "line": 246,
+          "text": "int wmain(int argc, wchar_t** argv) {"
+        }
+      ]
+    },
+    {
+      "path": "tests/benchmark.py",
+      "bytes": 5640,
+      "lines": 97,
+      "sha256": "486297f68cd94c2354da1ac77881571fc1c97e0bdee3bb88a826eb9ad59f335b",
+      "kind": "text",
+      "role": "正式吞吐矩阵与过程观测；第22章",
+      "symbols": [
+        {
+          "line": 19,
+          "text": "class Process(C.Structure):"
+        },
+        {
+          "line": 24,
+          "text": "def main():"
+        }
+      ]
+    },
+    {
+      "path": "tests/compatibility_v121.py",
+      "bytes": 8539,
+      "lines": 145,
+      "sha256": "57a927f3a0b289f006828dc49ce6799aaf43d4b388f9ef25fc0def97e825dbd6",
+      "kind": "text",
+      "role": "竖拍像素、矩阵与音频偏移回归；第13、21章",
+      "symbols": [
+        {
+          "line": 13,
+          "text": "def main():"
+        }
+      ]
+    },
+    {
+      "path": "tests/cuda_artifact.py",
+      "bytes": 1017,
+      "lines": 18,
+      "sha256": "9b2b026d8e64a0f621e12054c0897cdd1acb13a49615c46529e2b4d46c2a4f54",
+      "kind": "text",
+      "role": "CUDA源码、嵌入PTX哈希与选项一致性；第11章",
+      "symbols": []
+    },
+    {
+      "path": "tests/fake_ffmpeg.cpp",
+      "bytes": 327,
+      "lines": 10,
+      "sha256": "d03976fec00fe86e846312f0ed8ac43f445785cea02f5afcc1d6225d0c38d3fe",
+      "kind": "text",
+      "role": "未知工具不得执行的标记夹具；第17章",
+      "symbols": [
+        {
+          "line": 5,
+          "text": "int main() {"
+        }
+      ]
+    },
+    {
+      "path": "tests/gui_smoke.py",
+      "bytes": 7280,
+      "lines": 123,
+      "sha256": "99015b1d77e52e99a471d86631dbb66b8be446d305bce0222da78e870d8866f8",
+      "kind": "text",
+      "role": "交互桌面GUI场景脚本，本文未重跑；第20章",
+      "symbols": [
+        {
+          "line": 14,
+          "text": "def main():"
+        }
+      ]
+    },
+    {
+      "path": "tests/hardening.cpp",
+      "bytes": 17467,
+      "lines": 367,
+      "sha256": "c1e7a3104a91c902f6e683f19fa9981924082783bf3bde8147ea230533c1bbe8",
+      "kind": "text",
+      "role": "节奏、工具信任、MOV、并行与发布回归；第21章",
+      "symbols": [
+        {
+          "line": 10,
+          "text": "void Require(bool ok, const char* what) {"
+        },
+        {
+          "line": 14,
+          "text": "void Cadence() {"
+        },
+        {
+          "line": 79,
+          "text": "void Security(const fs::path& root) {"
+        },
+        {
+          "line": 155,
+          "text": "std::string BE(uint32_t n) {"
+        },
+        {
+          "line": 161,
+          "text": "std::string Atom(const std::string& type, const std::string& data) {"
+        },
+        {
+          "line": 164,
+          "text": "std::string Data(int type, const std::string& data) {"
+        },
+        {
+          "line": 167,
+          "text": "void Mov(const fs::path& root) {"
+        },
+        {
+          "line": 244,
+          "text": "void Parallel() {"
+        },
+        {
+          "line": 283,
+          "text": "void Publication(const fs::path& ff, const fs::path& root) {"
+        },
+        {
+          "line": 345,
+          "text": "int main(int argc, char** argv) {"
+        }
+      ]
+    },
+    {
+      "path": "tests/identification.cpp",
+      "bytes": 4889,
+      "lines": 101,
+      "sha256": "f6df4ec1397510b5abfabe65110803aff5d108dc746eaaade1f477e84a641920",
+      "kind": "text",
+      "role": "识别写入、幂等与失败结构测试；第15、21章",
+      "symbols": [
+        {
+          "line": 6,
+          "text": "void Check(bool ok, const char* message) {"
+        },
+        {
+          "line": 10,
+          "text": "std::string BE(uint64_t n, int bytes = 4) {"
+        },
+        {
+          "line": 16,
+          "text": "std::string Atom(const std::string& t, const std::string& p, bool extended = false) {"
+        },
+        {
+          "line": 21,
+          "text": "std::string Movie(const std::string& extensions, const std::string& suffix = {}, bool extended = false,"
+        },
+        {
+          "line": 30,
+          "text": "void Save(const fs::path& path, const std::string& data) {"
+        },
+        {
+          "line": 36,
+          "text": "std::string Load(const fs::path& path) {"
+        },
+        {
+          "line": 42,
+          "text": "int main() {"
+        }
+      ]
+    },
+    {
+      "path": "tests/integration.py",
+      "bytes": 18347,
+      "lines": 255,
+      "sha256": "825b629e9056a8e9cd546a86f165bb914ca18d77a6362d95d3d0df5e3228c686",
+      "kind": "text",
+      "role": "端到端合成媒体测试；本次在第154行旧准入断言失败；第21章",
+      "symbols": [
+        {
+          "line": 12,
+          "text": "def run(args, **kw):"
+        },
+        {
+          "line": 19,
+          "text": "def main():"
+        }
+      ]
+    },
+    {
+      "path": "tests/layout_snapshots.py",
+      "bytes": 1738,
+      "lines": 35,
+      "sha256": "879e3dc61d11f99fd9390a7c1da7ecd50d121b0569df628b3dcb47e5ba6c55b9",
+      "kind": "text",
+      "role": "生产布局与主题DPI截图断言；第20章",
+      "symbols": [
+        {
+          "line": 11,
+          "text": "assert len(matrix)==960 and all(c['passed'] for c in matrix)"
+        }
+      ]
+    },
+    {
+      "path": "tests/package_audit.py",
+      "bytes": 2219,
+      "lines": 38,
+      "sha256": "7968c0ae2965bbe8eedc27cb34e575174b0e8a35af1a821270e1c14c658e7b1e",
+      "kind": "text",
+      "role": "归档允许列表、CRC、EXE与SHA-256审计；附录",
+      "symbols": [
+        {
+          "line": 8,
+          "text": "def main():"
+        }
+      ]
+    },
+    {
+      "path": "tests/process_fixture.cpp",
+      "bytes": 1926,
+      "lines": 51,
+      "sha256": "e37f441837d9e51c40f0516c863dd02fc69244f7653c2a99781f4ae341c2084a",
+      "kind": "text",
+      "role": "后代持管道、长行、退出码夹具；第18章",
+      "symbols": [
+        {
+          "line": 5,
+          "text": "void Write(HANDLE handle, const std::string& text) {"
+        },
+        {
+          "line": 9,
+          "text": "int wmain(int argc, wchar_t** argv) {"
+        }
+      ]
+    },
+    {
+      "path": "tests/reliability.cpp",
+      "bytes": 12380,
+      "lines": 246,
+      "sha256": "ed95cf31a3c19c90166072d160b8f1a2c6ad0c1701de016e23a1e6b4df77544a",
+      "kind": "text",
+      "role": "进程、发现与CLI异常回归；第21章",
+      "symbols": [
+        {
+          "line": 10,
+          "text": "void Require(bool ok, const char* message) {"
+        },
+        {
+          "line": 14,
+          "text": "void Write(const fs::path& path, const std::string& data) {"
+        },
+        {
+          "line": 45,
+          "text": "void Processes() {"
+        },
+        {
+          "line": 93,
+          "text": "void Discovery() {"
+        },
+        {
+          "line": 216,
+          "text": "void CommandLine() {"
+        },
+        {
+          "line": 232,
+          "text": "int main(int argc, char** argv) {"
+        }
+      ]
+    },
+    {
+      "path": "tests/resolve_identification.py",
+      "bytes": 5726,
+      "lines": 110,
+      "sha256": "bddeee4d0b60e82cd3e6f81cc99a9c8ad94276b5aec011a963e78f5d36059510",
+      "kind": "text",
+      "role": "真实Resolve控制导入脚本，本文未重跑；第15章",
+      "symbols": [
+        {
+          "line": 21,
+          "text": "def sha256(path):"
+        },
+        {
+          "line": 26,
+          "text": "def main():"
+        }
+      ]
+    },
+    {
+      "path": "tests/signal_integrity.py",
+      "bytes": 8543,
+      "lines": 160,
+      "sha256": "c9771136e6c9d5cd4a03abb89215226bd40f401f0ad1d5b75fcafffccc85000d",
+      "kind": "text",
+      "role": "独立整数色块、创意与范围计数；第7、21章",
+      "symbols": [
+        {
+          "line": 17,
+          "text": "def main():"
+        }
+      ]
+    },
+    {
+      "path": "tests/sustained.py",
+      "bytes": 5328,
+      "lines": 90,
+      "sha256": "8c3d77c24fc197f57f3d2760b6fe5561fac7f7e79b97ecf2ef30a0a7cbe4e92a",
+      "kind": "text",
+      "role": "240帧4K120、内存和编码后亮度；第21章",
+      "symbols": [
+        {
+          "line": 15,
+          "text": "class Counters(ctypes.Structure):"
+        },
+        {
+          "line": 21,
+          "text": "def main():"
+        }
+      ]
+    },
+    {
+      "path": "tests/tests.cpp",
+      "bytes": 21303,
+      "lines": 396,
+      "sha256": "af78f2035ba814374648a04cb1b15f4c2229c539bf590fe47a11cee5efc1a627",
+      "kind": "text",
+      "role": "基础数学、媒体和平台测试；第21章",
+      "symbols": [
+        {
+          "line": 11,
+          "text": "void check(bool ok, const char* msg) {"
+        },
+        {
+          "line": 15,
+          "text": "void Near(double a, double b, double tolerance, const char* msg) {"
+        },
+        {
+          "line": 18,
+          "text": "logforge::Json Fixture() {"
+        },
+        {
+          "line": 22,
+          "text": "void MediaTests() {"
+        },
+        {
+          "line": 189,
+          "text": "void PlatformTests() {"
+        },
+        {
+          "line": 248,
+          "text": "int main(int argc, char** argv) {"
+        }
+      ]
+    },
+    {
+      "path": "tests/v120.cpp",
+      "bytes": 18321,
+      "lines": 386,
+      "sha256": "07e63cd2a09ea56f4a2c286cd913a2147038966e94da5c4a4fcecad21e9c2264",
+      "kind": "text",
+      "role": "存储、矩阵、CUDA故障、队列和媒体回归；第21章",
+      "symbols": [
+        {
+          "line": 10,
+          "text": "void Check(bool ok, const char* message) {"
+        },
+        {
+          "line": 14,
+          "text": "fs::path Self() {"
+        },
+        {
+          "line": 17,
+          "text": "void Semantics() {"
+        },
+        {
+          "line": 59,
+          "text": "void Storage() {"
+        },
+        {
+          "line": 108,
+          "text": "int Writer(int n) {"
+        },
+        {
+          "line": 126,
+          "text": "void Pipeline(const fs::path& ff) {"
+        },
+        {
+          "line": 356,
+          "text": "int wmain(int argc, wchar_t** argv) {"
+        }
+      ]
+    },
+    {
+      "path": "third_party/NVIDIA-CUDA-NOTICE.txt",
+      "bytes": 1243,
+      "lines": 23,
+      "sha256": "502d5a8a622d63149048faf0b9100544e3b2d28910bf00a06fe0c7e6cabbba4b",
+      "kind": "text",
+      "role": "项目或第三方许可与归属说明；发行边界",
+      "symbols": []
+    },
+    {
+      "path": "third_party/nlohmann/LICENSE.MIT",
+      "bytes": 1075,
+      "lines": 21,
+      "sha256": "c0d068392ea65358b798b8c165103560f06e9e3b38c4ab4e2d8810a7b931af86",
+      "kind": "text",
+      "role": "项目或第三方许可与归属说明；发行边界",
+      "symbols": []
+    },
+    {
+      "path": "third_party/nlohmann/json.hpp",
+      "bytes": 953436,
+      "lines": 25526,
+      "sha256": "aaf127c04cb31c406e5b04a63f1ae89369fccde6d8fa7cdda1ed4f32dfc5de63",
+      "kind": "text",
+      "role": "第三方JSON 3.12.0单头依赖：JSON读写支持，非项目颜色算法",
+      "symbols": [
+        {
+          "line": 851,
+          "text": "#  define JSON_HEDLEY_HAS_ATTRIBUTE(attribute) __has_attribute(attribute)"
+        },
+        {
+          "line": 853,
+          "text": "#  define JSON_HEDLEY_HAS_ATTRIBUTE(attribute) (0)"
+        },
+        {
+          "line": 1126,
+          "text": "#  if JSON_HEDLEY_HAS_WARNING(\"-Wc++98-compat\")"
+        },
+        {
+          "line": 1127,
+          "text": "#    if JSON_HEDLEY_HAS_WARNING(\"-Wc++17-extensions\")"
+        },
+        {
+          "line": 1128,
+          "text": "#      if JSON_HEDLEY_HAS_WARNING(\"-Wc++1z-extensions\")"
+        },
+        {
+          "line": 1129,
+          "text": "#        define JSON_HEDLEY_DIAGNOSTIC_DISABLE_CPP98_COMPAT_WRAP_(xpr) \\"
+        },
+        {
+          "line": 1136,
+          "text": "#      else"
+        },
+        {
+          "line": 1137,
+          "text": "#        define JSON_HEDLEY_DIAGNOSTIC_DISABLE_CPP98_COMPAT_WRAP_(xpr) \\"
+        },
+        {
+          "line": 1143,
+          "text": "#      endif"
+        },
+        {
+          "line": 1144,
+          "text": "#    else"
+        },
+        {
+          "line": 1145,
+          "text": "#      define JSON_HEDLEY_DIAGNOSTIC_DISABLE_CPP98_COMPAT_WRAP_(xpr) \\"
+        },
+        {
+          "line": 1150,
+          "text": "#    endif"
+        },
+        {
+          "line": 1151,
+          "text": "#  endif"
+        },
+        {
+          "line": 1161,
+          "text": "#  define JSON_HEDLEY_CONST_CAST(T, expr) (const_cast<T>(expr))"
+        },
+        {
+          "line": 1166,
+          "text": "#  define JSON_HEDLEY_CONST_CAST(T, expr) (__extension__ ({ \\"
+        },
+        {
+          "line": 1173,
+          "text": "#  define JSON_HEDLEY_CONST_CAST(T, expr) ((T) (expr))"
+        },
+        {
+          "line": 1198,
+          "text": "#  if JSON_HEDLEY_HAS_WARNING(\"-Wold-style-cast\")"
+        },
+        {
+          "line": 1199,
+          "text": "#    define JSON_HEDLEY_CPP_CAST(T, expr) \\"
+        },
+        {
+          "line": 1204,
+          "text": "#  elif JSON_HEDLEY_IAR_VERSION_CHECK(8,3,0)"
+        },
+        {
+          "line": 1205,
+          "text": "#    define JSON_HEDLEY_CPP_CAST(T, expr) \\"
+        },
+        {
+          "line": 1209,
+          "text": "#  else"
+        },
+        {
+          "line": 1210,
+          "text": "#    define JSON_HEDLEY_CPP_CAST(T, expr) ((T) (expr))"
+        },
+        {
+          "line": 1211,
+          "text": "#  endif"
+        },
+        {
+          "line": 1213,
+          "text": "#  define JSON_HEDLEY_CPP_CAST(T, expr) (expr)"
+        },
+        {
+          "line": 1687,
+          "text": "#  define JSON_HEDLEY_PREDICT(expr, value, probability) __builtin_expect_with_probability(  (expr), (value), (probability))"
+        },
+        {
+          "line": 1688,
+          "text": "#  define JSON_HEDLEY_PREDICT_TRUE(expr, probability)   __builtin_expect_with_probability(!!(expr),    1   , (probability))"
+        },
+        {
+          "line": 1689,
+          "text": "#  define JSON_HEDLEY_PREDICT_FALSE(expr, probability)  __builtin_expect_with_probability(!!(expr),    0   , (probability))"
+        },
+        {
+          "line": 1690,
+          "text": "#  define JSON_HEDLEY_LIKELY(expr)                      __builtin_expect                 (!!(expr),    1                  )"
+        },
+        {
+          "line": 1691,
+          "text": "#  define JSON_HEDLEY_UNLIKELY(expr)                    __builtin_expect                 (!!(expr),    0                  )"
+        },
+        {
+          "line": 1709,
+          "text": "#  define JSON_HEDLEY_PREDICT(expr, expected, probability) \\"
+        },
+        {
+          "line": 1711,
+          "text": "#  define JSON_HEDLEY_PREDICT_TRUE(expr, probability) \\"
+        },
+        {
+          "line": 1716,
+          "text": "#  define JSON_HEDLEY_PREDICT_FALSE(expr, probability) \\"
+        },
+        {
+          "line": 1721,
+          "text": "#  define JSON_HEDLEY_LIKELY(expr)   __builtin_expect(!!(expr), 1)"
+        },
+        {
+          "line": 1722,
+          "text": "#  define JSON_HEDLEY_UNLIKELY(expr) __builtin_expect(!!(expr), 0)"
+        },
+        {
+          "line": 1724,
+          "text": "#  define JSON_HEDLEY_PREDICT(expr, expected, probability) (JSON_HEDLEY_STATIC_CAST(void, expected), (expr))"
+        },
+        {
+          "line": 1725,
+          "text": "#  define JSON_HEDLEY_PREDICT_TRUE(expr, probability) (!!(expr))"
+        },
+        {
+          "line": 1726,
+          "text": "#  define JSON_HEDLEY_PREDICT_FALSE(expr, probability) (!!(expr))"
+        },
+        {
+          "line": 1727,
+          "text": "#  define JSON_HEDLEY_LIKELY(expr) (!!(expr))"
+        },
+        {
+          "line": 1728,
+          "text": "#  define JSON_HEDLEY_UNLIKELY(expr) (!!(expr))"
+        },
+        {
+          "line": 1790,
+          "text": "#  define JSON_HEDLEY_PURE __attribute__((__pure__))"
+        },
+        {
+          "line": 1792,
+          "text": "#  define JSON_HEDLEY_PURE _Pragma(\"does_not_write_global_data\")"
+        },
+        {
+          "line": 1799,
+          "text": "#  define JSON_HEDLEY_PURE _Pragma(\"FUNC_IS_PURE;\")"
+        },
+        {
+          "line": 1801,
+          "text": "#  define JSON_HEDLEY_PURE"
+        },
+        {
+          "line": 1913,
+          "text": "#  define JSON_HEDLEY_ALWAYS_INLINE __attribute__((__always_inline__)) JSON_HEDLEY_INLINE"
+        },
+        {
+          "line": 1917,
+          "text": "#  define JSON_HEDLEY_ALWAYS_INLINE __forceinline"
+        },
+        {
+          "line": 1927,
+          "text": "#  define JSON_HEDLEY_ALWAYS_INLINE _Pragma(\"FUNC_ALWAYS_INLINE;\")"
+        },
+        {
+          "line": 1929,
+          "text": "#  define JSON_HEDLEY_ALWAYS_INLINE _Pragma(\"inline=forced\")"
+        },
+        {
+          "line": 1931,
+          "text": "#  define JSON_HEDLEY_ALWAYS_INLINE JSON_HEDLEY_INLINE"
+        },
+        {
+          "line": 1986,
+          "text": "#  define JSON_HEDLEY_PRIVATE"
+        },
+        {
+          "line": 1987,
+          "text": "#  define JSON_HEDLEY_PUBLIC   __declspec(dllexport)"
+        },
+        {
+          "line": 1988,
+          "text": "#  define JSON_HEDLEY_IMPORT   __declspec(dllimport)"
+        },
+        {
+          "line": 1990,
+          "text": "#  if \\"
+        },
+        {
+          "line": 2005,
+          "text": "#    define JSON_HEDLEY_PRIVATE __attribute__((__visibility__(\"hidden\")))"
+        },
+        {
+          "line": 2006,
+          "text": "#    define JSON_HEDLEY_PUBLIC  __attribute__((__visibility__(\"default\")))"
+        },
+        {
+          "line": 2007,
+          "text": "#  else"
+        },
+        {
+          "line": 2008,
+          "text": "#    define JSON_HEDLEY_PRIVATE"
+        },
+        {
+          "line": 2009,
+          "text": "#    define JSON_HEDLEY_PUBLIC"
+        },
+        {
+          "line": 2010,
+          "text": "#  endif"
+        },
+        {
+          "line": 2011,
+          "text": "#  define JSON_HEDLEY_IMPORT    extern"
+        },
+        {
+          "line": 2103,
+          "text": "#  if \\"
+        },
+        {
+          "line": 2117,
+          "text": "#  elif \\"
+        },
+        {
+          "line": 2134,
+          "text": "#  elif \\"
+        },
+        {
+          "line": 2145,
+          "text": "#    define JSON_HEDLEY_IS_CONSTEXPR_(expr) ( \\"
+        },
+        {
+          "line": 2154,
+          "text": "#  endif"
+        },
+        {
+          "line": 2198,
+          "text": "#  define JSON_HEDLEY_STATIC_ASSERT(expr, message) _Static_assert(expr, message)"
+        },
+        {
+          "line": 2203,
+          "text": "#  define JSON_HEDLEY_STATIC_ASSERT(expr, message) JSON_HEDLEY_DIAGNOSTIC_DISABLE_CPP98_COMPAT_WRAP_(static_assert(expr, message))"
+        },
+        {
+          "line": 2205,
+          "text": "#  define JSON_HEDLEY_STATIC_ASSERT(expr, message)"
+        },
+        {
+          "line": 2229,
+          "text": "#  define JSON_HEDLEY_MESSAGE(msg) \\"
+        },
+        {
+          "line": 2237,
+          "text": "#  define JSON_HEDLEY_MESSAGE(msg) JSON_HEDLEY_PRAGMA(message msg)"
+        },
+        {
+          "line": 2239,
+          "text": "#  define JSON_HEDLEY_MESSAGE(msg) JSON_HEDLEY_PRAGMA(_CRI message msg)"
+        },
+        {
+          "line": 2241,
+          "text": "#  define JSON_HEDLEY_MESSAGE(msg) JSON_HEDLEY_PRAGMA(message(msg))"
+        },
+        {
+          "line": 2243,
+          "text": "#  define JSON_HEDLEY_MESSAGE(msg) JSON_HEDLEY_PRAGMA(message(msg))"
+        },
+        {
+          "line": 2245,
+          "text": "#  define JSON_HEDLEY_MESSAGE(msg)"
+        },
+        {
+          "line": 2252,
+          "text": "#  define JSON_HEDLEY_WARNING(msg) \\"
+        },
+        {
+          "line": 2261,
+          "text": "#  define JSON_HEDLEY_WARNING(msg) JSON_HEDLEY_PRAGMA(GCC warning msg)"
+        },
+        {
+          "line": 2265,
+          "text": "#  define JSON_HEDLEY_WARNING(msg) JSON_HEDLEY_PRAGMA(message(msg))"
+        },
+        {
+          "line": 2267,
+          "text": "#  define JSON_HEDLEY_WARNING(msg) JSON_HEDLEY_MESSAGE(msg)"
+        },
+        {
+          "line": 2277,
+          "text": "#  if JSON_HEDLEY_HAS_WARNING(\"-Wgcc-compat\")"
+        },
+        {
+          "line": 2278,
+          "text": "#    define JSON_HEDLEY_REQUIRE(expr) \\"
+        },
+        {
+          "line": 2283,
+          "text": "#    define JSON_HEDLEY_REQUIRE_MSG(expr,msg) \\"
+        },
+        {
+          "line": 2288,
+          "text": "#  else"
+        },
+        {
+          "line": 2289,
+          "text": "#    define JSON_HEDLEY_REQUIRE(expr) __attribute__((diagnose_if(!(expr), #expr, \"error\")))"
+        },
+        {
+          "line": 2290,
+          "text": "#    define JSON_HEDLEY_REQUIRE_MSG(expr,msg) __attribute__((diagnose_if(!(expr), msg, \"error\")))"
+        },
+        {
+          "line": 2291,
+          "text": "#  endif"
+        },
+        {
+          "line": 2293,
+          "text": "#  define JSON_HEDLEY_REQUIRE(expr)"
+        },
+        {
+          "line": 2294,
+          "text": "#  define JSON_HEDLEY_REQUIRE_MSG(expr,msg)"
+        },
+        {
+          "line": 2310,
+          "text": "#  define JSON_HEDLEY_FLAGS_CAST(T, expr) (__extension__ ({ \\"
+        },
+        {
+          "line": 2317,
+          "text": "#  define JSON_HEDLEY_FLAGS_CAST(T, expr) JSON_HEDLEY_STATIC_CAST(T, expr)"
+        },
+        {
+          "line": 3098,
+          "text": "inline void replace_substring(StringType& s, const StringType& f,"
+        },
+        {
+          "line": 3117,
+          "text": "inline StringType escape(StringType s)"
+        },
+        {
+          "line": 3132,
+          "text": "static void unescape(StringType& s)"
+        },
+        {
+          "line": 3610,
+          "text": "class json_ref;"
+        },
+        {
+          "line": 4177,
+          "text": "T conditional_static_cast(U value)"
+        },
+        {
+          "line": 4183,
+          "text": "T conditional_static_cast(U value)"
+        },
+        {
+          "line": 4277,
+          "text": "constexpr bool value_in_range_of(T val)"
+        },
+        {
+          "line": 4293,
+          "text": "constexpr bool is_c_string()"
+        },
+        {
+          "line": 4321,
+          "text": "constexpr bool is_transparent()"
+        },
+        {
+          "line": 4361,
+          "text": "inline std::size_t concat_length()"
+        },
+        {
+          "line": 4367,
+          "text": "inline std::size_t concat_length(const char* cstr, const Args& ... rest);"
+        },
+        {
+          "line": 4370,
+          "text": "inline std::size_t concat_length(const StringType& str, const Args& ... rest);"
+        },
+        {
+          "line": 4373,
+          "text": "inline std::size_t concat_length(const char /*c*/, const Args& ... rest)"
+        },
+        {
+          "line": 4379,
+          "text": "inline std::size_t concat_length(const char* cstr, const Args& ... rest)"
+        },
+        {
+          "line": 4386,
+          "text": "inline std::size_t concat_length(const StringType& str, const Args& ... rest)"
+        },
+        {
+          "line": 4392,
+          "text": "inline void concat_into(OutStringType& /*out*/)"
+        },
+        {
+          "line": 4422,
+          "text": "inline void concat_into(OutStringType& out, Arg && arg, Args && ... rest);"
+        },
+        {
+          "line": 4428,
+          "text": "inline void concat_into(OutStringType& out, const Arg& arg, Args && ... rest);"
+        },
+        {
+          "line": 4435,
+          "text": "inline void concat_into(OutStringType& out, const Arg& arg, Args && ... rest);"
+        },
+        {
+          "line": 4439,
+          "text": "inline void concat_into(OutStringType& out, Arg && arg, Args && ... rest)"
+        },
+        {
+          "line": 4448,
+          "text": "inline void concat_into(OutStringType& out, Arg&& arg, Args&& ... rest)"
+        },
+        {
+          "line": 4458,
+          "text": "inline void concat_into(OutStringType& out, const Arg& arg, Args&& ... rest)"
+        },
+        {
+          "line": 4469,
+          "text": "inline void concat_into(OutStringType& out, const Arg& arg, Args&& ... rest)"
+        },
+        {
+          "line": 4476,
+          "text": "inline OutStringType concat(Args && ... args)"
+        },
+        {
+          "line": 4510,
+          "text": "class exception : public std::exception"
+        },
+        {
+          "line": 4626,
+          "text": "class parse_error : public exception"
+        },
+        {
+          "line": 4679,
+          "text": "class invalid_iterator : public exception"
+        },
+        {
+          "line": 4697,
+          "text": "class type_error : public exception"
+        },
+        {
+          "line": 4714,
+          "text": "class out_of_range : public exception"
+        },
+        {
+          "line": 4731,
+          "text": "class other_error : public exception"
+        },
+        {
+          "line": 4825,
+          "text": "inline void from_json(const BasicJsonType& j, typename std::nullptr_t& n)"
+        },
+        {
+          "line": 4837,
+          "text": "void from_json(const BasicJsonType& j, std::optional<T>& opt)"
+        },
+        {
+          "line": 4857,
+          "text": "void get_arithmetic_value(const BasicJsonType& j, ArithmeticType& val)"
+        },
+        {
+          "line": 4890,
+          "text": "inline void from_json(const BasicJsonType& j, typename BasicJsonType::boolean_t& b)"
+        },
+        {
+          "line": 4900,
+          "text": "inline void from_json(const BasicJsonType& j, typename BasicJsonType::string_t& s)"
+        },
+        {
+          "line": 4916,
+          "text": "inline void from_json(const BasicJsonType& j, StringType& s)"
+        },
+        {
+          "line": 4927,
+          "text": "inline void from_json(const BasicJsonType& j, typename BasicJsonType::number_float_t& val)"
+        },
+        {
+          "line": 4933,
+          "text": "inline void from_json(const BasicJsonType& j, typename BasicJsonType::number_unsigned_t& val)"
+        },
+        {
+          "line": 4939,
+          "text": "inline void from_json(const BasicJsonType& j, typename BasicJsonType::number_integer_t& val)"
+        },
+        {
+          "line": 4947,
+          "text": "inline void from_json(const BasicJsonType& j, EnumType& e)"
+        },
+        {
+          "line": 4958,
+          "text": "inline void from_json(const BasicJsonType& j, std::forward_list<T, Allocator>& l)"
+        },
+        {
+          "line": 4975,
+          "text": "inline void from_json(const BasicJsonType& j, std::valarray<T>& l)"
+        },
+        {
+          "line": 4990,
+          "text": "auto from_json(const BasicJsonType& j, T (&arr)[N])  // NOLINT(cppcoreguidelines-avoid-c-arrays,hicpp-avoid-c-arrays,modernize-avoid-c-arrays)"
+        },
+        {
+          "line": 5000,
+          "text": "auto from_json(const BasicJsonType& j, T (&arr)[N1][N2])  // NOLINT(cppcoreguidelines-avoid-c-arrays,hicpp-avoid-c-arrays,modernize-avoid-c-arrays)"
+        },
+        {
+          "line": 5013,
+          "text": "auto from_json(const BasicJsonType& j, T (&arr)[N1][N2][N3])  // NOLINT(cppcoreguidelines-avoid-c-arrays,hicpp-avoid-c-arrays,modernize-avoid-c-arrays)"
+        },
+        {
+          "line": 5029,
+          "text": "auto from_json(const BasicJsonType& j, T (&arr)[N1][N2][N3][N4])  // NOLINT(cppcoreguidelines-avoid-c-arrays,hicpp-avoid-c-arrays,modernize-avoid-c-arrays)"
+        },
+        {
+          "line": 5048,
+          "text": "inline void from_json_array_impl(const BasicJsonType& j, typename BasicJsonType::array_t& arr, priority_tag<3> /*unused*/)"
+        },
+        {
+          "line": 5054,
+          "text": "auto from_json_array_impl(const BasicJsonType& j, std::array<T, N>& arr,"
+        },
+        {
+          "line": 5068,
+          "text": "auto from_json_array_impl(const BasicJsonType& j, ConstructibleArrayType& arr, priority_tag<1> /*unused*/)"
+        },
+        {
+          "line": 5092,
+          "text": "inline void from_json_array_impl(const BasicJsonType& j, ConstructibleArrayType& arr,"
+        },
+        {
+          "line": 5117,
+          "text": "auto from_json(const BasicJsonType& j, ConstructibleArrayType& arr)"
+        },
+        {
+          "line": 5138,
+          "text": "auto from_json(BasicJsonType&& j, identity_tag<std::array<T, N>> tag)"
+        },
+        {
+          "line": 5150,
+          "text": "inline void from_json(const BasicJsonType& j, typename BasicJsonType::binary_t& bin)"
+        },
+        {
+          "line": 5162,
+          "text": "inline void from_json(const BasicJsonType& j, ConstructibleObjectType& obj)"
+        },
+        {
+          "line": 5194,
+          "text": "inline void from_json(const BasicJsonType& j, ArithmeticType& val)"
+        },
+        {
+          "line": 5237,
+          "text": "std::tuple<> from_json_tuple_impl_base(BasicJsonType& /*unused*/, index_sequence<> /*unused*/)"
+        },
+        {
+          "line": 5250,
+          "text": "inline void from_json_tuple_impl(BasicJsonType&& j, std::pair<A1, A2>& p, priority_tag<1> /*unused*/)"
+        },
+        {
+          "line": 5262,
+          "text": "inline void from_json_tuple_impl(BasicJsonType&& j, std::tuple<Args...>& t, priority_tag<3> /*unused*/)"
+        },
+        {
+          "line": 5268,
+          "text": "auto from_json(BasicJsonType&& j, TupleRelated&& t)"
+        },
+        {
+          "line": 5282,
+          "text": "inline void from_json(const BasicJsonType& j, std::map<Key, Value, Compare, Allocator>& m)"
+        },
+        {
+          "line": 5302,
+          "text": "inline void from_json(const BasicJsonType& j, std::unordered_map<Key, Value, Hash, KeyEqual, Allocator>& m)"
+        },
+        {
+          "line": 5321,
+          "text": "inline void from_json(const BasicJsonType& j, std_fs::path& p)"
+        },
+        {
+          "line": 5436,
+          "text": "void int_to_string(StringType& target, std::size_t value)"
+        },
+        {
+          "line": 5444,
+          "text": "StringType to_string(std::size_t value)"
+        },
+        {
+          "line": 5618,
+          "text": "auto get(const nlohmann::detail::iteration_proxy_value<IteratorType>& i) -> decltype(i.key())"
+        },
+        {
+          "line": 5626,
+          "text": "auto get(const nlohmann::detail::iteration_proxy_value<IteratorType>& i) -> decltype(i.value())"
+        },
+        {
+          "line": 5647,
+          "text": "class tuple_size<::nlohmann::detail::iteration_proxy_value<IteratorType>> // NOLINT(cert-dcl58-cpp)"
+        },
+        {
+          "line": 5651,
+          "text": "class tuple_element<N, ::nlohmann::detail::iteration_proxy_value<IteratorType >> // NOLINT(cert-dcl58-cpp)"
+        },
+        {
+          "line": 5917,
+          "text": "void to_json(BasicJsonType& j, const std::optional<T>& opt)"
+        },
+        {
+          "line": 5932,
+          "text": "inline void to_json(BasicJsonType& j, T b) noexcept"
+        },
+        {
+          "line": 5945,
+          "text": "inline void to_json(BasicJsonType& j, const BoolRef& b) noexcept"
+        },
+        {
+          "line": 5952,
+          "text": "inline void to_json(BasicJsonType& j, const CompatibleString& s)"
+        },
+        {
+          "line": 5958,
+          "text": "inline void to_json(BasicJsonType& j, typename BasicJsonType::string_t&& s)"
+        },
+        {
+          "line": 5965,
+          "text": "inline void to_json(BasicJsonType& j, FloatType val) noexcept"
+        },
+        {
+          "line": 5972,
+          "text": "inline void to_json(BasicJsonType& j, CompatibleNumberUnsignedType val) noexcept"
+        },
+        {
+          "line": 5979,
+          "text": "inline void to_json(BasicJsonType& j, CompatibleNumberIntegerType val) noexcept"
+        },
+        {
+          "line": 5987,
+          "text": "inline void to_json(BasicJsonType& j, EnumType e) noexcept"
+        },
+        {
+          "line": 5996,
+          "text": "inline void to_json(BasicJsonType& j, const std::vector<bool>& e)"
+        },
+        {
+          "line": 6009,
+          "text": "inline void to_json(BasicJsonType& j, const CompatibleArrayType& arr)"
+        },
+        {
+          "line": 6015,
+          "text": "inline void to_json(BasicJsonType& j, const typename BasicJsonType::binary_t& bin)"
+        },
+        {
+          "line": 6022,
+          "text": "inline void to_json(BasicJsonType& j, const std::valarray<T>& arr)"
+        },
+        {
+          "line": 6028,
+          "text": "inline void to_json(BasicJsonType& j, typename BasicJsonType::array_t&& arr)"
+        },
+        {
+          "line": 6035,
+          "text": "inline void to_json(BasicJsonType& j, const CompatibleObjectType& obj)"
+        },
+        {
+          "line": 6041,
+          "text": "inline void to_json(BasicJsonType& j, typename BasicJsonType::object_t&& obj)"
+        },
+        {
+          "line": 6051,
+          "text": "inline void to_json(BasicJsonType& j, const T(&arr)[N]) // NOLINT(cppcoreguidelines-avoid-c-arrays,hicpp-avoid-c-arrays,modernize-avoid-c-arrays)"
+        },
+        {
+          "line": 6057,
+          "text": "inline void to_json(BasicJsonType& j, const std::pair<T1, T2>& p)"
+        },
+        {
+          "line": 6065,
+          "text": "inline void to_json(BasicJsonType& j, const T& b)"
+        },
+        {
+          "line": 6071,
+          "text": "inline void to_json_tuple_impl(BasicJsonType& j, const Tuple& t, index_sequence<Idx...> /*unused*/)"
+        },
+        {
+          "line": 6077,
+          "text": "inline void to_json_tuple_impl(BasicJsonType& j, const Tuple& /*unused*/, index_sequence<> /*unused*/)"
+        },
+        {
+          "line": 6084,
+          "text": "inline void to_json(BasicJsonType& j, const T& t)"
+        },
+        {
+          "line": 6091,
+          "text": "inline void to_json(BasicJsonType& j, const std_fs::path& p)"
+        },
+        {
+          "line": 6193,
+          "text": "class byte_container_with_subtype : public BinaryType"
+        },
+        {
+          "line": 6307,
+          "text": "inline std::size_t combine(std::size_t seed, std::size_t h) noexcept"
+        },
+        {
+          "line": 6325,
+          "text": "std::size_t hash(const BasicJsonType& j)"
+        },
+        {
+          "line": 6495,
+          "text": "class file_input_adapter"
+        },
+        {
+          "line": 6540,
+          "text": "class input_stream_adapter"
+        },
+        {
+          "line": 6606,
+          "text": "class iterator_input_adapter"
+        },
+        {
+          "line": 6785,
+          "text": "class wide_string_input_adapter"
+        },
+        {
+          "line": 6874,
+          "text": "typename iterator_input_adapter_factory<IteratorType>::adapter_type input_adapter(IteratorType first, IteratorType last)"
+        },
+        {
+          "line": 6908,
+          "text": "typename container_input_adapter_factory_impl::container_input_adapter_factory<ContainerType>::adapter_type input_adapter(const ContainerType& container)"
+        },
+        {
+          "line": 6918,
+          "text": "inline file_input_adapter input_adapter(std::FILE* file)"
+        },
+        {
+          "line": 6927,
+          "text": "inline input_stream_adapter input_adapter(std::istream& stream)"
+        },
+        {
+          "line": 6932,
+          "text": "inline input_stream_adapter input_adapter(std::istream&& stream)"
+        },
+        {
+          "line": 6948,
+          "text": "contiguous_bytes_input_adapter input_adapter(CharT b)"
+        },
+        {
+          "line": 6960,
+          "text": "auto input_adapter(T (&array)[N]) -> decltype(input_adapter(array, array + N)) // NOLINT(cppcoreguidelines-avoid-c-arrays,hicpp-avoid-c-arrays,modernize-avoid-c-arrays)"
+        },
+        {
+          "line": 6968,
+          "text": "class span_input_adapter"
+        },
+        {
+          "line": 7057,
+          "text": "class lexer_base"
+        },
+        {
+          "line": 7134,
+          "text": "class lexer : public lexer_base<BasicJsonType>"
+        },
+        {
+          "line": 8798,
+          "text": "constexpr std::size_t unknown_size()"
+        },
+        {
+          "line": 8817,
+          "text": "class json_sax_dom_parser"
+        },
+        {
+          "line": 9123,
+          "text": "class json_sax_dom_callback_parser"
+        },
+        {
+          "line": 9560,
+          "text": "class json_sax_acceptor"
+        },
+        {
+          "line": 9832,
+          "text": "static inline bool little_endianness(int num = 1) noexcept"
+        },
+        {
+          "line": 9845,
+          "text": "class binary_reader"
+        },
+        {
+          "line": 12918,
+          "text": "class parser"
+        },
+        {
+          "line": 13422,
+          "text": "class primitive_iterator_t"
+        },
+        {
+          "line": 13605,
+          "text": "class iter_impl // NOLINT(cppcoreguidelines-special-member-functions,hicpp-special-member-functions)"
+        },
+        {
+          "line": 14367,
+          "text": "class json_reverse_iterator : public std::reverse_iterator<Base>"
+        },
+        {
+          "line": 14539,
+          "text": "class json_pointer"
+        },
+        {
+          "line": 15518,
+          "text": "class json_ref"
+        },
+        {
+          "line": 15664,
+          "text": "class output_vector_adapter : public output_adapter_protocol<CharType>"
+        },
+        {
+          "line": 15689,
+          "text": "class output_stream_adapter : public output_adapter_protocol<CharType>"
+        },
+        {
+          "line": 15714,
+          "text": "class output_string_adapter : public output_adapter_protocol<CharType>"
+        },
+        {
+          "line": 15737,
+          "text": "class output_adapter"
+        },
+        {
+          "line": 15786,
+          "text": "class binary_writer"
+        },
+        {
+          "line": 17668,
+          "text": "Target reinterpret_bits(const Source source)"
+        },
+        {
+          "line": 17809,
+          "text": "boundaries compute_boundaries(FloatType value)"
+        },
+        {
+          "line": 17948,
+          "text": "inline cached_power get_cached_power_for_binary_exponent(int e)"
+        },
+        {
+          "line": 18112,
+          "text": "inline int find_largest_pow10(const std::uint32_t n, std::uint32_t& pow10)"
+        },
+        {
+          "line": 18166,
+          "text": "inline void grisu2_round(char* buf, int len, std::uint64_t dist, std::uint64_t delta,"
+        },
+        {
+          "line": 18207,
+          "text": "inline void grisu2_digit_gen(char* buffer, int& length, int& decimal_exponent,"
+        },
+        {
+          "line": 18448,
+          "text": "inline void grisu2(char* buf, int& len, int& decimal_exponent,"
+        },
+        {
+          "line": 18508,
+          "text": "void grisu2(char* buf, int& len, int& decimal_exponent, FloatType value)"
+        },
+        {
+          "line": 18548,
+          "text": "inline char* append_exponent(char* buf, int e)"
+        },
+        {
+          "line": 18600,
+          "text": "inline char* format_buffer(char* buf, int len, int decimal_exponent,"
+        },
+        {
+          "line": 18685,
+          "text": "char* to_chars(char* first, const char* last, FloatType value)"
+        },
+        {
+          "line": 18772,
+          "text": "class serializer"
+        },
+        {
+          "line": 20102,
+          "text": "The invariants are checked by member function assert_invariant()."
+        },
+        {
+          "line": 20112,
+          "text": "class basic_json // NOLINT(cppcoreguidelines-special-member-functions,hicpp-special-member-functions)"
+        },
+        {
+          "line": 25216,
+          "text": "std::string to_string(const NLOHMANN_BASIC_JSON_TPL& j)"
+        },
+        {
+          "line": 25297,
+          "text": "inline void swap(nlohmann::NLOHMANN_BASIC_JSON_TPL& j1, nlohmann::NLOHMANN_BASIC_JSON_TPL& j2) noexcept(  // NOLINT(readability-inconsistent-declaration-parameter-name, cert-dcl58-cpp)"
+        }
+      ]
+    },
+    {
+      "path": "tools/compile_cuda.py",
+      "bytes": 2905,
+      "lines": 48,
+      "sha256": "255e5af85e1054d08bbd1b45577999fe09220e4c0cb6e7e381b3210f07fa97bc",
+      "kind": "text",
+      "role": "NVRTC精确选项编译和生成清单；第11章",
+      "symbols": []
+    }
+  ]
+}

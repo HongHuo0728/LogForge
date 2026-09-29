@@ -1,0 +1,320 @@
+{
+  "version": "1.2.0",
+  "build": "26926A",
+  "date": "2026-09-26",
+  "platform": "Windows 11 x64 build 26200; MSVC Release /MT",
+  "exe_sha256": "368263bccfc37530083a3cb1e48cf7aeb399a7415a63e9583546518d0d8a95cb",
+  "ctest": {
+    "tests": 22,
+    "failures": 0,
+    "seconds": 225.77,
+    "groups": [
+      {
+        "name": "robustness_v120",
+        "seconds": 0.973802
+      },
+      {
+        "name": "cuda_qualification",
+        "seconds": 0.121604
+      },
+      {
+        "name": "apple_log_identification",
+        "seconds": 1.59986
+      },
+      {
+        "name": "reliability_process",
+        "seconds": 1.56075
+      },
+      {
+        "name": "reliability_discovery",
+        "seconds": 3.48188
+      },
+      {
+        "name": "reliability_cli",
+        "seconds": 0.508327
+      },
+      {
+        "name": "hardening_cadence",
+        "seconds": 0.0647825
+      },
+      {
+        "name": "hardening_security",
+        "seconds": 0.285758
+      },
+      {
+        "name": "hardening_mov",
+        "seconds": 0.0428444
+      },
+      {
+        "name": "hardening_parallel",
+        "seconds": 2.27461
+      },
+      {
+        "name": "color_math",
+        "seconds": 0.175676
+      },
+      {
+        "name": "media_metadata_validation",
+        "seconds": 0.0131949
+      },
+      {
+        "name": "ffmpeg_platform",
+        "seconds": 0.246476
+      },
+      {
+        "name": "application_preferences",
+        "seconds": 0.147004
+      },
+      {
+        "name": "ffmpeg_disk_discovery",
+        "seconds": 0.0465929
+      },
+      {
+        "name": "application_resources",
+        "seconds": 0.0487416
+      },
+      {
+        "name": "portrait_storage_queue_v120",
+        "seconds": 27.456
+      },
+      {
+        "name": "media_pipeline",
+        "seconds": 84.9058
+      },
+      {
+        "name": "color_signal",
+        "seconds": 12.213
+      },
+      {
+        "name": "ffmpeg_discovery_capabilities",
+        "seconds": 4.14231
+      },
+      {
+        "name": "publication_no_overwrite",
+        "seconds": 4.34109
+      },
+      {
+        "name": "sustained_4k120",
+        "seconds": 80.6133
+      }
+    ]
+  },
+  "gui": {
+    "passed": true,
+    "cases": 26,
+    "case_names": [
+      "en-dark-96",
+      "en-dark-120",
+      "en-dark-144",
+      "en-dark-168",
+      "en-dark-192",
+      "en-light-96",
+      "en-light-120",
+      "en-light-144",
+      "en-light-168",
+      "en-light-192",
+      "zh-CN-dark-96",
+      "zh-CN-dark-120",
+      "zh-CN-dark-144",
+      "zh-CN-dark-168",
+      "zh-CN-dark-192",
+      "zh-CN-light-96",
+      "zh-CN-light-120",
+      "zh-CN-light-144",
+      "zh-CN-light-168",
+      "zh-CN-light-192",
+      "en-dark-96-missing",
+      "zh-CN-light-144-missing",
+      "close-active-search",
+      "standard",
+      "creative",
+      "queue-failed-first-continues"
+    ],
+    "dialog_resource_counts_stable": true
+  },
+  "layout": {
+    "cases": 960,
+    "passed": true,
+    "dpi": [
+      96,
+      120,
+      144,
+      168,
+      192
+    ],
+    "client_sizes": [
+      [
+        1280,
+        720
+      ],
+      [
+        1920,
+        1080
+      ],
+      [
+        2560,
+        1440
+      ]
+    ],
+    "snapshots": 20,
+    "gdi_stable": true,
+    "scope": "Real production layout and paint functions via native windows and WM_DPICHANGED; not three physical monitor configurations."
+  },
+  "cuda": {
+    "backend": "cuda",
+    "chunks": 0,
+    "compute_capability": "8.6",
+    "device_buffer_bytes": 114688,
+    "download_seconds": 0.0,
+    "driver_cuda_version": 13040,
+    "driver_file_version": "32.0.16.1692",
+    "gpu": "NVIDIA GeForce RTX 3080 Ti Laptop GPU",
+    "gpu_transform_seconds": 0.0,
+    "math": "double expressions, FP32 input/output; FMA disabled",
+    "pinned_host_bytes": 114688,
+    "ptx_target": "compute_75",
+    "qualification": {
+      "absolute_tolerance": 2e-06,
+      "cases": [
+        {
+          "creative": false,
+          "exposure_ev": -8.0,
+          "max_error": 0.0,
+          "mean_error": 0.0,
+          "samples": 24576
+        },
+        {
+          "creative": false,
+          "exposure_ev": 0.0,
+          "max_error": 0.0,
+          "mean_error": 0.0,
+          "samples": 24576
+        },
+        {
+          "creative": false,
+          "exposure_ev": 8.0,
+          "max_error": 0.0,
+          "mean_error": 0.0,
+          "samples": 24576
+        },
+        {
+          "creative": true,
+          "exposure_ev": -8.0,
+          "max_error": 0.0,
+          "mean_error": 0.0,
+          "samples": 24576
+        },
+        {
+          "creative": true,
+          "exposure_ev": 0.0,
+          "max_error": 0.0,
+          "mean_error": 0.0,
+          "samples": 24576
+        },
+        {
+          "creative": true,
+          "exposure_ev": 8.0,
+          "max_error": 0.0,
+          "mean_error": 0.0,
+          "samples": 24576
+        }
+      ],
+      "max_error": 0.0,
+      "passed": true,
+      "reference": "independent scalar CPU double"
+    },
+    "runtime": "CUDA Driver API; no cudart",
+    "upload_seconds": 0.0
+  },
+  "sustained_cpu": {
+    "passed": true,
+    "raster": "3840x2160",
+    "capture_fps": 120,
+    "frames": 240,
+    "media_seconds": 2,
+    "elapsed_seconds": 45.20200470000418,
+    "conversion_fps": 5.309499027594628,
+    "app_peak_private_bytes": 15130624,
+    "float_buffer_bytes": 4194304,
+    "sampled_frames": [
+      0,
+      119,
+      239
+    ],
+    "max_post_encode_luma_code_error": 0.8650509424642223,
+    "samples": 1536
+  },
+  "resolve": {
+    "product": "DaVinci Resolve Studio",
+    "version": "20.3.2.9",
+    "production_only_regression": true,
+    "clip_color_space_set_by_script": false,
+    "clip_lut_set_by_script": false,
+    "results": [
+      {
+        "case": "production",
+        "file": "standard.mov",
+        "sha256": "64e900ce63f44dc376aa43627b2eb5994fd04796221ea445d1b14195f91ab285",
+        "expected": "Apple Log",
+        "properties": {
+          "Input Color Space": "Apple Log",
+          "IDT": "Apple Log",
+          "Gamma Notes": "",
+          "Data Level": "Auto",
+          "Input LUT": "",
+          "Camera Manufacturer": "",
+          "Camera Type": "",
+          "Video Codec": "Apple ProRes 422 HQ",
+          "Bit Depth": "10",
+          "Resolution": "320x180",
+          "FPS": 29.97
+        }
+      },
+      {
+        "case": "candidate-1",
+        "file": "creative.mov",
+        "sha256": "b79ba1c82af3cf986cdcbf40bcedc014447fbf665d9a95a902bf077191eef634",
+        "expected": "Apple Log",
+        "properties": {
+          "Input Color Space": "Apple Log",
+          "IDT": "Apple Log",
+          "Gamma Notes": "",
+          "Data Level": "Auto",
+          "Input LUT": "",
+          "Camera Manufacturer": "",
+          "Camera Type": "",
+          "Video Codec": "Apple ProRes 422 HQ",
+          "Bit Depth": "10",
+          "Resolution": "320x180",
+          "FPS": 29.97
+        }
+      }
+    ],
+    "color_settings": {
+      "colorScienceMode": "davinciYRGBColorManagedv2",
+      "isAutoColorManage": "1",
+      "colorSpaceInput": "Rec.709 Gamma 2.4",
+      "colorSpaceOutput": "Rec.709 (Scene)"
+    },
+    "passed": true,
+    "temporary_project_deleted": true
+  },
+  "limitations": [
+    "One physical RTX 3080 Ti Laptop GPU tested; other devices must pass runtime qualification.",
+    "Disk-full and CUDA fault/OOM paths use deterministic injected failures; the physical disk and GPU were not deliberately exhausted.",
+    "Creative retains one complete float32 planar GBR frame.",
+    "An earlier GUI resource sample changed once without an established root cause; isolated recheck and the final unchanged strict 26-case suite passed.",
+    "No new Premiere or Final Cut validation; Resolve result is automatic identification only, not a new render or native camera A/B comparison."
+  ],
+  "cleanup": {
+    "generated_files_removed": 1229,
+    "bytes_removed": 389189985,
+    "preserved": "Source code, tests, compact verification records, synthetic UI snapshots and verified development FFmpeg tools",
+    "temporary_resolve_project_removed": true
+  },
+  "portable_smoke": {
+    "passed": true,
+    "source": "EXE extracted from audited release ZIP",
+    "checks": "Native startup, Settings and missing-FFmpeg/failure recovery; EXE hash matches this record"
+  }
+}

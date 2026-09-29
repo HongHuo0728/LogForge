@@ -1,0 +1,21 @@
+{
+  "commit": "6b43a93fbd4d1457ff20b4c99a030c0e398f520a",
+  "version": "1.2.1 (26927B)",
+  "body_cjk_characters": 31071,
+  "manuscript_cjk_characters": 32110,
+  "manuscript_characters": 51328,
+  "pages": 63,
+  "equations": 66,
+  "figures": 18,
+  "tables": 5,
+  "tracked_files": 102,
+  "pdf_sha256": "f4f3277e50b780f89f1dafa876ec3b9052db9a5718745579527e48794140b99e",
+  "ctest": {
+    "tests": 24,
+    "passed": 23,
+    "failed": 1,
+    "failed_test": "media_pipeline"
+  },
+  "latex_builtin_compile": "unavailable: Unable to find standard directories for platform",
+  "pdf_export": "ReportLab; embedded CJK fonts; vector SVG math and charts"
+}
