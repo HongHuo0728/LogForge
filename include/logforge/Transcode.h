@@ -16,6 +16,7 @@ struct JobIOHooks {
     std::function<uintmax_t(const fs::path&)> availableSpace;
     std::function<void(const fs::path&)> beforeReportWrite;
     std::function<void(const char*)> cudaCheckpoint;
+    std::function<void(const char*, const fs::path&)> stageCheckpoint;
 };
 struct TranscodeOptions {
     // A scene-linear exposure gain before the unchanged Apple Log encoding.
@@ -23,6 +24,8 @@ struct TranscodeOptions {
     ToneAdjustments tone;
     ProcessingBackend backend = ProcessingBackend::Auto;
     const JobIOHooks* io = nullptr;
+    // Explicit per-job consent only; never inferred from missing metadata.
+    bool forceBT2020Interpretation = false;
 };
 class TranscodeJob {
   public:

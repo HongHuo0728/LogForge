@@ -1,23 +1,60 @@
 #include "logforge/Queue.h"
+#include <set>
 namespace logforge {
+QueuePlan PlanQueue(const std::vector<fs::path>& inputs, const fs::path& directory) {
+    const auto dir = fs::absolute(directory).lexically_normal();
+    if (!fs::is_directory(dir))
+        throw AppError(TextId::OutputDirectory);
+    const auto less = [](const std::wstring& a, const std::wstring& b) {
+        return CompareStringOrdinal(a.c_str(), -1, b.c_str(), -1, TRUE) == CSTR_LESS_THAN;
+    };
+    std::set<std::wstring, decltype(less)> reserved(less);
+    QueuePlan plan;
+    for (const auto& input : inputs) {
+        const auto stem = input.stem().wstring() + L"_AppleLog";
+        for (uint64_t n = 1;; ++n) {
+            const auto name = stem + (n == 1 ? L"" : L"_" + std::to_wstring(n)) + L".mov";
+            const auto output = dir / name;
+            if (!reserved.contains(name) && !fs::exists(output)) {
+                reserved.insert(name);
+                plan.push_back({fs::absolute(input).lexically_normal(), output});
+                break;
+            }
+        }
+    }
+    return plan;
+}
+Json QueuePlanJson(const QueuePlan& plan) {
+    Json result = Json::array();
+    for (const auto& item : plan)
+        result.push_back({{"input", PathText(item.input)}, {"output", PathText(item.output)}});
+    return result;
+}
 Json RunQueue(const FFmpegInstallation& tools, const std::vector<fs::path>& inputs, const fs::path& directory,
               Logger& logger, const std::atomic_bool& cancel, const TranscodeOptions& options,
               const std::string& explicitChroma, const QueueCallback& progress) {
+    return RunQueue(tools, PlanQueue(inputs, directory), logger, cancel, options, explicitChroma, progress);
+}
+Json RunQueue(const FFmpegInstallation& tools, const QueuePlan& plan, Logger& logger,
+              const std::atomic_bool& cancel, const TranscodeOptions& options,
+              const std::string& explicitChroma, const QueueCallback& progress) {
     Json results = Json::array();
     size_t successful = 0;
-    for (size_t i = 0; i < inputs.size() && !cancel; ++i) {
-        const auto output = directory / (inputs[i].stem().wstring() + L"_AppleLog.mov");
-        Json entry{{"input", PathText(inputs[i])}, {"output", PathText(output)}, {"passed", false}};
+    for (size_t i = 0; i < plan.size() && !cancel; ++i) {
+        const auto& output = plan[i].output;
+        Json entry{{"input", PathText(plan[i].input)}, {"output", PathText(output)}, {"passed", false}};
         try {
-            auto media = Probe(tools.ffprobe, inputs[i], &cancel);
+            auto media = Probe(tools.ffprobe, plan[i].input, &cancel);
             media.inputChromaOverride = explicitChroma;
-            progress(i, inputs.size(), media, {});
+            media.forceBT2020Interpretation = options.forceBT2020Interpretation;
+            progress(i, plan.size(), media, {});
             auto report = TranscodeJob::Run(
                 tools, media, output, logger, cancel,
-                [&](const auto& p) { progress(i, inputs.size(), media, p); }, options);
-            entry["passed"] = report.passed;
+                [&](const auto& p) { progress(i, plan.size(), media, p); }, options);
+            entry["passed"] = report.Completed();
             entry["validation"] = report.ToJson();
-            ++successful;
+            if (report.Completed())
+                ++successful;
         } catch (const std::exception& error) {
             entry["error"] = error.what();
             entry["cancelled"] = cancel.load();
@@ -40,10 +77,10 @@ Json RunQueue(const FFmpegInstallation& tools, const std::vector<fs::path>& inpu
         }
         results.push_back(entry);
     }
-    return {{"items", results},
+    return {{"plan", QueuePlanJson(plan)}, {"items", results},
             {"successful", successful},
             {"failed", results.size() - successful},
-            {"remaining", inputs.size() - results.size()},
+            {"remaining", plan.size() - results.size()},
             {"cancelled", cancel.load()}};
 }
 } // namespace logforge

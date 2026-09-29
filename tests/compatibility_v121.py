@@ -136,6 +136,61 @@ def main():
               'orientation_matches_source_playback': True, 'output_raster': [width, height],
               'creation_headers_preserved': True, 'timecode_preserved': True, 'pcm_payload_identical': True,
               'audio_offset_seconds': float(offset(out_video, out_audio))}
+    if not delayed:
+        # iPhone-style auxiliary tracks: reuse a generated timecode sample as
+        # opaque metadata, with two distinct track IDs/nonzero media origins.
+        # No user footage, guessed private atoms, or changed mdat offsets.
+        original = source.read_bytes()
+        moov = next(b for b in boxes(original) if b[0] == 'moov')
+        assert moov[3] == len(original), 'Fixture needs trailing moov'
+        track = next(b for b in boxes(original) if b[0] == 'trak' and '/trak[2]' in b[1])
+        auxiliary = bytearray(original[track[2]-8:track[3]])
+        auxiliary[:] = auxiliary.replace(b'tmcd', b'mebx')
+        extra = bytearray()
+        for ordinal in range(2):
+            current = bytearray(auxiliary)
+            for kind, _, at, _ in boxes(current):
+                if kind == 'hdlr':
+                    current[at+8:at+12] = b'meta'
+                elif kind == 'tkhd':
+                    struct.pack_into('>I', current, at+12, 3+ordinal)
+                elif kind == 'elst':
+                    assert current[at] == 0
+                    struct.pack_into('>i', current, at+12, 1+ordinal)
+            extra.extend(current)
+        modified = bytearray(original[:track[2]-8] + extra + original[track[3]:])
+        struct.pack_into('>I', modified, moov[2]-8, len(modified)-(moov[2]-8))
+        # Remove any explicit timecode label and video-to-timecode association.
+        # Same-size replacements do not move sample data.
+        modified[moov[2]:] = modified[moov[2]:].replace(b'tmcd', b'mebx').replace(b'timecode', b'auxlabel')
+        mvhd = next(b for b in boxes(modified) if b[0] == 'mvhd')
+        struct.pack_into('>I', modified, mvhd[3]-4, 5)
+        report['auxiliary_cases'] = []
+        for degrees, unit in [(90, [0, -65536, 0, 65536, 0, 0, 0, 0, 1 << 30]),
+                              (270, [0, 65536, 0, -65536, 0, 0, 0, 0, 1 << 30])]:
+            fixture = root / f'no-timecode-mebx-{degrees}.mov'
+            converted = root / f'no-timecode-mebx-{degrees}-output.mov'
+            content = bytearray(modified)
+            tkhd = next(b for b in boxes(content) if b[0] == 'tkhd' and '/trak[0]/' in b[1])
+            struct.pack_into('>9i', content, tkhd[2]+40, *unit)
+            fixture.write_bytes(content); converted.unlink(missing_ok=True)
+            declared = info(fixture)
+            assert len([s for s in declared['streams'] if s.get('codec_tag_string') == 'mebx']) == 2
+            assert all('timecode' not in s.get('tags', {}) for s in declared['streams'])
+            assert 'timecode' not in declared['format'].get('tags', {})
+            run([cli, '--convert', fixture, converted, '--ffmpeg', ff, '--backend', 'cpu'])
+            actual = info(converted)
+            v = next(s for s in actual['streams'] if s['codec_type'] == 'video')
+            assert (v['width'], v['height']) == (64, 128)
+            assert all(s.get('rotation', 0) == 0 for s in v.get('side_data_list', []))
+            width, height = 64, 128
+            a, b = corners(fixture, True), corners(converted, False)
+            assert sorted(range(4), key=a.__getitem__) == sorted(range(4), key=b.__getitem__)
+            assert audio_bytes(fixture) == audio_bytes(converted)
+            assert actual['format']['tags']['creation_time'] == declared['format']['tags']['creation_time']
+            report['auxiliary_cases'].append({'rotation': degrees, 'mebx_tracks': 2,
+                                               'timecode_absent': True, 'passed': True})
+            fixture.unlink(); converted.unlink()
     (root / 'result.json').write_text(json.dumps(report, indent=2), encoding='utf-8')
     print(json.dumps(report))
     source.unlink(); output.unlink()

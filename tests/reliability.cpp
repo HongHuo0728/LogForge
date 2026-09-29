@@ -224,8 +224,23 @@ void CommandLine() {
         Require(result.exitCode != 0 && result.error.find("CLICommand") != std::string::npos,
                 "Malformed command launched discovery or returned the wrong error");
     }
-    Require(RunProcess(cli, {L"--version"}, &cancel, 2).output.find("1.2.1 (26927B)") != std::string::npos,
+    Require(RunProcess(cli, {L"--version"}, &cancel, 2).output.find("1.3.0 (26929A)") != std::string::npos,
             "CLI build identifier wrong");
+    for (const auto* value : {L"100abc", L"-1", L"0", L"9223372036854775808", L"", L"1.5", L" 1", L"1 "}) {
+        const auto result = RunProcess(cli, {L"--version", L"--cancel-after-frames", value}, &cancel, 2);
+        Require(result.exitCode != 0 && result.error.find("CLIInteger") != std::string::npos,
+                "Partial/overflow/nonpositive integer was accepted");
+    }
+    for (const auto* value : {L"1abc", L"nan", L"inf", L"1e999", L"", L" 1", L"1 "}) {
+        const auto result = RunProcess(cli, {L"--version", L"--exposure-ev", value}, &cancel, 2);
+        Require(result.exitCode != 0 && result.error.find("CLIExposure") != std::string::npos,
+                "Malformed exposure token accepted");
+        const auto tone = RunProcess(cli, {L"--version", L"--tone", L"--shadow-lift-ev", value}, &cancel, 2);
+        Require(tone.exitCode != 0 && tone.error.find("CLITone") != std::string::npos,
+                "Malformed creative parameter accepted");
+    }
+    Require(RunProcess(cli, {L"--version", L"--cancel-after-frames", L"100", L"--exposure-ev", L"+1"},
+                       &cancel, 2).exitCode == 0, "Valid complete numeric parameters rejected");
     std::cout << "PASS: malformed CLI rejected before tool detection and current version\n";
 }
 } // namespace

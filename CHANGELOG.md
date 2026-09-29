@@ -1,5 +1,39 @@
 # Changelog
 
+## 1.3.0 (26929A)
+
+- Replace the nominal-rate phase threshold with an all-packet integer-quantization
+  model. Accept verified fractional camera cadence even when average/nominal tags
+  differ; retain negative tests for changing speed, VFR, gaps, duplicate/backward
+  PTS and invalid durations. Report the candidate, time base, phase in ticks,
+  microseconds and frame fractions, and the precise rejection category.
+- Accept missing color declarations with explicit BT.2020 / BT.2020 NCL / limited
+  / left assumptions and warnings. Reject explicit conflicts by default; a
+  per-file GUI confirmation or `--force-bt2020-interpretation` permits a deliberate
+  primaries/matrix reinterpretation. HLG and other format requirements still apply.
+- Preserve v1.2.1 iPhone mebx/no-timecode admission, Blackmagic audio offset and
+  stream copy, and cardinal rotations baked into float32 pixels.
+- Preflight queue output paths with deterministic suffixes, skipping existing
+  files, and expose the mapping before conversion and in queue reports.
+- Separate `validation_passed` from `publication.published`; record publication
+  failures and require both for completion. Retain race-safe no-overwrite rename.
+- Require complete, bounded CLI numeric parsing before FFmpeg discovery.
+- Reject multiple primary video streams and report all deliberately omitted
+  attached-picture, subtitle, metadata and data streams; distinguish regenerated
+  timecode from copied streams.
+- Verify concatenated stream-copy audio payloads with per-stream SHA-256 in
+  production, alongside the existing timing and format checks.
+- Rank CUDA candidates deterministically and cache successful qualification only
+  within the process, bound to GPU UUID, driver, embedded PTX hash, build,
+  algorithm and Creative parameters. Failures invalidate the cache; explicit
+  qualification always reruns the unchanged scalar comparison.
+- Clarify per-buffer/total CPU bridge and CUDA memory report fields.
+- Remove filename-only media cleanup and the remux rename/journal gap. Track
+  original file identities through normal failure, cancellation and crash recovery.
+- Update generated application/resources/manifest versions to 1.3.0 / 1.3.0.0.
+  See [release details](docs/RELEASE_1.3.0.md) and [verification](docs/VALIDATION.md).
+  Historical v1.2.1 academic results remain unchanged.
+
 ## 1.2.1 (26927B)
 
 - Apply cardinal camera orientation to float32 pixels before encoding. Portrait

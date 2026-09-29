@@ -4,13 +4,26 @@ A small native Windows tool that re-encodes **BT.2020 HLG ProRes** into **Apple 
 
 LogForge changes the pixels using published color mathematics. It does not restore clipped highlights, crushed shadows, tone-mapped-away detail, or information lost in a camera's ISP. It cannot turn processed phone footage into the original sensor capture.
 
-**Version 1.2.1 · Build 26927B.** Output is **Apple Log / Rec.2020 with Video levels**. The identification fields were **verified in 1.1.0 with DaVinci Resolve Studio 20.3.2.9 on Windows**, using DaVinci YRGB Color Managed. The latest build's verification scope is recorded in [VALIDATION](docs/VALIDATION.md); historical editor evidence is not a fresh import test. This is Apple Log, not Apple Log 2 / Apple Wide Gamut. See the [native-reference and real-import evidence](docs/APPLE_LOG_IDENTIFICATION.md).
+**Version 1.3.0 · Build 26929A.** Output is **Apple Log / Rec.2020 with Video levels**. The identification fields were **verified in 1.1.0 with DaVinci Resolve Studio 20.3.2.9 on Windows**, using DaVinci YRGB Color Managed. The latest build's verification scope is recorded in [VALIDATION](docs/VALIDATION.md); historical editor evidence is not a fresh import test. This is Apple Log, not Apple Log 2 / Apple Wide Gamut. See the [native-reference and real-import evidence](docs/APPLE_LOG_IDENTIFICATION.md).
 
 ![LogForge Windows interface](docs/images/LogForge.png)
 
 The screenshot uses an empty workspace; no personal video or camera image is included.
 
-## What's new in 1.2.1
+## What's new in 1.3.0
+
+- **Fractional CFR compatibility:** verify the shared integer-timestamp quantization model over every packet boundary. A generated 309-frame regression reproduces the reported 59.94/59.970888 case and its old 1.06-tick rejection. Nominal FPS does not veto an otherwise verified fixed clock; real changing cadence and damaged timestamps still fail. See the [timing contract](docs/CADENCE_1.3.0.md).
+- **Explicit input interpretation:** missing primaries, matrix, range and chroma tags use documented defaults with warnings. Explicit BT.709 conflicts are rejected unless deliberately overridden. CLI probe, GUI Details and reports distinguish declarations, assumptions and overrides. See the [input contract](docs/INPUT_CONTRACT_1.3.0.md).
+- **Camera compatibility retained:** iPhone auxiliary mebx tracks and missing timecode remain accepted. Blackmagic audio offset/PCM copy and float32 portrait rotation remain intact.
+- **Predictable queue output:** preflight every filename, reserve stable `_2`, `_3` suffixes for collisions and preview the input/output mapping in Details. Existing files are never overwritten.
+- **Honest completion reports:** distinguish media validation from final publication. Reports retain a failed rename's reason even when the encoded media passed validation.
+- **Audio and recovery safeguards:** hash copied audio payloads per stream; use file identities for both failure cleanup and crash recovery. Extra attached pictures/data/subtitle tracks are explicitly reported as omitted; multiple primary videos are rejected.
+- **CUDA engineering:** deterministic device ranking and a process-local qualification cache bound to device, driver, kernel, build and Creative parameters. Color kernels and numerical tolerances are unchanged. Buffer reports distinguish individual slots, total bridge memory and GPU allocations.
+- **Strict CLI integers:** reject trailing garbage, overflow, empty values and nonpositive `--cancel-after-frames` values before tool discovery.
+
+See [1.3.0 release details](docs/RELEASE_1.3.0.md) and the [validation record](docs/VALIDATION.md). The historical v1.2.1 academic study remains tied to commit `6b43a93`; its 23/24 test result has not been rewritten.
+
+## Previous release: 1.2.1
 
 - **Upright portrait output:** apply cardinal rotation directly to float32 pixels before encoding. A 3840x2160 source with a 90-degree display rotation becomes a 2160x3840 output with identity orientation, so playback no longer depends on rotation-tag support.
 - **Simpler camera admission:** the recording-format gate requires ProRes Standard/HQ and HLG. Missing timecode and auxiliary metadata are not requirements. Edit lists are recorded and interpreted by FFmpeg, rather than rejected by a camera-specific pattern whitelist; iPhone `mebx` metadata tracks are omitted.
@@ -64,7 +77,7 @@ Automatic identification was checked with an unmodified iPhone 15 Pro Max / Blac
 - Bounded Quick FFmpeg discovery and optional manual Deep search; explicit path/hash approval before external tools may run, plus a pinned HTTPS installer.
 - Numerical FFmpeg qualification (matrix, range, left/center chroma phase and post-ProRes code values).
 - English (default) and Simplified Chinese; dark (default) and light themes, saved in Settings.
-- Original spectrum-and-curve icon; Windows version 1.2.1.0 and in-app build display 1.2.1 (26927B).
+- Original spectrum-and-curve icon; Windows version 1.3.0.0 and in-app build display 1.3.0 (26929A).
 - Runtime-qualified CPU/CUDA color processing, a serial multi-file queue and detailed per-job reports.
 - Double-precision Apple Log and inverse HLG math; 32-bit float RGB transport.
 - ProRes HQ 10-bit 4:2:2 MOV output; audio packet copy, frame rate and raster preservation.
@@ -77,11 +90,11 @@ Automatic identification was checked with an unmodified iPhone 15 Pro Max / Blac
 
 ## Install and run
 
-1. Download `LogForge-1.2.1-Windows-x64.zip` and its `.sha256` file from this project's GitHub Releases when published.
+1. Download `LogForge-1.3.0-Windows-x64.zip` and its `.sha256` file from this project's GitHub Releases when published.
 2. Extract the ZIP and run `LogForge.exe`. No installer or administrator rights are required.
 3. Let LogForge discover FFmpeg paths. Unapproved programs are **not executed**. Use **Review FFmpeg...** to select a discovered candidate and review both SHA-256 hashes, then explicitly approve it. If none is usable, retry Quick search, explicitly start Deep search, choose a file manually, or use **Download FFmpeg** for the pinned build. Buttons disappear after approved tools pass numerical verification. An old saved path alone is not execution approval.
 4. Open or drop supported videos. Missing chroma siting defaults to left for this ProRes camera workflow; an explicit CLI override remains available. Choose a new output `.mov` for one file, or an output directory for a queue, then select **Convert to Apple Log**.
-5. Wait for output validation. An existing output file is never overwritten.
+5. Wait for output validation and final publication. An existing output file is never overwritten. If the final report update fails after a successful rename, the valid movie is retained and the job reports an error; see the release notes for this two-file transaction limitation.
 
 The executable is unsigned. Windows may show an unrecognized-publisher prompt. The Release build uses the static MSVC runtime (`/MT`); no separately installed VC++ runtime is required by LogForge. Windows 10 22H2 / Windows 11 x64 is the supported target. ARM64, macOS and Linux are not supported in v1.
 
@@ -106,20 +119,22 @@ Creative adjustment is an intentional grade applied before the unchanged Apple L
 
 | Property | V1 requirement |
 | --- | --- |
-| Container | Nonfragmented QuickTime MOV with `qt  ` major brand |
+| Container | Nonfragmented QuickTime MOV; `qt  ` major brand, or legacy MOV without a brand |
 | Codec | ProRes 422 (Standard) or ProRes 422 HQ |
 | Pixel format | `yuv422p10le`, 10-bit 4:2:2 |
-| Primaries / matrix interpretation | BT.2020 / BT.2020 non-constant luminance for this HLG camera workflow |
+| Primaries / matrix interpretation | BT.2020 / BT.2020 NCL; missing tags are assumed with warnings; explicit conflicts require deliberate override |
 | Transfer | Explicit HLG (`arib-std-b67`) |
-| Range | Full when explicitly tagged; otherwise video range |
-| Timing | One progressive video stream, fixed cadence verified from every packet's PTS, duration, interval and cumulative phase |
+| Range | Declared full/limited; unspecified assumes limited with a warning; other explicit tags are rejected |
+| Timing | One primary video stream, fixed cadence verified from every packet's PTS, duration, interval and cumulative phase |
 | Chroma location | Use the source declaration or explicit override; missing declaration defaults to left |
 | Resolution | Even width, up to 8192 × 8192; no resize |
 | Frame rate | Valid rational frame rate, at most 120 fps |
 
-The listed target devices are **iPhone 13 Pro, iPhone 13 Pro Max, iPhone 14 Pro and iPhone 14 Pro Max**. Record **ProRes 422 HDR or ProRes 422 HQ HDR (10-bit BT.2020 HLG)**. Choose your recording resolution and frame rate freely within the format guards above; LogForge preserves the source settings and does not force 4K or 24 fps. Admission depends on actual media parameters, not a model-name allowlist. VFR, HEVC/Dolby Vision, PQ, SDR, interlaced footage, ProRes LT/Proxy/4444 and missing/non-HLG transfer tags are refused. Missing auxiliary color tags use the interpretation documented above. Chapters are copied and validated. Nonessential metadata/data tracks are removed with a report entry. Cardinal rotations are applied to float32 pixels; 90/270 degrees exchange the output width and height without resizing. Other display matrices remain metadata. Edit-list shape, missing timecode and auxiliary metadata do not block format admission. FFmpeg interprets the video/audio playback timeline, while nonessential metadata/data tracks are omitted and recorded. Additional audio streams are copied when MOV supports their codecs; otherwise conversion fails visibly.
+The listed target devices are **iPhone 13 Pro, iPhone 13 Pro Max, iPhone 14 Pro and iPhone 14 Pro Max**. Record **ProRes 422 HDR or ProRes 422 HQ HDR (10-bit BT.2020 HLG)**. Choose your recording resolution and frame rate freely within the format guards above; LogForge preserves the source settings and does not force 4K or 24 fps. Admission depends on actual media parameters, not a model-name allowlist. VFR, HEVC/Dolby Vision, PQ, SDR, ProRes LT/Proxy/4444 and missing/non-HLG transfer tags are refused. Testing targets progressive camera recordings; there is no automatic deinterlacing. Missing auxiliary color tags use the interpretation documented above. Chapters are copied and validated. Nonessential metadata/data tracks are removed with a report entry. Cardinal rotations are applied to float32 pixels; 90/270 degrees exchange the output width and height without resizing. Other display matrices remain metadata. Edit-list shape, missing timecode and auxiliary metadata do not block format admission. FFmpeg interprets the video/audio playback timeline, while nonessential metadata/data tracks are omitted and recorded. Additional audio streams are copied when MOV supports their codecs; otherwise conversion fails visibly.
 
-Identical packet durations/intervals establish the exact rational cadence, including 29.99, 29.98 and 29.9701 fps, even when average/nominal tags disagree. Timing checks retain a 1.05-tick maximum error around a candidate for nonuniform clocks; sustained phase drift, gaps and duplicate/reverse PTS are refused with a packet index. The float pipeline normalizes that small timing difference; it does not preserve arbitrary VFR timestamps. See [timing policy](docs/ARCHITECTURE.md#timing-and-publication).
+Identical packet durations/intervals establish the exact rational cadence. Nonuniform floor/ceil timestamps must share one quantization cell across the entire sequence, including the final packet endpoint. Nominal and average tags cannot override packet evidence. Changing-speed drift, gaps and duplicate/reverse PTS are rejected with time-base, microsecond and frame-fraction diagnostics. The float pipeline normalizes timestamp quantization; it does not preserve arbitrary VFR timestamps. See the [timing policy and its limits](docs/CADENCE_1.3.0.md).
+
+The optional CLI flag `--force-bt2020-interpretation` is only for a known incorrect primaries/matrix declaration. It does **not** perform gamut conversion and can produce incorrect colors if the source really is BT.709. The GUI offers an explicit, default-No confirmation for a single conflicting clip. PQ/non-HLG, unsupported chroma/range, codec/profile and container cannot be forced through this option. A GUI batch keeps normal admission for every item; the CLI flag applies deliberately to that CLI job or batch.
 
 ## Output format and Apple Log workflow
 
@@ -177,7 +192,7 @@ Generate the small portable package:
 
 ```powershell
 cpack --config build/CPackConfig.cmake -C Release -B dist
-python tests/package_audit.py --zip dist/LogForge-1.2.1-Windows-x64.zip --exe build/Release/LogForge.exe
+python tests/package_audit.py --zip dist/LogForge-1.3.0-Windows-x64.zip --exe build/Release/LogForge.exe
 ```
 
 Pushes and pull requests configure/build/test on Windows. Every build creates a ZIP artifact; version tags must match the CMake version, and the workflow does not silently publish a GitHub Release. See [validation details](docs/VALIDATION.md) and [architecture](docs/ARCHITECTURE.md).

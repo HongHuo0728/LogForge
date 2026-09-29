@@ -6,9 +6,11 @@
 namespace logforge {
 enum class ProcessingBackend { Auto, CPU, CUDA };
 const char* BackendName(ProcessingBackend backend);
+// Pure ranking for deterministic selection and hardware-independent regression.
+nlohmann::json RankCudaCandidates(nlohmann::json candidates);
 class CudaTransformer {
   public:
-    CudaTransformer(double exposure, const ToneAdjustments& tone);
+    CudaTransformer(double exposure, const ToneAdjustments& tone, bool freshQualification = false);
     ~CudaTransformer();
     CudaTransformer(const CudaTransformer&) = delete;
     CudaTransformer& operator=(const CudaTransformer&) = delete;

@@ -153,6 +153,13 @@ Json PreserveMovCreationTimes(const Json& source, const fs::path& partial, const
     const auto in = headers(source), out = headers(ReferenceMovAnalyzer::Analyze(partial));
     Json patches = Json::array();
     for (const auto& [key, a] : in) {
+        // Only v:0 is encoded, and at most one source timecode is regenerated.
+        // Admission has already refused multiple primary pictures; other video
+        // entries are attached pictures. Omitted auxiliary headers cannot be
+        // restored into a stream that was deliberately not mapped.
+        if (!out.contains(key) &&
+            ((key.starts_with("vide/") && !key.starts_with("vide/0/")) || key.starts_with("tmcd/")))
+            continue;
         if (!out.contains(key))
             throw AppError(Message(TextId::OutputMetadataPreserve, {key + ": creation_time header missing"}));
         const auto& b = out.at(key);
@@ -235,7 +242,8 @@ Json InspectMovTimeline(const MediaInfo& in, const Json& analysis, const fs::pat
                         const std::atomic_bool*) {
     Json result{{"chapters", "copied and validated"},
                 {"policy", "FFmpeg playback timestamps; edit lists are informational, not admission gates"},
-                {"edit_lists", Json::array()}, {"removed_streams", Json::array()}};
+                {"edit_lists", Json::array()}, {"removed_streams", Json::array()},
+                {"preserved_streams", Json::array()}, {"regenerated_streams", Json::array()}};
     for (const auto& a : analysis.at("atoms")) {
         if (a.value("type", "") == "mvhd") {
             const auto scale = a.value("timescale", uint64_t{});
@@ -258,14 +266,26 @@ Json InspectMovTimeline(const MediaInfo& in, const Json& analysis, const fs::pat
                             ? "playback timeline interpreted by FFmpeg"
                             : "auxiliary track omitted; timecode regenerated if present"}});
     }
+    bool selectedVideo = false, selectedTimecode = false;
     for (const auto& stream : in.raw.value("streams", Json::array())) {
         const auto type = stream.value("codec_type", "");
-        if (type == "video" || type == "audio" || stream.value("codec_tag_string", "") == "tmcd")
+        Json entry{{"index", stream.value("index", -1)}, {"type", type},
+                   {"codec_tag", stream.value("codec_tag_string", "")}};
+        if (type == "audio" || (type == "video" && !selectedVideo)) {
+            if (type == "video") selectedVideo = true;
+            entry["operation"] = type == "audio" ? "stream copy" : "re-encode selected v:0";
+            result["preserved_streams"].push_back(entry);
             continue;
-        result["removed_streams"].push_back(
-            {{"index", stream.value("index", -1)}, {"type", type},
-             {"codec_tag", stream.value("codec_tag_string", "")},
-             {"reason", "auxiliary metadata/data; not required for conversion"}});
+        }
+        if (stream.value("codec_tag_string", "") == "tmcd" && !in.timecode.empty() && !selectedTimecode) {
+            selectedTimecode = true;
+            entry["operation"] = "one timecode track regenerated from selected source timecode";
+            result["regenerated_streams"].push_back(entry);
+            continue;
+        }
+        entry["reason"] = type == "video" ? "additional attached picture; only v:0 is encoded"
+                                           : "unmapped auxiliary/subtitle/data/timecode track";
+        result["removed_streams"].push_back(entry);
     }
     return result;
 }

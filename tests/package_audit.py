@@ -12,10 +12,11 @@ def main():
     args = parser.parse_args()
     expected = {'LogForge.exe', 'README.md', 'CHANGELOG.md', 'LICENSE', 'THIRD_PARTY_NOTICES.md',
                 'licenses/nlohmann-json-MIT.txt', 'licenses/NVIDIA-CUDA-NOTICE.txt', 'docs/images/LogForge.png',
-                'docs/benchmarks/1.2.0.json', 'docs/verification/1.2.0.json'}
+                'docs/benchmarks/1.2.0.json', 'docs/verification/1.2.0.json', 'docs/verification/1.3.0.json'}
     expected |= {f'docs/{name}.md' for name in (
         'ARCHITECTURE', 'COLOR_PIPELINE', 'CREATIVE_ADJUSTMENTS', 'FFMPEG_PROVIDER',
-        'ICON', 'METADATA', 'TECHNICAL_REFERENCES', 'VALIDATION', 'APPLE_LOG_IDENTIFICATION', 'BUG_AUDIT_1.1.1', 'RELEASE_1.2.0', 'RELEASE_1.2.1', 'BENCHMARK_1.2.0')}
+        'ICON', 'METADATA', 'TECHNICAL_REFERENCES', 'VALIDATION', 'APPLE_LOG_IDENTIFICATION', 'BUG_AUDIT_1.1.1', 'RELEASE_1.2.0', 'RELEASE_1.2.1', 'BENCHMARK_1.2.0',
+        'RELEASE_1.3.0', 'CADENCE_1.3.0', 'INPUT_CONTRACT_1.3.0')}
     with ZipFile(args.zip) as archive:
         files = [entry for entry in archive.infolist() if not entry.is_dir()]
         names = [entry.filename for entry in files]

@@ -48,6 +48,70 @@ void MediaTests() {
         absent["streams"][0].erase(key);
         check(MediaInfo::Parse(absent).UnsupportedReasons().empty(), "Optional tag blocked HLG ProRes");
     }
+    auto unspecified = j;
+    for (auto key : {"color_primaries", "color_space", "color_range", "chroma_location"})
+        unspecified["streams"][0].erase(key);
+    const auto assumed = MediaInfo::Parse(unspecified);
+    const auto interpretation = assumed.InputInterpretation();
+    check(assumed.InputWarnings().size() == 4 && interpretation["warnings"].size() == 4,
+          "Missing source declarations must produce four traceable assumptions");
+    check(interpretation["assumed"] == Json({{"primaries", "bt2020"}, {"matrix", "bt2020nc"},
+                                            {"range", "tv"}, {"chroma_location", "left"}}) &&
+              interpretation["overridden"].empty() && interpretation["conflicting_fields"].empty(),
+          "Input assumption report is incorrect");
+    check(assumed.EffectiveRange() == "tv" && assumed.EffectiveChromaLocation() == "left",
+          "Missing range/chroma defaults changed");
+    for (const char* unknown : {"unknown", "unspecified"}) {
+        auto missingTags = unspecified;
+        for (const char* key : {"color_primaries", "color_space", "color_range", "chroma_location"})
+            missingTags["streams"][0][key] = unknown;
+        check(MediaInfo::Parse(missingTags).UnsupportedReasons().empty() &&
+                  MediaInfo::Parse(missingTags).InputWarnings().size() == 4,
+              "Unspecified tag differs from absent tag policy");
+    }
+    check(m.InputWarnings().empty() && m.InputInterpretation()["origin"]["range"] == "declared-limited",
+          "Declared source tags are incorrectly reported as assumptions");
+    auto full = j;
+    full["streams"][0]["color_range"] = "pc";
+    check(MediaInfo::Parse(full).UnsupportedReasons().empty() &&
+              MediaInfo::Parse(full).InputInterpretation()["origin"]["range"] == "declared-full",
+          "Explicit full range is not preserved");
+    for (const auto& [key, value, field] : std::vector<std::tuple<std::string, std::string, std::string>>{
+             {"color_primaries", "bt709", "primaries"}, {"color_space", "bt709", "matrix"},
+             {"color_transfer", "smpte2084", "transfer"}, {"color_range", "reserved", "range"},
+             {"chroma_location", "topleft", "chroma_location"}}) {
+        auto bad = j;
+        bad["streams"][0][key] = value;
+        auto media = MediaInfo::Parse(bad);
+        check(!media.UnsupportedReasons().empty() &&
+                  media.InputInterpretation()["conflicting_fields"] == Json::array({field}),
+              "Explicit conflicting tag was silently accepted");
+        media.forceBT2020Interpretation = true;
+        if (field == "primaries" || field == "matrix") {
+            check(media.UnsupportedReasons().empty() && media.InputWarnings().size() == 1 &&
+                      media.InputInterpretation()["overridden"].contains(field) &&
+                      media.InputInterpretation()["declared"][field] == value,
+                  "Explicit override must record original declaration and effective interpretation");
+        } else {
+            check(!media.UnsupportedReasons().empty(), "Gamut override bypassed non-gamut safety contract");
+        }
+    }
+    auto extraVideo = j;
+    extraVideo["streams"].push_back(j["streams"][0]);
+    check(!MediaInfo::Parse(extraVideo).UnsupportedReasons().empty(), "Second main video silently discarded");
+    extraVideo["streams"].back()["disposition"]["attached_pic"] = 1;
+    check(MediaInfo::Parse(extraVideo).UnsupportedReasons().empty(), "Trailing cover art blocks primary video");
+    extraVideo["streams"][0]["disposition"]["attached_pic"] = 1;
+    extraVideo["streams"].back()["disposition"]["attached_pic"] = 0;
+    check(!MediaInfo::Parse(extraVideo).UnsupportedReasons().empty(), "Attached picture selected as main video");
+    auto wrongContainer = j;
+    wrongContainer["format"]["format_name"] = "matroska,webm";
+    check(!MediaInfo::Parse(wrongContainer).UnsupportedReasons().empty(), "Non-MOV input enters MOV parser");
+    wrongContainer = j;
+    wrongContainer["format"]["tags"]["major_brand"] = "isom";
+    check(!MediaInfo::Parse(wrongContainer).UnsupportedReasons().empty(), "Explicit non-QuickTime brand accepted");
+    wrongContainer["format"]["tags"].erase("major_brand");
+    check(MediaInfo::Parse(wrongContainer).UnsupportedReasons().empty(), "Legacy MOV without ftyp rejected");
     auto missing = j;
     missing["streams"][0].erase("color_transfer");
     check(!MediaInfo::Parse(missing).UnsupportedReasons().empty(), "Missing HLG tag accepted");
@@ -159,8 +223,11 @@ void MediaTests() {
     explicitSiting.inputChromaOverride = "center";
     check(explicitSiting.UnsupportedReasons().empty() && explicitSiting.EffectiveChromaLocation() == "center",
           "Explicit siting failed");
+    check(explicitSiting.InputInterpretation()["overridden"]["chroma_location"] == "center" &&
+              explicitSiting.InputInterpretation()["origin"]["chroma_location"] == "explicit-override",
+          "Explicit chroma choice is not recorded");
     explicitSiting.chromaLocation = "topleft";
-    check(explicitSiting.EffectiveChromaLocation() == "topleft",
+    check(explicitSiting.EffectiveChromaLocation() == "topleft" && !explicitSiting.UnsupportedReasons().empty(),
           "Override replaced a native declaration");
     auto wrongChroma = output;
     wrongChroma["streams"][0]["chroma_location"] = "center";

@@ -132,6 +132,21 @@ The optional 0.1.3 `creative-luma-v1` curve is a LogForge creative adjustment re
   bounds, not inferred solely from ffprobe's rotation angle.
 - [Apple QTFF: Edit list atom](https://developer.apple.com/documentation/quicktime-file-format/edit_list_atom)
   and [edit list table](https://developer.apple.com/documentation/quicktime-file-format/edit_list_atom/edit_list_table)
-  distinguish movie duration, media origin and playback rate. LogForge accepts
-  only a timestamp-confirmed leading audio delay plus full unit-rate media, in
-  addition to its existing duration/packet-confirmed AAC priming cases.
+  distinguish movie duration, media origin and playback rate. Since the 1.2.1
+  camera-compatibility follow-up, edit-list shapes are diagnostic rather than an
+  admission whitelist. FFmpeg interprets the timeline; packet cadence, output
+  duration and relative audio offset are still verified. Auxiliary mebx origins
+  and absent timecode do not reject a supported camera recording.
+
+## Payload integrity and CUDA device identity (1.3.0)
+
+- [FFmpeg streamhash muxer](https://ffmpeg.org/ffmpeg-formats.html#streamhash)
+  hashes per-stream packet content and ignores timestamps. `-c:a copy` is essential:
+  the muxer's default audio conversion would otherwise hash decoded PCM rather
+  than the copied encoded payload. Timing is checked independently.
+- [NVIDIA CUDA Driver API device management](https://docs.nvidia.com/cuda/cuda-driver-api/cuda_driver_api/group__CUDA__DEVICE.html)
+  documents device UUID, compute attributes and total device memory used for
+  deterministic selection and qualification-cache identity.
+- [NVIDIA CUDA Driver API declarations](https://docs.nvidia.com/cuda/cuda-driver-api/cuda_driver_api/cuda_8h.html)
+  provides the versioned `cuDeviceGetUuid_v2` / `cuDeviceTotalMem_v2` ABI. LogForge
+  uses the system driver and does not add a CUDA runtime DLL dependency.

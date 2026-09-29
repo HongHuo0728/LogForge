@@ -3,12 +3,33 @@
 #include <fcntl.h>
 #include <io.h>
 #include <iostream>
+#include <charconv>
+#include <cmath>
 
 namespace {
 std::atomic_bool cancelled = false;
 BOOL WINAPI Ctrl(DWORD) {
     cancelled = true;
     return TRUE;
+}
+int64_t PositiveInteger(const std::wstring& value) {
+    const auto text = logforge::Utf8(value);
+    int64_t number = 0;
+    const auto [end, error] = std::from_chars(text.data(), text.data() + text.size(), number);
+    if (error != std::errc{} || end != text.data() + text.size() || number <= 0)
+        throw logforge::AppError(logforge::TextId::CLIInteger);
+    return number;
+}
+double Number(const std::wstring& value, logforge::TextId diagnostic) {
+    const auto text = logforge::Utf8(value);
+    // from_chars intentionally rejects whitespace, partial tokens and overflow.
+    const char* start = text.data();
+    if (!text.empty() && text.front() == '+') ++start;
+    double number = 0;
+    const auto [end, error] = std::from_chars(start, text.data() + text.size(), number);
+    if (error != std::errc{} || end != text.data() + text.size() || !std::isfinite(number))
+        throw logforge::AppError(diagnostic);
+    return number;
 }
 } // namespace
 int wmain(int argc, wchar_t** argv) {
@@ -40,6 +61,8 @@ int wmain(int argc, wchar_t** argv) {
                     throw AppError(TextId::CLICommand);
             } else if (std::wstring(argv[i]) == L"--deep-search")
                 deepSearch = true;
+            else if (std::wstring(argv[i]) == L"--force-bt2020-interpretation")
+                options.forceBT2020Interpretation = true;
             else if (std::wstring(argv[i]) == L"--language" && i + 1 < argc) {
                 const std::wstring value = argv[++i];
                 if (value == L"zh-CN")
@@ -55,13 +78,9 @@ int wmain(int argc, wchar_t** argv) {
                 if (inputChroma != "left" && inputChroma != "center")
                     throw AppError(TextId::InputChroma);
             } else if (std::wstring(argv[i]) == L"--cancel-after-frames" && i + 1 < argc)
-                cancelAfterFrames = std::stoll(argv[++i]);
+                cancelAfterFrames = PositiveInteger(argv[++i]);
             else if (std::wstring(argv[i]) == L"--exposure-ev" && i + 1 < argc) {
-                std::wstring value = argv[++i];
-                size_t consumed = 0;
-                options.exposureStops = std::stod(value, &consumed);
-                if (consumed != value.size())
-                    throw AppError(TextId::CLIExposure);
+                options.exposureStops = Number(argv[++i], TextId::CLIExposure);
             } else if (std::wstring(argv[i]) == L"--tone") {
                 options.tone.enabled = true;
             } else if ((std::wstring(argv[i]) == L"--shadow-lift-ev" ||
@@ -69,10 +88,7 @@ int wmain(int argc, wchar_t** argv) {
                         std::wstring(argv[i]) == L"--saturation-percent") &&
                        i + 1 < argc) {
                 const std::wstring key = argv[i], value = argv[++i];
-                size_t consumed = 0;
-                const double number = std::stod(value, &consumed);
-                if (consumed != value.size())
-                    throw AppError(TextId::CLITone);
+                const double number = Number(value, TextId::CLITone);
                 if (key == L"--shadow-lift-ev")
                     options.tone.shadowStops = number;
                 else if (key == L"--highlight-compression-ev")
@@ -86,6 +102,7 @@ int wmain(int argc, wchar_t** argv) {
         if (toneParameter && !options.tone.enabled)
             throw AppError(TextId::CLIEnableTone);
         ValidateToneAdjustments(options.tone);
+        ValidateExposureStops(options.exposureStops);
         if (a.empty() || a[0] == L"--help" || a[0] == L"--version") {
             std::cout << "LogForge " << DisplayVersion << "\n";
             if (!a.empty() && a[0] == L"--version")
@@ -98,7 +115,7 @@ int wmain(int argc, wchar_t** argv) {
                       << Translate(TextId::CLIOptional, language)
                       << ": --ffmpeg PATH_TO_FFMPEG_EXE "
                          "--language en|zh-CN --backend auto|cpu|cuda --exposure-ev STOPS "
-                         "--input-chroma-location left|center\n"
+                         "--input-chroma-location left|center --force-bt2020-interpretation\n"
                       << Translate(TextId::CLICreative, language)
                       << ": --tone [--shadow-lift-ev 3] "
                          "[--highlight-compression-ev 1] [--saturation-percent 85]\n";
@@ -164,15 +181,22 @@ int wmain(int argc, wchar_t** argv) {
         if (a[0] == L"--probe" && a.size() == 2) {
             auto m = Probe(tools->ffprobe, a[1], &cancelled);
             m.inputChromaOverride = inputChroma;
-            std::cout << m.raw.dump(2) << '\n';
+            m.forceBT2020Interpretation = options.forceBT2020Interpretation;
+            auto inspection = m.raw;
+            inspection["input_interpretation"] = m.InputInterpretation();
+            std::cout << inspection.dump(2) << '\n';
             auto errors = m.UnsupportedReasons();
+            for (const auto& warning : m.InputWarnings())
+                std::cerr << "WARNING: " << Translate(warning, language) << '\n';
             for (const auto& e : errors)
                 std::cerr << Translate(e, language) << '\n';
             return errors.empty() ? 0 : 2;
         }
         if (a[0] == L"--batch") {
             std::vector<fs::path> paths(a.begin() + 2, a.end());
-            auto queue = RunQueue(*tools, paths, a[1], log, cancelled, options, inputChroma,
+            const auto plan = PlanQueue(paths, a[1]);
+            std::cout << Json{{"queue_plan", QueuePlanJson(plan)}}.dump(2) << '\n';
+            auto queue = RunQueue(*tools, plan, log, cancelled, options, inputChroma,
                                   [&](size_t index, size_t count, const MediaInfo&, const JobProgress& p) {
                                       std::cout << "[" << index + 1 << "/" << count << "] "
                                                 << Translate(p.stage, language) << " frame=" << p.frame
@@ -184,6 +208,7 @@ int wmain(int argc, wchar_t** argv) {
         if (a[0] == L"--convert" && a.size() == 3) {
             auto m = Probe(tools->ffprobe, a[1], &cancelled);
             m.inputChromaOverride = inputChroma;
+            m.forceBT2020Interpretation = options.forceBT2020Interpretation;
             auto report = TranscodeJob::Run(
                 *tools, m, a[2], log, cancelled,
                 [&](const auto& p) {
@@ -194,7 +219,7 @@ int wmain(int argc, wchar_t** argv) {
                 },
                 options);
             std::cout << report.ToJson().dump(2) << '\n';
-            return report.passed ? 0 : 3;
+            return report.Completed() ? 0 : 3;
         }
         if (a[0] == L"--analyze" && (a.size() == 2 || a.size() == 3)) {
             auto first = ReferenceMovAnalyzer::Analyze(a[1]);

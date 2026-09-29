@@ -13,6 +13,7 @@ The C++20 core contains no GUI framework or linked multimedia library. Win32 is 
 | `ToolTrust.cpp`, `FFmpegNumeric.cpp` | Explicit path/hash execution approval, locked images and numeric qualification |
 | `color/FloatTransformer.cpp` | Persistent CPU workers calling scalar equations on bounded chunks/tiles |
 | `Transcode.cpp` | Job lifecycle, float decode/transform/encode bridge, progress, orientation, validation and publication |
+| `AudioPayload.cpp`, `Queue.cpp` | Bounded-memory copied-payload hashes; deterministic output preflight and serial job reports |
 | `MainWindow.cpp`, `SettingsWindow.cpp`, `Ui.cpp` | Native controls, settings, dark/light palettes, drop handling, DPI scaling and background-task events |
 | `Settings.cpp` | Atomic per-user JSON preferences; preserve unrelated settings and migrate the legacy FFmpeg field |
 | `Localization.cpp`, `Messages.inc` | English/Chinese messages with stable keys and checked argument placeholders |
@@ -32,11 +33,15 @@ The C++20 core contains no GUI framework or linked multimedia library. Win32 is 
 
 The raw float pipe does not carry timestamps. V1 therefore checks the complete video packet cadence before conversion and supports only a fixed-rate, monotonic stream. The rational input rate generates rawvideo timestamps. Original audio timestamps are offset by the input video start; output offsets/durations are checked. This is intentionally narrower than silently rebuilding VFR timing.
 
-Average and nominal rates are candidates, never a VFR verdict. If all packet durations and adjacent intervals are identical, their exact time-base ratio is authoritative, including 29.99/29.98/29.970x rates. For nonuniform quantized clocks, a nominal candidate inside the observed duration range is tested; otherwise the dominant packet duration is the conservative anchor. The checker does not regress the mean/endpoints to erase sustained corrections. Every duration, interval and cumulative phase must stay within the existing 1.05-tick budget; interval/previous-duration inconsistencies, duplicate/reverse PTS and sustained phase drift fail with a zero-based packet index. Missing timing is rejected. This conservative policy can refuse ambiguous nonuniform clocks rather than manufacture a new rate. Output is checked again over every packet and uses the verified input cadence.
+Average and nominal rates are candidates, never a VFR verdict. Identical packet durations and intervals establish their exact rational cadence, including 29.99/29.98/29.970x rates. Fractional clocks must fit a single integer-quantization cell over **all** packet boundaries, including the final duration. Convex envelopes infer a fixed rational period without accepting a mean or regression alone. The integer clock component is removed exactly before fractional calculations. Local duration variation, inconsistent intervals, gaps and duplicate/reverse PTS fail with a packet-specific diagnostic. Nominal FPS has no veto over a verified fixed sequence. See the [complete cadence model and identifiability limits](CADENCE_1.3.0.md). Output packets are independently verified against the inferred input rate.
 
-Audio uses stream copy and `-guess_layout_max 0` on the source input and any rotation remux. An absent channel-layout declaration stays absent; two unlabelled channels are not automatically declared stereo. The validator continues to compare codec, channel count, sample rate and layout strictly, with a field-specific diagnostic. Regression tests compare the complete audio payload hash for both unrotated and rotated unlabelled PCM input.
+The [input interpretation contract](INPUT_CONTRACT_1.3.0.md) permits missing primaries, matrix, range and chroma tags with explicit assumptions and warnings. Explicit conflicting tags are rejected before the fixed BT.2020 decoder runs. A separately authorized primaries/matrix override is recorded and cannot bypass the HLG transfer requirement. QuickTime-only admission and a single primary video stream match the actual decoder and MOV metadata writer.
 
-The selected destination is never overwritten. A unique partial MOV in the destination directory is written, probed and atom-checked. A same-directory `MoveFileExW` without REPLACE_EXISTING publishes it only after validation, also protecting a destination created during conversion. Cancellation or a failed validator removes the partial. A local JSON report records the evidence.
+Audio uses stream copy and `-guess_layout_max 0` on the source input and any rotation remux. An absent channel-layout declaration stays absent; two unlabelled channels are not automatically declared stereo. The validator continues to compare codec, channel count, sample rate, layout, duration and offset strictly. Before publication, FFmpeg's `streamhash` muxer with `-c:a copy` computes SHA-256 over each stream's concatenated packet bytes in source and output. This does not decode audio or hash timestamps/packet boundaries; independent timing checks remain required. Only digests are retained in application memory. The report separates declared copy from verified payload identity and records the extra I/O time.
+
+The selected destination is never overwritten. A unique partial MOV in the destination directory is written, probed and atom-checked. A same-directory `MoveFileExW` without REPLACE_EXISTING publishes it only after validation, also protecting a destination created during conversion. Cancellation or a failed validator removes only the partial whose file identity matches its journal. Reports distinguish `validation_passed`, `publication` and `completed`; legacy `passed` means media validation only. A pre-publication report is saved first and updated after rename. A crash between the media rename and final report write can leave valid media with a pending report. A final report-write failure retains that media and returns an error, because two separate files cannot be atomically committed together.
+
+Queues freeze their complete output plan before starting: input order plus case-insensitive filename reservations determines suffixes, including existing files. GUI Details previews the plan; CLI and queue JSON expose it. The final atomic rename remains authoritative if another process creates a reserved path later.
 
 After encoding and any rotation remux, the separate identification writer adds
 the verified `logs` sample-entry atom. It requires one HQ entry and trailing
@@ -100,9 +105,9 @@ joins on cancellation/failure, including partial reader-thread construction.
 
 ## Version and resources
 
-CMake defines version 1.2.1 and build 26927B. Generated headers feed both the C++ display/logs/metadata and Windows VERSIONINFO. FileVersion/ProductVersion and manifest use 1.2.1.0; UI/CLI use 1.2.1 (26927B). Both executables embed the same nine-size icon. Portable packaging uses an explicit document/image allowlist. The independent ZIP audit checks the actual checksum sidecar, CRC integrity and equality with the tested Release executable.
+CMake defines version 1.3.0 and build 26929A. Generated headers feed both the C++ display/logs/metadata and Windows VERSIONINFO. FileVersion/ProductVersion and manifest use 1.3.0.0; UI/CLI use 1.3.0 (26929A). Both executables embed the same nine-size icon. Portable packaging uses an explicit document/image allowlist. The independent ZIP audit checks the actual checksum sidecar, CRC integrity and equality with the tested Release executable.
 
-## 1.2.0 processing and storage
+## Processing and storage
 
 `FloatBridge` uses three bounded Standard buffers and persistent reader/writer
 threads. The color stage consumes buffers in order while the CPU decoder and CPU
@@ -119,8 +124,22 @@ pinned buffers and a nonblocking stream; events measure GPU costs. Host data and
 statistics are committed only after successful synchronization, allowing Auto to
 retry an unchanged failed chunk on CPU. Forced CUDA never silently falls back.
 
-`MediaSafety` validates edit-list semantics and display matrices before decoding,
-and again checks the output timeline. Rotation remux explicitly rebuilds timecode
+CUDA candidates are ranked by eligibility, total VRAM descending, compute
+capability descending, UUID ascending, then ordinal. Context failures move to
+the next candidate; module/qualification failure follows the existing backend
+failure policy. Reports list candidates and the selection reason. A bounded
+16-entry process-local cache stores only successful qualification, keyed by GPU
+UUID, driver API/file version, PTX SHA-256, application/build/algorithm and Creative
+parameters. A failed transform evicts its entry. The explicit qualification API
+bypasses the cache. No CUDA math, precision, synchronization or commit boundary
+has changed. Multiple physical GPUs and upload/kernel/download overlap have not
+been newly benchmarked for this release.
+
+`MediaSafety` records edit lists and auxiliary tracks without restoring the
+pre-1.2.1 camera-metadata admission gates. FFmpeg interprets playback timing,
+then packet, duration and relative A/V-offset checks validate the output.
+Cardinal camera matrices, including legal translation, are baked into float32
+pixels; output orientation is identity. Rotation remux explicitly rebuilds timecode
 and re-applies the safe metadata plan. A separate fixed-width writer restores
 movie/track/media creation timestamps from source headers. It does not touch mdat
 or sample tables. Semantic timestamp and structural header checks both remain.
@@ -138,6 +157,15 @@ matching file ID; filename matching alone never authorizes deletion. Retention
 only acts on recognized owned locations/names, excludes active/reparse entries
 and leaves older unjournalled files alone. Queue jobs execute serially with an
 independent report for each item.
+
+Temporary files are reserved with deletion denied until their identity is
+journalled. Normal cleanup uses the same identity checks as crash recovery.
+Remux keeps both temporary identities recorded and changes only the active path,
+avoiding a rename-to-untracked-path window. A crash before the journal is durable
+can still leave an unknown file: it is intentionally left for manual review.
+Memory reports name bridge bytes per slot, slot count, total bridge bytes,
+Creative frame bytes and CUDA pinned/device bytes. These are buffer accounting,
+not whole-process memory; the legacy `float_buffer_bytes` is explicitly deprecated.
 
 The main window has one measured layout owner. Every status string is rendered
 by exactly one native owner-drawn text control. Card/background drawing does not

@@ -6,12 +6,44 @@
 #include <cstring>
 #include <random>
 #include <stdexcept>
+#include <bcrypt.h>
+#include <map>
+#include <mutex>
 
 namespace logforge {
 const char* BackendName(ProcessingBackend b) {
     return b == ProcessingBackend::Auto ? "auto" : b == ProcessingBackend::CPU ? "cpu" : "cuda";
 }
+nlohmann::json RankCudaCandidates(nlohmann::json candidates) {
+    std::sort(candidates.begin(), candidates.end(), [](const auto& a, const auto& b) {
+        if (a.value("eligible", false) != b.value("eligible", false)) return a.value("eligible", false);
+        if (a.value("total_memory_bytes", uint64_t{}) != b.value("total_memory_bytes", uint64_t{}))
+            return a.value("total_memory_bytes", uint64_t{}) > b.value("total_memory_bytes", uint64_t{});
+        if (a.value("compute_score", 0) != b.value("compute_score", 0))
+            return a.value("compute_score", 0) > b.value("compute_score", 0);
+        if (a.value("uuid", "") != b.value("uuid", "")) return a.value("uuid", "") < b.value("uuid", "");
+        return a.value("ordinal", 0) < b.value("ordinal", 0);
+    });
+    return candidates;
+}
 namespace {
+std::mutex qualificationMutex;
+std::map<std::string, nlohmann::json> qualificationCache;
+std::string Hex(const unsigned char* bytes, size_t count) {
+    constexpr char digits[] = "0123456789abcdef";
+    std::string result;
+    for (size_t i = 0; i < count; ++i) {
+        result += digits[bytes[i] >> 4]; result += digits[bytes[i] & 15];
+    }
+    return result;
+}
+std::string PTXHash() {
+    std::array<unsigned char, 32> hash{};
+    if (BCryptHash(BCRYPT_SHA256_ALG_HANDLE, nullptr, 0, const_cast<PUCHAR>(ColorPTX),
+                   static_cast<ULONG>(sizeof(ColorPTX) - 1), hash.data(), static_cast<ULONG>(hash.size())) < 0)
+        throw std::runtime_error("Cannot hash embedded CUDA kernel");
+    return Hex(hash.data(), hash.size());
+}
 using DevicePtr = unsigned long long;
 using Object = void*;
 struct Statistics {
@@ -25,6 +57,8 @@ struct Driver {
 #define API(name, args) int(__stdcall * name) args{};
     API(cuInit, (unsigned))
     API(cuDeviceGetCount, (int*))
+    API(cuDeviceGetUuid_v2, (void*, int))
+    API(cuDeviceTotalMem_v2, (size_t*, int))
     API(cuDeviceGet, (int*, int)) API(cuDeviceGetName, (char*, int, int))
         API(cuDeviceGetAttribute, (int*, int, int)) API(cuDriverGetVersion, (int*))
             API(cuCtxCreate_v2, (Object*, unsigned, int)) API(cuCtxDestroy_v2, (Object))
@@ -56,6 +90,8 @@ struct Driver {
         throw std::runtime_error("CUDA driver lacks " #name);
             LOAD(cuInit)
             LOAD(cuDeviceGetCount)
+            LOAD(cuDeviceGetUuid_v2)
+            LOAD(cuDeviceTotalMem_v2)
             LOAD(cuDeviceGet) LOAD(cuDeviceGetName) LOAD(cuDeviceGetAttribute) LOAD(cuDriverGetVersion)
                 LOAD(cuCtxCreate_v2) LOAD(cuCtxDestroy_v2) LOAD(cuCtxSetCurrent) LOAD(cuModuleLoadData)
                     LOAD(cuModuleUnload) LOAD(cuModuleGetFunction) LOAD(cuMemAlloc_v2) LOAD(cuMemFree_v2)
@@ -96,6 +132,7 @@ struct CudaTransformer::Impl {
     uint64_t calls = 0;
     ToneAdjustments tone;
     nlohmann::json report;
+    std::string qualificationKey;
     Impl(double e, const ToneAdjustments& t) : exposure(e), tone(t) {
         ValidateExposureStops(e);
         ValidateToneAdjustments(t);
@@ -106,15 +143,42 @@ struct CudaTransformer::Impl {
             if (!count)
                 throw std::runtime_error("No CUDA device");
             int device = -1, major = 0, minor = 0;
+            auto candidates = nlohmann::json::array();
             for (int i = 0; i < count; ++i) {
-                int candidate;
-                d.Check(d.cuDeviceGet(&candidate, i));
-                d.Check(d.cuDeviceGetAttribute(&major, 75, candidate)); // documented COMPUTE_CAPABILITY_MAJOR
-                d.Check(d.cuDeviceGetAttribute(&minor, 76, candidate));
-                if (major * 10 + minor >= 75 && !d.cuCtxCreate_v2(&context, 0, candidate)) {
-                    device = candidate;
-                    break;
+                nlohmann::json entry{{"ordinal", i}, {"eligible", false}};
+                try {
+                    int candidate = -1, cm = 0, cn = 0;
+                    size_t bytes = 0;
+                    char label[256]{};
+                    std::array<unsigned char, 16> uuid{};
+                    d.Check(d.cuDeviceGet(&candidate, i));
+                    d.Check(d.cuDeviceGetAttribute(&cm, 75, candidate));
+                    d.Check(d.cuDeviceGetAttribute(&cn, 76, candidate));
+                    d.Check(d.cuDeviceGetName(label, sizeof(label), candidate));
+                    d.Check(d.cuDeviceGetUuid_v2(uuid.data(), candidate));
+                    d.Check(d.cuDeviceTotalMem_v2(&bytes, candidate));
+                    entry.update({{"device", candidate}, {"name", label}, {"uuid", Hex(uuid.data(), uuid.size())},
+                                  {"total_memory_bytes", bytes}, {"compute_score", cm * 10 + cn},
+                                  {"eligible", cm * 10 + cn >= 75}});
+                } catch (const std::exception& e) {
+                    entry["error"] = e.what();
                 }
+                candidates.push_back(entry);
+            }
+            candidates = RankCudaCandidates(std::move(candidates));
+            std::string selectedUuid;
+            for (auto& entry : candidates) {
+                if (!entry.value("eligible", false)) continue;
+                const int candidate = entry.at("device").get<int>();
+                const auto status = d.cuCtxCreate_v2(&context, 0, candidate);
+                entry["context_result"] = status;
+                if (status) continue;
+                device = candidate;
+                major = entry.at("compute_score").get<int>() / 10;
+                minor = entry.at("compute_score").get<int>() % 10;
+                selectedUuid = entry.at("uuid").get<std::string>();
+                entry["selected"] = true;
+                break;
             }
             if (device < 0)
                 throw std::runtime_error("No usable CUDA device with compute capability >= 7.5");
@@ -130,6 +194,8 @@ struct CudaTransformer::Impl {
             d.Check(d.cuMemAlloc_v2(&statistics, Blocks * sizeof(Statistics)));
             d.Check(d.cuMemHostAlloc(&hostStats, Blocks * sizeof(Statistics), 0));
             report = {{"backend", "cuda"},
+                      {"candidates", candidates}, {"selected_uuid", selectedUuid},
+                      {"selection_reason", "eligible compute >=7.5; total VRAM descending, compute descending, UUID ascending; first usable context"},
                       {"gpu", name},
                       {"driver_cuda_version", driver},
                       {"runtime", "CUDA Driver API; no cudart"},
@@ -152,6 +218,12 @@ struct CudaTransformer::Impl {
                                                         std::to_string(LOWORD(info->dwFileVersionLS));
                 }
             }
+            const nlohmann::json key{{"device_uuid", selectedUuid}, {"driver", driver},
+                {"driver_file_version", report.value("driver_file_version", "")}, {"ptx_sha256", PTXHash()},
+                {"build", BuildNumber}, {"version", Version}, {"algorithm", "hlg-bt2408-applelog-creative-v1"},
+                {"shadow", tone.shadowStops}, {"highlight", tone.highlightStops}, {"saturation", tone.saturation}};
+            qualificationKey = key.dump();
+            report["qualification_identity"] = key;
         } catch (...) {
             Cleanup();
             throw;
@@ -310,12 +382,30 @@ struct CudaTransformer::Impl {
                 {"cases", cases}};
     }
 };
-CudaTransformer::CudaTransformer(double e, const ToneAdjustments& t) : impl_(std::make_unique<Impl>(e, t)) {
-    impl_->report["qualification"] = impl_->Qualify();
+CudaTransformer::CudaTransformer(double e, const ToneAdjustments& t, bool fresh) : impl_(std::make_unique<Impl>(e, t)) {
+    // Process-only cache: no persisted approval can skip qualification after a
+    // driver/build/kernel change. Failed qualifications are never cached.
+    std::lock_guard lock(qualificationMutex);
+    const auto found = qualificationCache.find(impl_->qualificationKey);
+    const bool hit = !fresh && found != qualificationCache.end();
+    if (hit) impl_->report["qualification"] = found->second;
+    else {
+        qualificationCache.erase(impl_->qualificationKey);
+        auto result = impl_->Qualify();
+        if (qualificationCache.size() >= 16) qualificationCache.erase(qualificationCache.begin());
+        qualificationCache[impl_->qualificationKey] = result;
+        impl_->report["qualification"] = std::move(result);
+    }
+    impl_->report["qualification_cache"] = {{"scope", "process"}, {"hit", hit}, {"max_entries", 16}};
 }
 CudaTransformer::~CudaTransformer() = default;
 void CudaTransformer::Apply(std::span<float> p, SignalStatistics& s) {
-    impl_->Apply(p, s);
+    try { impl_->Apply(p, s); }
+    catch (...) {
+        std::lock_guard lock(qualificationMutex);
+        qualificationCache.erase(impl_->qualificationKey);
+        throw;
+    }
 }
 nlohmann::json CudaTransformer::Report() const {
     auto j = impl_->report;
@@ -328,6 +418,6 @@ nlohmann::json CudaTransformer::Report() const {
     return j;
 }
 nlohmann::json CudaTransformer::Qualify() {
-    return CudaTransformer(0, {}).Report();
+    return CudaTransformer(0, {}, true).Report();
 }
 } // namespace logforge

@@ -166,6 +166,7 @@ class MainWindow {
     std::optional<FFmpegInstallation> tools;
     std::optional<MediaInfo> source;
     std::vector<fs::path> queueInputs;
+    QueuePlan queuePlan;
     Json queueResults;
     std::optional<ValidationReport> lastValidation;
     std::vector<DiscoveryCandidate> candidates;
@@ -362,6 +363,7 @@ class MainWindow {
         if (paths.empty() || (busy && active != Kind::Detect))
             return;
         queueInputs = std::move(paths);
+        queuePlan.clear();
         queueResults = Json();
         lastValidation.reset();
         ProbeInput(queueInputs.front());
@@ -404,14 +406,15 @@ class MainWindow {
         conversionTone = options.tone.enabled;
         lastValidation.reset();
         if (queueInputs.size() > 1) {
-            const auto inputs = queueInputs;
-            const auto directory = path;
+            if (queuePlan.empty())
+                queuePlan = PlanQueue(queueInputs, path);
+            const auto plan = queuePlan;
             // A label on one file is not a user declaration for other files.
             const auto chroma = source ? source->inputChromaOverride : explicitInputChroma;
             Stage(TextId::Starting);
-            Start(Kind::Convert, [this, inputs, directory, chroma, options] {
+            Start(Kind::Convert, [this, plan, chroma, options] {
                 auto result = RunQueue(
-                    *tools, inputs, directory, logger, cancelled, options, chroma,
+                    *tools, plan, logger, cancelled, options, chroma,
                     [this](size_t index, size_t total, const MediaInfo& media, const JobProgress& p) {
                         Event e{Kind::QueueItem};
                         e.itemIndex = index;
@@ -817,6 +820,7 @@ class MainWindow {
             return;
         }
         if (e->kind == Kind::QueueDone) {
+            queuePlan.clear();
             queueResults = e->queue;
             rawDetails = Wide(queueResults.dump(2));
             Stage(cancelled ? Message(TextId::Cancelled)
@@ -938,6 +942,18 @@ class MainWindow {
         }
         if (e->kind == Kind::Probe) {
             source = std::move(e->media);
+            // Consent applies to this selected clip only; queue items retain
+            // normal admission unless explicitly requested through the CLI.
+            const auto interpretation = source->InputInterpretation();
+            const auto& conflicts = interpretation.at("conflicting_fields");
+            if (!smoke && queueInputs.size() < 2 &&
+                (std::find(conflicts.begin(), conflicts.end(), "primaries") != conflicts.end() ||
+                 std::find(conflicts.begin(), conflicts.end(), "matrix") != conflicts.end())) {
+                if (MessageBoxW(window, T(TextId::InputOverrideConfirm).c_str(),
+                                T(TextId::InputRejected).c_str(),
+                                MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2) == IDYES)
+                    source->forceBT2020Interpretation = true;
+            }
             if (!smoke && source->EffectiveChromaLocation().empty()) {
                 const auto question = T(TextId::InputChromaChoose) +
                                       (queueInputs.size() > 1 ? L"\r\n\r\n" + T(TextId::QueueChroma) : L"");
@@ -949,6 +965,7 @@ class MainWindow {
                     source->inputChromaOverride = "center";
             }
             Text(SourceText, source->Summary(settings.language));
+            rawDetails.clear();
             details = source->UnsupportedReasons();
             Stage(details.empty() ? Message(TextId::InputReady) : details.front());
             Buttons();
@@ -963,9 +980,11 @@ class MainWindow {
             return;
         }
         if (e->kind == Kind::Convert) {
+            if (!e->validation || !e->validation->Completed())
+                throw AppError(TextId::ValidationFailed);
             lastValidation = e->validation;
             rawDetails = e->validation ? Wide(e->validation->ToJson().dump(2)) : L"";
-            lastSignalWarning = e->validation && e->validation->signalWarning;
+            lastSignalWarning = e->validation && !e->validation->warnings.empty();
             details = e->validation ? e->validation->warnings : std::vector<Message>{};
             Stage(lastSignalWarning ? TextId::CompleteWarning
                   : conversionTone  ? TextId::CompleteCreative
@@ -994,8 +1013,16 @@ class MainWindow {
         }
         if (id == DetailsButton) {
             std::wstring text;
+            if (queueInputs.size() > 1) {
+                if (!busy && queuePlan.empty())
+                    queuePlan = PlanQueue(queueInputs, fs::path(WindowText(H(OutputEdit))));
+                text += Wide(Json{{"queue_plan", QueuePlanJson(queuePlan)}}.dump(2)) + L"\r\n\r\n";
+            }
             if (source) {
-                text = source->Summary(settings.language) + L"\r\n\r\n";
+                text += source->Summary(settings.language) + L"\r\n\r\n";
+                for (const auto& warning : source->InputWarnings())
+                    text += T(warning) + L"\r\n";
+                text += Wide(source->InputInterpretation().dump(2)) + L"\r\n\r\n";
                 text += T({TextId::DetailsRates,
                            {std::to_string(source->averageFps.Value()),
                             std::to_string(source->nominalFps.Value()), std::to_string(source->frames),
@@ -1533,6 +1560,8 @@ class MainWindow {
                 return 0;
             }
             case WM_COMMAND:
+                if (LOWORD(w) == OutputEdit && HIWORD(w) == EN_CHANGE && !self->busy)
+                    self->queuePlan.clear();
                 if (HIWORD(w) == BN_CLICKED)
                     self->Command(LOWORD(w));
                 return 0;

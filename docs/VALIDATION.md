@@ -1,5 +1,91 @@
 # Validation record
 
+## 1.3.0 (26929A): timing, input interpretation and engineering reliability
+
+Local verification: **2026-09-29**, Windows 11 x64 build 26200, 20 logical CPUs,
+MSVC Release with static runtime. Configure and Release build succeeded.
+UI/CLI show **1.3.0 (26929A)** and Windows versions/manifest are **1.3.0.0**.
+The tested GUI EXE is **1,629,184 bytes**, SHA-256
+`32d04ad6effccbe7881c94dceeedf44502297a875e750fba6dc52579a2bf47cf`.
+
+**29/29 CTests passed, zero failures or skips, in 424.09 seconds.** P0 timing,
+input-contract and generated camera regressions passed before P1/P2 development;
+the final complete suite then reran all groups. See
+[the per-test results and numerical evidence](verification/1.3.0.json) and
+[causes, fixes and changed files](RELEASE_1.3.0.md).
+
+- The generated 309-packet regression reproduces reported average
+  **59.970887918 fps**, nominal **59.940059940 fps** and the former packet-53
+  **1.06-tick** failure. All boundaries verify as `quantized-fixed`, inferred
+  cadence `41200/687`, maximum phase **0.990291262 ticks / 825.242718 us /
+  0.049490539 frame**. Floor/ceil variants and fractional clocks with integer
+  nominal tags pass; accelerating, piecewise and clustered drift, VFR, gaps,
+  duplicate/backward PTS and invalid final durations fail. A 120,000-packet
+  case and a very fine time base check inference and numerical conditioning.
+- `media_pipeline` now passes with the declared input contract. Eighteen actual
+  MOV admission/override cases cover absent primaries/matrix/chroma, BT.2020,
+  BT.709 primaries/matrix/both, PQ, non-HLG, ProRes LT and H.264. Pure parser tests
+  also cover missing range, declared full/limited and unsupported siting. Reports
+  distinguish declarations, assumptions and explicit overrides.
+- Camera fixtures verify iPhone -180-degree translation and two extra 90/270
+  cases with **two mebx tracks and no timecode**. Blackmagic-style 24 fps ProRes
+  Standard retains the **500/48000-second** audio offset. Baked upright pixels,
+  identity output orientation, creation metadata, available timecode and PCM
+  payload equality pass. The existing all-rotation, multiple-audio, unlabelled
+  PCM and drop-frame checks also pass.
+- Queue preflight resolves same-stem/case-variant names while preserving existing
+  files. An independent process creates a destination during conversion:
+  validation passes but publication fails, the other file remains intact and
+  `completed` is false. Strict CLI parsing rejects malformed integer/float tokens
+  before discovery.
+- Production audio payload verification succeeds for copied streams. Flipping a
+  PCM byte after encoding produces `payload_mismatch`, failed validation and no
+  published movie. Existing independent complete-audio hash checks are retained.
+- Ten forced process exits cover reservation, transformation, encoding, remux
+  reservation/completion, metadata patching, report save before/after and
+  publication before/after. Recovery removes owned stale partials, retains the
+  published movie and preserves unowned/replaced files. Existing cancellation,
+  report-write failure, disk-space, held-pipe, multi-instance settings/trust and
+  FFmpeg non-execution/hash-change regressions pass.
+- Scalar color tests, signal integrity and FFmpeg numerical qualification pass.
+  Across 28 signal patches, maximum mean-patch error is **0.211127 10-bit code**
+  Standard and **0.253078 code** Creative, under the existing unchanged limits.
+- CUDA qualification passes on **NVIDIA GeForce RTX 3080 Ti Laptop GPU**,
+  driver DLL **32.0.16.1692**, Driver API **13040**. Six Standard/Creative and
+  -8/0/+8 EV cases each compare **24,576 samples** with CPU scalar double:
+  maximum and mean error **0** on this device. The existing tolerance remains
+  **2e-6**. Cache hit, changed-grade requalification, failure invalidation and
+  unchanged-input-on-error tests pass. Device ranking is tested independently
+  of enumeration order; only one physical GPU is present.
+- The embedded CUDA source/PTX manifest and precise compilation flags pass their
+  artifact check. Scalar formulas, CUDA kernel/PTX, FloatTransformer, PixelSanity,
+  FFmpeg discovery/trust and historical academic papers are unchanged from the
+  starting checkout.
+- Sustained **3840x2160 / 120 fps / 240 frames** CPU conversion passes in
+  **47.544 seconds** including job/validation overhead (**5.048 output fps**;
+  the complete CTest including fixture generation takes 83.37 seconds).
+  Peak sampled application private memory is **14.48 MiB**, excluding FFmpeg
+  processes. The three 4 MiB bridge slots total **12 MiB**. First/middle/last
+  output samples have maximum luma error **0.865051 code**, below the unchanged
+  two-code limit. This short two-second source is not an hours-long stress test.
+- Native GUI testing passes **26 scenarios**: English/Simplified Chinese,
+  dark/light, 100/125/150/175/200% DPI, ready/missing FFmpeg, Settings and candidate
+  flows, cancellation/failure recovery and close-with-active-child cleanup.
+  Standard and Creative conversions run through actual drag/drop, probe and
+  validation. A queue with an invalid first file still publishes its valid second
+  file. **960 production layouts**, **20 distinct screenshots** and stable GDI
+  checks pass; the README screenshot is from this build.
+
+Verification limits: all current media fixtures are generated, including the
+reported 59.94 reconstruction; the user's actual failing recording was not
+supplied. No fresh Resolve/Premiere/FCP import or physical multi-GPU test was run.
+GUI color-override confirmation is not part of the automated click scenarios;
+CLI override and the shared interpretation contract are exercised. Windows 10
+was not separately boot-tested. Package auditing is performed after CPack against
+the explicit allowlist, EXE hash, ZIP CRC and actual `.zip.sha256` sidecar.
+The separate-media/report transaction and timestamp-identifiability limits are
+documented in the release note. Historical results below are preserved as history.
+
 ## 1.2.1 (26927B): camera compatibility follow-up
 
 Local verification: **2026-09-27**, following reports of sideways Blackmagic

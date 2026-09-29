@@ -50,6 +50,17 @@ int64_t frameCount(const Json& j) {
         throw AppError(TextId::ProbeStreams);
     return n;
 }
+bool Unspecified(const std::string& value) {
+    return value.empty() || value == "unknown" || value == "unspecified";
+}
+bool IsMovDemuxer(const std::string& value) {
+    std::istringstream formats(value);
+    std::string format;
+    while (std::getline(formats, format, ','))
+        if (format == "mov")
+            return true;
+    return false;
+}
 } // namespace
 Rational Rational::Parse(const std::string& value) {
     Rational r;
@@ -85,8 +96,12 @@ MediaInfo MediaInfo::Parse(const Json& j, const fs::path& path) {
     for (const auto& s : j["streams"]) {
         const auto type = str(s, "codec_type");
         if (type == "video") {
+            const bool attachedPicture = s.value("disposition", Json::object()).value("attached_pic", 0) != 0;
+            if (!attachedPicture)
+                ++m.mainVideoStreams;
             if (++m.videoStreams > 1)
                 continue;
+            m.firstVideoAttachedPicture = attachedPicture;
             m.codec = str(s, "codec_name");
             m.profile = str(s, "profile");
             m.pixelFormat = str(s, "pix_fmt");
@@ -135,34 +150,113 @@ MediaInfo MediaInfo::Parse(const Json& j, const fs::path& path) {
     return m;
 }
 std::string MediaInfo::EffectiveChromaLocation() const {
-    if (chromaLocation.empty() || chromaLocation == "unknown" || chromaLocation == "unspecified")
+    if (Unspecified(chromaLocation))
         return inputChromaOverride.empty() ? "left" : inputChromaOverride;
     return chromaLocation;
 }
+std::string MediaInfo::EffectiveRange() const {
+    return Unspecified(range) ? "tv" : range;
+}
+std::vector<Message> MediaInfo::InputWarnings() const {
+    std::vector<Message> warnings;
+    if (Unspecified(primaries))
+        warnings.emplace_back(TextId::InputAssumption, std::initializer_list<std::string>{"primaries", "BT.2020"});
+    if (Unspecified(matrix))
+        warnings.emplace_back(TextId::InputAssumption, std::initializer_list<std::string>{"matrix", "BT.2020 NCL"});
+    if (Unspecified(range))
+        warnings.emplace_back(TextId::InputAssumption, std::initializer_list<std::string>{"range", "limited"});
+    if (Unspecified(chromaLocation) && inputChromaOverride.empty())
+        warnings.emplace_back(TextId::InputAssumption, std::initializer_list<std::string>{"chroma location", "left"});
+    if (forceBT2020Interpretation && ((!Unspecified(primaries) && primaries != "bt2020") ||
+                                      (!Unspecified(matrix) && matrix != "bt2020nc")))
+        warnings.emplace_back(TextId::InputColorOverride);
+    return warnings;
+}
+Json MediaInfo::InputInterpretation() const {
+    Json result{{"declared", {{"primaries", primaries}, {"matrix", matrix}, {"transfer", transfer},
+                              {"range", range}, {"chroma_location", chromaLocation}}},
+                {"assumed", Json::object()}, {"overridden", Json::object()},
+                {"effective", Json::object()}, {"origin", Json::object()},
+                {"conflicting_fields", Json::array()}, {"warnings", Json::array()}};
+    const auto field = [&](const char* key, const std::string& declared, const std::string& effective,
+                           const char* assumption, bool conflict, bool overridden = false) {
+        result["effective"][key] = effective;
+        if (overridden) {
+            result["overridden"][key] = effective;
+            result["origin"][key] = "explicit-override";
+        } else if (Unspecified(declared) && assumption) {
+            result["assumed"][key] = effective;
+            result["origin"][key] = assumption;
+        } else {
+            result["origin"][key] = "source-declared";
+        }
+        if (conflict)
+            result["conflicting_fields"].push_back(key);
+    };
+    const bool primariesConflict = !Unspecified(primaries) && primaries != "bt2020";
+    const bool matrixConflict = !Unspecified(matrix) && matrix != "bt2020nc";
+    field("primaries", primaries, Unspecified(primaries) || forceBT2020Interpretation ? "bt2020" : primaries,
+          "assumed-bt2020", primariesConflict, forceBT2020Interpretation && primariesConflict);
+    field("matrix", matrix, Unspecified(matrix) || forceBT2020Interpretation ? "bt2020nc" : matrix,
+          "assumed-bt2020nc", matrixConflict, forceBT2020Interpretation && matrixConflict);
+    field("transfer", transfer, transfer, nullptr, transfer != "arib-std-b67");
+    field("range", range, EffectiveRange(), "assumed-limited",
+          !Unspecified(range) && range != "tv" && range != "pc");
+    if (!Unspecified(range))
+        result["origin"]["range"] = range == "pc" ? "declared-full" : range == "tv" ? "declared-limited" : "source-declared";
+    field("chroma_location", chromaLocation, EffectiveChromaLocation(), "assumed-left",
+          EffectiveChromaLocation() != "left" && EffectiveChromaLocation() != "center",
+          Unspecified(chromaLocation) && !inputChromaOverride.empty());
+    for (const auto& warning : InputWarnings())
+        result["warnings"].push_back(Translate(warning));
+    return result;
+}
 std::vector<Message> MediaInfo::UnsupportedReasons() const {
     std::vector<Message> e;
-    // Admission is deliberately limited to the recording format. Auxiliary
-    // metadata, camera tags, timecode and edit-list shapes are not prerequisites.
+    // Match admission to the fixed decoder interpretation. Missing optional
+    // declarations remain compatible; explicit conflicts must never be ignored.
+    // Camera metadata, timecode and edit-list shapes are not prerequisites.
+    const auto brand = str(tags, "major_brand");
+    if (!IsMovDemuxer(container) || (!brand.empty() && brand != "qt  "))
+        e.emplace_back(TextId::InputContainer);
+    if (mainVideoStreams != 1 || firstVideoAttachedPicture)
+        e.emplace_back(TextId::InputVideoCount);
     if (codec != "prores")
         e.emplace_back(TextId::InputCodec);
     if (profile != "Standard" && profile != "HQ")
         e.emplace_back(TextId::InputProfile);
     if (transfer != "arib-std-b67")
         e.emplace_back(TextId::InputTransfer);
+    if (!forceBT2020Interpretation && !Unspecified(primaries) && primaries != "bt2020")
+        e.emplace_back(TextId::InputPrimaries);
+    if (!forceBT2020Interpretation && !Unspecified(matrix) && matrix != "bt2020nc")
+        e.emplace_back(TextId::InputMatrix);
+    if (!Unspecified(range) && range != "pc" && range != "tv")
+        e.emplace_back(TextId::InputRange);
+    if (EffectiveChromaLocation() != "left" && EffectiveChromaLocation() != "center")
+        e.emplace_back(TextId::InputChroma);
     return e;
 }
 std::wstring MediaInfo::Summary(Language language) const {
     std::wostringstream s;
+    const auto interpretation = InputInterpretation();
+    const auto origin = [&](const char* key) {
+        const auto value = interpretation["origin"][key].get<std::string>();
+        return TranslateWide(value.starts_with("assumed-") ? TextId::DefaultAssumption :
+                             value == "explicit-override" ? TextId::ExplicitSource : TextId::SourceDeclared,
+                             language);
+    };
     s << (codec == "prores" ? L"ProRes" : Wide(codec)) << L" " << Wide(profile) << L"   ·   " << width
       << L" × " << height << L"   ·   " << std::fixed << std::setprecision(3) << fps.Value() << L" fps\r\n";
     s << (pixelFormat == "yuv422p10le" ? L"10-bit 4:2:2" : Wide(pixelFormat)) << L"   ·   "
-      << (primaries == "bt2020" ? L"BT.2020" : Wide(primaries)) << L" / "
+      << Wide(interpretation["effective"]["primaries"].get<std::string>()) << L" (" << origin("primaries") << L") / "
       << (transfer == "arib-std-b67" ? L"HLG" : Wide(transfer)) << L" / "
-      << (matrix == "bt2020nc" ? L"BT.2020 NCL" : Wide(matrix)) << L"   ·   "
-      << TranslateWide(TextId::RangeLabel, language) << L": " << Wide(range) << L"\r\n";
+      << Wide(interpretation["effective"]["matrix"].get<std::string>()) << L" (" << origin("matrix") << L")\r\n";
+    s << TranslateWide(TextId::RangeLabel, language) << L": " << Wide(EffectiveRange())
+      << L" (" << origin("range") << L")   ·   ";
     s << TranslateWide(TextId::ChromaLocation, language) << L": "
       << Wide(EffectiveChromaLocation().empty() ? "unknown" : EffectiveChromaLocation())
-      << (inputChromaOverride.empty() ? L"" : L" (" + TranslateWide(TextId::ExplicitSource, language) + L")")
+      << L" (" << origin("chroma_location") << L")"
       << L"\r\n";
     s << TranslateWide(TextId::Duration, language) << L": " << std::setprecision(2) << videoDuration
       << L" s   ·   " << TranslateWide(TextId::Audio, language) << L": ";
@@ -203,6 +297,9 @@ Json ValidationReport::ToJson() const {
         warningCodes.push_back(MessageKey(m.id));
     }
     return {{"passed", passed},
+            {"validation_passed", passed},
+            {"completed", Completed()},
+            {"publication", publication},
             {"errors", e},
             {"warnings", w},
             {"error_codes", codes},

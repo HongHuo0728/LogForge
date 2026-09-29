@@ -1,5 +1,6 @@
 #include "logforge/Transcode.h"
 #include "logforge/AppleLogIdentification.h"
+#include "logforge/AudioPayload.h"
 #include "logforge/Color.h"
 #include "logforge/FloatBridge.h"
 #include "logforge/FloatTransformer.h"
@@ -21,7 +22,11 @@ ValidationReport TranscodeJob::Run(const FFmpegInstallation& tools, const MediaI
                                    const fs::path& output, Logger& log, const std::atomic_bool& cancel,
                                    const JobCallback& progress, const TranscodeOptions& options) {
     const auto jobStart = std::chrono::steady_clock::now();
+    const auto checkpoint = [&](const char* stage, const fs::path& path) {
+        if (options.io && options.io->stageCheckpoint) options.io->stageCheckpoint(stage, path);
+    };
     auto m = input;
+    m.forceBT2020Interpretation = m.forceBT2020Interpretation || options.forceBT2020Interpretation;
     auto lease = ToolTrust::Acquire(tools.ffmpeg);
     if (tools.ffmpeg != lease->identity.ffmpeg || tools.ffprobe != lease->identity.ffprobe)
         throw AppError(Message(TextId::FFmpegUntrusted, {PathText(tools.ffmpeg)}));
@@ -95,23 +100,16 @@ ValidationReport TranscodeJob::Run(const FFmpegInstallation& tools, const MediaI
     fs::path partial =
         dest.parent_path() / (dest.stem().wstring() + L".logforge-" + std::to_wstring(GetCurrentProcessId()) +
                               L"-" + std::to_wstring(GetTickCount64()) + L".partial.mov");
-    Handle reservation(
-        CreateFileW(partial.c_str(), GENERIC_WRITE, 0, nullptr, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, nullptr));
+    OwnedJobFiles owned;
+    Handle reservation(CreateFileW(partial.c_str(), GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE,
+                                   nullptr, CREATE_NEW, FILE_ATTRIBUTE_NORMAL, nullptr));
     if (!reservation)
         throw AppError(Message(TextId::OutputCreate, {Utf8(WinError())}));
-    reservation.reset();
-    struct PartialGuard {
-        fs::path p;
-        bool keep = false;
-        ~PartialGuard() {
-            if (!keep) {
-                std::error_code ec;
-                fs::remove(p, ec);
-            }
-        }
-    } guard{partial};
-    OwnedJobFiles owned;
+    // Keep replacement/deletion denied until ownership is durably journalled.
+    // Media cleanup exclusively uses the file-ID journal, never a filename guard.
     owned.Track(partial);
+    reservation.reset();
+    checkpoint("partial_tracked", partial);
     log.Write(
         "CFR timestamps verified: " + std::to_string(expectedFrames) +
         " frames. BT.2408 HLG75% -> 100% reflectance; scale=" + std::to_string(HLGToReflectanceScale()) +
@@ -136,7 +134,7 @@ ValidationReport TranscodeJob::Run(const FFmpegInstallation& tools, const MediaI
         }
     }
     const auto threads = PlanThreads(cuda != nullptr);
-    const std::wstring range = m.range == "pc" ? L"full" : L"limited";
+    const std::wstring range = m.EffectiveRange() == "pc" ? L"full" : L"limited";
     std::wstring decodeFilter = L"zscale=matrixin=2020_ncl:matrix=gbr:rangein=" + range +
                                 L":range=full:transferin=arib-std-b67:transfer=arib-std-b67:primariesin=2020:"
                                 L"primaries=2020:chromalin=" +
@@ -301,6 +299,7 @@ ValidationReport TranscodeJob::Run(const FFmpegInstallation& tools, const MediaI
         return std::chrono::duration<double>(std::chrono::steady_clock::now() - start).count();
     };
     std::exception_ptr workError;
+    bool transformCheckpoint = false;
     try {
         const size_t frameSamples = static_cast<size_t>(m.width) * m.height * 3;
         FloatTransformer transformer(options.exposureStops, options.tone, threads.transform);
@@ -310,6 +309,10 @@ ValidationReport TranscodeJob::Run(const FFmpegInstallation& tools, const MediaI
         frames = RunFloatBridge(
             decoder, encoder, frameSamples, options.tone.enabled, cancel,
             [&](std::span<float> samples) {
+                if (!transformCheckpoint) {
+                    transformCheckpoint = true;
+                    checkpoint("during_transform", partial);
+                }
                 pixelSanity.Observe(samples);
                 if (cuda) {
                     try {
@@ -374,6 +377,7 @@ ValidationReport TranscodeJob::Run(const FFmpegInstallation& tools, const MediaI
     }
     if (decodeExit || encodeExit || frames != expectedFrames)
         throw AppError(Message(TextId::EncodeFailed, {encoderError + decoderError}));
+    checkpoint("encoded", partial);
     const double pipelineSeconds = elapsed(transformStart);
     const auto remuxStart = std::chrono::steady_clock::now();
     // rawvideo has no orientation field. Remux from our encoded file to apply the
@@ -382,13 +386,13 @@ ValidationReport TranscodeJob::Run(const FFmpegInstallation& tools, const MediaI
         progress({Message(TextId::PreservingRotation)});
         auto rotated = partial;
         rotated += L".rotated.mov";
-        PartialGuard rotatedGuard{rotated};
-        Handle rotatedReservation(CreateFileW(rotated.c_str(), GENERIC_WRITE, 0, nullptr, CREATE_NEW,
+        Handle rotatedReservation(CreateFileW(rotated.c_str(), GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr, CREATE_NEW,
                                               FILE_ATTRIBUTE_NORMAL, nullptr));
         if (!rotatedReservation)
             throw AppError(TextId::OutputCreate);
-        rotatedReservation.reset();
         owned.Track(rotated);
+        rotatedReservation.reset();
+        checkpoint("rotation_tracked", rotated);
         if (availableSpace(dest.parent_path()) < fs::file_size(partial) + 32ull * 1024 * 1024)
             throw AppError(TextId::RotationSpace);
         std::vector<std::wstring> args{L"-hide_banner",
@@ -416,9 +420,10 @@ ValidationReport TranscodeJob::Run(const FFmpegInstallation& tools, const MediaI
         auto r = RunProcess(tools.ffmpeg, args, &cancel, 0);
         if (r.exitCode)
             throw AppError(Message(TextId::RotationFailed, {r.error}));
-        fs::remove(partial);
-        fs::rename(rotated, partial);
-        owned.Track(partial);
+        checkpoint("rotation_encoded", rotated);
+        // Keep both original identities tracked. Switching the active path avoids
+        // a crash window between renaming a temporary file and updating its journal.
+        partial = rotated;
     }
     const double remuxSeconds = elapsed(remuxStart);
     const auto headerStart = std::chrono::steady_clock::now();
@@ -427,6 +432,7 @@ ValidationReport TranscodeJob::Run(const FFmpegInstallation& tools, const MediaI
     const auto identificationStart = std::chrono::steady_clock::now();
     progress({Message(TextId::WritingIdentification)});
     AppleLogIdentificationWriter::WriteToEncodedPartial(partial, cancel);
+    checkpoint("metadata_patched", partial);
     log.Write("Apple Log identification: ProRes sample-entry logs / com.apple.rec2020.apple-log");
     const double identificationSeconds = elapsed(identificationStart);
     const auto validationStart = std::chrono::steady_clock::now();
@@ -437,6 +443,16 @@ ValidationReport TranscodeJob::Run(const FFmpegInstallation& tools, const MediaI
     out.cadence = VerifyConstantFrameRate(tools.ffprobe, out, cancel, false);
     out.fps = out.cadence.rate;
     auto report = ValidateOutput(m, out, frames);
+    report.publication["final_path"] = PathText(dest);
+    const auto audioStart = std::chrono::steady_clock::now();
+    report.metadata["audio_copy"] = VerifyAudioPayload(tools.ffmpeg, m.path, partial, m.audio.size(), cancel);
+    const double audioSeconds = elapsed(audioStart);
+    if (!report.metadata["audio_copy"].at("passed").get<bool>()) {
+        report.passed = false;
+        report.errors.emplace_back(TextId::OutputAudioPayload);
+    }
+    const auto interpretationWarnings = m.InputWarnings();
+    report.warnings.insert(report.warnings.end(), interpretationWarnings.begin(), interpretationWarnings.end());
     report.signal["pixel_sanity"] =
         pixelSanity.Validate(tools.ffmpeg, partial, cancel, options.exposureStops, options.tone);
     if (!report.signal["pixel_sanity"]["passed"].get<bool>()) {
@@ -449,10 +465,7 @@ ValidationReport TranscodeJob::Run(const FFmpegInstallation& tools, const MediaI
                                        {"applied_to_pixels", !orientationFilter.empty()},
                                        {"output_width", out.width}, {"output_height", out.height},
                                        {"output_degrees", out.rotation}};
-    report.metadata["input_policy"] = {{"required", "ProRes Standard/HQ + HLG"},
-                                        {"color_interpretation", "BT.2020 NCL HLG"},
-                                        {"range_used", m.range == "pc" ? "full" : "video"},
-                                        {"chroma_used", m.EffectiveChromaLocation()}};
+    report.metadata["input_interpretation"] = m.InputInterpretation();
     report.metadata["creation_headers"] = headerTimes;
     report.metadata["chroma"] = {
         {"input_ffprobe", m.chromaLocation},
@@ -501,6 +514,7 @@ ValidationReport TranscodeJob::Run(const FFmpegInstallation& tools, const MediaI
                                {"creation_metadata_seconds", headerSeconds},
                                {"identification_seconds", identificationSeconds},
                                {"validation_seconds", elapsed(validationStart)},
+                               {"audio_payload_seconds", audioSeconds},
                                {"total_before_publication_seconds", elapsed(jobStart)},
                                {"definition", "Pipe read/write include backpressure; decode and encode run "
                                               "concurrently. Stage values are not additive."}};
@@ -531,6 +545,14 @@ ValidationReport TranscodeJob::Run(const FFmpegInstallation& tools, const MediaI
         {"processed_frames", frames},
         {"processing",
          {{"float_buffer_bytes", floatBufferBytes},
+          {"float_buffer_bytes_deprecated", "one bridge slot only; use bridge_buffer_bytes_each/count/total"},
+          {"bridge_buffer_bytes_each", floatBufferBytes},
+          {"bridge_buffer_count", backend.value("bridge_buffers", 0u)},
+          {"bridge_total_bytes", backend.value("bridge_total_bytes", size_t{})},
+          {"creative_frame_buffer_bytes", options.tone.enabled ? floatBufferBytes : size_t{0}},
+          {"cuda_pinned_host_bytes", backend.value("pinned_host_bytes", size_t{})},
+          {"cuda_device_buffer_bytes", backend.value("device_buffer_bytes", size_t{})},
+          {"memory_scope", "bridge and active/last CUDA allocations, not whole-process or FFmpeg memory"},
           {"transform_workers", transformWorkers},
           {"mode", options.tone.enabled ? "planar frame with parallel RGB tiles" : "bounded planar chunks"},
           {"transform_and_encode_seconds", pipelineSeconds}}},
@@ -550,32 +572,74 @@ ValidationReport TranscodeJob::Run(const FFmpegInstallation& tools, const MediaI
           {"math", "double"},
           {"range", "video (Y 64..940; C 64..960)"}}}};
     auto reportPath = DataDirectory() / L"logs" /
-                      (L"LogForge-" + dest.filename().wstring() + L"-" + std::to_wstring(GetTickCount64()) +
+                      (L"LogForge-" + dest.filename().wstring() + L"-" + std::to_wstring(GetCurrentProcessId()) +
+                       L"-" + std::to_wstring(GetTickCount64()) +
                        L".validation.json");
     auto reportTemporary = fs::path(reportPath.wstring() + L".tmp");
-    PartialGuard reportGuard{reportTemporary};
-    if (options.io && options.io->beforeReportWrite)
-        options.io->beforeReportWrite(reportTemporary);
-    std::ofstream file(reportTemporary);
-    file << full.dump(2);
-    file.close();
-    if (!file || !MoveFileExW(reportTemporary.c_str(), reportPath.c_str(), MOVEFILE_WRITE_THROUGH))
-        throw AppError(TextId::ReportSave);
+    struct ReportTemporaryGuard {
+        fs::path path;
+        ~ReportTemporaryGuard() { std::error_code ec; fs::remove(path, ec); }
+    } reportGuard{reportTemporary};
+    bool reportCreated = false;
+    const auto saveReport = [&] {
+        full["validation"] = report.ToJson();
+        full["final_output"] = PathText(dest);
+        if (options.io && options.io->beforeReportWrite)
+            options.io->beforeReportWrite(reportTemporary);
+        if (options.io && options.io->stageCheckpoint)
+            options.io->stageCheckpoint("before_report", partial);
+        std::ofstream file(reportTemporary);
+        file << full.dump(2);
+        file.close();
+        if (!file || !MoveFileExW(reportTemporary.c_str(), reportPath.c_str(),
+                                  MOVEFILE_WRITE_THROUGH | (reportCreated ? MOVEFILE_REPLACE_EXISTING : 0)))
+            throw AppError(TextId::ReportSave);
+        reportCreated = true;
+        if (options.io && options.io->stageCheckpoint)
+            options.io->stageCheckpoint("after_report", partial);
+    };
+    report.publication["status"] = report.passed ? "validated_awaiting_publication" : "validation_failed";
+    saveReport();
     log.Write("Validation report: " + PathText(reportPath) + "\n" + report.ToJson().dump());
     if (!report.passed)
         throw AppError(TextId::ValidationFailed, report.errors);
-    if (cancel.load())
+    if (cancel.load()) {
+        report.publication["status"] = "cancelled";
+        saveReport();
         throw AppError(TextId::Cancelled);
+    }
+    report.publication["attempted"] = true;
+    report.publication["status"] = "publication_pending";
+    saveReport();
+    if (options.io && options.io->stageCheckpoint)
+        options.io->stageCheckpoint("before_publication", partial);
+    if (cancel.load()) {
+        report.publication["status"] = "cancelled";
+        saveReport();
+        throw AppError(TextId::Cancelled);
+    }
     // Same-volume rename publishes only a fully validated file, with no overwrite.
     // Windows std::filesystem::rename may replace an existing destination.
     // No REPLACE_EXISTING flag: also refuse a file created during conversion.
     if (!MoveFileExW(partial.c_str(), dest.c_str(), MOVEFILE_WRITE_THROUGH)) {
+        const auto error = GetLastError();
+        report.publication["status"] = "failed";
+        report.publication["error"] = Utf8(WinError(error));
+        report.publication["win32_error"] = error;
+        saveReport();
         if (fs::exists(dest))
             throw AppError(TextId::OutputExists);
-        throw AppError(Message(TextId::OutputCreate, {Utf8(WinError())}));
+        throw AppError(Message(TextId::OutputCreate, {Utf8(WinError(error))}));
     }
-    guard.keep = true;
-    progress({Message(report.signalWarning   ? TextId::CompleteWarning
+    report.publication["published"] = true;
+    report.publication["status"] = "published";
+    report.timing["stages"]["total_seconds"] = elapsed(jobStart);
+    if (options.io && options.io->stageCheckpoint)
+        options.io->stageCheckpoint("after_publication", dest);
+    // If this write fails, retain the valid published movie and report an error.
+    // Never delete a public destination to try to roll back a second-file write.
+    saveReport();
+    progress({Message(!report.warnings.empty() ? TextId::CompleteWarning
                       : options.tone.enabled ? TextId::CompleteCreative
                                              : TextId::CompleteStandard),
               1.0, m.videoDuration, 0, 0, frames});

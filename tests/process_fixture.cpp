@@ -8,6 +8,13 @@ void Write(HANDLE handle, const std::string& text) {
 }
 int wmain(int argc, wchar_t** argv) {
     const std::wstring mode = argc > 1 ? argv[1] : L"";
+    if (mode == L"create-output" && argc == 3) {
+        const auto h = CreateFileW(argv[2], GENERIC_WRITE, 0, nullptr, CREATE_NEW, 0, nullptr);
+        if (h == INVALID_HANDLE_VALUE) return 2;
+        Write(h, "unrelated destination");
+        CloseHandle(h);
+        return 0;
+    }
     if (mode == L"hold" || mode == L"wait") {
         Sleep(30000);
         return 0;

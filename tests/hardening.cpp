@@ -53,8 +53,18 @@ void Cadence() {
         const auto n = static_cast<int64_t>(i);
         packets[i] = {n * 20 - n / 64, 20 - ((n + 1) % 64 == 0 ? 1 : 0)};
     }
+    Require(AnalyzeCadence(packets, m).verified,
+            "A fixed rational clock was rejected because nominal metadata disagreed");
+    // The former fixture above is exactly a quantized 1279/64 period. Keep it
+    // as a positive regression; genuine changing-speed drift must still fail.
+    for (size_t i = 0; i < packets.size(); ++i) {
+        const auto n = static_cast<int64_t>(i);
+        const auto at = n * 20 - n * n / 4096;
+        const auto next = (n + 1) * 20 - (n + 1) * (n + 1) / 4096;
+        packets[i] = {at, next - at};
+    }
     auto drift = AnalyzeCadence(packets, m);
-    Require(!drift.verified && drift.errorPacket == 128 && drift.maxPhaseError >= 3,
+    Require(!drift.verified && drift.errorPacket >= 0 && drift.quantizationSpanTicks > 1,
             "Sustained phase drift accepted");
     packets.clear();
     for (int64_t i = 0; i < 100; ++i)
@@ -322,9 +332,9 @@ void Publication(const fs::path& ff, const fs::path& root) {
     try {
         TranscodeJob::Run(tools, media, output, log, cancel, [&](const JobProgress& p) {
             if (p.frame > 0 && !created) {
-                std::ofstream f(output);
-                f << "unrelated destination";
-                created = true;
+                const auto other = RunProcess(ExecutableDirectory() / L"logforge_process_fixture.exe",
+                                              {L"create-output", output.wstring()}, &cancel, 5);
+                created = other.exitCode == 0;
             }
         });
     } catch (const AppError& e) {
@@ -334,6 +344,25 @@ void Publication(const fs::path& ff, const fs::path& root) {
     std::string content((std::istreambuf_iterator<char>(f)), {});
     f.close();
     Require(created && refused && content == "unrelated destination", "Late destination was overwritten");
+    bool recorded = false;
+    for (const auto& file : fs::directory_iterator(DataDirectory() / L"logs")) {
+        if (file.path().filename().wstring().starts_with(L"LogForge-created-during-conversion.mov-") &&
+            file.path().extension() == L".json") {
+            Json json;
+            std::ifstream(file.path()) >> json;
+            const auto& r = json.at("validation");
+            if (r.contains("publication") && r.at("publication").at("final_path") == PathText(fs::absolute(output))) {
+                Require(r.at("validation_passed") == true && r.at("completed") == false &&
+                            r.at("publication").at("attempted") == true &&
+                            r.at("publication").at("published") == false &&
+                            r.at("publication").at("status") == "failed" &&
+                            !r.at("publication").at("error").get<std::string>().empty(),
+                        "Validation success was incorrectly reported as publication success");
+                recorded = true;
+            }
+        }
+    }
+    Require(recorded, "Publication-race report missing");
     for (const auto& entry : fs::directory_iterator(root))
         Require(entry.path().filename().wstring().find(L"partial") == std::wstring::npos,
                 "Publication failure leaked a partial");

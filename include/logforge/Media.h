@@ -27,17 +27,18 @@ struct VideoPacketTiming {
 };
 struct CadenceReport {
     bool verified = false;
-    Rational rate;
+    Rational rate, timeBase, nominalRate, averageRate;
     int64_t packets = 0, errorPacket = -1;
     double maxIntervalError = 0, maxPhaseError = 0, maxDurationError = 0;
-    std::string error;
+    double maxNominalPhaseError = 0, quantizationSpanTicks = 0, errorTicks = 0;
+    std::string error, candidateSource, classification = "invalid", reasonCode;
     Json ToJson() const;
 };
 struct MediaInfo {
     fs::path path;
     std::string container, codec, profile, pixelFormat, primaries, transfer, matrix, range, fieldOrder,
         chromaLocation, sampleAspect;
-    int width = 0, height = 0, bitDepth = 0, videoStreams = 0;
+    int width = 0, height = 0, bitDepth = 0, videoStreams = 0, mainVideoStreams = 0;
     int64_t frames = 0;
     Rational fps, averageFps, nominalFps, timeBase;
     double duration = 0, videoDuration = 0, startTime = 0, rotation = 0;
@@ -48,7 +49,12 @@ struct MediaInfo {
     std::string inputChromaOverride;
     bool outputChromaVerified = false;
     bool displayMatrixSupported = true;
+    bool firstVideoAttachedPicture = false;
+    bool forceBT2020Interpretation = false;
     std::string EffectiveChromaLocation() const;
+    std::string EffectiveRange() const;
+    Json InputInterpretation() const;
+    std::vector<Message> InputWarnings() const;
     static MediaInfo Parse(const Json& json, const fs::path& path = {});
     std::vector<Message> UnsupportedReasons() const;
     std::wstring Summary(Language language = Language::English) const;
@@ -61,6 +67,7 @@ Json InspectMovTimeline(const MediaInfo& input, const Json& atoms, const fs::pat
                         const std::atomic_bool* cancel = nullptr);
 MediaInfo Probe(const fs::path& ffprobe, const fs::path& path, const std::atomic_bool* cancel = nullptr);
 CadenceReport AnalyzeCadence(std::span<const VideoPacketTiming> packets, const MediaInfo& media);
+AppError CadenceFailure(const CadenceReport& report, const MediaInfo& media);
 CadenceReport VerifyConstantFrameRate(const fs::path& ffprobe, const MediaInfo& media,
                                       const std::atomic_bool& cancel, bool rejectInvalid = true);
 struct ValidationReport {
@@ -69,6 +76,9 @@ struct ValidationReport {
     std::vector<Message> errors, warnings;
     Json signal = Json::object();
     Json timing = Json::object(), metadata = Json::object(), ffmpeg = Json::object();
+    Json publication{{"attempted", false}, {"published", false}, {"final_path", ""},
+                     {"status", "not_attempted"}, {"error", ""}};
+    bool Completed() const { return passed && publication.value("published", false); }
     Json ToJson() const;
 };
 ValidationReport ValidateOutput(const MediaInfo& input, const MediaInfo& output, int64_t processedFrames);

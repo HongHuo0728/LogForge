@@ -148,10 +148,96 @@ def main():
                  for p in (unknown,target)]
         assert payload[0]==payload[1], 'Unlabelled audio payload changed'
         audio_layout_cases.append({'rotation':rotation,'payload_sha256':payload[0].decode(),'layout_preserved':True})
-    bad = work/'unsupported-rec709.mov'
-    run([ff,'-v','error','-y','-i',source,'-map','0','-c','copy','-color_primaries','bt709','-movflags','+write_colr',bad])
-    rejected=subprocess.run([str(args.cli.resolve()),'--convert',str(bad),str(work/'must-not-exist.mov'),'--ffmpeg',str(ff),'--input-chroma-location','left'],env=env,capture_output=True)
-    assert rejected.returncode!=0 and not (work/'must-not-exist.mov').exists(), 'Unsupported input accepted'
+    # v1.3 contract: frame headers and container tags must agree. A metadata-only
+    # remux cannot construct unspecified/BT.709 ProRes reliably because ffprobe
+    # can recover the original declarations from the compressed frame header.
+    contract_cases = []
+    def contract_movie(name, primaries='bt2020', matrix='bt2020nc', transfer='arib-std-b67',
+                       codec='prores_ks', profile='3'):
+        movie = work/f'contract-{name}.mov'
+        format_name = 'yuv422p10le' if codec == 'prores_ks' else 'yuv420p'
+        cmd = [ff, '-v', 'error', '-y', '-i', source, '-map', '0:v:0', '-an', '-frames:v', '6',
+               '-vf', f'format={format_name},setparams=color_primaries={primaries}:colorspace={matrix}:'
+                      f'color_trc={transfer}:range=limited:chroma_location=unspecified',
+               '-c:v', codec, '-threads:v', '2']
+        if codec == 'prores_ks':
+            cmd += ['-profile:v', profile]
+        cmd += ['-color_primaries', primaries, '-colorspace', matrix, '-color_trc', transfer,
+                '-color_range', 'tv', '-movflags', '+write_colr+use_metadata_tags', movie]
+        run(cmd)
+        stream = json.loads(run([probe, '-v', 'error', '-select_streams', 'v:0', '-show_streams',
+                                 '-of', 'json', movie]))['streams'][0]
+        for key, expected in [('color_primaries', primaries), ('color_space', matrix),
+                              ('color_transfer', transfer)]:
+            if expected == 'unknown':
+                assert stream.get(key, '') in ('', 'unknown', 'unspecified'), (name, key, stream)
+            else:
+                assert stream.get(key) == expected, (name, key, stream)
+        return movie, stream
+
+    def contract_convert(name, movie, *, accepted=True, force=False):
+        target = work/f'contract-{name}-AppleLog.mov'
+        if target.exists():
+            target.unlink()
+        command = [str(args.cli.resolve()), '--convert', str(movie), str(target), '--ffmpeg', str(ff)]
+        if force:
+            command += ['--force-bt2020-interpretation']
+        result = subprocess.run(command, env=env, capture_output=True)
+        if not accepted:
+            assert result.returncode != 0 and not target.exists(), ('Conflicting input accepted', name)
+            assert b'InputRejected' in result.stderr, (name, result.stderr)
+            contract_cases.append({'case': name, 'accepted': False})
+            return None
+        assert result.returncode == 0 and target.exists(), (name, result.stderr.decode('utf-8', 'replace'))
+        reports = list((work/'appdata'/'logs').glob(f'LogForge-{target.name}-*.validation.json'))
+        assert reports, ('Missing validation report', name)
+        report = json.loads(max(reports, key=lambda p: p.stat().st_mtime_ns).read_text(encoding='utf-8'))
+        interpretation = report['validation']['metadata']['input_interpretation']
+        command = [args.cli.resolve(), '--probe', movie, '--ffmpeg', ff]
+        if force:
+            command += ['--force-bt2020-interpretation']
+        cli_probe = json.loads(run(command, env=env))
+        assert cli_probe['input_interpretation'] == interpretation, ('Probe/report interpretation differs', name)
+        contract_cases.append({'case': name, 'accepted': True, 'input_interpretation': interpretation})
+        return interpretation
+
+    declared, _ = contract_movie('declared-bt2020')
+    declaration = contract_convert('declared-bt2020', declared)
+    assert declaration['origin']['primaries'] == 'source-declared'
+    assert declaration['origin']['matrix'] == 'source-declared'
+    assert declaration['conflicting_fields'] == []
+    for name, key, option, expected in [('missing-primaries', 'primaries', 'primaries', 'bt2020'),
+                                       ('missing-matrix', 'matrix', 'matrix', 'bt2020nc')]:
+        movie, _ = contract_movie(name, **{option: 'unknown'})
+        interpretation = contract_convert(name, movie)
+        assert interpretation['assumed'][key] == expected and interpretation['warnings'], (name, interpretation)
+        assert interpretation['overridden'] == {} and interpretation['conflicting_fields'] == []
+    no_chroma, no_chroma_stream = contract_movie('missing-chroma')
+    assert no_chroma_stream.get('chroma_location', '') in ('', 'unknown', 'unspecified')
+    interpretation = contract_convert('missing-chroma', no_chroma)
+    assert interpretation['assumed']['chroma_location'] == 'left'
+    assert interpretation['origin']['chroma_location'] == 'assumed-left' and interpretation['warnings']
+    # A deliberately mislabeled source retains BT.2020 pixels. Explicit override
+    # tests interpretation authorization, not a hidden gamut conversion.
+    for name, options, conflicts in [
+            ('bt709-primaries', {'primaries': 'bt709'}, ['primaries']),
+            ('bt709-matrix', {'matrix': 'bt709'}, ['matrix']),
+            ('bt709-both', {'primaries': 'bt709', 'matrix': 'bt709'}, ['primaries', 'matrix'])]:
+        movie, _ = contract_movie(name, **options)
+        contract_convert(name, movie, accepted=False)
+        interpretation = contract_convert(name+'-forced', movie, force=True)
+        assert interpretation['conflicting_fields'] == conflicts
+        assert set(interpretation['overridden']) == set(conflicts) and interpretation['warnings']
+        for field in conflicts:
+            assert interpretation['declared'][field] == 'bt709'
+            assert interpretation['origin'][field] == 'explicit-override'
+    for name, options in [('pq', {'transfer': 'smpte2084'}),
+                          ('non-hlg', {'transfer': 'bt709'}),
+                          ('prores-lt', {'profile': '1'}),
+                          ('h264', {'codec': 'libx264'})]:
+        movie, _ = contract_movie(name, **options)
+        contract_convert(name, movie, accepted=False)
+        contract_convert(name+'-forced', movie, accepted=False, force=True)
     # Original image orientation, codec Standard, silent footage, and AAC are separate cases.
     variants = []
     for name, options in [
@@ -210,7 +296,7 @@ def main():
     run([args.cli.resolve(),'--convert',four_k,four_k_out,'--ffmpeg',ff,'--input-chroma-location','left'],env=env)
     variants.append('3840x2160-3frames')
     # A single 1/480-second camera clock correction must not turn 24 fps into
-    # an arbitrary rational mean rate. Sustained clock drift is still refused.
+    # an arbitrary rational mean rate when nominal passes the full clock model.
     clock=work/'camera-clock.mov';clock_out=work/'camera-clock-AppleLog.mov'
     run([ff,'-v','error','-y','-stream_loop','1','-i',source,'-map','0:v:0','-an',
          '-vf',r'fps=24,settb=1/480,setpts=N*20-gte(N\,30)',
@@ -223,9 +309,20 @@ def main():
     clock_after=json.loads(run([probe,'-v','error','-select_streams','v','-show_streams','-of','json',clock_out]))['streams'][0]
     assert clock_after['avg_frame_rate']=='24/1' and clock_after['nb_frames']==clock_info['nb_frames']
     variants.append('camera-clock-correction-24fps')
-    drift=work/'cumulative-drift.mov';drift_out=work/'drift-must-not-exist.mov'
+    # The former drift fixture N*20-floor(N/64) is exactly rational cadence,
+    # not changing-speed drift. Keep it as a positive compatibility regression.
+    fixed_quantized=work/'fixed-quantized.mov';fixed_quantized_out=work/'fixed-quantized-AppleLog.mov'
     run([ff,'-v','error','-y','-stream_loop','3','-i',source,'-map','0:v:0','-an',
          '-vf','fps=24,settb=1/480,setpts=N*20-floor(N/64)',
+         '-enc_time_base','1:480','-fps_mode','passthrough','-video_track_timescale','480',
+         '-c:v','prores_ks','-profile:v','3','-pix_fmt','yuv422p10le',fixed_quantized])
+    fixed_quantized_out.unlink(missing_ok=True)
+    run([args.cli.resolve(),'--convert',fixed_quantized,fixed_quantized_out,'--ffmpeg',ff,
+         '--input-chroma-location','left'],env=env)
+    variants.append('fixed-quantized-integer-nominal-mismatch')
+    drift=work/'cumulative-drift.mov';drift_out=work/'drift-must-not-exist.mov'
+    run([ff,'-v','error','-y','-stream_loop','3','-i',source,'-map','0:v:0','-an',
+         '-vf','fps=24,settb=1/480,setpts=N*20-floor(N*N/4096)',
          '-enc_time_base','1:480','-fps_mode','passthrough','-video_track_timescale','480',
          '-c:v','prores_ks','-profile:v','3','-pix_fmt','yuv422p10le',drift])
     # Metadata alone looks close enough; rejection must come from packet phase.
@@ -247,7 +344,7 @@ def main():
     cancellation=subprocess.run([str(args.cli.resolve()),'--convert',str(source),str(cancelled_output),'--ffmpeg',str(ff),'--input-chroma-location','left','--cancel-after-frames','1'],env=env,capture_output=True,timeout=20)
     assert cancellation.returncode==130 and not cancelled_output.exists(), 'Cancellation published output'
     assert not list(work.glob('*.partial.mov')), 'Incomplete files were not cleaned up'
-    report={'passed':True,'frames':frames,'pixel_mae':mae,'pixel_max_error':maximum,'samples':len(errors),'audio_sha256':hashes[0].decode(),'unlabelled_audio':audio_layout_cases,'variants':variants,'vfr_rejected':True,'overwrite_refused':True,'cancel_cleanup':True,'output':str(output),'source':str(source)}
+    report={'passed':True,'frames':frames,'pixel_mae':mae,'pixel_max_error':maximum,'samples':len(errors),'audio_sha256':hashes[0].decode(),'unlabelled_audio':audio_layout_cases,'input_contract':contract_cases,'variants':variants,'vfr_rejected':True,'overwrite_refused':True,'cancel_cleanup':True,'output':str(output),'source':str(source)}
     (work/'integration-report.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
     print(json.dumps(report,indent=2))
 
