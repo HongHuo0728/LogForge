@@ -78,8 +78,8 @@ explains this correction; no numeric color tolerance or validator was weakened.
 
 See [the current verification record](VALIDATION.md) and
 [machine-readable results](verification/1.3.0.json) for actual executed checks.
-Tests use generated media. Historical v1.2.1 academic papers remain unchanged,
-including their fixed commit `6b43a93` and recorded 23/24 result.
+Tests use generated media. The bilingual academic papers in `AcademicPapers` have been revised for 1.3.0;
+they retain explicitly labeled historical measurements and cite this release verification record.
 
 - Timestamp quantization limits what can be distinguished physically. A different
   fixed clock producing the same packet sequence cannot be identified as VFR;
@@ -144,4 +144,4 @@ compatibility.
 - Current documentation: `README.md`, `CHANGELOG.md`, `docs/ARCHITECTURE.md`,
   `docs/TECHNICAL_REFERENCES.md`, `docs/VALIDATION.md`, `docs/images/LogForge.png`;
   new `docs/CADENCE_1.3.0.md`, `docs/INPUT_CONTRACT_1.3.0.md`, this release note and
-  `docs/verification/1.3.0.json`. Historical papers and release records are retained.
+  `docs/verification/1.3.0.json`. Academic papers are revised separately; historical release records are retained.

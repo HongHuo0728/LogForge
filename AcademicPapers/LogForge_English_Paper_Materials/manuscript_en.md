@@ -1,16 +1,16 @@
 # Abstract
 
-Designed for color interchange between mobile imaging and professional post-production, LogForge converts 10-bit BT.2020 HLG ProRes footage into Apple Log / BT.2020 ProRes 422 HQ. Although this may appear to be a change of video encoding, it involves interdependent questions of transfer-function interpretation, scene-exposure normalization, chroma-sampling phase, timeline reconstruction, container identification, and trusted execution of external tools. This paper studies the public repository at the fixed commit 6b43a93fbd4d1457ff20b4c99a030c0e398f520a, version 1.2.1, build 26927B. Source code, interfaces, tests, build configuration, the README, and versioned documentation provide the basis for an explanation extending from the signal model to the executable application.
+Designed for color interchange between mobile imaging and professional post-production, LogForge converts 10-bit BT.2020 HLG ProRes footage into Apple Log / BT.2020 ProRes 422 HQ. Although this may appear to be a change of video encoding, it involves interdependent questions of transfer-function interpretation, scene-exposure normalization, chroma-sampling phase, timeline reconstruction, container identification, and trusted execution of external tools. This paper studies the public repository at the fixed commit 913e4b9417fa0f32b88629c39062b54589d9dd21, version 1.3.0, build 26929A. Source code, interfaces, tests, build configuration, the README, and versioned documentation provide the basis for an explanation extending from the signal model to the executable application.
 
-The conversion is first decomposed into integer YCbCr decoding, nonlinear RGB reconstruction, inverse HLG opto-electronic transfer, reference-white normalization, optional creative adjustment, Apple Log encoding, and lossy output encoding and packaging. Piecewise functions, monotonicity, gray-card anchors, error propagation, and boundaries of invertibility are derived step by step. The analysis then examines the triple-buffer floating-point bridge, persistent CPU worker threads, and the CUDA implementation with runtime qualification. It explains why Standard mode can process arbitrary component blocks, whereas Creative mode must pair the complete RGB planes. Finally, timestamps, MOV atoms, audio copying, tool trust, failure recovery, and publication transactions are used to establish the conditions on which system correctness depends. Historical repository measurements and tests executed for this paper are reported separately.
+The conversion is first decomposed into integer YCbCr decoding, nonlinear RGB reconstruction, inverse HLG opto-electronic transfer, reference-white normalization, optional creative adjustment, Apple Log encoding, and lossy output encoding and packaging. Piecewise functions, monotonicity, gray-card anchors, error propagation, and boundaries of invertibility are derived step by step. The analysis then examines the triple-buffer floating-point bridge, persistent CPU worker threads, and the CUDA implementation with runtime qualification. It explains why Standard mode can process arbitrary component blocks, whereas Creative mode must pair the complete RGB planes. Finally, timestamps, MOV atoms, audio copying, tool trust, failure recovery, and publication transactions are used to establish the conditions on which system correctness depends. Historical repository measurements and existing 1.3.0 release verification are reported separately.
 
-The principal conclusion is conditional: when input interpretation, the numerical qualification of external tools, and output validation hold, LogForge implements traceable color re-encoding and a constrained media-delivery process. Mathematical derivation can explain conformity to the declared functional relationships; it cannot establish recovery of sensor information already lost, nor replace interoperability experiments with different cameras and editing applications. Version 1.2.1 differs from some historical documentation in input admission, defaults for missing chroma location, and pixel-rotation policy. These differences are explicitly resolved in favor of the current code. This paper is a reproducible source-code and engineering study; project statements, historical tests, and finite sampling are not elevated to unconditional certification.
+The principal conclusion is conditional: when input interpretation, the numerical qualification of external tools, and output validation hold, LogForge implements traceable color re-encoding and a constrained media-delivery process. Mathematical derivation can explain conformity to the declared functional relationships; it cannot establish recovery of sensor information already lost, nor replace interoperability experiments with different cameras and editing applications. Version 1.3.0 updates explicit input interpretation, the shared quantization-cell model, and publication reports while retaining color equations and camera pixel-rotation policy. These differences are explicitly resolved in favor of the current code. This paper is a reproducible source-code and engineering study; project statements, historical tests, and finite sampling are not elevated to unconditional certification.
 
 Keywords: HLG; Apple Log; BT.2020; floating-point video pipeline; CUDA; MOV metadata; software reliability; reproducible verification.
 
 # Original English Abstract
 
-LogForge is a native Windows application that converts BT.2020 HLG ProRes footage into Apple Log / BT.2020 ProRes 422 HQ. This monograph studies release 1.2.1 at an immutable repository revision. It derives the implemented signal transform, explains bounded CPU and CUDA processing, and examines timestamp reconstruction, metadata signaling, executable trust, cancellation, and transactional publication. Mathematical properties, repository measurements, and newly executed regression tests are distinguished throughout. The resulting argument is conditional: conformance to a declared encoding does not imply sensor-data recovery, camera-look equivalence, lossless transcoding, or universal editor compatibility.
+LogForge is a native Windows application that converts BT.2020 HLG ProRes footage into Apple Log / BT.2020 ProRes 422 HQ. This monograph studies release 1.3.0 at an immutable repository revision. It derives the implemented signal transform, explains bounded CPU and CUDA processing, and examines timestamp reconstruction, metadata signaling, executable trust, cancellation, and transactional publication. Mathematical properties, repository measurements, and existing versioned regression records are distinguished throughout. The resulting argument is conditional: conformance to a declared encoding does not imply sensor-data recovery, camera-look equivalence, lossless transcoding, or universal editor compatibility.
 
 # Chapter 1. Research Object, Evidence, and the Scope of the Argument
 
@@ -24,13 +24,13 @@ The research questions are therefore as follows. Given an input sample interpret
 
 ## 1.2 A fixed revision and repository-wide coverage
 
-The local Git HEAD and remote origin HEAD were checked and both identified the fixed commit stated above. Recording a commit is preferable to recording only the main branch, because subsequent fixes cannot silently change the object being reviewed. Key implementations are located by file and function names. The appendix and accompanying manifests classify all version-controlled files and provide line counts and hashes. Project code, test scripts, build resources, and documentation are included in the analysis. The third-party nlohmann/json single header and generated PTX are recorded separately as a dependency and generated artifacts; their individual lines are not presented as algorithms independently designed by this project.
+The local Git HEAD and remote origin HEAD were checked and both identified the fixed commit stated above. Recording a commit is preferable to recording only the main branch, because subsequent fixes cannot silently change the object being reviewed. Key implementations are located by file and function names. The appendix and accompanying manifests classify source and project files at the fixed commit (excluding paper artifacts) and provide line counts and hashes. Project code, test scripts, build resources, and documentation are included in the analysis. The third-party nlohmann/json single header and generated PTX are recorded separately as a dependency and generated artifacts; their individual lines are not presented as algorithms independently designed by this project.
 
 The repository contains documentation from several historical stages. The README is the user entry point, but the code at the selected commit is the final authority for implementation semantics. docs/ARCHITECTURE.md, docs/METADATA.md, and early validation records help explain design motivation, yet do not automatically override branches changed later. Current code, current release notes, and historical test records are compared in that order. Conflicts are identified explicitly rather than resolved by choosing the most favorable narrative. For example, older documentation requires an explicit declaration when chroma location is missing, whereas the current EffectiveChromaLocation returns left by default. This affects confidence in input interpretation.
 
 ## 1.3 Four non-interchangeable forms of evidence
 
-This paper uses four forms of evidence. Source-code facts establish that a path exists, such as multiplication by exposure gain in the scene-linear domain. Mathematical derivation explains why a property holds under stated conditions, such as strict monotonicity of the creative luminance mapping for positive neutral inputs. Historical measurements establish that the repository recorded a result on a particular machine, driver, and version. The present reproduction establishes the build and test outcomes actually obtained in the current environment. Each form is useful, and each has boundaries that cannot legitimately be crossed.
+This paper uses four forms of evidence. Source-code facts establish that a path exists, such as multiplication by exposure gain in the scene-linear domain. Mathematical derivation explains why a property holds under stated conditions, such as strict monotonicity of the creative luminance mapping for positive neutral inputs. Historical measurements establish that the repository recorded a result on a particular machine, driver, and version. Version verification establishes build and test outcomes recorded in existing release evidence. Each form is useful, and each has boundaries that cannot legitimately be crossed.
 
 A typical invalid inference is to move from agreement between CPU and GPU outputs on six input sets to permanent, exact agreement for every floating-point value. Another is to infer support in all players from successful identification in one Resolve version. Finite tests are used here to find counterexamples, build engineering confidence, and delimit compatibility. Genuine whole-domain claims require verifiable mathematical premises, language semantics, and implementation structure. Claims involving external encoders and the operating system retain the corresponding assumptions.
 
@@ -38,8 +38,8 @@ A typical invalid inference is to move from agreement between CPU and GPU output
 Evidence|Example|Supports|Does not directly support
 Source inspection|HLGToAppleLog call order|The current computational relationship|Exposure accuracy for arbitrary cameras
 Mathematical derivation|A lower bound on the creative-curve derivative|Neutral-luminance monotonicity in the stated parameter domain|All color components remaining in range
-Historical measurement|Version 1.2.0 performance JSON|Observations for the specified workload|A performance guarantee for version 1.2.1 on every platform
-Present reproduction|Release build and CTest|Results in this environment|A new commercial-editor certification
+Historical measurement|Version 1.2.0 performance JSON|Observations for the specified workload|A performance guarantee for version 1.3.0 on every platform
+Release verification|Release build and CTest|Results in the release record|A new commercial-editor certification
 @end
 
 ## 1.4 Correctness as a conditional proposition
@@ -82,11 +82,11 @@ An HLG system includes not only an OETF but also an opto-optical relationship co
 
 A camera may nevertheless have applied local tone mapping, denoising, sharpening, and exposure processing before generating HLG. The inverse OETF can reverse the declared function, but not an unknown camera-processing chain. If a camera has already compressed distinct highlights into the same code value, even an exact inverse yields only the same linear estimate. E should therefore be understood as a relative scene quantity interpreted under this model, not automatically as an original sensor electron count or actual scene radiance.
 
-## 2.5 Range and default interpretation in the source
+## 2.5 The explicit input-interpretation contract in 1.3.0
 
-The version 1.2.1 transcoder uses full range when the source explicitly reports pc, and limited range otherwise. The matrix and primaries are explicitly supplied to the filters under a BT.2020 NCL HLG interpretation. This behavior reduces rejection caused by missing tags, but places greater responsibility on the default interpretation. If a file actually uses another matrix and merely carries an HLG transfer tag, permissive admission cannot establish that it satisfies the intended assumptions.
+Version 1.3.0 records declared, assumed, overridden, effective, origin, conflicting_fields, and warnings in input_interpretation. Declared BT.2020 primaries and BT.2020 NCL matrix are honored; missing, unknown, or unspecified values use BT.2020 defaults with warnings. Explicit conflicts fail before decoding unless a single-file GUI confirmation or CLI --force-bt2020-interpretation authorizes reinterpretation. This override performs no gamut conversion and does not prove that the source tag is incorrect.
 
-This paper consequently separates format admission from reliable signal interpretation. The current UnsupportedReasons checks only the ProRes codec, Standard/HQ profile, and HLG transfer tag. Resolution, time base, duration, and related conditions are checked in later processing layers. The initial admission gate no longer enforces every historical restriction on color, sampling, or auxiliary metadata. Strict output validation does not eliminate the modeling risk that input defaults disagree with the actual recording configuration.
+Transfer must explicitly be arib-std-b67; the override cannot bypass missing transfer, PQ, other non-HLG transfers, codec, or container requirements. Range tv/pc means limited/full; missing range assumes limited with a warning. Declared left/center chroma siting is honored; missing siting uses left or an explicit input option, which cannot replace a source declaration. Unsupported range and siting fail. The container must satisfy QuickTime MOV requirements, and multiple primary videos fail. A GUI queue does not inherit the first file's confirmation; a CLI batch override applies to the explicitly authorized command.
 
 # Chapter 3. Deriving Inverse HLG and Reference Exposure
 
@@ -425,6 +425,10 @@ When any thread fails, fail saves the first exception, sets abort, wakes every w
 
 It is not enough to prove that states zero, one, and two cycle correctly during normal execution. Exit conditions must also break every type of wait. That is often the difficult part of reliable concurrent code. Library exceptions, user cancellation, broken pipes, and partial thread-creation failure must all converge on cleanup rather than leave a condition variable waiting for an owner that no longer exists.
 
+## 9.7 The scope of memory reporting
+
+bridge_buffer_bytes_each, count, and total identify one bridge slot, slot count, and total allocation. Creative frame and CUDA pinned/device allocations are separate. Legacy float_buffer_bytes denotes one slot and is deprecated. None is whole-process peak memory.
+
 # Chapter 10. Persistent CPU Workers and Determinism
 
 ## 10.1 Avoiding thread creation for every block
@@ -503,6 +507,10 @@ GPU time includes upload, kernel execution, and download, with additional pinned
 
 The source uses one nonblocking stream and synchronizes commits block by block. It is not an indefinitely deep, multistream, all-GPU video pipeline. ProRes decoding and encoding remain on CPU, as do zscale matrix and range operations. Describing the project as full-pipeline GPU hardware transcoding would be inaccurate. It accelerates the color-mathematics stage and uses thread budgeting and bridging to reduce waiting elsewhere.
 
+## 11.7 Deterministic device ranking and process-local qualification caching
+
+Candidates sort by eligibility, descending VRAM and compute_score, lexicographic UUID, then ordinal; all candidates are reported. Qualification caches at most 16 entries in the current process. Identity binds GPU UUID, driver API/file version, embedded PTX SHA-256, application version/build, algorithm, and Creative parameters. Explicit qualification and retries after failure revalidate; failures evict entries. The 2e-6 tolerance and color kernel are unchanged. Physical multi-GPU selection was not exercised locally; this cache is not persistent approval.
+
 # Chapter 12. Fixed-Frame-Rate Validation and Timeline Reconstruction
 
 ## 12.1 Information lost by rawvideo
@@ -511,37 +519,37 @@ A rawvideo pipe carries sample bytes, not each frame's original timestamp, conta
 
 MediaInfo retains average and nominal frame rates, but Cadence does not make its final decision by checking whether they are equal. Nominal rate may be a probe estimate, while the average can be affected by container duration and quantization. The values that actually require inspection are the PTS and duration of every video packet. This explains why the project can accept a nonstandard but fixed cadence such as 29.99 while rejecting a drifting sequence whose average appears normal.
 
-## 12.2 Describing cadence in integer time-base units
+## 12.2 Integer timestamps and a shared quantization cell
 
-Let the time base be tau seconds per tick, packet i begin at integer timestamp p_i, its duration be d_i, and a candidate period be T ticks. Fixed cadence requires every duration to be near T, adjacent starts to be separated by approximately T, and accumulated phase to be near iT. The program also strictly requires each adjacent PTS difference to equal the preceding packet's declared duration, first excluding gaps or overlaps in the internal time table.
+Let the video time base be tau seconds, all packet boundaries relative to the first PTS be t_i, and the candidate period be T ticks. The final packet end is also a boundary. Positive durations, increasing PTS, and exact equality of each interval to the preceding duration are required first; nonuniform durations must be adjacent integers. Duplicates, backward timestamps, missing durations, gaps, and overlaps fail early.
 
-$$\epsilon_d(i)=|d_i-T|,\qquad \epsilon_i(i)=|(p_i-p_{i-1})-T|$$
+$$r_i(T)=t_i-iT,\qquad Q(T)=\max_i r_i(T)-\min_i r_i(T)$$
 
-$$\epsilon_\phi(i)=|(p_i-p_0)-iT|$$
+$$Q(T)\leq 1\ \mathrm{tick}$$
 
-All three error limits are 1.05 ticks, in the input video time base, not milliseconds or hundredths of a frame. Expressing the threshold in milliseconds without time_base loses its meaning. Repeated or decreasing PTS, missing or nonpositive duration, and disagreement between an interval and the preceding duration all fail early, with a zero-based packet index recorded.
+Every boundary must share one closed quantization cell. This covers floor/ceil rounding and a bounded one-tick correction; it does not enlarge the former 1.05-tick empirical threshold. Local durations, intervals, and complete phase are checked. Reports retain inferred-clock errors separately from nominal-clock disagreement.
 
-## 12.3 Exact and candidate periods
+## 12.3 Exact periods, candidates, and convex-envelope search
 
-If every packet duration and adjacent interval is exactly equal, that integer period is authoritative. With time base n/d and packet period m, the frame rate is d/(nm), reduced by the greatest common divisor. The code checks representable range before multiplication to prevent overflow in the product of time base and a long period. This branch does not force 29.99 to 30000/1001 merely because both are close to 30.
+When all durations and intervals agree, the integer period m is authoritative. Time base n/d yields a reduced rate after checked multiplication. Rates 29.99, 29.98, and 29.9701 are not forced onto standard rates.
 
 $$f=\frac{1}{m\tau}=\frac{d}{nm}$$
 
-When clock quantization makes periods unequal, the program first uses the most frequent packet duration as a conservative anchor. If the period implied by nominal frame rate lies within the observed duration range, it becomes the candidate. Errors are then checked across every packet. A fitted average is not used to remove accumulated drift, because such fitting could disguise an actual cadence change as normal behavior.
+For nonuniform sequences, the nominal candidate is tested first but has no veto. An endpoint-derived rational period follows; if it fails, upper and lower hull-edge slopes locate the minimum residual span. Q is a maximum of affine residuals minus their minimum, hence convex and piecewise linear; support changes occur at envelope-edge slopes. A final complete-sequence cell check cannot be replaced by an average or least-squares fit. Integer subtraction of the floor period avoids cancellation across large timestamp spans; numerical allowance scales only with packet count. Hull construction is O(n), candidate sorting is at worst O(n log n), support queries are logarithmic, final checking is O(n), and storage is O(n).
 
-## 12.4 Why accumulated phase must be checked
+## 12.4 The 59.94 regression and identifiability limits
 
-Consider a very small excess in each local frame interval. Every individual error may remain within tolerance, yet after hundreds of frames the start-time phase error can exceed a frame. Local-interval checks alone miss this persistent drift. Accumulated phase directly compares the ideal clock measured from the first frame with the actual clock, eventually causing a systematic offset to exceed the threshold and be rejected.
+The generated regression uses 309 packets, time base 1/1200, duration 6183 ticks, and nominal rate 60000/1001. PTS[i]=floor(i*2061/103), giving average rate 59.970887918. Packet 53 differs from the nominal 20.02-tick clock by 1.06 ticks and fails the old gate. The inferred period 2061/103 ticks and rate 41200/687 occupy approximately 0.990291262 ticks of residual span and pass. The maximum nominal phase disagreement of 4.16 ticks remains reported. This reconstructs supplied numbers with generated timings; the original failing recording was not examined.
 
-@figure:cadence|Phase examples for exact fixed cadence, quantized alternating cadence, and sustained drift. Dashed lines show the 1.05-tick budget. These instructional curves demonstrate that small local error does not guarantee small accumulated phase error.
+@figure:cadence|The generated 309-packet reconstruction in 1.3.0. Left: nominal and inferred clock residuals. Right: the shared one-tick cell across all boundaries, including the final packet end.
 
-Conversely, a correct rational frame rate on a coarse time base may require alternating long and short integer durations. If accumulated phase remains within budget, such quantization jitter should not simply be equated with arbitrary VFR. The policy allows bounded quantization around an interpretable fixed clock; it does not preserve every original timestamp. Accordingly, the paper describes validated reconstruction of fixed cadence rather than completely lossless copying of packet timestamps.
+The former negative 20*i-floor(i/64) equals ceil(1279*i/64), a quantized fixed clock, and remains as a positive case. The genuine accelerating negative is 20*i-floor(i*i/4096); piecewise and clustered changes add negatives. Timestamps cannot distinguish different physical clocks producing the same integer sequence, or independently reveal sub-resolution deviations. Validated fixed cadence is reconstructed; original packet timestamps are not claimed to be copied losslessly.
 
 ## 12.5 Why the output must be checked again
 
 Passing input validation establishes a basis for pipe reconstruction, not proof that the encoder actually produced the expected cadence. Output validation traverses every video packet again and compares frame count, average frame rate, validated frame rate, and video duration. This can reveal changes caused by incorrect commands, encoder synchronization policy, or the muxer's time base. Media.cpp explicitly contains floating-point frame-rate thresholds and duration tolerances. They should be interpreted as implemented, rather than replaced by a claim of exact integer equality everywhere.
 
-Temporal scanning stores all packets in a vector, giving linear storage in packet count N. Building the duration-frequency table additionally involves ordered-map operations. Costs are manageable when footage contains only a few distinct duration values, but very long clips still increase preliminary scan time and memory. Future streaming, multipass validation could reduce memory, but would have to retain equivalent candidate-selection and phase-checking semantics.
+Temporal scanning stores all packets in a vector, giving linear storage in packet count N. The 1.3.0 convex-envelope inference has at worst O(n log n) time and O(n) storage, so very long clips increase preliminary scan time and memory. Future streaming, multipass validation could reduce memory, but would have to retain equivalent candidate-selection and phase-checking semantics.
 
 # Chapter 13. Audiovisual Synchronization, Edit Lists, and Rotation Geometry
 
@@ -593,6 +601,10 @@ When material does not meet the standard matrix conditions, the current version 
 
 Audio layouts follow a related principle: two unlabeled channels are not necessarily standard left and right. The program uses guess_layout_max 0 to prohibit inference and requires the output layout string to match the input. Preserving an unknown value can be more honest than writing a plausible default. Compared with defaulting missing chroma location to left, this also shows that default policies differ across fields and should be presented clearly at the interface.
 
+## 13.7 Audio payload identity and timing semantics
+
+AudioPayload.cpp launches FFmpeg for source and output, using stream copy and streamhash to SHA-256 the concatenated compressed packet content of each audio stream. It neither decodes nor stores whole tracks in memory. Stream counts and every digest must match before publication. Hashes omit timestamps, packet boundaries, and container layout; relative start, duration, and format checks remain separate. A no_audio state does not claim audio_payload_verified. The method adds two sequential audio reads and external-process launches.
+
 # Chapter 14. MOV Atom Parsing and Semantic Comparison
 
 ## 14.1 Why an independent container analyzer is needed
@@ -643,7 +655,7 @@ Substituting a generic log enumeration would declare a different curve, while re
 
 docs/APPLE_LOG_IDENTIFICATION.md records native reference provenance, SHA-256, negative baselines, candidate fields, and actual Resolve import outcomes. The identification writer's validation report retains that experiment's software version and date and explicitly sets this_file_imported_in_editor to false. It indicates conformity of the current output structure to an established pattern, not that every transcode opens an editor for a fresh experiment.
 
-The paper preserves this distinction. The controlled version 1.1.0 result in Resolve Studio 20.3.2.9 on Windows supports compatibility evidence for that configuration. Reusing the writer in version 1.2.1 shows that the mechanism continues, but does not automatically certify newer editors or other products. Apple Log and Apple Log 2 / Apple Wide Gamut are also different targets; similar names do not extend the scope.
+The paper preserves this distinction. The controlled version 1.1.0 result in Resolve Studio 20.3.2.9 on Windows supports compatibility evidence for that configuration. Reusing the writer in version 1.3.0 shows that the mechanism continues, but does not automatically certify newer editors or other products. Apple Log and Apple Log 2 / Apple Wide Gamut are also different targets; similar names do not extend the scope.
 
 ## 15.3 Structure of the thirty-five-byte extension
 
@@ -841,6 +853,10 @@ Maintenance removes only recognized log names and installation directories after
 
 This design ties convenience to provable ownership. In large-media workflows, cleanup itself may be more dangerous than a failed conversion. Recovery and retention should therefore not be treated as incidental code that simply deletes temporary files. They require path, identity, and concurrency assumptions as careful as those of publication.
 
+## 19.7 Crash recovery and the two-transaction boundary
+
+Temporary-media cleanup must match file identity in the ownership journal; a filename does not authorize deletion. Remux tracks both old and new original paths before switching the active path, closing the crash gap between rename and identity update. Ten injected stages cover reservation, transformation, remux, patching, reports, and publication. Replacement identities, inaccessible evidence, or a crash before durable journaling may leave files for manual review. The no-overwrite movie rename and atomic report replacement are distinct transactions. Final report-write failure preserves a valid published movie and returns an error; recovery never deletes final media to roll back its report.
+
 # Chapter 20. GUI, CLI, Queues, and Inspectable Interaction
 
 ## 20.1 A single owner of background work
@@ -879,6 +895,10 @@ Cli.cpp exposes detect, probe, convert, batch, qualify-cuda, and analyze. Argume
 
 The CLI and GUI share mathematical, temporal, and publication rules through the core, but their exposure controls differ. The GUI offers discrete values from -4 to +4 stops; the CLI accepts -8 to +8. Reproducing experiments requires naming the entry point and all parameters rather than merely saying default settings. Defaults may refer to different configurations at different times, under saved state, or through different interfaces.
 
+## 20.7 Queue planning, arguments, and stream-disposition reports
+
+Queue.cpp freezes a complete deterministic destination plan before encoding, handling equal stems, case collisions, and existing targets; no-overwrite publication still protects against external races. CLI integers require full-token bounded parsing; empty, trailing-garbage, overflow, negative, and zero tokens fail before discovery. Multiple primary videos fail. Omitted attached pictures, data, and subtitles are reported separately from regenerated timecode; not every video stream is described as preserved.
+
 # Chapter 21. Test Structure, the Present Reproduction, and Failure Analysis
 
 ## 21.1 Tests are not a single score
@@ -893,33 +913,38 @@ integration.py generates controlled media and checks actual output. signal_integ
 
 gui_smoke.py and layout_snapshots.py require an interactive desktop and real windows to check language, theme, DPI, interaction paths, and screenshots. resolve_identification.py requires an actual Resolve scripting connection and suitable references, making it an editor-interoperability experiment. Historical outcomes from these latter categories are not presented as rerun results here, and simulated windows or fabricated editor responses were not used as substitutes.
 
-## 21.3 The build and complete CTest run
+## 21.3 The 1.3.0 release verification record
 
-On September 29, 2026, a Release build was executed in the current Windows workspace and every configured target built successfully. The twenty-four CTest entries in the current build configuration were then run, including actual CUDA qualification, media conversion, portrait compatibility, signal, publication, and sustained 4K120 tests. Twenty-three passed and one failed, with a total test wall time of approximately 195.71 seconds. The CUDA artifact-consistency script was also executed and passed checks of source and PTX hashes, target architecture, and precise compilation options.
+docs/verification/1.3.0.json records the September 29, 2026 environment: Windows 11 x64, 20 logical CPUs, and MSVC Release /MT. Complete CTest has 29 passes, 0 failures, 0 skips, and 424.09 seconds elapsed; media_pipeline takes 182.571 seconds and sustained_4k120 83.3651 seconds. This paper cites existing release evidence; updating documents is not a newly executed media experiment.
 
-Test logs and JUnit XML accompany the paper. The XML's top-level time field is an integer number of seconds as emitted by the tool; individual timings retain decimals. The total in the narrative comes from CTest's terminal summary. Source or tests were not modified and rerun to obtain an all-green outcome: the fixed revision remains unchanged. Failure is part of the research object and must not be hidden in an effort to prove the tool correct.
+The companion ctest_current.xml is a case-by-case reading table exported from that JSON; evidence/verification_1.3.0.json retains the authoritative original record. It is not a new CTest execution log. Generated media cover interpretation, cadence, audio-byte corruption, queue collisions, publication races, and ten injected crash stages. No new commercial-editor or physical multi-GPU verification was performed.
 
 @results
 
-## 21.4 Why media_pipeline failed
+## 21.4 Repairing the earlier media_pipeline issue
 
-The failing assertion is at line 154 of tests/integration.py. The test copies a valid source into a MOV with only color_primaries changed to bt709, retaining ProRes and HLG conditions, and expects conversion to be rejected with no destination file. Version 1.2.1 UnsupportedReasons no longer checks primaries. The file is therefore accepted, processed under the explicit BT.2020 NCL interpretation, and passes production output validation. The test consequently reports Unsupported input accepted.
+The 1.2.1 paper recorded 23/24 passes: explicit BT.709 primaries were automatically interpreted as BT.2020. Version 1.3.0 restores conflict rejection, retains the earlier rejection case, and adds actual MOV conversions with missing fields, consistent declarations, conflicts, and explicit overrides. The failed condition becomes a meaningful regression constraint rather than a deleted assertion.
 
-This is a contract conflict directly explained by the code. The older integration test expects stricter admission of color tags, while current release notes deliberately relax the format gate. Current unit tests already assert that missing optional tags do not block input, but this older end-to-end expectation was not synchronized. The immediate maintenance question is whether explicitly conflicting primary tags and missing tags should receive different policies. Implementation, tests, and documentation should then agree. This paper analyzes the issue without unilaterally changing repository policy.
+The new media_pipeline passes. Release evidence lists fixed 29.99, 29.98, and 29.9701 cadence, rotation, silent, AAC, multiple-audio, and camera-clock variants. The earlier coverage gap after the failed assertion is no longer a current-version conclusion. Passing supports the listed generated cases, not arbitrary original camera recordings.
 
-## 21.5 Why the failure is not simply harmless
+## 21.5 Passing results and remaining modeling assumptions
 
-From a test-maintenance perspective, an outdated expectation caused the failure. From a signal-interpretation perspective, it also exposes the practical cost of permissive admission. An HLG file explicitly tagged BT.709 is processed as BT.2020. If the tag accurately describes its content, color may be wrong. Production output validation builds its reference from the same input interpretation and cannot independently prove that ignoring the source tag was justified. This is a shared modeling assumption, not a problem eliminated by output-format checks.
+29 passes are not a whole-program or all-device proof. Defaults for absent tags still assume that content matches the interpretation; user authorization does not establish true BT.2020 gamut. Shared assumptions of output references and production transforms require source provenance and independent integer-signal checks.
 
-The twenty-three passes therefore do not establish that the tool has no problems, and the single failure does not establish that all conversions are unreliable. More precisely, mathematics, parallel execution, tool qualification, and several media paths have evidence from this environment. The complete integration suite retains an unresolved inconsistency where the input contract evolved, and the policy needs clearer user communication and distinct tests. Because integration.py stopped at the assertion, its later variants did not execute in this run and cannot be counted as covered.
+Cadence is identifiable only at integer timestamp resolution. Audio hashes omit timestamps. Movie publication and report replacement are separate transactions. GPU ranking has unit-test and installed-device qualification evidence. The update relaxes no color tolerance and adds no Resolve, Premiere, or FCP import certification.
 
 ## 21.6 Specific sustained-test results
 
-The sustained_4k120 reproduction used generated footage of two seconds, 240 frames, 3840 by 2160, and 120 fps. Conversion took 43.449496 seconds, approximately 5.523654 fps. Peak application private memory was 15142912 bytes, approximately 14.44 MiB. Frames 0, 119, and 239 were sampled, producing 1536 luma samples. Maximum post-encoding error was 0.86505094 codes, below the test's two-code threshold.
+The historical 1.2.1 paper's sustained_4k120 reproduction used generated footage of two seconds, 240 frames, 3840 by 2160, and 120 fps. Conversion took 43.449496 seconds, approximately 5.523654 fps. Peak application private memory was 15142912 bytes, approximately 14.44 MiB. Frames 0, 119, and 239 were sampled, producing 1536 luma samples. Maximum post-encoding error was 0.86505094 codes, below the test's two-code threshold.
 
 This conversion time differs from the 78.55 seconds reported by CTest for the case because the latter includes fixture generation, additional sampling, and script overhead. It also does not mean real-time 4K120 processing. Input acquisition rate is 120 frames per second; actual offline conversion throughput is approximately 5.5 frames per second. The two uses of fps describe different concepts and must be distinguished in figure titles and axes.
 
-@figure:memory|Application private-memory trace from the paper's 240-frame 4K120 reproduction in CPU Standard mode. Data comes from sustained-report.json and covers only the main application, excluding FFmpeg children and GPU device memory. This is an observation from one run.
+@figure:memory|Application private-memory trace from the historical 1.2.1 paper's 240-frame 4K120 reproduction in CPU Standard mode. Data comes from sustained-report.json and covers only the main application, excluding FFmpeg children and GPU device memory. This is an observation from one run.
+
+## 21.7 The 1.3.0 sustained-processing record
+
+The 1.3.0 release JSON uses generated 3840x2160, 120 fps, 240-frame, 2-second media. Conversion and job validation take 47.5439493 seconds, approximately 5.047960961 fps; peak application private memory is 15183872 bytes, approximately 14.48 MiB. Frames 0, 119, and 239 yield 1536 luma samples and maximum post-encoding error 0.8650509424642223 codes. Legacy float_buffer_bytes=4194304 denotes only one bridge slot. This record has no complete memory trace, so the preceding figure retains the explicitly labeled historical 1.2.1 trace; it must not be conflated with the new peak measurement.
+
 
 # Chapter 22. Performance Data, Complexity, and Reproducible Comparison
 
@@ -927,7 +952,7 @@ This conversion time differs from the 78.55 seconds reported by CTest for the ca
 
 docs/benchmarks/1.2.0.json records twenty formal cases: 1080p24 and 4K at 24, 30, 60, and 120 fps, each combined with Standard/Creative and CPU/CUDA. Input is a one-second generated grayscale ramp. Each task performs tool checks and production output validation, with no audio or rotation. The dataset is suitable for comparing backend and workload costs on that machine, not for inferring throughput on long clips, complex color texture, disk arrays, or thermally stabilized hardware.
 
-The hardware record identifies twenty logical CPUs, an RTX 3080 Ti Laptop GPU with sixteen GB of device memory, and a specified NVIDIA driver. The paper plots these as historical measurements and keeps their version and date explicit. A dataset named 1.2.0 cannot be relabeled as a new version 1.2.1 measurement. Even with an unchanged color kernel, thread allocation, operating-system state, and surrounding processing can affect timing.
+The hardware record identifies twenty logical CPUs, an RTX 3080 Ti Laptop GPU with sixteen GB of device memory, and a specified NVIDIA driver. The paper plots these as historical measurements and keeps their version and date explicit. A dataset named 1.2.0 cannot be relabeled as a new version 1.3.0 measurement. Even with an unchanged color kernel, thread allocation, operating-system state, and surrounding processing can affect timing.
 
 @figure:benchmark|Historical throughput matrix from repository version 1.2.0. Solid and dashed lines distinguish Standard and Creative modes; colors distinguish CPU and CUDA. The vertical axis is measured pipeline throughput, not input capture rate. Each case is a single observation on one machine.
 
@@ -997,9 +1022,9 @@ Backend selection is therefore part of result provenance. Work may cross two imp
 
 ## 23.6 Tracing a final-path conflict
 
-If another process creates the destination during conversion, the initial absence check is stale. The final MoveFileExW forbids replacement, so the task reports OutputExists, preserves the externally created file, and cleans its own temporary media. A passing validation report can therefore exist without a final video published by this task. External scripts must not interpret the report's passed field as a guarantee of publication.
+If another process creates the destination during conversion, the initial absence check is stale. Final MoveFileExW forbids replacement, preserves the external file, and cleans only temporary media matching task ownership. validation_passed and legacy passed may be true while publication.published and completed are false and publication.status is failed. The report records attempted, final_path, and error.
 
-This suggests a future interface refinement. The report is currently saved before publication, while publication-failure details reside mainly in the task error and log. An explicit publication state or a final transaction-result update would help automation distinguish content validated but publication failed from fully completed. This is an improvement proposal, not a claim that the current JSON already implements that field.
+Version 1.3.0 implements explicit publication state: completed requires both validation and publication. A pending report is saved before publication, then updated to published after a successful move. Final report-write failure preserves the valid published media and returns an error. A crash between the two filesystem transactions may still leave a valid movie and pending report; this remains a current limitation.
 
 # Chapter 24. Discussion, Implementation Limits, and Research Conclusions
 
@@ -1017,11 +1042,11 @@ The paper cannot establish recovery of original sensor dynamic range, complete e
 
 Nor has all C++ concurrency or every Win32 error branch been formally verified. The paper offers conditional arguments based on inspectable implementation structure, numerical derivations, and test evidence, not a whole-program theorem generated by a proof assistant. Formula-derived curves, single historical measurements, and the present single reproduction must each be understood according to their own evidence class.
 
-## 24.3 The input contract most in need of clarification
+## 24.3 The updated contract and retained limits
 
-Version 1.2.1 relaxes admission for a clear compatibility purpose, but missing information, explicitly conflicting information, and uninterpretable information should be distinguished. Missing camera model need not affect color computation. Defaulting missing chroma location to left may be pragmatic. Explicitly declared alternative primaries followed by forced BT.2020 interpretation creates a different risk. A single category of optional tags does not express these distinctions adequately.
+Version 1.3.0 distinguishes missing, explicitly conflicting, and uninterpretable fields and records defaults, overrides, and warnings, resolving the earlier admission inconsistency. Camera model, absent timecode, auxiliary mebx tracks, and legal edit lists remain compatible. Cardinal rotations still operate on float32 pixels; 90/270 degrees swap the raster and output orientation is identity.
 
-Compatibility could be retained while recording defaults, alerting users to explicit conflicts, and giving different policies stable report fields. Tests should separately cover missing-but-allowed, conflicting-and-warned-or-rejected, and explicit user override. The failed integration test provides a concrete starting point: revise the contract, then synchronize code and tests, instead of deleting the assertion or restoring an old gate merely to obtain green results.
+Explicit authorization, a shared quantization cell, audio-byte verification, and ownership-based recovery constrain failure modes. They cannot restore unrecorded capture settings, identify sub-resolution clock changes, or guarantee every editor's behavior. Versioned evidence must track implementation; historical 1.2.0 performance is not a new 1.3.0 benchmark.
 
 ## 24.4 A stronger scientific validation program
 
@@ -1033,7 +1058,7 @@ For editor interoperability, a matrix of software, version, color-management mod
 
 LogForge demonstrates an understandable engineering approach: public color mathematics defines the transform, independent multimedia tools provide codecs, bounded memory and explicit ownership organize concurrency, and structured validation determines delivery. Its value lies not in inventing a new Log curve but in connecting existing standards with the timing, metadata, and failure behavior of a practical desktop workflow while leaving inspectable evidence.
 
-In this fixed-version study, the Release build and twenty-three tests passed; one older rejection expectation conflicted with newer input admission; and sustained 4K120 numerical samples met the current threshold. These outcomes support operation of the core transform and several reliability mechanisms as designed in this environment, while retaining limits concerning input interpretation, evolving documentation, and finite sampling. A rigorous implementation paper must explain why success follows and where its conclusions cease to apply. On that basis, the paper develops a layered argument from formulas and code through tests to the final file.
+The 1.3.0 release record reports a successful Release build and 29 passing tests, resolves the earlier admission conflict, and retains passing sustained 4K120 numerical sampling. These outcomes support operation of the core transform and several reliability mechanisms as designed in this environment, while retaining limits concerning input interpretation, evolving documentation, and finite sampling. A rigorous implementation paper must explain why success follows and where its conclusions cease to apply. On that basis, the paper develops a layered argument from formulas and code through tests to the final file.
 
 # Appendix A. Symbols, Units, and a Review Guide
 
@@ -1068,7 +1093,7 @@ The accompanying repository manifest records the path, category, line count, and
 
 ## A.4 Reading the experimental records
 
-The regression XML is the result of the reported run. The sustained-test JSON contains conversion duration, the application-private-memory sequence, and sampling error. Historical performance JSON comes from repository version 1.2.0. Keeping these datasets separate preserves temporal and version provenance. Theoretical curves are generated directly from formulas by the typesetting script, not fitted to camera captures or presented as actual waveform-monitor readings.
+The regression XML is a reading export of the 1.3.0 release JSON. The historical 1.2.1 sustained-test JSON contains conversion duration, the application-private-memory sequence, and sampling error. Historical performance JSON comes from repository version 1.2.0. Keeping these datasets separate preserves temporal and version provenance. Theoretical curves are generated directly from formulas by the typesetting script, not fitted to camera captures or presented as actual waveform-monitor readings.
 
 The accompanying LaTeX and Markdown are editable sources, while the PDF is generated by a local vector-typesetting program. A platform-directory error in the built-in LaTeX compiler prevents validation of the complete project, so the source is not labeled as successfully built by that compiler. PDF formulas are vector paths, the body is searchable, and figures and tables carry numbers, units, data provenance, and scope limitations.
 

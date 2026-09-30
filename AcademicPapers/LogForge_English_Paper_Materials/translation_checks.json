@@ -1,10 +1,10 @@
 {
-  "source_commit": "6b43a93fbd4d1457ff20b4c99a030c0e398f520a",
+  "source_commit": "913e4b9417fa0f32b88629c39062b54589d9dd21",
   "equations": 66,
   "figures": 18,
-  "subsections": 134,
-  "nonempty_blocks": 556,
-  "english_words": 20868,
+  "subsections": 140,
+  "nonempty_blocks": 568,
+  "english_words": 21046,
   "chinese_characters_in_english": 0,
   "problems": []
 }

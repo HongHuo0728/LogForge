@@ -1,103 +1,111 @@
 path	lines	bytes	sha256	role
 .clang-format	9	247	12a067c4b568871a6bd38656578ed2df62eac5ce86bee50d50e36fddd119a95a	Repository formatting, line endings, and ignore rules; reproduction infrastructure
 .gitattributes	10	169	343b613987797cb64c9bb6dcaf0ddba2b808eddcf770e7fe85fb569b9a589383	Repository formatting, line endings, and ignore rules; reproduction infrastructure
-.github/workflows/build-windows.yml	71	2764	43e7e6f85a681e3408703ab7fd3d84d0ee34a664590ea3878a53a0b7cf4dbd6d	C++20/MSVC targets, test registration, build and release allowlists; Chapters 8, 21
+.github/workflows/build-windows.yml	73	2869	4643932a494947863063872a7c7f7a82c6e4956588cb2e549c6d9a419d6f4b43	C++20/MSVC targets, test registration, build and release allowlists; Chapters 8, 21
 .gitignore	48	751	cd7c853953c287a70021938c3c2cd82cda999f8c1a12abb701bd8bc78a0cdc4c	Repository formatting, line endings, and ignore rules; reproduction infrastructure
-CHANGELOG.md	141	9659	368b93867efae369da60e7946ccc8e4fb87752a2b81456c0d2a43eddbb3a6f76	Project documentation, historical evidence, or development procedures; cross-checked by chapter topic
-CMakeLists.txt	124	9296	6a12fd2be0dd2bbca7b78cc601635a8222cf6856d5ca81dab0010064daace506	C++20/MSVC targets, test registration, build and release allowlists; Chapters 8, 21
+CHANGELOG.md	175	11866	c4cd4d39b93273a1bb8d7a07ab1462098582c63bc36ab47ccefbd8b2ec6117c5	Project documentation, historical evidence, or development procedures; cross-checked by chapter topic
+CMakeLists.txt	143	10871	3fb0fa432af3c6faa786fa18b7283d938463a262f6b7b8d116347b97bc491939	C++20/MSVC targets, test registration, build and release allowlists; Chapters 8, 21
 CONTRIBUTING.md	19	2953	0a2abd0219b7776edd6e56a7d3fc25b032de91291e1200652c1bd275c8cbcb8d	Project documentation, historical evidence, or development procedures; cross-checked by chapter topic
 LICENSE	21	1078	d2b1a524541b73ddb7474654410dbe5dd782d481959fe237d749f1e3d1136dcd	Project or third-party licensing and attribution; distribution boundaries
-README.md	233	27355	efb454924028a502302bb5b751cb43e70289fd0935d36989dc4e0b99c0a63fab	Project documentation, historical evidence, or development procedures; cross-checked by chapter topic
+README.md	248	30307	90854d8689613597b86bc8729719b433a5e52b31de5ab1d5ab496f006d736d67	Project documentation, historical evidence, or development procedures; cross-checked by chapter topic
 THIRD_PARTY_NOTICES.md	41	2715	70926562afcfa9b4bba6129a544e3547bc7919e9dc51ec9f30ef4bb09351da7c	Project or third-party licensing and attribution; distribution boundaries
 docs/APPLE_LOG_IDENTIFICATION.md	153	9133	ecdc0896f24584b97c439fdb2d78453a9fd798e7ce0b0b9696306acb91181390	Project documentation, historical evidence, or development procedures; cross-checked by chapter topic
-docs/ARCHITECTURE.md	147	14614	7972eaf13401ff9a212d5f26554edf14b7a8cfa49a2d999737ab4edaf6145fb8	Project documentation, historical evidence, or development procedures; cross-checked by chapter topic
-docs/BENCHMARK_1.2.0.md	62	6010	5c289167580dd1c7b504ecea0227a8024714251ee931768c889eaa1be1854cdc	Project documentation, historical evidence, or development procedures; cross-checked by chapter topic
-docs/BUG_AUDIT_1.1.1.md	63	7273	063144bb62910596895ac7e172c7dc372483d0cb4bc4a5eead1c6f886afca4c8	Project documentation, historical evidence, or development procedures; cross-checked by chapter topic
+docs/ARCHITECTURE.md	175	17602	bd747d8a28c539f0e6f3003e8cd53d20db9614f66993254a9c6ccd234141f0f5	Project documentation, historical evidence, or development procedures; cross-checked by chapter topic
+docs/BENCHMARK_1.2.0.md	62	5967	dc1841627b235cc1a681f95ab540abf6eab4e3a7c047b9049ce29384dd9c37e6	Project documentation, historical evidence, or development procedures; cross-checked by chapter topic
+docs/BUG_AUDIT_1.1.1.md	63	7210	7a434cecc54910c661c678149b6850dd3675568f44190683f70e5d49dd7985ab	Project documentation, historical evidence, or development procedures; cross-checked by chapter topic
+docs/CADENCE_1.3.0.md	84	4540	613a5227ff17be80d216a148df688317b5e231a03380d89d93b0cb1ab9a0ddd2	Project documentation, historical evidence, or development procedures; cross-checked by chapter topic
 docs/COLOR_PIPELINE.md	97	8085	a26e0740881c1b9a00819e30d15e2f6cf8c9740c93af14a77573ef3b11fbc745	Project documentation, historical evidence, or development procedures; cross-checked by chapter topic
 docs/CREATIVE_ADJUSTMENTS.md	46	4895	88102a849700142217dd0fcb225ea684b9f213c17949205b61433ad862676f87	Project documentation, historical evidence, or development procedures; cross-checked by chapter topic
-docs/FFMPEG_PROVIDER.md	54	6952	ac40882a24bba073b2d3767f5143b0b68708cda219f6ff7a7a01f42837f0e8c1	Project documentation, historical evidence, or development procedures; cross-checked by chapter topic
+docs/FFMPEG_PROVIDER.md	54	6898	ff5ebdaa9bb8f4f241dca6163a7360f3417aee2be4312e59efcdf4277bdb511d	Project documentation, historical evidence, or development procedures; cross-checked by chapter topic
 docs/ICON.md	28	1600	4cb31a795651fe66817112de2014ccfde21a0f0f48521e339cf17ef2897c0c2d	Project documentation, historical evidence, or development procedures; cross-checked by chapter topic
-docs/METADATA.md	79	9176	a264ddece54935d751a25700cef4b8114bf198c771a222583e52398318924fe0	Project documentation, historical evidence, or development procedures; cross-checked by chapter topic
+docs/INPUT_CONTRACT_1.3.0.md	41	2804	e8cc64be0ec7a7494ffe921d54c081cec86b8f6075bc2618a8fc26152e1cdb0b	Project documentation, historical evidence, or development procedures; cross-checked by chapter topic
+docs/METADATA.md	79	9097	95873dd530bbfec8f3fc93ed26c0b40ad6d2e187012b8351a3136c42859b5272	Project documentation, historical evidence, or development procedures; cross-checked by chapter topic
 docs/RELEASE_1.2.0.md	92	5550	8510c1d929444cbdb7287fa93792be0c9ddb54696d5a9a68b8d2f7d37d9274fa	Project documentation, historical evidence, or development procedures; cross-checked by chapter topic
-docs/RELEASE_1.2.1.md	46	2522	9eb3de52ff8ef9b1a520539724b2a83e3ac67f77cc3ab1c5d51f926d49932aea	Project documentation, historical evidence, or development procedures; cross-checked by chapter topic
-docs/TECHNICAL_REFERENCES.md	137	16149	c97054741275e8a67750110e0cb133d3e441dfdd0ae15eea9bd21d6bbfafa24e	Project documentation, historical evidence, or development procedures; cross-checked by chapter topic
-docs/VALIDATION.md	598	47231	f35088aa312376842c8980fa08d80f604bc6ad64b9c397fdd837a5a6901b0341	Project documentation, historical evidence, or development procedures; cross-checked by chapter topic
-docs/benchmarks/1.2.0.json	2805	95920	3347a311d28e712752661b4a2615725251dae4488eeced1565bf63390518cb27	Project documentation, historical evidence, or development procedures; cross-checked by chapter topic
-docs/images/LogForge.png	None	37255	7cfc452f64600478b7944f7787b7ce3ba2a8aa2a60a9d7b03134ab22d15521dc	Project documentation, historical evidence, or development procedures; cross-checked by chapter topic
-docs/verification/1.2.0.json	320	8602	c054d034c823c62e9365ec2c20a440f1826e59a83664f45ef39cc0264a6e79f3	Project documentation, historical evidence, or development procedures; cross-checked by chapter topic
+docs/RELEASE_1.2.1.md	46	2476	6ca71379eee8e4a43e19949017364d5b86631f324570e25a3b61057a2f9e4fbf	Project documentation, historical evidence, or development procedures; cross-checked by chapter topic
+docs/RELEASE_1.3.0.md	147	11035	5873fde6841b773e25914ea0874dfc1531e84f070e688587a552a719aeb236eb	Project documentation, historical evidence, or development procedures; cross-checked by chapter topic
+docs/TECHNICAL_REFERENCES.md	152	17099	50b9ce166ece13999b5a7ba02ee04f2b58c75fc7ddc63c09b6c8a69bf1578306	Project documentation, historical evidence, or development procedures; cross-checked by chapter topic
+docs/VALIDATION.md	684	52802	7caf3d9c7126107eb4f27af42646682b88f839bbe5721c1eeccf6a55d64175bb	Project documentation, historical evidence, or development procedures; cross-checked by chapter topic
+docs/benchmarks/1.2.0.json	2805	93115	ca1531acd42ee74fe7fc56664801242f047446b39c7bc7b0a745ca9256ba9976	Project documentation, historical evidence, or development procedures; cross-checked by chapter topic
+docs/images/LogForge.png	None	37377	feea70a693b0fe97c5c4f31df3d4496889cd8288e038362f01037d088cfbef4e	Project documentation, historical evidence, or development procedures; cross-checked by chapter topic
+docs/verification/1.2.0.json	320	8283	ddfdcfc9b2753164a32138d6dcf6282f894b2ee58cc8a52d7b1faf08f28b513a	Project documentation, historical evidence, or development procedures; cross-checked by chapter topic
+docs/verification/1.3.0.json	947	23552	86af24fd056038c29c8aa6caccfd612daa280ebc6c87dd243ecc4f91097d28b8	Project documentation, historical evidence, or development procedures; cross-checked by chapter topic
 include/logforge/AppleLogIdentification.h	14	538	f680e727764b585577ac0b1c279d40e5fd79094a706c606c766a174873fee5e0	Writing the 35-byte identification extension and checking structure; Chapter 15
+include/logforge/AudioPayload.h	8	382	5a0f882da25b764c0958b8daf4eba8bb3a5a152e71bc603a5d09fade8ec6812a	Per-stream SHA-256 over copied audio packet content; Chapter 13
 include/logforge/Color.h	53	2298	b84b959a93c7ba1724b57628df0d7af9fa4277b8596079b7e18d5b612c259bfa	Color-model interfaces, constants, parameters, and statistics; Chapters 3-7
-include/logforge/CudaTransformer.h	24	757	cb3c78e9fda67240d2ab04304054d6e0c37379f926d88d879b62fe8203156181	Dynamic driver interface, qualification, and transactional commit; Chapter 11
+include/logforge/CudaTransformer.h	26	933	021cc78ddc2cd1963d34b533f31f9f7209ccba346cf6811030ea5514646c12ce	Dynamic driver interface, qualification, and transactional commit; Chapter 11
 include/logforge/Discovery.h	61	2992	c9ec233f7adf1a54438bdc9ecc36fccc2b5efa8a15479663018d4fac909b9c01	Local volume and directory traversal; Chapter 17
 include/logforge/FFmpeg.h	62	2368	e800495087beaab28f6ac7b0e3f3de6876adeef277e1ce2b3b3cc5ef26c7569d	Tool capabilities, discovery scheduling, and fixed downloads; Chapter 17
 include/logforge/FloatBridge.h	21	830	fbb7866da4acc35c702328d8511492313febaef42c899653d139e716076032e0	Three-slot read/transform/write state machine and thread budgeting; Chapter 9
 include/logforge/FloatTransformer.h	18	564	57d45cefb02514d76d90653b9ee76502d06a942c1b8a42e62efd8b756bae4246	Persistent CPU workers, tile pairing, and statistics merging; Chapter 10
 include/logforge/Localization.h	34	1170	05b79d1b1b53f8f65b5ef0ea65b2e2e3bed42036e1f0fb53adce79661b29a4ca	Stable message keys and single-pass argument replacement; Chapter 20
-include/logforge/Media.h	87	3821	08e504ba764534e33beba756527126ec76bd52adc4f03cab7c9db17e785276f2	Probe parsing, admission, metadata arguments, and output validation; Chapters 2, 16
-include/logforge/Messages.inc	262	29793	55f1ee07f6da30e7cbc368628c95b7ea84b55871f4937c05ac25e5f492d023ea	Bilingual message macro table, stable keys, and placeholders; Chapter 20
+include/logforge/Media.h	97	4546	04e4ba12a7f0a2ebb308bcaa22a3b214ffdc1650fcdd8bd56c72c05ada683aad	Probe parsing, admission, metadata arguments, and output validation; Chapters 2, 16
+include/logforge/Messages.inc	272	31908	2c07480743de8086a6fb4bbedb9843c1595f181e0ae6c9372ee30d1441cd0baf	Bilingual message macro table, stable keys, and placeholders; Chapter 20
 include/logforge/PixelSanity.h	24	640	8cd7d0a6e8b47b8885a016bd2c5c64f8b8ed680765a01f264353bb6f480d09dd	Nine-block gross-error checks on first, middle, and last encoded frames; Chapter 7
 include/logforge/Platform.h	115	3353	2b97344db3740ccb4d16806fc573384d70ae7c449322219e17b5b99b656ec3d9	Wide strings, handles, process supervision, pipes, and hashing; Chapter 18
-include/logforge/Queue.h	8	465	3cc33ff450339cbeb5eee098dd78d615310798674496b42935fd0ed2ddb84378	Serial multi-file tasks and per-item failure recording; Chapter 20
+include/logforge/Queue.h	17	931	c2fafdaec61f71bb41605a083d375475b89318854a013ba93011d4c5c7d4357d	Serial multi-file tasks and per-item failure recording; Chapter 20
 include/logforge/Settings.h	23	643	359c8126a827a14ffc5a125ceed67c14676daf6ec674f3746e5e5124f4a18fa2	Field merging, concurrency locks, and atomic preference persistence; Chapters 19, 20
 include/logforge/StorageSafety.h	18	489	07ee1b5548d9c48a77e472ed5133c2c3b98d0eb70cae198fb6f76a179c3007d3	File-identity journals, state locks, and ownership-based recovery; Chapter 19
 include/logforge/ToolTrust.h	29	997	4b89a357d1d8a95a44fdddeab703c7e28a3080bee7c96c7ed7657ee281b93265	Identity, approval, and leases for the executable pair; Chapter 17
-include/logforge/Transcode.h	33	1287	c786cdbeffda746793f7c0bf5a1adef40b00a60c0b3c4bb037b809647886acff	Complete media task, backends, validation reports, and final publication; Chapters 8, 23
+include/logforge/Transcode.h	36	1478	1e12ab267cb112e399972ec4295ebc0a0aaab396851e070e08cba02e7233375c	Complete media task, backends, validation reports, and final publication; Chapters 8, 23
 include/logforge/Ui.h	49	2145	bcf4657680d358717bd7f505b5731db93a7bea684eb2110c6304d2bafdebff00	Themes, DPI, native drawing, and screenshots; Chapter 20
 resources/LogForge.ico	None	103909	1e262b4ac403e2d843d0b261857d485a830126a1be92c5652285692cb2ae6ee7	Icons, manifests, version resources, and generated templates; build and interface
 resources/LogForge.manifest	9	1218	7a4b2b2a6dcce95772d18d3a9bd833234b116f60dd743edf40777ed1e8650429	Icons, manifests, version resources, and generated templates; build and interface
 resources/LogForge.png	None	1161472	12f8ffa70b1f275385d98aa901c5f17441dfcabdd0b5a78c27468e49cdeb8b9f	Icons, manifests, version resources, and generated templates; build and interface
 resources/LogForge.rc	34	853	cafd9451b9f69b77d1c9b3e4e1a0a67bddccfd5b8b4e3e55693eaa6d3e5b2fff	Icons, manifests, version resources, and generated templates; build and interface
 resources/Version.h.in	6	244	6ff776788c331bc1784449eb7bfda980c028bf47b31c45ab86d1dbfb1a7ae15d	Icons, manifests, version resources, and generated templates; build and interface
-resources/VersionResource.h.in	4	305	8aac898816910f0604f7f07934b3330e382811025b877a20fbe212080803cb82	Icons, manifests, version resources, and generated templates; build and interface
-src/AppleLogIdentification.cpp	194	9669	7e4e8bde35e9f959261de0fd3d7d46372e6d632093400f627c1fe3ae993dc52d	Writing the 35-byte identification extension and checking structure; Chapter 15
-src/Cadence.cpp	168	7954	e323be3a9a3500254a8d5dcc8d04f31173ed72368d32f0a997b59553c991b00e	All-packet period, phase, and fixed-clock validation; Chapter 12
-src/Cli.cpp	223	11521	63a897aea0a2406ce77ffa18f83ca37eadab3ecaf144e8ef65c370ea8eac6bb2	Commands, numeric arguments, and automation entry points; Chapter 20
+resources/VersionResource.h.in	4	301	c7983eed111b60afef652576a58a6eb001c50d4237b89da3cc6b09bf2d573501	Icons, manifests, version resources, and generated templates; build and interface
+src/AppleLogIdentification.cpp	194	9475	d6efead7e6091a43151cdf75e125367ba9e0d11f3b102d73d1171da6a4ae6645	Writing the 35-byte identification extension and checking structure; Chapter 15
+src/AudioPayload.cpp	54	2901	56d9cd4701f54a77dcf4aa22fb597d9b29c053a5c3b94c926e4039058fcd0e89	Per-stream SHA-256 over copied audio packet content; Chapter 13
+src/Cadence.cpp	381	19331	159919fe3406bd71e098f5c1465e9d4adee88a1a772592a79790af88b07a3d31	All-packet period, phase, and fixed-clock validation; Chapter 12
+src/Cli.cpp	248	12742	014aafef40b476d04953255925123023f4c16df67a747f59ec65c89d67904319	Commands, numeric arguments, and automation entry points; Chapter 20
 src/Discovery.cpp	141	5625	5a1158a97ce9760d16d49ab459cd909299f8a86876f387a4d386d819ed9b34b6	Local volume and directory traversal; Chapter 17
 src/DiscoveryHelper.cpp	501	21631	79ab057331767ec3547cbc76bb75cbf1b47575abff7ba1e62da5548ea5abfb4b	Supervised hidden discovery entry point and source budgets; Chapter 17
-src/FFmpeg.cpp	416	19743	796f085a9bc8d5bbb4859470189b6eef8a1514f110cbce005ecaf8848d561247	Tool capabilities, discovery scheduling, and fixed downloads; Chapter 17
+src/FFmpeg.cpp	416	19327	f36edcf4e4401820282105cc11e4ade9187ab601890a8f124786b4db2ca80a9d	Tool capabilities, discovery scheduling, and fixed downloads; Chapter 17
 src/FFmpegNumeric.cpp	234	12546	369c388412c0eb181e8de62666fc1ea31159022729bae4c56c8469db8b150c1f	Independent integer signals and actual codec numerical qualification; Chapters 5, 7
 src/FloatBridge.cpp	183	6615	c9c1a362141507e0eaa9f62d2269304afb005caaecd4c330437b4981d48d668c	Three-slot read/transform/write state machine and thread budgeting; Chapter 9
 src/Localization.cpp	77	2601	226577c38c748dc0ad00f0932903844a1b8c411706967188147c0c23be82f482	Stable message keys and single-pass argument replacement; Chapter 20
-src/MainWindow.cpp	1710	81800	a548eece7ef0e4422934fc0383ca00153197b9420a66bad6d8e5a61cf957c179	Single background worker, events, and measured layout; Chapter 20
-src/Media.cpp	400	19862	6d6e7cfcc7b269cfd7a984bb2ac851755c3e8f685428e0cae826660b1b6a8a6a	Probe parsing, admission, metadata arguments, and output validation; Chapters 2, 16
-src/MediaSafety.cpp	272	12964	60b21485eecea443deef5b2f338d1e968c0aa57eded463113884ddafa8cb27a1	Time semantics, display matrices, and fixed-width header repair; Chapters 13, 16
+src/MainWindow.cpp	1739	81839	b774b3d05f220558da01af28458b3fb1f01fb56a8b00861d3be4c5e3593278ea	Single background worker, events, and measured layout; Chapter 20
+src/Media.cpp	497	25009	96f846f34b443a04e36843450f652be158eb61dfbc5226c53e15e3dc3d139232	Probe parsing, admission, metadata arguments, and output validation; Chapters 2, 16
+src/MediaSafety.cpp	292	13961	c46f3581e19c6caa6e0316219303473526483be1b888d8a70bdce91eae2f9ed2	Time semantics, display matrices, and fixed-width header repair; Chapters 13, 16
 src/MetadataPolicy.cpp	53	2525	6ee23ddd4f1852c0e77b9ed7b452abdd7488cd77d15a6472851bc933e2a8d0c6	Metadata allowlists and conflict classification; Chapter 16
 src/MovAnalyzer.cpp	433	21512	e3c05f84f886015445f2d456caeb1d8169cc5e7f682d70e18792a809c91c729d	Bounded atom parsing and typed semantic comparison; Chapter 14
-src/PixelSanity.cpp	184	8726	feb7a1d41c169c56e567d67c1fdc0706e702c362dfd611ee5e1951014515f41c	Nine-block gross-error checks on first, middle, and last encoded frames; Chapter 7
+src/PixelSanity.cpp	184	8542	2e9d78d9789e42df5c86d21da9ee42f66971f81823f41fe8124853f2becb71bc	Nine-block gross-error checks on first, middle, and last encoded frames; Chapter 7
 src/Platform.cpp	398	14816	8b453a11298d9e33e348eea4343364c6b336f2a482ae9627b987ce7a58c3534f	Wide strings, handles, process supervision, pipes, and hashing; Chapter 18
-src/Queue.cpp	49	2401	d83dd93f45866f2a2c771439bed820cd663ce8a4e333a91de282611de1464175	Serial multi-file tasks and per-item failure recording; Chapter 20
-src/Settings.cpp	120	4486	1683ff619a1314ae74fa902d8b49115daebb5268786df058eca4f1dd26bb8db6	Field merging, concurrency locks, and atomic preference persistence; Chapters 19, 20
-src/SettingsWindow.cpp	659	30348	9f1bca19873f612fe38ed1ca9bbb9503eeed0cf9610cabbcb0f9d6f49a919ed6	Settings drafts, save/cancel, candidate review, and dialogs; Chapter 20
-src/StorageSafety.cpp	214	9503	30a783479ca3e505c65ab10290266079c2e76a9fe4f88daf9096327542744b12	File-identity journals, state locks, and ownership-based recovery; Chapter 19
-src/ToolTrust.cpp	124	5115	3a9905906290eb33ed1c67c109402ea1924e4c020369e26695f204ed3c969e9a	Identity, approval, and leases for the executable pair; Chapter 17
-src/Transcode.cpp	584	30850	35882a70c5d2406359074a5ec98f096397206abe52ef51bb8377a58a9968e331	Complete media task, backends, validation reports, and final publication; Chapters 8, 23
+src/Queue.cpp	86	4133	49e9b5366a31ae2a82cf8b31c6019c77405a537206c96e70601fd288148079db	Serial multi-file tasks and per-item failure recording; Chapter 20
+src/Settings.cpp	120	4366	3431fccfd332e3d6efc7a32966f4c4c94769a3fc8edede8c9ea1c862fa599b61	Field merging, concurrency locks, and atomic preference persistence; Chapters 19, 20
+src/SettingsWindow.cpp	659	29689	5e26d569706466287915c8b074ce04265840d0c4f6f9545f994a213e2b86063a	Settings drafts, save/cancel, candidate review, and dialogs; Chapter 20
+src/StorageSafety.cpp	214	9289	ff5df9bfecdf4153947998057fd69f67381f1ff6d610c00d32691c00bebf6680	File-identity journals, state locks, and ownership-based recovery; Chapter 19
+src/ToolTrust.cpp	124	4991	3afe79a5067beb7a84445602b3d0d6dc96fc64f9c259758480f92f4f76404563	Identity, approval, and leases for the executable pair; Chapter 17
+src/Transcode.cpp	648	34250	2048666e671f971020b71ef034227fb6ecc35ec8593e7c64833b61b172b56ad2	Complete media task, backends, validation reports, and final publication; Chapters 8, 23
 src/Ui.cpp	322	15575	54098d2fafa50dbcd400563c3e469c092b423f6b932f1b7b31ad3dc41878e569	Themes, DPI, native drawing, and screenshots; Chapter 20
 src/color/AppleLog.cpp	19	533	9b0e6342405cb45c7b4058f0a9fd744cd481e6555a1dd593c0c607c56983a711	Piecewise Apple Log encoding/decoding and public constants; Chapter 4
 src/color/ColorKernel.cu	58	2867	ba04b0dee2e9fe42b4ff1b48d8879242d0845f23f588e93982fa172855f09519	Device-side double color kernel and shared-memory reduction; Chapter 11
-src/color/ColorKernel.manifest.json	14	465	9d9adc2b2f38153fbca2aa45a0f6028a4d73108cf5b11e45db132cf1a7832cad	CUDA source, PTX, compiler identity, and precise options; Chapter 11
-src/color/ColorKernel.ptx.h	1620	169037	b31bd7dbe2e58b157e722976947e7a56465d26a5b7d31a98011005b16a39d2e2	Generated PTX byte array: content-hash and source-manifest checks; not handwritten algorithm code; Chapter 11
-src/color/CudaTransformer.cpp	333	16161	fa362f0de9a4dba956e6f8ca7859ea7ec4f23f261badf2ed8f09839354415cde	Dynamic driver interface, qualification, and transactional commit; Chapter 11
-src/color/FloatTransformer.cpp	127	5395	9589f760dcbcd90f597a5c41f7bc5bf4966c664508499863ef3b49755fd856dd	Persistent CPU workers, tile pairing, and statistics merging; Chapter 10
+src/color/ColorKernel.manifest.json	14	451	ccae7226c1f1607047a4a184122080ae668fe7286c6b194d80534f130e3edb96	CUDA source, PTX, compiler identity, and precise options; Chapter 11
+src/color/ColorKernel.ptx.h	1620	167417	4f65eb1b19e795c947b7aa9599fbf52fc8831b70b3c75fabc23eca38141aba5d	Generated PTX byte array: content-hash and source-manifest checks; not handwritten algorithm code; Chapter 11
+src/color/CudaTransformer.cpp	423	21217	4058ad34f9d49df590d90e98fdcd05990973da00b4ccd2d1fec6691b8d7eab05	Dynamic driver interface, qualification, and transactional commit; Chapter 11
+src/color/FloatTransformer.cpp	127	5268	221068c17e85d0ea195908f4d8859f97a171ed4f0214a47ceb77529e24ce485a	Persistent CPU workers, tile pairing, and statistics merging; Chapter 10
 src/color/HLG.cpp	98	4638	626936469d53efd5f9217b3819c9c71b227fc681b55727e575aca98b0fefc478	Inverse HLG, reference scaling, creative adjustment, and signal counts; Chapters 3, 6
-tests/application.cpp	262	13363	fe055c27f053e4fa4454f356eba02e1aa259128df9bc9aeddcdaaa34d064ce2e	Preferences, discovery, and version-resource tests; Chapter 21
+tests/application.cpp	262	13107	b70a5926620daf8829caa5b58dabbfe9e19c0209a4f68990778bab6161d93499	Preferences, discovery, and version-resource tests; Chapter 21
 tests/benchmark.py	97	5640	486297f68cd94c2354da1ac77881571fc1c97e0bdee3bb88a826eb9ad59f335b	Formal throughput matrix and process observations; Chapter 22
-tests/compatibility_v121.py	145	8539	57a927f3a0b289f006828dc49ce6799aaf43d4b388f9ef25fc0def97e825dbd6	Portrait pixels, matrices, and audio-offset regression; Chapters 13, 21
+tests/cadence_v130.cpp	128	6570	17a7564b3b2388537e562c6e09739c930ebabe6a1fec02ec5be2def47212676b	Full-sequence rational quantization regressions; Chapters 12, 21
+tests/compatibility_v121.py	200	12096	41ace765aa9f6301d0a75204ee317eb1d9bfe04a7a5319760ca9d4a9450ac64c	Portrait pixels, matrices, and audio-offset regression; Chapters 13, 21
 tests/cuda_artifact.py	18	1017	9b2b026d8e64a0f621e12054c0897cdd1acb13a49615c46529e2b4d46c2a4f54	CUDA source, embedded PTX hashes, and option consistency; Chapter 11
 tests/fake_ffmpeg.cpp	10	327	d03976fec00fe86e846312f0ed8ac43f445785cea02f5afcc1d6225d0c38d3fe	Marker fixture establishing non-execution of unknown tools; Chapter 17
 tests/gui_smoke.py	123	7280	99015b1d77e52e99a471d86631dbb66b8be446d305bce0222da78e870d8866f8	Interactive desktop GUI scenarios; not rerun for this paper; Chapter 20
-tests/hardening.cpp	367	17467	c1e7a3104a91c902f6e683f19fa9981924082783bf3bde8147ea230533c1bbe8	Cadence, tool trust, MOV, parallelism, and publication regressions; Chapter 21
+tests/hardening.cpp	396	19277	12307d6060bb346f1874e21970ef2500bef7f42988ce2f94df6b9c88eb38026d	Cadence, tool trust, MOV, parallelism, and publication regressions; Chapter 21
 tests/identification.cpp	101	4889	f6df4ec1397510b5abfabe65110803aff5d108dc746eaaade1f477e84a641920	Identification writing, idempotence, and structural-failure tests; Chapters 15, 21
-tests/integration.py	255	18347	825b629e9056a8e9cd546a86f165bb914ca18d77a6362d95d3d0df5e3228c686	End-to-end synthetic media; the reported run fails at the old admission assertion on line 154; Chapter 21
+tests/integration.py	352	24688	d84dd2d5a30f5a46dff41458b70f17b68f434a4949b083ce12ed05d65cb4a711	End-to-end synthetic media; 1.3.0 release verification passes explicit conflict and override regressions; Chapter 21
 tests/layout_snapshots.py	35	1738	879e3dc61d11f99fd9390a7c1da7ecd50d121b0569df628b3dcb47e5ba6c55b9	Production layout, theme, and DPI screenshot assertions; Chapter 20
-tests/package_audit.py	38	2219	7968c0ae2965bbe8eedc27cb34e575174b0e8a35af1a821270e1c14c658e7b1e	Archive allowlist, CRC, executable, and SHA-256 audit; Appendix
-tests/process_fixture.cpp	51	1926	e37f441837d9e51c40f0516c863dd02fc69244f7653c2a99781f4ae341c2084a	Descendant-held pipes, long lines, and exit-code fixtures; Chapter 18
-tests/reliability.cpp	246	12380	ed95cf31a3c19c90166072d160b8f1a2c6ad0c1701de016e23a1e6b4df77544a	Process, discovery, and CLI abnormal-path regressions; Chapter 21
+tests/package_audit.py	39	2282	fada36d0c269fc29f22c2c534ff51c5bdbfeea1346ddd66ddf6c633c7ff27320	Archive allowlist, CRC, executable, and SHA-256 audit; Appendix
+tests/process_fixture.cpp	58	2211	ef4c0e5c9cfb1d3a23ce049c6c7b3185b5933a285872e7551eaa510c545eb49c	Descendant-held pipes, long lines, and exit-code fixtures; Chapter 18
+tests/reliability.cpp	261	13314	20a380b423928d6460c7ba7bbc6d94039e5e9d3aba8d47fdf75d384885635c43	Process, discovery, and CLI abnormal-path regressions; Chapter 21
 tests/resolve_identification.py	110	5726	bddeee4d0b60e82cd3e6f81cc99a9c8ad94276b5aec011a963e78f5d36059510	Real Resolve controlled-import script; not rerun for this paper; Chapter 15
-tests/signal_integrity.py	160	8543	c9771136e6c9d5cd4a03abb89215226bd40f401f0ad1d5b75fcafffccc85000d	Independent integer patches, creative processing, and range counts; Chapters 7, 21
-tests/sustained.py	90	5328	8c3d77c24fc197f57f3d2760b6fe5561fac7f7e79b97ecf2ef30a0a7cbe4e92a	240-frame 4K120, memory, and post-encoding luma; Chapter 21
-tests/tests.cpp	396	21303	af78f2035ba814374648a04cb1b15f4c2229c539bf590fe47a11cee5efc1a627	Basic mathematical, media, and platform tests; Chapter 21
-tests/v120.cpp	386	18321	07e63cd2a09ea56f4a2c286cd913a2147038966e94da5c4a4fcecad21e9c2264	Storage, matrices, CUDA faults, queues, and media regressions; Chapter 21
+tests/signal_integrity.py	160	8383	f6d1c742c78b011a1f29e1798b491842ec499ce20c6bcc0f2969d554e1db9071	Independent integer patches, creative processing, and range counts; Chapters 7, 21
+tests/sustained.py	90	5238	f0a0bbfe5535a4e17c89ab3712cc3b7eee4d5a5f20511609d4cd8e5cbd755872	240-frame 4K120, memory, and post-encoding luma; Chapter 21
+tests/tests.cpp	463	25952	e7842e814433210a3a51375b16b001c63330e577f5cd053fd2260dd7feb9a5f2	Basic mathematical, media, and platform tests; Chapter 21
+tests/v120.cpp	386	17956	64d7b77302e46c63762607510a92318ac0fe7affdc05eb409019e38f3e35e2d8	Storage, matrices, CUDA faults, queues, and media regressions; Chapter 21
+tests/v130.cpp	239	14931	499f45e9c6afe87af51aac4abb65e21f8454403da957d30f9c63f0d333c50386	Queue, report and CUDA cache regressions; Chapters 11, 20, 21
 third_party/NVIDIA-CUDA-NOTICE.txt	23	1243	502d5a8a622d63149048faf0b9100544e3b2d28910bf00a06fe0c7e6cabbba4b	Project or third-party licensing and attribution; distribution boundaries
 third_party/nlohmann/LICENSE.MIT	21	1075	c0d068392ea65358b798b8c165103560f06e9e3b38c4ab4e2d8810a7b931af86	Project or third-party licensing and attribution; distribution boundaries
 third_party/nlohmann/json.hpp	25526	953436	aaf127c04cb31c406e5b04a63f1ae89369fccde6d8fa7cdda1ed4f32dfc5de63	Third-party JSON 3.12.0 single-header dependency for JSON I/O; not the project color algorithm
-tools/compile_cuda.py	48	2905	255e5af85e1054d08bbd1b45577999fe09220e4c0cb6e7e381b3210f07fa97bc	NVRTC compilation with precise options and generated manifest; Chapter 11
+tools/compile_cuda.py	48	2857	4654f40513d2fb8645288577b70fd899b467274975ab45cefd70a326f2109573	NVRTC compilation with precise options and generated manifest; Chapter 11

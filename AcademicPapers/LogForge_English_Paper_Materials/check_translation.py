@@ -23,6 +23,6 @@ for i,(a,b) in enumerate(zip(orig,tran),1):
     nums=re.findall(r'(?<![A-Za-z])\d+(?:\.\d+)?',a)
     missing=[n for n in nums if n not in b]
     if missing:problems.append({'block':i,'missing_literals':missing,'zh':a,'en':b})
-report={'source_commit':'6b43a93fbd4d1457ff20b4c99a030c0e398f520a','equations':len(eq(en)),'figures':len(fig(en)),'subsections':len(sub(en)),'nonempty_blocks':len(tran),'english_words':len(re.findall(r"\b[A-Za-z]+(?:[-'][A-Za-z]+)*\b",en)),'chinese_characters_in_english':len(re.findall('[\u4e00-\u9fff]',en)),'problems':problems}
+report={'source_commit':'913e4b9417fa0f32b88629c39062b54589d9dd21','equations':len(eq(en)),'figures':len(fig(en)),'subsections':len(sub(en)),'nonempty_blocks':len(tran),'english_words':len(re.findall(r"\b[A-Za-z]+(?:[-'][A-Za-z]+)*\b",en)),'chinese_characters_in_english':len(re.findall('[\u4e00-\u9fff]',en)),'problems':problems}
 (root/'translation_checks.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
 print(json.dumps(report,ensure_ascii=False,indent=2))

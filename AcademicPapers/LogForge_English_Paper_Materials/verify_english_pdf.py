@@ -4,9 +4,10 @@ import pymupdf as fitz
 import hashlib,json,re
 root=Path(__file__).parent
 title='LogForge Source Code Analysis and Mathematical Proof - Academic Paper'
-pdf=root.parent/(title+'.pdf')
+pdf=root.parent/(title+'_enus.pdf')
 qa=root/'qa';qa.mkdir(exist_ok=True)
 doc=fitz.open(pdf)
+for n,page in enumerate(doc):page.get_pixmap(matrix=fitz.Matrix(0.85,0.85)).save(qa/f'page-{n+1:03}.png')
 pages=sorted(qa.glob('page-*.png'))[:len(doc)]
 for start in range(0,len(pages),12):
     sheet=Image.new('RGB',(1600,1820),'#d8dee3');d=ImageDraw.Draw(sheet)
@@ -28,14 +29,14 @@ for n,page in enumerate(doc):
     if any(t in text for t in ['@figure:','@table:','@inventory','@references','@results']):issues.append({'page':n+1,'kind':'unexpanded_directive'})
     if len(text.strip())<60:issues.append({'page':n+1,'kind':'almost_blank'})
     if re.search('[\u4e00-\u9fff]',text):issues.append({'page':n+1,'kind':'untranslated_chinese'})
-original=json.loads((root/'original_chinese_files_sha256.json').read_text(encoding='utf-8-sig'))
+original=json.loads((root/'chinese_counterpart_sha256.json').read_text(encoding='utf-8-sig'))
 changed=[]
 for item in original:
     path=Path(item['Path'])
     if not path.exists() or hashlib.sha256(path.read_bytes()).hexdigest().upper()!=item['SHA256']:changed.append(str(path))
-zhpdf=root.parent/'LogForge_源码解析与数学论证_学术论文.pdf'
+zhpdf=root.parent/'LogForge_源码解析与数学论证_学术论文_zhcn.pdf'
 zhhash=hashlib.sha256(zhpdf.read_bytes()).hexdigest()
-if zhhash!='f4f3277e50b780f89f1dafa876ec3b9052db9a5718745579527e48794140b99e':changed.append(str(zhpdf))
+if zhhash!=json.loads((root.parent/'LogForge_论文资料/制作与验证统计.json').read_text(encoding='utf-8'))['pdf_sha256']:changed.append(str(zhpdf))
 assets=[]
 for path in (root/'figures').iterdir():
     src=root.parent/'LogForge_论文资料/figures'/path.name

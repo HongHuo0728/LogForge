@@ -1,21 +1,21 @@
 {
-  "commit": "6b43a93fbd4d1457ff20b4c99a030c0e398f520a",
-  "version": "1.2.1 (26927B)",
-  "body_cjk_characters": 31071,
-  "manuscript_cjk_characters": 32110,
-  "manuscript_characters": 51328,
-  "pages": 63,
+  "commit": "913e4b9417fa0f32b88629c39062b54589d9dd21",
+  "version": "1.3.0 (26929A)",
+  "body_cjk_characters": 31402,
+  "manuscript_cjk_characters": 32445,
+  "manuscript_characters": 52912,
+  "pages": 66,
   "equations": 66,
   "figures": 18,
   "tables": 5,
-  "tracked_files": 102,
-  "pdf_sha256": "f4f3277e50b780f89f1dafa876ec3b9052db9a5718745579527e48794140b99e",
+  "tracked_files": 110,
+  "pdf_sha256": "7c8cdf3a748590c7ebb426b1694daf2f815ba58f442ba27e6c0e83c38c1b4c5c",
   "ctest": {
-    "tests": 24,
-    "passed": 23,
-    "failed": 1,
-    "failed_test": "media_pipeline"
+    "tests": 29,
+    "passed": 29,
+    "failed": 0,
+    "provenance": "docs/verification/1.3.0.json; existing release record"
   },
-  "latex_builtin_compile": "unavailable: Unable to find standard directories for platform",
+  "latex_builtin_compile": "not run: multi-file project uses ReportLab export",
   "pdf_export": "ReportLab; embedded CJK fonts; vector SVG math and charts"
 }

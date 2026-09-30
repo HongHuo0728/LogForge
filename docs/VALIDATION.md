@@ -59,8 +59,8 @@ the final complete suite then reran all groups. See
   of enumeration order; only one physical GPU is present.
 - The embedded CUDA source/PTX manifest and precise compilation flags pass their
   artifact check. Scalar formulas, CUDA kernel/PTX, FloatTransformer, PixelSanity,
-  FFmpeg discovery/trust and historical academic papers are unchanged from the
-  starting checkout.
+  FFmpeg discovery/trust are unchanged from the starting checkout. Academic
+  papers are revised separately for 1.3.0.
 - Sustained **3840x2160 / 120 fps / 240 frames** CPU conversion passes in
   **47.544 seconds** including job/validation overhead (**5.048 output fps**;
   the complete CTest including fixture generation takes 83.37 seconds).

@@ -6,21 +6,21 @@
 \setlength{\parskip}{5pt}
 \pagestyle{fancy}\fancyhf{}\fancyhead[L]{LogForge 源码研究与数学论证}\fancyfoot[C]{\thepage}
 \title{LogForge：HLG 至 Apple Log 转换的数学原理、源码实现与验证}
-\author{公开源码技术研究稿}\date{2026年9月29日}
+\author{公开源码技术研究稿}\date{2026年9月30日}
 \begin{document}\maketitle\tableofcontents
 
 \chapter*{摘要}\addcontentsline{toc}{chapter}{摘要}
-面向移动影像与专业后期制作之间的色彩交接，LogForge 将十位 BT.2020 HLG ProRes 素材转换为 Apple Log／BT.2020 ProRes 422 HQ。这个任务表面上只是更换视频编码，实际涉及传递函数的解释、场景曝光归一化、色度采样相位、时间轴重建、容器识别与外部工具可信执行等相互制约的问题。本文以公开仓库的固定提交 6b43a93fbd4d1457ff20b4c99a030c0e398f520a、版本 1.2.1、构建号 26927B 为研究对象，依据源码、接口、测试、构建配置、README 与版本文档，建立从信号模型到可执行程序的完整解释。
+面向移动影像与专业后期制作之间的色彩交接，LogForge 将十位 BT.2020 HLG ProRes 素材转换为 Apple Log／BT.2020 ProRes 422 HQ。这个任务表面上只是更换视频编码，实际涉及传递函数的解释、场景曝光归一化、色度采样相位、时间轴重建、容器识别与外部工具可信执行等相互制约的问题。本文以公开仓库的固定提交 913e4b9417fa0f32b88629c39062b54589d9dd21、版本 1.3.0、构建号 26929A 为研究对象，依据源码、接口、测试、构建配置、README 与版本文档，建立从信号模型到可执行程序的完整解释。
 
-本文首先将转换分解为整数 YCbCr 解码、非线性 RGB 重建、HLG 逆光电传递、参考白归一化、可选创意调整、Apple Log 编码与有损封装，逐步推导分段函数、单调性、灰卡锚点、误差传播及不可逆边界。随后分析三缓冲浮点桥、持久 CPU 工作线程与运行时资格验证的 CUDA 实现，解释为何标准模式可按任意分量块处理，而创意模式必须配对完整 RGB 平面。最后从时间戳、MOV 原子、音频复制、工具信任、失败恢复和发布事务六个角度，论证系统正确性依赖的条件，并将仓库历史测量与本文重新执行的测试分开报告。
+本文首先将转换分解为整数 YCbCr 解码、非线性 RGB 重建、HLG 逆光电传递、参考白归一化、可选创意调整、Apple Log 编码与有损封装，逐步推导分段函数、单调性、灰卡锚点、误差传播及不可逆边界。随后分析三缓冲浮点桥、持久 CPU 工作线程与运行时资格验证的 CUDA 实现，解释为何标准模式可按任意分量块处理，而创意模式必须配对完整 RGB 平面。最后从时间戳、MOV 原子、音频复制、工具信任、失败恢复和发布事务六个角度，论证系统正确性依赖的条件，并将历史测量与已有 1.3.0 发布验证分开报告。
 
-主要结论是：在输入解释、外部工具数值资格与输出验证成立的前提下，LogForge 实现了可追溯的颜色重编码和受约束的媒体交付流程。数学推导能够说明它为何符合所声明的函数关系，但不能证明已经丢失的传感器信息可以恢复，也不能替代不同相机与编辑软件的实际互操作实验。1.2.1 的输入准入、缺失色度位置默认值及像素旋转策略与部分历史文档不同，本文以当前代码为准明确区分。本文定位为可复核的源码研究与工程实现论文，不把项目自述、历史测试或有限抽样提升为无条件认证。
+主要结论是：在输入解释、外部工具数值资格与输出验证成立的前提下，LogForge 实现了可追溯的颜色重编码和受约束的媒体交付流程。数学推导能够说明它为何符合所声明的函数关系，但不能证明已经丢失的传感器信息可以恢复，也不能替代不同相机与编辑软件的实际互操作实验。1.3.0 的显式输入契约、共同量化单元和发布报告已更新，颜色公式及相机像素旋转策略延续既有实现，本文以当前代码为准明确区分。本文定位为可复核的源码研究与工程实现论文，不把项目自述、历史测试或有限抽样提升为无条件认证。
 
 关键词：HLG；Apple Log；BT.2020；浮点视频流水线；CUDA；MOV 元数据；软件可靠性；可复现验证。
 
 
 \chapter*{Abstract}\addcontentsline{toc}{chapter}{Abstract}
-LogForge is a native Windows application that converts BT.2020 HLG ProRes footage into Apple Log / BT.2020 ProRes 422 HQ. This monograph studies release 1.2.1 at an immutable repository revision. It derives the implemented signal transform, explains bounded CPU and CUDA processing, and examines timestamp reconstruction, metadata signaling, executable trust, cancellation, and transactional publication. Mathematical properties, repository measurements, and newly executed regression tests are distinguished throughout. The resulting argument is conditional: conformance to a declared encoding does not imply sensor-data recovery, camera-look equivalence, lossless transcoding, or universal editor compatibility.
+LogForge is a native Windows application that converts BT.2020 HLG ProRes footage into Apple Log / BT.2020 ProRes 422 HQ. This monograph studies release 1.3.0 at an immutable repository revision. It derives the implemented signal transform, explains bounded CPU and CUDA processing, and examines timestamp reconstruction, metadata signaling, executable trust, cancellation, and transactional publication. Mathematical properties, repository measurements, and existing versioned regression records are distinguished throughout. The resulting argument is conditional: conformance to a declared encoding does not imply sensor-data recovery, camera-look equivalence, lossless transcoding, or universal editor compatibility.
 
 
 \chapter*{第一章　研究对象、证据方法与论证边界}\addcontentsline{toc}{chapter}{第一章　研究对象、证据方法与论证边界}
@@ -34,13 +34,13 @@ LogForge 的可研究价值在于它把这些目标划分为明确模块。颜�
 
 
 \section*{1.2 固定版本与全仓库覆盖}
-本文核对了本地 Git HEAD 与远程 origin HEAD，两者均为上述固定提交。固定提交优于只记录 main 分支，因为后续修复不会悄悄改变读者正在复核的对象。正文使用“文件名＋函数名”定位关键实现，附录列出全部受版本控制文件的分类、行数与哈希清单。项目代码、测试脚本、构建资源和说明文档纳入解释范围；第三方 nlohmann/json 单头文件与编译生成的 PTX 作为依赖和生成物单独登记，不把其每一行都宣称为项目自行设计的算法。
+本文核对了本地 Git HEAD 与远程 origin HEAD，两者均为上述固定提交。固定提交优于只记录 main 分支，因为后续修复不会悄悄改变读者正在复核的对象。正文使用“文件名＋函数名”定位关键实现，附录列出固定提交的源码与项目文件（不含论文生成物）的分类、行数与哈希清单。项目代码、测试脚本、构建资源和说明文档纳入解释范围；第三方 nlohmann/json 单头文件与编译生成的 PTX 作为依赖和生成物单独登记，不把其每一行都宣称为项目自行设计的算法。
 
 仓库同时包含不同历史阶段的说明。README 是用户入口，但实现语义的最终依据是该提交中的代码。docs/ARCHITECTURE.md、docs/METADATA.md 和早期验证记录有助于理解设计动机，却不能自动覆盖后来修改的分支。本文将当前代码、当前版本发布说明、历史测试记录依次对照；发现冲突时明确标注，而不是选取最有利的叙述。例如，旧文档要求缺失色度位置时人工声明，当前 EffectiveChromaLocation 已返回默认 left，这影响输入解释的置信度。
 
 
 \section*{1.3 四类证据不能互相替代}
-本文采用四类证据。源码事实说明某条路径确实存在，例如曝光参数在场景线性域相乘。数学推导说明在指定条件下为何成立，例如创意亮度映射对正中性输入保持严格单调。历史实测说明仓库曾在特定机器、驱动和版本上获得某个结果。本文复测说明当前环境中实际执行的构建与测试结果。每类证据都有作用，也都有不能跨越的边界。
+本文采用四类证据。源码事实说明某条路径确实存在，例如曝光参数在场景线性域相乘。数学推导说明在指定条件下为何成立，例如创意亮度映射对正中性输入保持严格单调。历史实测说明仓库曾在特定机器、驱动和版本上获得某个结果。版本验证说明已有发布记录中的构建与测试结果。每类证据都有作用，也都有不能跨越的边界。
 
 一个典型错误是从“CPU 与 GPU 在六组输入上输出相同”推导“所有浮点数上永远完全一致”。另一个错误是从“某个 Resolve 版本识别成功”推导“所有播放器均支持”。本文只把有限测试用于发现反例、建立工程置信度和限定兼容性范围。真正的全域结论必须来自可验证的数学前提、语言语义与实现结构；涉及外部编码器和操作系统的结论则保留相应假设。
 
@@ -51,8 +51,8 @@ LogForge 的可研究价值在于它把这些目标划分为明确模块。颜�
 证据类型 & 典型实例 & 可以支持 & 不能直接支持\\
 源码核对 & HLGToAppleLog 调用顺序 & 当前实现的计算关系 & 任意相机的曝光真实性\\
 数学推导 & 创意曲线导数下界 & 指定参数域内的中性亮度单调 & 彩色分量均不越界\\
-历史实测 & 1.2.0 性能 JSON & 指定工作负载的观察结果 & 1.2.1 全平台性能承诺\\
-本次复测 & Release 构建与 CTest & 本环境中的测试结果 & 新一轮商业编辑器认证\\
+历史实测 & 1.2.0 性能 JSON & 指定工作负载的观察结果 & 1.3.0 全平台性能承诺\\
+版本验证 & Release 构建与 CTest & 发布记录中的测试结果 & 新一轮商业编辑器认证\\
 \bottomrule
 \end{longtable}
 
@@ -66,7 +66,7 @@ LogForge 的可研究价值在于它把这些目标划分为明确模块。颜�
 其中 I 表示输入与时间条件，T 表示工具信任和资格，C 表示颜色计算完成，M 表示媒体语义一致，V 表示验证通过，P 表示发布动作成功。这个表达式不是源码中的单一布尔变量，而是本文对 TranscodeJob 生命周期的形式化整理。它帮助读者看到：只要其中一项不成立，就不应以“转换成功”概括整个任务。
 
 
-\par\small 本章主要源码依据：README.md；CHANGELOG.md；docs/RELEASE\_1.2.1.md。均为固定提交 6b43a93。\normalsize
+\par\small 本章主要源码依据：README.md；CHANGELOG.md；docs/RELEASE\_1.3.0.md。均为固定提交 913e4b9。\normalsize
 
 \chapter*{第二章　信号域、颜色空间与端到端契约}\addcontentsline{toc}{chapter}{第二章　信号域、颜色空间与端到端契约}
 
@@ -104,13 +104,13 @@ HLG 系统不仅有 OETF，也有连接场景与显示的光光传递关系。Lo
 然而，相机生成 HLG 之前可能已经进行局部色调映射、降噪、锐化和曝光处理。逆 OETF 只能逆转声明的函数，不能逆转未知的相机处理链。若相机已经把高光压成同一码值，再精确的逆函数也只能得到同一个线性估计。读者应把 E 理解为“在本模型下解释的场景相对量”，不要自动理解为原始传感器电子数或真实场景辐亮度。
 
 
-\section*{2.5 源码中的范围与默认解释}
-1.2.1 的转码器在源范围明确为 pc 时采用 full，否则采用 limited；矩阵和基色按 BT.2020 NCL HLG 显式传入滤镜。此行为减少了缺失标签导致的拒绝，但增加了默认解释的责任。输入文件若实际上采用其他矩阵，却只带有 HLG 传递标签，宽松准入并不能凭空证明它符合目标假设。
+\section*{2.5 1.3.0 的显式输入解释契约}
+1.3.0 将 declared、assumed、overridden、effective、origin、conflicting\_fields 与 warnings 写入 input\_interpretation。明确 BT.2020 基色及 BT.2020 NCL 矩阵按声明解释；缺失、unknown 或 unspecified 使用 BT.2020 默认值并警告。明确冲突在解码前拒绝，只有单文件 GUI 确认或 CLI --force-bt2020-interpretation 才能覆盖。覆盖授权重新解释，不实施色域转换，也不证明标签有误。
 
-因此论文将“格式可进入程序”和“信号解释可靠”分开。当前 UnsupportedReasons 仅检查 ProRes 编解码器、Standard/HQ 档次与 HLG 传递标签。分辨率、时间基和时长等条件在后续处理层检查。它并没有把所有旧文档中的颜色、采样、辅助元数据限制继续作为最初准入条件。输出验证严格，并不消除输入默认值可能不符合真实录制设置这一模型风险。
+传递函数必须明确为 arib-std-b67；覆盖不能绕过缺失传递、PQ、其他非 HLG、编解码器或容器门槛。范围 tv／pc 分别为 limited／full，缺失默认 limited 并警告。色度位置 left／center 按声明采用；缺失默认 left 或采用显式输入选项；选项不能替换明确的源声明。不支持的范围和色度位置拒绝。容器必须符合 QuickTime MOV，多个主视频拒绝；GUI 队列不继承首文件确认，CLI 批量覆盖只对明确的该次命令有效。
 
 
-\par\small 本章主要源码依据：src/Transcode.cpp；src/Media.cpp；docs/COLOR\_PIPELINE.md。均为固定提交 6b43a93。\normalsize
+\par\small 本章主要源码依据：docs/INPUT\_CONTRACT\_1.3.0.md；src/Transcode.cpp；src/Media.cpp；docs/COLOR\_PIPELINE.md。均为固定提交 913e4b9。\normalsize
 
 \chapter*{第三章　HLG 逆函数的推导与参考曝光}\addcontentsline{toc}{chapter}{第三章　HLG 逆函数的推导与参考曝光}
 
@@ -184,7 +184,7 @@ H_{18}=\sqrt{\frac{3\cdot0.18}{S}}\approx0.3782588831
 这也解释了为什么浮点中间量有价值：它避免在求逆和重新编码之间再施加一个狭窄整数格点。但输入本来只有十位，浮点不会创造新的测量精度；它只是让已有离散样本通过公式时不额外遭遇低精度截断。最终十位 ProRes 输出仍会重新量化，数值精度应沿整个链路讨论。
 
 
-\par\small 本章主要源码依据：src/color/HLG.cpp；include/logforge/Color.h。均为固定提交 6b43a93。\normalsize
+\par\small 本章主要源码依据：src/color/HLG.cpp；include/logforge/Color.h。均为固定提交 913e4b9。\normalsize
 
 \chapter*{第四章　Apple Log 编码、逆映射与可证明性质}\addcontentsline{toc}{chapter}{第四章　Apple Log 编码、逆映射与可证明性质}
 
@@ -268,7 +268,7 @@ R_a\neq R_b,\ R_a<R_0,\ R_b<R_0\ \Longrightarrow\ f(R_a)=f(R_b)=0
 因此，论文能够证明的是指定映射被实现以及某些结构性质成立，而不是整个转码链无损。保留更多中间精度、禁止隐式色调映射、验证编码误差都很重要，但这些措施不能逆转先前量化与相机处理造成的信息合并。对输出的评价应始终区分编码正确性、可编辑性与信息恢复能力。
 
 
-\par\small 本章主要源码依据：src/color/AppleLog.cpp；include/logforge/Color.h；tests/tests.cpp。均为固定提交 6b43a93。\normalsize
+\par\small 本章主要源码依据：src/color/AppleLog.cpp；include/logforge/Color.h；tests/tests.cpp。均为固定提交 913e4b9。\normalsize
 
 \chapter*{第五章　YCbCr、数据范围与色度重采样}\addcontentsline{toc}{chapter}{第五章　YCbCr、数据范围与色度重采样}
 
@@ -332,7 +332,7 @@ q_Y^*=64+876Y,\quad q_{Cb}^*=512+896C_b,\quad q_{Cr}^*=512+896C_r
 这里的 linear 是滤镜配置中的旁路手段，不是“Apple Log 数值属于线性光”的声明。论文若只摘抄这一选项而不解释上下文，会产生严重误导。源码注释与 FFmpeg 数值资格测试共同说明这一意图。滤镜名称和标签本身也不足以证明某个未来版本保持同样行为，所以运行时测试仍是契约的一部分。
 
 
-\par\small 本章主要源码依据：src/FFmpegNumeric.cpp；src/Transcode.cpp。均为固定提交 6b43a93。\normalsize
+\par\small 本章主要源码依据：src/FFmpegNumeric.cpp；src/Transcode.cpp。均为固定提交 913e4b9。\normalsize
 
 \chapter*{第六章　创意调整的模型、证明与局限}\addcontentsline{toc}{chapter}{第六章　创意调整的模型、证明与局限}
 
@@ -396,7 +396,7 @@ w'(t)=6t(1-t)\leq\frac32
 时间稳定性来自参数固定与逐像素确定性：同一个输入 RGB 在同一组参数下产生同一个输出，无需保存上一帧状态。它避免了自适应曝光那种由场景统计变化引起的泵动，但不能避免源素材自身的噪声、闪烁或拍摄曝光跳变。一个确定性函数不会自动使时间序列平滑，它只是不会引入额外的内容驱动参数变化。
 
 
-\par\small 本章主要源码依据：src/color/HLG.cpp；docs/CREATIVE\_ADJUSTMENTS.md。均为固定提交 6b43a93。\normalsize
+\par\small 本章主要源码依据：src/color/HLG.cpp；docs/CREATIVE\_ADJUSTMENTS.md。均为固定提交 913e4b9。\normalsize
 
 \chapter*{第七章　浮点精度、误差预算与数值验证}\addcontentsline{toc}{chapter}{第七章　浮点精度、误差预算与数值验证}
 
@@ -444,7 +444,7 @@ PixelSanity 的峰值块均值误差阈值为三十二码，总体平均为八�
 如果某种错误只发生在未取样的帧或区域，抽样门限可能观察不到。若错误在块内正负抵消，均值差也可能很小。因此正文把该模块称为编码后粗差检查，并保留原来的 scope 描述。更强验证可以增加帧与区域覆盖或使用全帧差异指标，但需要额外时间、存储与参考同步设计。
 
 
-\par\small 本章主要源码依据：src/PixelSanity.cpp；src/FFmpegNumeric.cpp；tests/signal\_integrity.py。均为固定提交 6b43a93。\normalsize
+\par\small 本章主要源码依据：src/PixelSanity.cpp；src/FFmpegNumeric.cpp；tests/signal\_integrity.py。均为固定提交 913e4b9。\normalsize
 
 \chapter*{第八章　C++20 核心与外部进程架构}\addcontentsline{toc}{chapter}{第八章　C++20 核心与外部进程架构}
 
@@ -480,7 +480,7 @@ Platform.cpp 将 UTF-8 与 UTF-16 分工处理：JSON、日志和多数核心字
 验证 JSON 保存版本、输入探测、输出探测、颜色参数、信号统计、工具身份、线程分配和阶段时间。这个设计让一次转换拥有可审查的旁证文件。报告并不包含形式化证明证书，但足以让复现者知道运行时采用了哪些前提，也能区分参数错误、外部工具错误、容器错误和发布失败。
 
 
-\par\small 本章主要源码依据：CMakeLists.txt；src/Transcode.cpp；src/Platform.cpp。均为固定提交 6b43a93。\normalsize
+\par\small 本章主要源码依据：CMakeLists.txt；src/Transcode.cpp；src/Platform.cpp。均为固定提交 913e4b9。\normalsize
 
 \chapter*{第九章　三缓冲流水线与内存上界}\addcontentsline{toc}{chapter}{第九章　三缓冲流水线与内存上界}
 
@@ -546,7 +546,11 @@ gbrpf32le 的排列顺序是完整 G 平面、完整 B 平面、完整 R 平面�
 这里不能只证明正常情况下状态零、一、二循环正确，还要证明退出条件能打破每一种等待。可靠并发代码的难点往往在后者。库函数的异常、用户取消、管道断开和部分线程创建失败，都必须收敛到清理路径，而不是留下一个等待拥有者已经消失的条件变量。
 
 
-\par\small 本章主要源码依据：src/FloatBridge.cpp；include/logforge/FloatBridge.h。均为固定提交 6b43a93。\normalsize
+\section*{9.7 内存报告的范围}
+bridge\_buffer\_bytes\_each、count 与 total 分别表示单桥接槽、槽数与总量；Creative 整帧和 CUDA 锁页／设备缓冲分别报告。旧 float\_buffer\_bytes 只表示一个槽且已弃用。这些字段都不是全进程峰值内存。
+
+
+\par\small 本章主要源码依据：src/FloatBridge.cpp；include/logforge/FloatBridge.h。均为固定提交 913e4b9。\normalsize
 
 \chapter*{第十章　持久 CPU 工作线程与确定性}\addcontentsline{toc}{chapter}{第十章　持久 CPU 工作线程与确定性}
 
@@ -584,7 +588,7 @@ CPU 并行模式最终仍调用同一标量函数，每个分量的计算顺序�
 这也是项目保留标量参考的价值。优化实现可以改变分块与调度，但用一个简洁的计算路径作为对照，有利于把性能修改与颜色定义分离。若为了速度改变数学近似、饱和行为或曝光位置，就已经不是纯实现优化，需要重新声明数值契约。
 
 
-\par\small 本章主要源码依据：src/color/FloatTransformer.cpp；tests/hardening.cpp。均为固定提交 6b43a93。\normalsize
+\par\small 本章主要源码依据：src/color/FloatTransformer.cpp；tests/hardening.cpp。均为固定提交 913e4b9。\normalsize
 
 \chapter*{第十一章　CUDA 后端、资格验证与失败原子性}\addcontentsline{toc}{chapter}{第十一章　CUDA 后端、资格验证与失败原子性}
 
@@ -634,7 +638,11 @@ GPU 时间由上传、核函数和下载组成，还要加上锁页内存复制�
 源码使用一个非阻塞流，按块同步提交，并不是无限深度的多流全 GPU 视频流水线。ProRes 解码与编码仍在 CPU，zscale 矩阵和范围处理也在 CPU。把本项目描述成“GPU 全流程硬件转码”是不准确的。它加速的是颜色数学这一段，并通过线程预算和桥接减少其余阶段的等待。
 
 
-\par\small 本章主要源码依据：src/color/CudaTransformer.cpp；src/color/ColorKernel.cu；tools/compile\_cuda.py；tests/cuda\_artifact.py。均为固定提交 6b43a93。\normalsize
+\section*{11.7 确定性设备排序与进程内资格缓存}
+候选先按 eligible，再按显存与 compute\_score 降序、UUID 字典序及 ordinal 排序，报告全部候选。资格缓存最多 16 项，只在当前进程有效；键包含 GPU UUID、驱动 API／文件版本、嵌入 PTX SHA-256、应用版本与构建、算法和 Creative 参数。显式资格命令及失败后的重试重新验证，失败驱逐缓存；2e-6 容差与颜色核未改变。真实多 GPU 排序尚未本机执行，缓存不是持久授权。
+
+
+\par\small 本章主要源码依据：src/color/CudaTransformer.cpp；src/color/ColorKernel.cu；tools/compile\_cuda.py；tests/cuda\_artifact.py。均为固定提交 913e4b9。\normalsize
 
 \chapter*{第十二章　固定帧率验证与时间轴重建}\addcontentsline{toc}{chapter}{第十二章　固定帧率验证与时间轴重建}
 
@@ -644,36 +652,36 @@ rawvideo 管道只输送样本字节，既没有每帧原始时间戳，也没�
 MediaInfo 保留平均帧率和名义帧率，但 Cadence 不以两者是否相等作为最终判断。名义帧率可能是探测器猜测，平均值可能受容器时长与量化影响；真正需要检查的是所有视频包的 PTS 和 duration。这个选择解释了项目为何能够接受 29.99 等非标准但固定的节奏，同时拒绝平均值看似正常的漂移序列。
 
 
-\section*{12.2 用整数时基描述节奏}
-记时间基为 tau 秒每 tick，第 i 包起始整数时间为 p\_i，时长为 d\_i，候选周期为 T tick。固定节奏要求每个时长接近 T、相邻起点间隔接近 T、累计相位接近 iT。程序还严格要求相邻 PTS 间隔等于上一包声明的 duration，先排除内部时间表的间隙或重叠。
+\section*{12.2 整数时间戳与共同量化单元}
+设视频时基为 tau 秒，全部包边界相对首 PTS 为 t\_i，候选周期为 T tick。最后一个包的结束也是边界。先严格要求正时长、递增 PTS、每个间隔恰等于前一包 duration；非均匀时长只能是相邻整数。重复、倒退、缺失、间隙与重叠提前失败。
 
 
 \begin{equation}
-\epsilon_d(i)=|d_i-T|,\qquad \epsilon_i(i)=|(p_i-p_{i-1})-T|
+r_i(T)=t_i-iT,\qquad Q(T)=\max_i r_i(T)-\min_i r_i(T)
 \end{equation}
 
 \begin{equation}
-\epsilon_\phi(i)=|(p_i-p_0)-iT|
+Q(T)\leq 1\ \mathrm{tick}
 \end{equation}
-三类误差的上限均为 1.05 tick，单位是输入视频时基，不是毫秒或百分之一帧。将阈值写成毫秒而不带 time\_base 会失去含义。重复或倒退 PTS、缺失或非正时长，以及间隔与上一时长不一致，都会提前失败并记录零起始包索引。
+这是所有边界共用一个闭合量化单元的条件，覆盖 floor／ceil 舍入及有界的一 tick 修正；它不是把旧 1.05 tick 经验阈值调大。局部时长、间隔与完整相位都检查，报告分别保留推断时钟误差与名义时钟分歧。
 
 
-\section*{12.3 精确周期与候选周期}
-若所有包时长与相邻间隔完全相同，这个整数周期就是权威依据。设时间基为 n／d，包周期为 m，那么帧率为 d／(nm)，再用最大公约数约分。源码在乘法前检查表示范围，避免时基与长周期相乘溢出。这个分支不会为了接近 30 而把 29.99 强行改写成 30000／1001。
+\section*{12.3 精确周期、候选与凸包搜索}
+若全部 duration 和间隔一致，整数周期 m 为权威；时基 n／d 给出约分后的帧率。乘法在检查表示范围后进行，29.99、29.98、29.9701 不会被强制改成标准帧率。
 
 
 \begin{equation}
 f=\frac{1}{m\tau}=\frac{d}{nm}
 \end{equation}
-当周期因时钟量化不完全相同时，程序先取出现最多的包时长作为保守锚点；如果名义帧率对应周期落在观察到的时长范围内，则用它作为候选。随后对全部包检查误差。它不通过回归平均值消除累计漂移，因为那可能把真实节奏修正“拟合成正常”。
+非均匀序列先检验名义候选，失败不构成否决；再检验首尾边界导出的有理周期，仍失败则用上下凸包的边斜率寻找最小残差跨度。函数 Q 是仿射残差的最大值减最小值，因此分段线性且凸，支持边界切换发生于包络边斜率；全序列复核共同单元，不以平均值或最小二乘替代。先用整数减去 floor 周期，避免大时间跨度的浮点相消；数值余量只按包数缩放。凸包构造 O(n)，候选排序最坏 O(n log n)，支持查询为对数复杂度，最终检查 O(n)，存储 O(n)。
 
 
-\section*{12.4 为什么必须检查累计相位}
-考虑每帧局部间隔只多很小的一点。单次误差都在阈值以内，但几百帧之后，起点相位误差可能超过一帧。只看局部间隔会漏掉这种持续漂移。累计相位直接比较从首帧出发的理想时钟和实际时钟，让这类系统性偏移最终越过阈值并被拒绝。
+\section*{12.4 59.94 回归与可辨识性边界}
+生成回归使用 309 包、1／1200 时基、6183 tick 总时长和 60000／1001 名义帧率。PTS[i]=floor(i*2061/103)，平均帧率为 59.970887918；包 53 相对名义周期 20.02 tick 的误差为 1.06 tick，旧门槛误拒绝。推断周期 2061／103 tick、帧率 41200／687 的全序列残差跨度约 0.990291262 tick，因此通过。全序列最大名义相位分歧 4.16 tick 仍报告；这是生成数值重构，未检查原始失败录像。
 
 
-\begin{figure}[htbp]\centering\includegraphics[width=\linewidth]{figures/cadence.pdf}\caption{固定节奏、量化交替节奏与持续漂移的相位示例。虚线表示 1.05 tick 预算；曲线为教学构造数据，展示局部误差小并不保证累计相位小。}\end{figure}
-相反，一个正确的有理数帧率在粗时基上可能需要长短交替的整数 duration。只要累计相位始终留在预算内，这种量化抖动不应简单等同于任意 VFR。程序的政策是在可解释的固定时钟附近允许有限量化，而不是保留每个原始时间戳。论文因此使用“验证后重建的固定节奏”，避免说成“逐包时间戳完全无损复制”。
+\begin{figure}[htbp]\centering\includegraphics[width=\linewidth]{figures/cadence.pdf}\caption{1.3.0 的 309 包生成重构。左图比较名义与推断时钟残差；右图展示全部边界的共同一 tick 单元，含最终包结束。}\end{figure}
+旧负例 20*i-floor(i/64) 实际等于 ceil(1279*i/64)，是可量化固定时钟，现在保留为正例。真正加速负例为 20*i-floor(i*i/4096)，另有分段与聚集变化负例。时间戳无法区分产生相同整数序列的不同物理时钟；低于时基分辨率的变化不可独立观察。验证后仍重建固定节奏，不宣称原始时间戳逐包无损复制。
 
 
 \section*{12.5 输出端再检查的必要性}
@@ -682,7 +690,7 @@ f=\frac{1}{m\tau}=\frac{d}{nm}
 时间扫描使用向量保存所有包，因此复杂度在包数 N 上为线性存储，构造时长频次表还包含有序映射操作。对通常只有少量不同 duration 的素材成本可控，但极长素材仍会增加前置扫描时间和内存。未来若改为流式多遍验证，可以降低内存，却必须保留候选选择与相位检查的同等语义。
 
 
-\par\small 本章主要源码依据：src/Cadence.cpp；src/Media.cpp。均为固定提交 6b43a93。\normalsize
+\par\small 本章主要源码依据：docs/CADENCE\_1.3.0.md；tests/cadence\_v130.cpp；src/Cadence.cpp；src/Media.cpp。均为固定提交 913e4b9。\normalsize
 
 \chapter*{第十三章　音画同步、编辑列表与旋转几何}\addcontentsline{toc}{chapter}{第十三章　音画同步、编辑列表与旋转几何}
 
@@ -744,7 +752,11 @@ F(\Pi\mathbf{x})=\Pi F(\mathbf{x})
 音轨布局也有类似原则：两个未标记的通道未必就是标准左右声道。程序使用 guess\_layout\_max 0 禁止推断，输出验证要求布局字符串与输入一致。保留“不知道”有时比写入一个看似合理的默认值更诚实。与色度位置默认 left 的策略相比，这也显示不同字段的默认政策并不完全统一，应在接口层清楚呈现。
 
 
-\par\small 本章主要源码依据：src/MediaSafety.cpp；src/Transcode.cpp；tests/compatibility\_v121.py。均为固定提交 6b43a93。\normalsize
+\section*{13.7 音频载荷身份与时间语义分离}
+AudioPayload.cpp 对源与输出各启动 FFmpeg，以 stream copy 和 streamhash 对每条音轨拼接的压缩包内容计算 SHA-256，不解码，不把整轨装入内存。流数与每条摘要必须一致，否则不能发布。哈希不包含时间戳、包边界或容器布局；音频相对起点、时长及格式检查独立保留。无音轨状态 no\_audio 不冒称 audio\_payload\_verified。该方法增加两次顺序音频读取和外部进程启动。
+
+
+\par\small 本章主要源码依据：src/AudioPayload.cpp；src/AudioPayload.cpp；src/MediaSafety.cpp；src/Transcode.cpp；tests/compatibility\_v121.py。均为固定提交 913e4b9。\normalsize
 
 \chapter*{第十四章　MOV 原子解析与语义比较}\addcontentsline{toc}{chapter}{第十四章　MOV 原子解析与语义比较}
 
@@ -786,7 +798,7 @@ data 的前部给出类型、标志与 locale，后部是值。代码区分 UTF-
 另一方面，语义归一化也可能忽略某些未解释字段的作用。未知私有字节被保留为原始证据，不能因为解析器没有名字就断言它们无关。项目通过受控编辑器 A/B 导入逐项隔离变量，才把 logs 标识与自动识别联系起来。分析工具提供候选差异，因果结论仍依赖实验设计。
 
 
-\par\small 本章主要源码依据：src/MovAnalyzer.cpp；tests/hardening.cpp。均为固定提交 6b43a93。\normalsize
+\par\small 本章主要源码依据：src/MovAnalyzer.cpp；tests/hardening.cpp。均为固定提交 913e4b9。\normalsize
 
 \chapter*{第十五章　Apple Log 识别字段与元数据写入证明}\addcontentsline{toc}{chapter}{第十五章　Apple Log 识别字段与元数据写入证明}
 
@@ -799,7 +811,7 @@ data 的前部给出类型、标志与 locale，后部是值。代码区分 UTF-
 \section*{15.2 历史识别实验的范围}
 docs/APPLE\_LOG\_IDENTIFICATION.md 记录原生参考文件来源、SHA-256、负基线、候选字段和实际 Resolve 导入结果。识别写入器的验证报告仍记录当时的软件版本及日期，并明确 this\_file\_imported\_in\_editor 为 false。它表明当前输出结构符合已验证模式，不代表每次转码都会打开编辑器重新实测。
 
-本文保留这一区分。1.1.0 的 Resolve Studio 20.3.2.9 Windows 受控结果可以支持该配置中的兼容性证据；1.2.1 代码沿用写入器，可以说明机制未变，却不能自动得到新版编辑器或其他产品的认证。Apple Log 与 Apple Log 2／Apple Wide Gamut 也不是同一目标，不能因为名称接近就扩展适用范围。
+本文保留这一区分。1.1.0 的 Resolve Studio 20.3.2.9 Windows 受控结果可以支持该配置中的兼容性证据；1.3.0 代码沿用写入器，可以说明机制未变，却不能自动得到新版编辑器或其他产品的认证。Apple Log 与 Apple Log 2／Apple Wide Gamut 也不是同一目标，不能因为名称接近就扩展适用范围。
 
 
 \section*{15.3 三十五字节扩展的结构}
@@ -836,7 +848,7 @@ O_{\mathrm{mdat}}^{\mathrm{after}}=O_{\mathrm{mdat}}^{\mathrm{before}}
 这一点对学术论证同样重要。只要通过伪造相机标签让软件显示 Apple Log，可能仍不能证明曲线、范围和编码正确。项目把颜色计算、识别字段和来源字段分开，使这些命题可以分别检验。本文也不以编辑器显示的一个名称作为全部正确性的替代证据。
 
 
-\par\small 本章主要源码依据：src/AppleLogIdentification.cpp；docs/APPLE\_LOG\_IDENTIFICATION.md；tests/identification.cpp。均为固定提交 6b43a93。\normalsize
+\par\small 本章主要源码依据：src/AppleLogIdentification.cpp；docs/APPLE\_LOG\_IDENTIFICATION.md；tests/identification.cpp。均为固定提交 913e4b9。\normalsize
 
 \chapter*{第十六章　元数据白名单、创建时间与保真语义}\addcontentsline{toc}{chapter}{第十六章　元数据白名单、创建时间与保真语义}
 
@@ -880,7 +892,7 @@ t_{\mathrm{UTC}}=t_{\mathrm{calendar}}-\Delta t_{\mathrm{zone}}
 因此，本章所论证的是白名单内已建立语义契约的保留与冲突清除，而不是完整复制全部拍摄信息。对依赖陀螺仪、镜头校正、深度或厂商专用轨道的流程，还需要单独验证。当前仓库的范围没有授权论文把这些能力写成已实现功能。
 
 
-\par\small 本章主要源码依据：src/MetadataPolicy.cpp；src/MediaSafety.cpp；src/Media.cpp。均为固定提交 6b43a93。\normalsize
+\par\small 本章主要源码依据：src/MetadataPolicy.cpp；src/MediaSafety.cpp；src/Media.cpp。均为固定提交 913e4b9。\normalsize
 
 \chapter*{第十七章　工具发现、执行信任与数值资格}\addcontentsline{toc}{chapter}{第十七章　工具发现、执行信任与数值资格}
 
@@ -926,7 +938,7 @@ GyanReleaseProvider 固定版本、HTTPS URL、归档根目录和 SHA-256，安�
 固定哈希避免“latest”内容变化造成不可复现，但也意味着升级必须显式更新并重复资格测试。HTTPS 提供传输保护，固定哈希提供内容绑定，运行时数值检查提供行为约束，三者不相互替代。本文没有为安装器执行新的在线下载，相关论述依据源码与已有测试，不虚构供应链审计结论。
 
 
-\par\small 本章主要源码依据：src/ToolTrust.cpp；src/FFmpeg.cpp；src/Discovery.cpp；src/DiscoveryHelper.cpp。均为固定提交 6b43a93。\normalsize
+\par\small 本章主要源码依据：src/ToolTrust.cpp；src/FFmpeg.cpp；src/Discovery.cpp；src/DiscoveryHelper.cpp。均为固定提交 913e4b9。\normalsize
 
 \chapter*{第十八章　进程监督、管道死锁与取消正确性}\addcontentsline{toc}{chapter}{第十八章　进程监督、管道死锁与取消正确性}
 
@@ -966,7 +978,7 @@ tests/process\_fixture.cpp 专门构造后代持有管道、长行输出和不�
 这种边界不是削弱结论，而是让结论可检验。若一个论文声称“保证永不卡死”，却没有说明系统调用、驱动与硬件的假设，实际上比一组具体且受测的退出条件更难复核。LogForge 的监督设计适合用资源所有权和状态转移说明，而不适合用无限制的可靠性形容词描述。
 
 
-\par\small 本章主要源码依据：src/Platform.cpp；src/Transcode.cpp；tests/process\_fixture.cpp；tests/reliability.cpp。均为固定提交 6b43a93。\normalsize
+\par\small 本章主要源码依据：src/Platform.cpp；src/Transcode.cpp；tests/process\_fixture.cpp；tests/reliability.cpp。均为固定提交 913e4b9。\normalsize
 
 \chapter*{第十九章　文件事务、磁盘规划与崩溃恢复}\addcontentsline{toc}{chapter}{第十九章　文件事务、磁盘规划与崩溃恢复}
 
@@ -1020,7 +1032,11 @@ settings 与 trust 的修改是读、改、写三步，单靠最终原子替换�
 这种设计把便利性与可证明所有权绑定。对于大体积媒体任务，清理功能本身可能比转换失败更危险；所以恢复和留存不应作为“简单删除临时文件”的附属代码看待。它们需要与发布机制一样严谨的路径、身份和并发假设。
 
 
-\par\small 本章主要源码依据：src/StorageSafety.cpp；src/Settings.cpp；src/Transcode.cpp；tests/v120.cpp。均为固定提交 6b43a93。\normalsize
+\section*{19.7 崩溃恢复与双事务边界}
+临时媒体清理必须匹配所有权日志中的文件身份，文件名不是删除授权。重封装保留旧、新两个原路径的跟踪，再切换活动路径，消除重命名与身份更新之间的崩溃空窗；十个注入阶段覆盖预留、变换、重封装、修补、报告与发布。替换身份、不可访问证据或持久日志写入前崩溃可能留下文件供人工核查。媒体无覆盖重命名与报告原子替换是不同事务；最终报告写入失败保留已发布的有效媒体并返回错误，恢复不删除最终媒体来回滚报告。
+
+
+\par\small 本章主要源码依据：src/StorageSafety.cpp；src/Settings.cpp；src/Transcode.cpp；tests/v120.cpp。均为固定提交 913e4b9。\normalsize
 
 \chapter*{第二十章　GUI、CLI、队列与可复核交互}\addcontentsline{toc}{chapter}{第二十章　GUI、CLI、队列与可复核交互}
 
@@ -1060,7 +1076,11 @@ Cli.cpp 提供 detect、probe、convert、batch、qualify-cuda、analyze 等入�
 CLI 与 GUI 共享核心，使数学、时间与发布规则保持一致；但二者可用的曝光界面范围不同，GUI 为离散负四到正四档，CLI 接受负八到正八档。复现论文实验时应写清入口和全部参数，而不是只写“默认设置”。同一个默认词在不同时间、保存状态或界面中可能指向不同配置。
 
 
-\par\small 本章主要源码依据：src/MainWindow.cpp；src/SettingsWindow.cpp；src/Ui.cpp；src/Localization.cpp；src/Cli.cpp；src/Queue.cpp。均为固定提交 6b43a93。\normalsize
+\section*{20.7 队列计划、参数与流处置报告}
+Queue.cpp 在编码前冻结完整、确定性的输出计划，处理同名 stem、大小写碰撞和已有目标；发布阶段仍以无覆盖移动防止外部竞争。CLI 整数必须完整解析并满足界限，空串、尾随垃圾、溢出、负数与零在发现前失败。多个主视频拒绝；attached picture、data 与 subtitle 的省略以及时间码重建分别报告，不能把所有视频流称为保留。
+
+
+\par\small 本章主要源码依据：src/MainWindow.cpp；src/SettingsWindow.cpp；src/Ui.cpp；src/Localization.cpp；src/Cli.cpp；src/Queue.cpp。均为固定提交 913e4b9。\normalsize
 
 \chapter*{第二十一章　测试体系、本文复测与失败分析}\addcontentsline{toc}{chapter}{第二十一章　测试体系、本文复测与失败分析}
 
@@ -1076,67 +1096,76 @@ integration.py 生成可控媒体并检查真实输出，signal\_integrity.py �
 gui\_smoke.py 与 layout\_snapshots.py 需要交互桌面和真实窗口，用于不同语言、主题、DPI、操作路径和截图检查。resolve\_identification.py 需要实际 Resolve 脚本连接和合适参考，属于编辑器互操作实验。本文没有把后两类历史结果当作本次重新运行结果，也没有以模拟窗口或伪造编辑器返回值替代它们。
 
 
-\section*{21.3 本次构建与完整 CTest}
-2026 年 9 月 29 日，本文在当前 Windows 工作区执行 Release 构建，所有配置目标构建成功。随后运行当前 build 配置中的二十四项 CTest，包括实际 CUDA 资格、媒体转码、竖拍兼容、信号、发布和持续 4K120。结果为二十三项通过、一项失败，总测试墙钟时间约 195.71 秒。另执行 CUDA 生成物一致性脚本，通过源哈希、PTX 哈希、目标与精确编译选项检查。
+\section*{21.3 1.3.0 发布验证记录}
+docs/verification/1.3.0.json 记录 2026 年 9 月 29 日的 Windows 11 x64、20 逻辑 CPU、MSVC Release /MT 环境。完整 CTest 为 29 项通过、0 失败、0 跳过，总耗时 424.09 秒；media\_pipeline 182.571 秒、sustained\_4k120 83.3651 秒。本文引用已有发布记录，不把文档更新称作新执行的媒体实验。
 
-测试日志与 JUnit XML 随论文资料保存。XML 顶层 time 字段按工具输出为整数秒，逐项耗时保留小数；正文总时间取 CTest 终端总结。这里没有修改源码或测试后重跑来获得全绿结果，固定提交保持不变。失败本身是研究对象的一部分，不能为了“证明工具正确”而隐藏。
+资料中的本次回归测试.xml 是按该 JSON 用例逐项导出的阅读表，原始权威记录保存在 evidence/verification\_1.3.0.json；它不是新的 CTest 执行日志。生成媒体覆盖输入解释、节奏、音频字节损坏、队列碰撞、发布竞争及十个崩溃注入阶段。未执行新的商业编辑器或物理多 GPU 验证。
 
 
 \begin{longtable}{p{.60\linewidth}rr}\toprule
 测试名称 & 结果 & 耗时／秒\\
-robustness\_v120 & 通过 & 0.940\\
-cuda\_qualification & 通过 & 0.133\\
-apple\_log\_identification & 通过 & 0.557\\
-reliability\_process & 通过 & 1.762\\
-reliability\_discovery & 通过 & 4.128\\
-reliability\_cli & 通过 & 1.597\\
-hardening\_cadence & 通过 & 0.085\\
-hardening\_security & 通过 & 0.540\\
-hardening\_mov & 通过 & 0.051\\
-hardening\_parallel & 通过 & 2.486\\
-color\_math & 通过 & 0.192\\
-media\_metadata\_validation & 通过 & 0.015\\
-ffmpeg\_platform & 通过 & 1.007\\
-application\_preferences & 通过 & 0.265\\
-ffmpeg\_disk\_discovery & 通过 & 0.084\\
-application\_resources & 通过 & 0.045\\
-portrait\_storage\_queue\_v120 & 通过 & 36.855\\
-compatibility\_iphone\_v121 & 通过 & 6.448\\
-compatibility\_blackmagic\_v121 & 通过 & 5.188\\
-media\_pipeline & 失败 & 29.726\\
-color\_signal & 通过 & 14.229\\
-ffmpeg\_discovery\_capabilities & 通过 & 5.351\\
-publication\_no\_overwrite & 通过 & 5.461\\
-sustained\_4k120 & 通过 & 78.546\\\bottomrule\end{longtable}
+queue\_report\_v130 & 通过 & 0.015\\
+cadence\_quantization\_v130 & 通过 & 0.091\\
+robustness\_v120 & 通过 & 3.297\\
+cuda\_cache\_v130 & 通过 & 0.497\\
+cuda\_qualification & 通过 & 0.136\\
+apple\_log\_identification & 通过 & 0.995\\
+reliability\_process & 通过 & 1.590\\
+reliability\_discovery & 通过 & 4.319\\
+reliability\_cli & 通过 & 4.347\\
+hardening\_cadence & 通过 & 0.014\\
+hardening\_security & 通过 & 0.600\\
+hardening\_mov & 通过 & 0.063\\
+hardening\_parallel & 通过 & 2.288\\
+color\_math & 通过 & 0.199\\
+media\_metadata\_validation & 通过 & 0.016\\
+ffmpeg\_platform & 通过 & 0.293\\
+application\_preferences & 通过 & 2.072\\
+ffmpeg\_disk\_discovery & 通过 & 0.087\\
+application\_resources & 通过 & 0.061\\
+audio\_crash\_recovery\_v130 & 通过 & 44.929\\
+queue\_collision\_v130 & 通过 & 7.126\\
+portrait\_storage\_queue\_v120 & 通过 & 36.130\\
+compatibility\_iphone\_v121 & 通过 & 13.751\\
+compatibility\_blackmagic\_v121 & 通过 & 5.687\\
+media\_pipeline & 通过 & 182.571\\
+color\_signal & 通过 & 16.203\\
+ffmpeg\_discovery\_capabilities & 通过 & 5.346\\
+publication\_no\_overwrite & 通过 & 5.647\\
+sustained\_4k120 & 通过 & 83.365\\\bottomrule\end{longtable}
 
-\section*{21.4 media\_pipeline 为什么失败}
-失败断言位于 tests/integration.py 第 154 行。测试先由有效源文件复制生成一个只把 color\_primaries 改成 bt709 的 MOV，保留 ProRes 与 HLG 条件，再期待转换拒绝且目标文件不存在。1.2.1 的 UnsupportedReasons 已不再检查 primaries，因此该文件被接受，生产转换按显式 BT.2020 NCL 解释处理并通过自身输出验证。测试于是报告 Unsupported input accepted。
+\section*{21.4 旧 media\_pipeline 问题的修复}
+1.2.1 论文记录 23／24 项通过，失败源于明确 BT.709 基色仍被自动按 BT.2020 处理。1.3.0 恢复明确冲突拒绝，保留旧拒绝用例，并新增缺失字段、一致声明、冲突和显式覆盖的真实 MOV 转换。原失败条件成为有效的回归约束，而不是删除断言。
 
-这是一个可以由代码直接解释的契约冲突：旧集成测试仍期待更严格颜色标签准入，新版发布说明则主动放宽格式门槛。当前单元测试已经包含可选标签缺失不阻断的断言，但较早端到端测试的这一项没有同步。最直接的维护工作是先决定对“明确冲突的基色标签”和“缺失标签”是否应采用不同政策，再让实现、测试和文档一致。本文只分析，不擅自改写仓库策略。
+新版 media\_pipeline 已通过，发布记录还列出 29.99、29.98、29.9701 固定节奏、旋转、静音、AAC、多音轨及相机时钟变体。历史失败后的覆盖缺口不再作为新版结论；通过只说明列出的生成场景满足检查，不能推导任意真实摄像机原片都正确。
 
 
-\section*{21.5 失败不能被简单归为无害}
-从测试维护角度看，这是过时预期导致的失败；从信号解释角度看，它也暴露了宽松准入的实际代价。一个明确标为 BT.709 的 HLG 文件仍被当作 BT.2020 处理，若标签真实反映内容，则颜色可能错误。生产输出验证使用同一输入解释建立参考，无法独立证明源标签被忽略是合理的。这属于模型共同假设，不是输出格式检查能够消除的问题。
+\section*{21.5 通过结果与剩余模型假设}
+29 项通过不构成全程序或全设备证明。缺失标签采用默认值仍然依赖源内容确实符合该解释；用户覆盖授权不证明色域真实为 BT.2020。输出参考与生产变换的共同假设必须由输入来源与独立整数信号检查补充。
 
-因此论文不把二十三项通过解释为“工具毫无问题”，也不把一项失败解释为“所有转换不可靠”。更准确的结论是：数学、并行、工具资格和多个媒体路径获得了本环境证据；当前完整集成套件在输入契约演进处存在未解决不一致，且该策略需要更清晰的用户提示和测试区分。由于 integration.py 在断言处停止，其后续变体在这次测试中未执行，不能计入本次已覆盖范围。
+节奏仅能在整数时间分辨率内辨识；音频哈希不检查时间戳；媒体发布与报告更新是两个事务；GPU 排序只有单元测试及本机资格证据。版本更新没有放松颜色容差，也没有新增 Resolve、Premiere 或 FCP 导入认证。
 
 
 \section*{21.6 持续测试的具体结果}
-本次 sustained\_4k120 使用两秒、240 帧、3840×2160、120 fps 的生成素材。转换耗时为 43.449496 秒，对应约 5.523654 fps；应用峰值私有内存为 15142912 字节，约 14.44 MiB。三帧抽样位置为 0、119、239，共 1536 个亮度样本，最大编码后误差为 0.86505094 码，低于该测试的两码阈值。
+历史 1.2.1 论文的 sustained\_4k120 使用两秒、240 帧、3840×2160、120 fps 的生成素材。转换耗时为 43.449496 秒，对应约 5.523654 fps；应用峰值私有内存为 15142912 字节，约 14.44 MiB。三帧抽样位置为 0、119、239，共 1536 个亮度样本，最大编码后误差为 0.86505094 码，低于该测试的两码阈值。
 
 这个转换耗时不等于 CTest 对该用例报告的 78.55 秒，因为后者还包含夹具生成、额外抽样与脚本开销。它也不意味着实时处理 4K120：输入采集速率是一百二十帧每秒，实际离线转换速度约五点五帧每秒。两个“fps”描述不同概念，必须在图表标题和坐标中分清。
 
 
-\begin{figure}[htbp]\centering\includegraphics[width=\linewidth]{figures/memory.pdf}\caption{本文复测的 240 帧 4K120 CPU 标准模式应用私有内存曲线。数据来自 sustained-report.json；仅计主应用，不包含 FFmpeg 子进程或 GPU 显存。曲线是一次运行观察。}\end{figure}
+\begin{figure}[htbp]\centering\includegraphics[width=\linewidth]{figures/memory.pdf}\caption{历史 1.2.1 论文复测的 240 帧 4K120 CPU 标准模式应用私有内存曲线。数据来自 sustained-report.json；仅计主应用，不包含 FFmpeg 子进程或 GPU 显存。曲线是一次运行观察。}\end{figure}
 
-\par\small 本章主要源码依据：CMakeLists.txt；tests/integration.py；tests/sustained.py；docs/VALIDATION.md。均为固定提交 6b43a93。\normalsize
+\section*{21.7 1.3.0 持续处理记录}
+1.3.0 发布 JSON 的持续测试为 3840×2160、120 fps、240 帧、2 秒生成素材，转换及任务验证耗时 47.5439493 秒，约 5.047960961 fps；应用峰值私有内存 15183872 字节，约 14.48 MiB。抽样帧 0、119、239 共 1536 个亮度样本，最大编码后误差 0.8650509424642223 码。旧 float\_buffer\_bytes=4194304 仅是单桥接槽。该记录没有完整内存采样曲线，因此前图保留明确标注的 1.2.1 历史曲线，不能与新版峰值混为同一次运行。
+
+
+\par\small 本章主要源码依据：CMakeLists.txt；tests/integration.py；tests/sustained.py；docs/VALIDATION.md。均为固定提交 913e4b9。\normalsize
 
 \chapter*{第二十二章　性能数据、复杂度与可重复比较}\addcontentsline{toc}{chapter}{第二十二章　性能数据、复杂度与可重复比较}
 
 \section*{22.1 历史矩阵的工作负载}
 docs/benchmarks/1.2.0.json 记录二十个正式案例：1080p24 与 4K 的 24、30、60、120 fps，各自组合标准／创意和 CPU／CUDA。输入是一秒生成灰阶斜坡，每次任务都进行工具检查和生产输出验证，没有添加音频或旋转。因此它适合比较该机器上的颜色后端与工作负载成本，不适合推断长片、复杂彩色纹理、磁盘阵列或热稳定后的吞吐。
 
-硬件记录为二十逻辑 CPU、RTX 3080 Ti Laptop GPU、十六 GB 显存与指定 NVIDIA 驱动。当前论文将其绘制为历史测量图，并明确日期与版本。一个文件名叫 1.2.0 的数据集不能在图标题中被改成“1.2.1 新实测”，即使颜色核未改变，线程、操作系统状态和外围处理也可能影响时间。
+硬件记录为二十逻辑 CPU、RTX 3080 Ti Laptop GPU、十六 GB 显存与指定 NVIDIA 驱动。当前论文将其绘制为历史测量图，并明确日期与版本。一个文件名叫 1.2.0 的数据集不能在图标题中被改成“1.3.0 新实测”，即使颜色核未改变，线程、操作系统状态和外围处理也可能影响时间。
 
 
 \begin{figure}[htbp]\centering\includegraphics[width=\linewidth]{figures/benchmark.pdf}\caption{仓库 1.2.0 历史吞吐矩阵。实线／虚线区分标准与创意，颜色区分 CPU 与 CUDA；纵轴为实际流水线处理帧率，不是输入拍摄帧率。数据为单机单次案例。}\end{figure}
@@ -1175,7 +1204,7 @@ S_{\mathrm{total}}\leq\frac{1}{(1-p)+p/s}
 本文没有生成不存在的置信区间，也没有把单次新测试与单次历史测试的小差异解释成版本性能提升。当前复测约 43.45 秒，历史重叠桥约 45.20 秒，环境噪声与测量条件足以影响这种差别；可以报告两者，但不足以证明软件优化。这个克制使性能章节的结论可被独立复现者评估。
 
 
-\par\small 本章主要源码依据：docs/BENCHMARK\_1.2.0.md；docs/benchmarks/1.2.0.json；tests/benchmark.py。均为固定提交 6b43a93。\normalsize
+\par\small 本章主要源码依据：docs/BENCHMARK\_1.2.0.md；docs/benchmarks/1.2.0.json；tests/benchmark.py。均为固定提交 913e4b9。\normalsize
 
 \chapter*{第二十三章　从一帧样本到最终文件的实现演练}\addcontentsline{toc}{chapter}{第二十三章　从一帧样本到最终文件的实现演练}
 
@@ -1214,12 +1243,12 @@ H\ \xrightarrow{E}\ E(H)\ \xrightarrow{S}\ 0.18\ \xrightarrow{f}\ 0.4882724585\ 
 
 
 \section*{23.6 追踪一个最终路径冲突}
-若另一进程在转换中创建了目标文件，早期不存在检查已经失效。最终 MoveFileExW 不允许替换，任务报 OutputExists，保留外部新文件并清理本任务临时媒体。这时可以有一份验证通过的报告，但没有本任务发布的最终视频；所以报告里的 passed 表示媒体验证，不应被外部脚本误当作最终文件发布保证。
+若另一进程在转换中创建目标文件，早期不存在检查已经失效。最终 MoveFileExW 不允许替换，保留外部文件并清理匹配本任务所有权的临时媒体。此时 validation\_passed 和兼容字段 passed 可为真，但 publication.published 与 completed 为假，publication.status 为 failed；报告记录 attempted、final\_path 和 error。
 
-这也是设计接口时值得进一步细化的地方：目前报告在发布前保存，发布失败信息主要留在任务错误和日志中。若未来增加明确 publication 状态或补写事务结果，自动化消费者更容易区分“内容通过但发布失败”和“全部完成”。本文将其作为改进建议，而非声称当前 JSON 已实现此字段。
+1.3.0 已实现明确发布状态，completed 要求验证与发布同时成功。发布前保存 pending 报告，成功移动后更新 published；若最后报告写入失败，已发布有效媒体保留且任务返回错误。两次文件系统事务之间的崩溃仍可能留下有效媒体与 pending 报告，这是当前限制。
 
 
-\par\small 本章主要源码依据：src/Transcode.cpp；src/FloatBridge.cpp；src/color/CudaTransformer.cpp。均为固定提交 6b43a93。\normalsize
+\par\small 本章主要源码依据：src/Transcode.cpp；src/FloatBridge.cpp；src/color/CudaTransformer.cpp。均为固定提交 913e4b9。\normalsize
 
 \chapter*{第二十四章　讨论、实现局限与研究结论}\addcontentsline{toc}{chapter}{第二十四章　讨论、实现局限与研究结论}
 
@@ -1237,10 +1266,10 @@ H\ \xrightarrow{E}\ E(H)\ \xrightarrow{S}\ 0.18\ \xrightarrow{f}\ 0.4882724585\ 
 同样，当前源码没有形式化验证全部 C++ 并发和所有 Win32 错误分支。本文给出的是基于可检查实现结构的条件化证明、数值推导和测试证据，不是机械证明助手生成的全程序定理。对图表中由公式计算的曲线、历史单次测量和本文单次复测，均应按各自证据类型理解。
 
 
-\section*{24.3 最需要澄清的输入契约}
-1.2.1 放宽准入有明确兼容性目的，但需要把缺失信息、明确冲突信息和不可解释信息分开。缺少相机型号不应影响颜色计算；缺少色度位置时默认 left 可能是务实选择；明确声明其他基色却强制 BT.2020 则具有不同风险。一个统一“可选标签”分类不足以表达这些差异。
+\section*{24.3 新版契约与保留限制}
+1.3.0 已区分缺失、明确冲突和不可解释字段，记录默认、覆盖与警告，修复旧论文提出的准入一致性问题。相机型号、缺失时间码、mebx 辅助轨及合法编辑列表保持兼容，基数方向仍作用于 float32 像素，90／270 度交换光栅，输出方向为单位矩阵。
 
-可考虑在保持兼容性的同时记录默认项清单、对明确冲突提示用户、为不同策略设置稳定报告字段。相应测试应覆盖“缺失允许”“冲突警告或拒绝”“用户明确覆盖”的独立案例。本文失败的集成测试提供了具体起点：先修订契约，再同步代码和测试，而不是为了全绿直接删掉断言或恢复旧门槛。
+明确覆盖、共同量化单元、音频字节验证和所有权恢复缩小了失败范围；它们不能恢复未记录的拍摄设置、辨识时基以下变化或保证任意编辑器行为。版本化证据应随实现维护，历史 1.2.0 性能不应被当成 1.3.0 新基准。
 
 
 \section*{24.4 更强的科学验证方案}
@@ -1252,10 +1281,10 @@ H\ \xrightarrow{E}\ E(H)\ \xrightarrow{S}\ 0.18\ \xrightarrow{f}\ 0.4882724585\ 
 \section*{24.5 结论}
 LogForge 展示了一种可理解的工程路径：以公开颜色数学定义信号转换，以独立多媒体工具完成编解码，以有限内存和明确所有权组织并发，以结构化验证决定交付。它的价值不在于创造一种新的 Log 曲线，而在于将已有标准与实际桌面工作流的时间、元数据和失败行为连接起来，并留下可检查的证据。
 
-在本次固定版本研究中，Release 构建与二十三项测试通过，一项旧输入拒绝预期与新版准入冲突，持续 4K120 数值抽样符合现有阈值。这支持核心转换和多个可靠性机制在本环境中按设计工作，也要求保留输入解释、文档演进和有限抽样的限制。严格的实现论文既要解释成功为何成立，也要说明结论从哪里开始不再成立；本文据此完成从公式、代码、测试到最终文件的逐层论证。
+1.3.0 发布记录中 Release 构建成功、29 项测试通过，旧准入冲突已修复，持续 4K120 数值抽样符合现有阈值。这支持核心转换和多个可靠性机制在本环境中按设计工作，也要求保留输入解释、文档演进和有限抽样的限制。严格的实现论文既要解释成功为何成立，也要说明结论从哪里开始不再成立；本文据此完成从公式、代码、测试到最终文件的逐层论证。
 
 
-\par\small 本章主要源码依据：README.md；docs/RELEASE\_1.2.1.md；docs/VALIDATION.md。均为固定提交 6b43a93。\normalsize
+\par\small 本章主要源码依据：README.md；docs/RELEASE\_1.3.0.md；docs/VALIDATION.md。均为固定提交 913e4b9。\normalsize
 
 \chapter*{附录 A　符号、单位与复核指南}\addcontentsline{toc}{chapter}{附录 A　符号、单位与复核指南}
 
@@ -1292,7 +1321,7 @@ N & 帧数或样本数 & 按下标明确\\
 
 
 \section*{A.4 实验记录的读取方式}
-本次回归 XML 是当前运行结果；持续测试 JSON 包含转换耗时、应用私有内存序列和抽样误差；历史性能 JSON 来自仓库 1.2.0。将两组数据分开放置，是为保留时间和版本来源。图中的理论曲线由排版脚本直接根据公式生成，不是从相机拍摄数据拟合，也不伪装成实际波形仪读数。
+版本回归 XML 是 1.3.0 发布 JSON 的阅读导出表；历史 1.2.1 持续测试 JSON 包含转换耗时、应用私有内存序列和抽样误差；历史性能 JSON 来自仓库 1.2.0。将两组数据分开放置，是为保留时间和版本来源。图中的理论曲线由排版脚本直接根据公式生成，不是从相机拍摄数据拟合，也不伪装成实际波形仪读数。
 
 论文配套 LaTeX 与 Markdown 用于编辑和复用，PDF 由本地矢量排版程序生成。当前内置 LaTeX 编译器因平台目录错误无法验证完整工程，故不把源稿标为已经由该编译器成功构建。公式在 PDF 中以矢量路径呈现，正文可搜索，图表附有编号、单位、数据来源和适用范围。
 
@@ -1308,29 +1337,31 @@ N & 帧数或样本数 & 按下标明确\\
 .gitattributes
 10 行 & 仓库格式、换行和忽略规则；复现基础\\
 .github/workflows/build-windows.yml
-71 行 & C++20/MSVC目标、测试注册、构建与发布允许列表；第8、21章\\
+73 行 & C++20/MSVC目标、测试注册、构建与发布允许列表；第8、21章\\
 .gitignore
 48 行 & 仓库格式、换行和忽略规则；复现基础\\
 CHANGELOG.md
-141 行 & 项目说明、历史证据或开发流程；按章节主题交叉核对\\
+175 行 & 项目说明、历史证据或开发流程；按章节主题交叉核对\\
 CMakeLists.txt
-124 行 & C++20/MSVC目标、测试注册、构建与发布允许列表；第8、21章\\
+143 行 & C++20/MSVC目标、测试注册、构建与发布允许列表；第8、21章\\
 CONTRIBUTING.md
 19 行 & 项目说明、历史证据或开发流程；按章节主题交叉核对\\
 LICENSE
 21 行 & 项目或第三方许可与归属说明；发行边界\\
 README.md
-233 行 & 项目说明、历史证据或开发流程；按章节主题交叉核对\\
+248 行 & 项目说明、历史证据或开发流程；按章节主题交叉核对\\
 THIRD\_PARTY\_NOTICES.md
 41 行 & 项目或第三方许可与归属说明；发行边界\\
 docs/APPLE\_LOG\_IDENTIFICATION.md
 153 行 & 项目说明、历史证据或开发流程；按章节主题交叉核对\\
 docs/ARCHITECTURE.md
-147 行 & 项目说明、历史证据或开发流程；按章节主题交叉核对\\
+175 行 & 项目说明、历史证据或开发流程；按章节主题交叉核对\\
 docs/BENCHMARK\_1.2.0.md
 62 行 & 项目说明、历史证据或开发流程；按章节主题交叉核对\\
 docs/BUG\_AUDIT\_1.1.1.md
 63 行 & 项目说明、历史证据或开发流程；按章节主题交叉核对\\
+docs/CADENCE\_1.3.0.md
+84 行 & 项目说明、历史证据或开发流程；按章节主题交叉核对\\
 docs/COLOR\_PIPELINE.md
 97 行 & 项目说明、历史证据或开发流程；按章节主题交叉核对\\
 docs/CREATIVE\_ADJUSTMENTS.md
@@ -1339,28 +1370,36 @@ docs/FFMPEG\_PROVIDER.md
 54 行 & 项目说明、历史证据或开发流程；按章节主题交叉核对\\
 docs/ICON.md
 28 行 & 项目说明、历史证据或开发流程；按章节主题交叉核对\\
+docs/INPUT\_CONTRACT\_1.3.0.md
+41 行 & 项目说明、历史证据或开发流程；按章节主题交叉核对\\
 docs/METADATA.md
 79 行 & 项目说明、历史证据或开发流程；按章节主题交叉核对\\
 docs/RELEASE\_1.2.0.md
 92 行 & 项目说明、历史证据或开发流程；按章节主题交叉核对\\
 docs/RELEASE\_1.2.1.md
 46 行 & 项目说明、历史证据或开发流程；按章节主题交叉核对\\
+docs/RELEASE\_1.3.0.md
+147 行 & 项目说明、历史证据或开发流程；按章节主题交叉核对\\
 docs/TECHNICAL\_REFERENCES.md
-137 行 & 项目说明、历史证据或开发流程；按章节主题交叉核对\\
+152 行 & 项目说明、历史证据或开发流程；按章节主题交叉核对\\
 docs/VALIDATION.md
-598 行 & 项目说明、历史证据或开发流程；按章节主题交叉核对\\
+684 行 & 项目说明、历史证据或开发流程；按章节主题交叉核对\\
 docs/benchmarks/1.2.0.json
 2805 行 & 项目说明、历史证据或开发流程；按章节主题交叉核对\\
 docs/images/LogForge.png
-二进制 37255 字节 & 项目说明、历史证据或开发流程；按章节主题交叉核对\\
+二进制 37377 字节 & 项目说明、历史证据或开发流程；按章节主题交叉核对\\
 docs/verification/1.2.0.json
 320 行 & 项目说明、历史证据或开发流程；按章节主题交叉核对\\
+docs/verification/1.3.0.json
+947 行 & 项目说明、历史证据或开发流程；按章节主题交叉核对\\
 include/logforge/AppleLogIdentification.h
 14 行 & 35字节识别扩展写入及结构检查；第15章\\
+include/logforge/AudioPayload.h
+8 行 & 每音轨压缩包SHA-256载荷验证；第13章\\
 include/logforge/Color.h
 53 行 & 颜色模型接口、常数、参数与统计结构；第3至7章\\
 include/logforge/CudaTransformer.h
-24 行 & 动态驱动接口、资格验证和事务提交；第11章\\
+26 行 & 动态驱动接口、资格验证和事务提交；第11章\\
 include/logforge/Discovery.h
 61 行 & 本地卷与目录遍历；第17章\\
 include/logforge/FFmpeg.h
@@ -1372,15 +1411,15 @@ include/logforge/FloatTransformer.h
 include/logforge/Localization.h
 34 行 & 稳定消息键和单遍参数替换；第20章\\
 include/logforge/Media.h
-87 行 & 探测解析、准入、元数据参数与输出验证；第2、16章\\
+97 行 & 探测解析、准入、元数据参数与输出验证；第2、16章\\
 include/logforge/Messages.inc
-262 行 & 双语消息宏表、稳定键与占位符；第20章\\
+272 行 & 双语消息宏表、稳定键与占位符；第20章\\
 include/logforge/PixelSanity.h
 24 行 & 首中尾帧九块编码后粗差检查；第7章\\
 include/logforge/Platform.h
 115 行 & 宽字符、句柄、进程监督、管道与哈希；第18章\\
 include/logforge/Queue.h
-8 行 & 串行多文件任务及逐项失败记录；第20章\\
+17 行 & 串行多文件任务及逐项失败记录；第20章\\
 include/logforge/Settings.h
 23 行 & 字段合并、并发锁及原子偏好保存；第19、20章\\
 include/logforge/StorageSafety.h
@@ -1388,7 +1427,7 @@ include/logforge/StorageSafety.h
 include/logforge/ToolTrust.h
 29 行 & 双可执行文件身份、批准与租约；第17章\\
 include/logforge/Transcode.h
-33 行 & 完整媒体任务、后端、验证报告与最终发布；第8、23章\\
+36 行 & 完整媒体任务、后端、验证报告与最终发布；第8、23章\\
 include/logforge/Ui.h
 49 行 & 主题、DPI、原生绘制与截图；第20章\\
 resources/LogForge.ico
@@ -1405,10 +1444,12 @@ resources/VersionResource.h.in
 4 行 & 图标、清单、版本资源及生成模板；构建与界面\\
 src/AppleLogIdentification.cpp
 194 行 & 35字节识别扩展写入及结构检查；第15章\\
+src/AudioPayload.cpp
+54 行 & 每音轨压缩包SHA-256载荷验证；第13章\\
 src/Cadence.cpp
-168 行 & 全包周期、相位与固定时钟验证；第12章\\
+381 行 & 全包周期、相位与固定时钟验证；第12章\\
 src/Cli.cpp
-223 行 & 命令与数值参数、核心自动化入口；第20章\\
+248 行 & 命令与数值参数、核心自动化入口；第20章\\
 src/Discovery.cpp
 141 行 & 本地卷与目录遍历；第17章\\
 src/DiscoveryHelper.cpp
@@ -1422,11 +1463,11 @@ src/FloatBridge.cpp
 src/Localization.cpp
 77 行 & 稳定消息键和单遍参数替换；第20章\\
 src/MainWindow.cpp
-1710 行 & 单后台工作者、事件与可测量布局；第20章\\
+1739 行 & 单后台工作者、事件与可测量布局；第20章\\
 src/Media.cpp
-400 行 & 探测解析、准入、元数据参数与输出验证；第2、16章\\
+497 行 & 探测解析、准入、元数据参数与输出验证；第2、16章\\
 src/MediaSafety.cpp
-272 行 & 时间语义、显示矩阵和固定宽度头修补；第13、16章\\
+292 行 & 时间语义、显示矩阵和固定宽度头修补；第13、16章\\
 src/MetadataPolicy.cpp
 53 行 & 元数据白名单和冲突分类；第16章\\
 src/MovAnalyzer.cpp
@@ -1436,7 +1477,7 @@ src/PixelSanity.cpp
 src/Platform.cpp
 398 行 & 宽字符、句柄、进程监督、管道与哈希；第18章\\
 src/Queue.cpp
-49 行 & 串行多文件任务及逐项失败记录；第20章\\
+86 行 & 串行多文件任务及逐项失败记录；第20章\\
 src/Settings.cpp
 120 行 & 字段合并、并发锁及原子偏好保存；第19、20章\\
 src/SettingsWindow.cpp
@@ -1446,7 +1487,7 @@ src/StorageSafety.cpp
 src/ToolTrust.cpp
 124 行 & 双可执行文件身份、批准与租约；第17章\\
 src/Transcode.cpp
-584 行 & 完整媒体任务、后端、验证报告与最终发布；第8、23章\\
+648 行 & 完整媒体任务、后端、验证报告与最终发布；第8、23章\\
 src/Ui.cpp
 322 行 & 主题、DPI、原生绘制与截图；第20章\\
 src/color/AppleLog.cpp
@@ -1458,7 +1499,7 @@ src/color/ColorKernel.manifest.json
 src/color/ColorKernel.ptx.h
 1620 行 & 生成PTX字节数组：检查内容哈希及源清单，不视为手写算法；第11章\\
 src/color/CudaTransformer.cpp
-333 行 & 动态驱动接口、资格验证和事务提交；第11章\\
+423 行 & 动态驱动接口、资格验证和事务提交；第11章\\
 src/color/FloatTransformer.cpp
 127 行 & 持久 CPU 工作线程、tile 配对及统计合并；第10章\\
 src/color/HLG.cpp
@@ -1467,8 +1508,10 @@ tests/application.cpp
 262 行 & 偏好、发现和版本资源测试；第21章\\
 tests/benchmark.py
 97 行 & 正式吞吐矩阵与过程观测；第22章\\
+tests/cadence\_v130.cpp
+128 行 & 全序列量化单元与时钟回归；第12、21章\\
 tests/compatibility\_v121.py
-145 行 & 竖拍像素、矩阵与音频偏移回归；第13、21章\\
+200 行 & 竖拍像素、矩阵与音频偏移回归；第13、21章\\
 tests/cuda\_artifact.py
 18 行 & CUDA源码、嵌入PTX哈希与选项一致性；第11章\\
 tests/fake\_ffmpeg.cpp
@@ -1476,19 +1519,19 @@ tests/fake\_ffmpeg.cpp
 tests/gui\_smoke.py
 123 行 & 交互桌面GUI场景脚本，本文未重跑；第20章\\
 tests/hardening.cpp
-367 行 & 节奏、工具信任、MOV、并行与发布回归；第21章\\
+396 行 & 节奏、工具信任、MOV、并行与发布回归；第21章\\
 tests/identification.cpp
 101 行 & 识别写入、幂等与失败结构测试；第15、21章\\
 tests/integration.py
-255 行 & 端到端合成媒体测试；本次在第154行旧准入断言失败；第21章\\
+352 行 & 端到端合成媒体测试；1.3.0 发布记录通过明确冲突与覆盖回归；第21章\\
 tests/layout\_snapshots.py
 35 行 & 生产布局与主题DPI截图断言；第20章\\
 tests/package\_audit.py
-38 行 & 归档允许列表、CRC、EXE与SHA-256审计；附录\\
+39 行 & 归档允许列表、CRC、EXE与SHA-256审计；附录\\
 tests/process\_fixture.cpp
-51 行 & 后代持管道、长行、退出码夹具；第18章\\
+58 行 & 后代持管道、长行、退出码夹具；第18章\\
 tests/reliability.cpp
-246 行 & 进程、发现与CLI异常回归；第21章\\
+261 行 & 进程、发现与CLI异常回归；第21章\\
 tests/resolve\_identification.py
 110 行 & 真实Resolve控制导入脚本，本文未重跑；第15章\\
 tests/signal\_integrity.py
@@ -1496,9 +1539,11 @@ tests/signal\_integrity.py
 tests/sustained.py
 90 行 & 240帧4K120、内存和编码后亮度；第21章\\
 tests/tests.cpp
-396 行 & 基础数学、媒体和平台测试；第21章\\
+463 行 & 基础数学、媒体和平台测试；第21章\\
 tests/v120.cpp
 386 行 & 存储、矩阵、CUDA故障、队列和媒体回归；第21章\\
+tests/v130.cpp
+239 行 & 队列、发布及CUDA缓存回归；第11、20、21章\\
 third\_party/NVIDIA-CUDA-NOTICE.txt
 23 行 & 项目或第三方许可与归属说明；发行边界\\
 third\_party/nlohmann/LICENSE.MIT
@@ -1511,16 +1556,16 @@ tools/compile\_cuda.py
 \chapter*{参考文献与源码定位}\addcontentsline{toc}{chapter}{参考文献与源码定位}
 正文的实现论述以固定提交源码为主要依据，章节末的源码定位列出主要文件；下面给出完整的项目资料和关键外部原始参考。外部文档用于核对公开定义与接口，仓库历史实验用于说明当时观察；二者均不替代本文实际执行结果。网页核对日期为 2026 年 9 月 29 日。
 
-\par [1] 项目固定版本源码与README. \url{https://github.com/HongHuo0728/LogForge/tree/6b43a93fbd4d1457ff20b4c99a030c0e398f520a}\par
-\par [2] LogForge COLOR\_PIPELINE：数值契约. \url{https://github.com/HongHuo0728/LogForge/blob/6b43a93fbd4d1457ff20b4c99a030c0e398f520a/docs/COLOR_PIPELINE.md}\par
-\par [3] LogForge CREATIVE\_ADJUSTMENTS：项目自定义调整. \url{https://github.com/HongHuo0728/LogForge/blob/6b43a93fbd4d1457ff20b4c99a030c0e398f520a/docs/CREATIVE_ADJUSTMENTS.md}\par
-\par [4] LogForge ARCHITECTURE：架构说明，含历史政策. \url{https://github.com/HongHuo0728/LogForge/blob/6b43a93fbd4d1457ff20b4c99a030c0e398f520a/docs/ARCHITECTURE.md}\par
-\par [5] LogForge RELEASE\_1.2.1：当前准入与像素方向策略. \url{https://github.com/HongHuo0728/LogForge/blob/6b43a93fbd4d1457ff20b4c99a030c0e398f520a/docs/RELEASE_1.2.1.md}\par
-\par [6] LogForge VALIDATION：版本化历史验证记录. \url{https://github.com/HongHuo0728/LogForge/blob/6b43a93fbd4d1457ff20b4c99a030c0e398f520a/docs/VALIDATION.md}\par
-\par [7] LogForge BENCHMARK\_1.2.0：历史性能矩阵. \url{https://github.com/HongHuo0728/LogForge/blob/6b43a93fbd4d1457ff20b4c99a030c0e398f520a/docs/BENCHMARK_1.2.0.md}\par
-\par [8] LogForge APPLE\_LOG\_IDENTIFICATION：原生参考与Resolve受控实验. \url{https://github.com/HongHuo0728/LogForge/blob/6b43a93fbd4d1457ff20b4c99a030c0e398f520a/docs/APPLE_LOG_IDENTIFICATION.md}\par
-\par [9] LogForge METADATA 与 FFMPEG\_PROVIDER：容器与工具政策. \url{https://github.com/HongHuo0728/LogForge/blob/6b43a93fbd4d1457ff20b4c99a030c0e398f520a/docs/METADATA.md}\par
-\par [10] LogForge TECHNICAL\_REFERENCES：外部原始参考索引. \url{https://github.com/HongHuo0728/LogForge/blob/6b43a93fbd4d1457ff20b4c99a030c0e398f520a/docs/TECHNICAL_REFERENCES.md}\par
+\par [1] 项目固定版本源码与README. \url{https://github.com/HongHuo0728/LogForge/tree/913e4b9417fa0f32b88629c39062b54589d9dd21}\par
+\par [2] LogForge COLOR\_PIPELINE：数值契约. \url{https://github.com/HongHuo0728/LogForge/blob/913e4b9417fa0f32b88629c39062b54589d9dd21/docs/COLOR_PIPELINE.md}\par
+\par [3] LogForge CREATIVE\_ADJUSTMENTS：项目自定义调整. \url{https://github.com/HongHuo0728/LogForge/blob/913e4b9417fa0f32b88629c39062b54589d9dd21/docs/CREATIVE_ADJUSTMENTS.md}\par
+\par [4] LogForge ARCHITECTURE：架构说明，含历史政策. \url{https://github.com/HongHuo0728/LogForge/blob/913e4b9417fa0f32b88629c39062b54589d9dd21/docs/ARCHITECTURE.md}\par
+\par [5] LogForge RELEASE\_1.3.0：当前准入与像素方向策略. \url{https://github.com/HongHuo0728/LogForge/blob/913e4b9417fa0f32b88629c39062b54589d9dd21/docs/RELEASE_1.3.0.md}\par
+\par [6] LogForge VALIDATION：版本化历史验证记录. \url{https://github.com/HongHuo0728/LogForge/blob/913e4b9417fa0f32b88629c39062b54589d9dd21/docs/VALIDATION.md}\par
+\par [7] LogForge BENCHMARK\_1.2.0：历史性能矩阵. \url{https://github.com/HongHuo0728/LogForge/blob/913e4b9417fa0f32b88629c39062b54589d9dd21/docs/BENCHMARK_1.2.0.md}\par
+\par [8] LogForge APPLE\_LOG\_IDENTIFICATION：原生参考与Resolve受控实验. \url{https://github.com/HongHuo0728/LogForge/blob/913e4b9417fa0f32b88629c39062b54589d9dd21/docs/APPLE_LOG_IDENTIFICATION.md}\par
+\par [9] LogForge METADATA 与 FFMPEG\_PROVIDER：容器与工具政策. \url{https://github.com/HongHuo0728/LogForge/blob/913e4b9417fa0f32b88629c39062b54589d9dd21/docs/METADATA.md}\par
+\par [10] LogForge TECHNICAL\_REFERENCES：外部原始参考索引. \url{https://github.com/HongHuo0728/LogForge/blob/913e4b9417fa0f32b88629c39062b54589d9dd21/docs/TECHNICAL_REFERENCES.md}\par
 \par [11] Apple提供的ACES IDT，固定提交528c78fe：Apple Log解码常数. \url{https://github.com/ampas/aces-dev/blob/528c78fe2c0f4e7eb322581e98aba05de79466cb/transforms/ctl/idt/vendorSupplied/apple/IDT.Apple.AppleLog_BT2020.ctl}\par
 \par [12] ITU-R BT.2100-3 (2025)：HLG传递函数；本次核对官方版本索引. \url{https://www.itu.int/rec/R-REC-BT.2100}\par
 \par [13] ITU-R BT.2408-6：HDR制作参考；本文尺度依据仓库固定数值契约交叉说明. \url{https://www.itu.int/dms_pub/itu-r/opb/rep/R-REP-BT.2408-6-2023-PDF-E.pdf}\par

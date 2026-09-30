@@ -1,0 +1,947 @@
+{
+  "version": "1.3.0",
+  "build": "26929A",
+  "windows_version": "1.3.0.0",
+  "date": "2026-09-29",
+  "environment": {
+    "os": "Windows 11 x64 build 26200",
+    "logical_cpus": 20,
+    "compiler": "MSVC Release /MT",
+    "test_media": "generated only"
+  },
+  "ctest": {
+    "passed": 29,
+    "failed": 0,
+    "skipped": 0,
+    "elapsed_seconds": 424.09,
+    "cases": [
+      {
+        "name": "queue_report_v130",
+        "passed": true,
+        "seconds": 0.015012
+      },
+      {
+        "name": "cadence_quantization_v130",
+        "passed": true,
+        "seconds": 0.0913249
+      },
+      {
+        "name": "robustness_v120",
+        "passed": true,
+        "seconds": 3.297
+      },
+      {
+        "name": "cuda_cache_v130",
+        "passed": true,
+        "seconds": 0.497447
+      },
+      {
+        "name": "cuda_qualification",
+        "passed": true,
+        "seconds": 0.136162
+      },
+      {
+        "name": "apple_log_identification",
+        "passed": true,
+        "seconds": 0.994897
+      },
+      {
+        "name": "reliability_process",
+        "passed": true,
+        "seconds": 1.58974
+      },
+      {
+        "name": "reliability_discovery",
+        "passed": true,
+        "seconds": 4.31914
+      },
+      {
+        "name": "reliability_cli",
+        "passed": true,
+        "seconds": 4.34741
+      },
+      {
+        "name": "hardening_cadence",
+        "passed": true,
+        "seconds": 0.0136183
+      },
+      {
+        "name": "hardening_security",
+        "passed": true,
+        "seconds": 0.599664
+      },
+      {
+        "name": "hardening_mov",
+        "passed": true,
+        "seconds": 0.0627399
+      },
+      {
+        "name": "hardening_parallel",
+        "passed": true,
+        "seconds": 2.28752
+      },
+      {
+        "name": "color_math",
+        "passed": true,
+        "seconds": 0.199079
+      },
+      {
+        "name": "media_metadata_validation",
+        "passed": true,
+        "seconds": 0.0162404
+      },
+      {
+        "name": "ffmpeg_platform",
+        "passed": true,
+        "seconds": 0.292762
+      },
+      {
+        "name": "application_preferences",
+        "passed": true,
+        "seconds": 2.07182
+      },
+      {
+        "name": "ffmpeg_disk_discovery",
+        "passed": true,
+        "seconds": 0.0869506
+      },
+      {
+        "name": "application_resources",
+        "passed": true,
+        "seconds": 0.0614571
+      },
+      {
+        "name": "audio_crash_recovery_v130",
+        "passed": true,
+        "seconds": 44.9289
+      },
+      {
+        "name": "queue_collision_v130",
+        "passed": true,
+        "seconds": 7.12607
+      },
+      {
+        "name": "portrait_storage_queue_v120",
+        "passed": true,
+        "seconds": 36.1304
+      },
+      {
+        "name": "compatibility_iphone_v121",
+        "passed": true,
+        "seconds": 13.7511
+      },
+      {
+        "name": "compatibility_blackmagic_v121",
+        "passed": true,
+        "seconds": 5.68664
+      },
+      {
+        "name": "media_pipeline",
+        "passed": true,
+        "seconds": 182.571
+      },
+      {
+        "name": "color_signal",
+        "passed": true,
+        "seconds": 16.203
+      },
+      {
+        "name": "ffmpeg_discovery_capabilities",
+        "passed": true,
+        "seconds": 5.346
+      },
+      {
+        "name": "publication_no_overwrite",
+        "passed": true,
+        "seconds": 5.6467
+      },
+      {
+        "name": "sustained_4k120",
+        "passed": true,
+        "seconds": 83.3651
+      }
+    ]
+  },
+  "reported_5994_reconstruction": {
+    "avg_fps": 59.97088791848617,
+    "candidate_source": "packet_quantization_envelope",
+    "classification": "quantized-fixed",
+    "error": "",
+    "error_frame_fraction": 0.0,
+    "error_frame_fraction_basis": "candidate",
+    "error_microseconds": 0.0,
+    "error_packet": -1,
+    "error_ticks": 0.0,
+    "error_units": "video time-base ticks",
+    "fps": 59.97088791848617,
+    "inferred_cadence": "41200/687",
+    "max_duration_error": 0.9902912621359223,
+    "max_interval_error": 0.9902912621359223,
+    "max_nominal_phase_error": 4.1599999999998545,
+    "max_phase_error": 0.9902912621359222,
+    "max_phase_error_frame_fraction": 0.049490538573508006,
+    "max_phase_error_seconds": 0.0008252427184466019,
+    "nominal_fps": 59.94005994005994,
+    "packets": 309,
+    "quantization_span_ticks": 0.9902912621359227,
+    "reason": "all_boundaries_share_one_quantization_cell",
+    "time_base": "1/1200",
+    "verified": true,
+    "verified_cadence": "41200/687"
+  },
+  "input_contract_cases": [
+    {
+      "case": "declared-bt2020",
+      "accepted": true,
+      "input_interpretation": {
+        "assumed": {
+          "chroma_location": "left"
+        },
+        "conflicting_fields": [],
+        "declared": {
+          "chroma_location": "",
+          "matrix": "bt2020nc",
+          "primaries": "bt2020",
+          "range": "tv",
+          "transfer": "arib-std-b67"
+        },
+        "effective": {
+          "chroma_location": "left",
+          "matrix": "bt2020nc",
+          "primaries": "bt2020",
+          "range": "tv",
+          "transfer": "arib-std-b67"
+        },
+        "origin": {
+          "chroma_location": "assumed-left",
+          "matrix": "source-declared",
+          "primaries": "source-declared",
+          "range": "declared-limited",
+          "transfer": "source-declared"
+        },
+        "overridden": {},
+        "warnings": [
+          "Source chroma location is unspecified; assuming left."
+        ]
+      }
+    },
+    {
+      "case": "missing-primaries",
+      "accepted": true,
+      "input_interpretation": {
+        "assumed": {
+          "chroma_location": "left",
+          "primaries": "bt2020"
+        },
+        "conflicting_fields": [],
+        "declared": {
+          "chroma_location": "",
+          "matrix": "bt2020nc",
+          "primaries": "",
+          "range": "tv",
+          "transfer": "arib-std-b67"
+        },
+        "effective": {
+          "chroma_location": "left",
+          "matrix": "bt2020nc",
+          "primaries": "bt2020",
+          "range": "tv",
+          "transfer": "arib-std-b67"
+        },
+        "origin": {
+          "chroma_location": "assumed-left",
+          "matrix": "source-declared",
+          "primaries": "assumed-bt2020",
+          "range": "declared-limited",
+          "transfer": "source-declared"
+        },
+        "overridden": {},
+        "warnings": [
+          "Source primaries is unspecified; assuming BT.2020.",
+          "Source chroma location is unspecified; assuming left."
+        ]
+      }
+    },
+    {
+      "case": "missing-matrix",
+      "accepted": true,
+      "input_interpretation": {
+        "assumed": {
+          "chroma_location": "left",
+          "matrix": "bt2020nc"
+        },
+        "conflicting_fields": [],
+        "declared": {
+          "chroma_location": "",
+          "matrix": "",
+          "primaries": "bt2020",
+          "range": "tv",
+          "transfer": "arib-std-b67"
+        },
+        "effective": {
+          "chroma_location": "left",
+          "matrix": "bt2020nc",
+          "primaries": "bt2020",
+          "range": "tv",
+          "transfer": "arib-std-b67"
+        },
+        "origin": {
+          "chroma_location": "assumed-left",
+          "matrix": "assumed-bt2020nc",
+          "primaries": "source-declared",
+          "range": "declared-limited",
+          "transfer": "source-declared"
+        },
+        "overridden": {},
+        "warnings": [
+          "Source matrix is unspecified; assuming BT.2020 NCL.",
+          "Source chroma location is unspecified; assuming left."
+        ]
+      }
+    },
+    {
+      "case": "missing-chroma",
+      "accepted": true,
+      "input_interpretation": {
+        "assumed": {
+          "chroma_location": "left"
+        },
+        "conflicting_fields": [],
+        "declared": {
+          "chroma_location": "",
+          "matrix": "bt2020nc",
+          "primaries": "bt2020",
+          "range": "tv",
+          "transfer": "arib-std-b67"
+        },
+        "effective": {
+          "chroma_location": "left",
+          "matrix": "bt2020nc",
+          "primaries": "bt2020",
+          "range": "tv",
+          "transfer": "arib-std-b67"
+        },
+        "origin": {
+          "chroma_location": "assumed-left",
+          "matrix": "source-declared",
+          "primaries": "source-declared",
+          "range": "declared-limited",
+          "transfer": "source-declared"
+        },
+        "overridden": {},
+        "warnings": [
+          "Source chroma location is unspecified; assuming left."
+        ]
+      }
+    },
+    {
+      "case": "bt709-primaries",
+      "accepted": false
+    },
+    {
+      "case": "bt709-primaries-forced",
+      "accepted": true,
+      "input_interpretation": {
+        "assumed": {
+          "chroma_location": "left"
+        },
+        "conflicting_fields": [
+          "primaries"
+        ],
+        "declared": {
+          "chroma_location": "",
+          "matrix": "bt2020nc",
+          "primaries": "bt709",
+          "range": "tv",
+          "transfer": "arib-std-b67"
+        },
+        "effective": {
+          "chroma_location": "left",
+          "matrix": "bt2020nc",
+          "primaries": "bt2020",
+          "range": "tv",
+          "transfer": "arib-std-b67"
+        },
+        "origin": {
+          "chroma_location": "assumed-left",
+          "matrix": "source-declared",
+          "primaries": "explicit-override",
+          "range": "declared-limited",
+          "transfer": "source-declared"
+        },
+        "overridden": {
+          "primaries": "bt2020"
+        },
+        "warnings": [
+          "Source chroma location is unspecified; assuming left.",
+          "The source declaration conflicts with the BT.2020 HLG workflow. Explicit override is enabled: interpreting primaries and matrix as BT.2020 / BT.2020 NCL."
+        ]
+      }
+    },
+    {
+      "case": "bt709-matrix",
+      "accepted": false
+    },
+    {
+      "case": "bt709-matrix-forced",
+      "accepted": true,
+      "input_interpretation": {
+        "assumed": {
+          "chroma_location": "left"
+        },
+        "conflicting_fields": [
+          "matrix"
+        ],
+        "declared": {
+          "chroma_location": "",
+          "matrix": "bt709",
+          "primaries": "bt2020",
+          "range": "tv",
+          "transfer": "arib-std-b67"
+        },
+        "effective": {
+          "chroma_location": "left",
+          "matrix": "bt2020nc",
+          "primaries": "bt2020",
+          "range": "tv",
+          "transfer": "arib-std-b67"
+        },
+        "origin": {
+          "chroma_location": "assumed-left",
+          "matrix": "explicit-override",
+          "primaries": "source-declared",
+          "range": "declared-limited",
+          "transfer": "source-declared"
+        },
+        "overridden": {
+          "matrix": "bt2020nc"
+        },
+        "warnings": [
+          "Source chroma location is unspecified; assuming left.",
+          "The source declaration conflicts with the BT.2020 HLG workflow. Explicit override is enabled: interpreting primaries and matrix as BT.2020 / BT.2020 NCL."
+        ]
+      }
+    },
+    {
+      "case": "bt709-both",
+      "accepted": false
+    },
+    {
+      "case": "bt709-both-forced",
+      "accepted": true,
+      "input_interpretation": {
+        "assumed": {
+          "chroma_location": "left"
+        },
+        "conflicting_fields": [
+          "primaries",
+          "matrix"
+        ],
+        "declared": {
+          "chroma_location": "",
+          "matrix": "bt709",
+          "primaries": "bt709",
+          "range": "tv",
+          "transfer": "arib-std-b67"
+        },
+        "effective": {
+          "chroma_location": "left",
+          "matrix": "bt2020nc",
+          "primaries": "bt2020",
+          "range": "tv",
+          "transfer": "arib-std-b67"
+        },
+        "origin": {
+          "chroma_location": "assumed-left",
+          "matrix": "explicit-override",
+          "primaries": "explicit-override",
+          "range": "declared-limited",
+          "transfer": "source-declared"
+        },
+        "overridden": {
+          "matrix": "bt2020nc",
+          "primaries": "bt2020"
+        },
+        "warnings": [
+          "Source chroma location is unspecified; assuming left.",
+          "The source declaration conflicts with the BT.2020 HLG workflow. Explicit override is enabled: interpreting primaries and matrix as BT.2020 / BT.2020 NCL."
+        ]
+      }
+    },
+    {
+      "case": "pq",
+      "accepted": false
+    },
+    {
+      "case": "pq-forced",
+      "accepted": false
+    },
+    {
+      "case": "non-hlg",
+      "accepted": false
+    },
+    {
+      "case": "non-hlg-forced",
+      "accepted": false
+    },
+    {
+      "case": "prores-lt",
+      "accepted": false
+    },
+    {
+      "case": "prores-lt-forced",
+      "accepted": false
+    },
+    {
+      "case": "h264",
+      "accepted": false
+    },
+    {
+      "case": "h264-forced",
+      "accepted": false
+    }
+  ],
+  "integration": {
+    "passed": true,
+    "frames": 60,
+    "pixel_mae": 0.00043869303706019815,
+    "pixel_max_error": 0.01275258321150774,
+    "samples": 122304,
+    "unlabelled_audio": [
+      {
+        "rotation": 0,
+        "payload_sha256": "SHA256=5f621417b9e96128479804a940e1c1c8db542a1be4f09c040f4ddbf655545ae7",
+        "layout_preserved": true
+      },
+      {
+        "rotation": 90,
+        "payload_sha256": "SHA256=5f621417b9e96128479804a940e1c1c8db542a1be4f09c040f4ddbf655545ae7",
+        "layout_preserved": true
+      }
+    ],
+    "variants": [
+      "rotation-90",
+      "rotation-minus90",
+      "rotation-180",
+      "rotation-270",
+      "silent",
+      "aac",
+      "standard",
+      "multi-audio-drop-frame-whitelist",
+      "exact-CFR-2999/100",
+      "exact-CFR-2998/100",
+      "exact-CFR-299701/10000",
+      "3840x2160-3frames",
+      "camera-clock-correction-24fps",
+      "fixed-quantized-integer-nominal-mismatch"
+    ],
+    "vfr_rejected": true,
+    "overwrite_refused": true,
+    "cancel_cleanup": true
+  },
+  "camera_structures": {
+    "iphone": {
+      "case": "iphone",
+      "passed": true,
+      "rotation_applied_to_pixels": true,
+      "orientation_matches_source_playback": true,
+      "output_raster": [
+        128,
+        64
+      ],
+      "creation_headers_preserved": true,
+      "timecode_preserved": true,
+      "pcm_payload_identical": true,
+      "audio_offset_seconds": 0.0,
+      "auxiliary_cases": [
+        {
+          "rotation": 90,
+          "mebx_tracks": 2,
+          "timecode_absent": true,
+          "passed": true
+        },
+        {
+          "rotation": 270,
+          "mebx_tracks": 2,
+          "timecode_absent": true,
+          "passed": true
+        }
+      ]
+    },
+    "blackmagic": {
+      "case": "blackmagic",
+      "passed": true,
+      "rotation_applied_to_pixels": true,
+      "orientation_matches_source_playback": true,
+      "output_raster": [
+        64,
+        128
+      ],
+      "creation_headers_preserved": true,
+      "timecode_preserved": true,
+      "pcm_payload_identical": true,
+      "audio_offset_seconds": 0.010416666666666666
+    }
+  },
+  "signal": {
+    "passed": true,
+    "patch_count": 28,
+    "cases": [
+      {
+        "creative": false,
+        "max_error_10bit_codes": 0.2111268995208775
+      },
+      {
+        "creative": true,
+        "max_error_10bit_codes": 0.2530783772587597
+      }
+    ]
+  },
+  "ffmpeg": {
+    "ffprobe_sha256": "b49ccc7c6547b141ad5a2f6ec69cc04323d7133d7704d70b331b904c63eecb07",
+    "sha256": "1326dde4c84ff1f96fe6b8916c5bed29e163e9b5dccf995f6f3db069d143ec5e",
+    "trust_type": "user-approved",
+    "version": "ffmpeg version 8.1.2-essentials_build-www.gyan.dev Copyright (c) 2000-2026 the FFmpeg developers"
+  },
+  "cuda": {
+    "gpu": "NVIDIA GeForce RTX 3080 Ti Laptop GPU",
+    "driver_cuda_version": 13040,
+    "driver_file_version": "32.0.16.1692",
+    "compute_capability": "8.6",
+    "math": "double expressions, FP32 input/output; FMA disabled",
+    "qualification": {
+      "absolute_tolerance": 2e-06,
+      "cases": [
+        {
+          "creative": false,
+          "exposure_ev": -8.0,
+          "max_error": 0.0,
+          "mean_error": 0.0,
+          "samples": 24576
+        },
+        {
+          "creative": false,
+          "exposure_ev": 0.0,
+          "max_error": 0.0,
+          "mean_error": 0.0,
+          "samples": 24576
+        },
+        {
+          "creative": false,
+          "exposure_ev": 8.0,
+          "max_error": 0.0,
+          "mean_error": 0.0,
+          "samples": 24576
+        },
+        {
+          "creative": true,
+          "exposure_ev": -8.0,
+          "max_error": 0.0,
+          "mean_error": 0.0,
+          "samples": 24576
+        },
+        {
+          "creative": true,
+          "exposure_ev": 0.0,
+          "max_error": 0.0,
+          "mean_error": 0.0,
+          "samples": 24576
+        },
+        {
+          "creative": true,
+          "exposure_ev": 8.0,
+          "max_error": 0.0,
+          "mean_error": 0.0,
+          "samples": 24576
+        }
+      ],
+      "max_error": 0.0,
+      "passed": true,
+      "reference": "independent scalar CPU double"
+    },
+    "selection_reason": "eligible compute >=7.5; total VRAM descending, compute descending, UUID ascending; first usable context"
+  },
+  "cuda_cache": {
+    "after_failure": {
+      "hit": false,
+      "passed": true,
+      "max_error": 0.0
+    },
+    "cached": {
+      "hit": true,
+      "passed": true,
+      "max_error": 0.0
+    },
+    "changed_grade": {
+      "hit": false,
+      "passed": true,
+      "max_error": 0.0
+    },
+    "fresh": {
+      "hit": false,
+      "passed": true,
+      "max_error": 0.0
+    }
+  },
+  "physical_gpu_count_tested": 1,
+  "queue": {
+    "successful": 2,
+    "failed": 0,
+    "actual_output_names": [
+      "IMG_0001_AppleLog_2.mov",
+      "IMG_0001_AppleLog_3.mov"
+    ],
+    "audio_payload_verified": [
+      true,
+      true
+    ]
+  },
+  "crash_recovery": {
+    "identity_replacement_preserved": true,
+    "stages": [
+      {
+        "owned_partials_removed": true,
+        "published_retained": false,
+        "stage": "partial_tracked"
+      },
+      {
+        "owned_partials_removed": true,
+        "published_retained": false,
+        "stage": "during_transform"
+      },
+      {
+        "owned_partials_removed": true,
+        "published_retained": false,
+        "stage": "encoded"
+      },
+      {
+        "owned_partials_removed": true,
+        "published_retained": false,
+        "stage": "rotation_tracked"
+      },
+      {
+        "owned_partials_removed": true,
+        "published_retained": false,
+        "stage": "rotation_encoded"
+      },
+      {
+        "owned_partials_removed": true,
+        "published_retained": false,
+        "stage": "metadata_patched"
+      },
+      {
+        "owned_partials_removed": true,
+        "published_retained": false,
+        "stage": "before_report"
+      },
+      {
+        "owned_partials_removed": true,
+        "published_retained": false,
+        "stage": "after_report"
+      },
+      {
+        "owned_partials_removed": true,
+        "published_retained": false,
+        "stage": "before_publication"
+      },
+      {
+        "owned_partials_removed": true,
+        "published_retained": true,
+        "stage": "after_publication"
+      }
+    ]
+  },
+  "audio_corruption": {
+    "passed": false,
+    "status": "payload_mismatch",
+    "audio_payload_verified": false
+  },
+  "sustained_4k120": {
+    "passed": true,
+    "raster": "3840x2160",
+    "capture_fps": 120,
+    "frames": 240,
+    "media_seconds": 2,
+    "elapsed_seconds": 47.54394930000126,
+    "conversion_fps": 5.047960961038498,
+    "app_peak_private_bytes": 15183872,
+    "float_buffer_bytes": 4194304,
+    "sampled_frames": [
+      0,
+      119,
+      239
+    ],
+    "max_post_encode_luma_code_error": 0.8650509424642223,
+    "samples": 1536
+  },
+  "gui": {
+    "passed": 26,
+    "failed": 0,
+    "cases": [
+      {
+        "case": "en-dark-96",
+        "passed": true
+      },
+      {
+        "case": "en-dark-120",
+        "passed": true
+      },
+      {
+        "case": "en-dark-144",
+        "passed": true
+      },
+      {
+        "case": "en-dark-168",
+        "passed": true
+      },
+      {
+        "case": "en-dark-192",
+        "passed": true
+      },
+      {
+        "case": "en-light-96",
+        "passed": true
+      },
+      {
+        "case": "en-light-120",
+        "passed": true
+      },
+      {
+        "case": "en-light-144",
+        "passed": true
+      },
+      {
+        "case": "en-light-168",
+        "passed": true
+      },
+      {
+        "case": "en-light-192",
+        "passed": true
+      },
+      {
+        "case": "zh-CN-dark-96",
+        "passed": true
+      },
+      {
+        "case": "zh-CN-dark-120",
+        "passed": true
+      },
+      {
+        "case": "zh-CN-dark-144",
+        "passed": true
+      },
+      {
+        "case": "zh-CN-dark-168",
+        "passed": true
+      },
+      {
+        "case": "zh-CN-dark-192",
+        "passed": true
+      },
+      {
+        "case": "zh-CN-light-96",
+        "passed": true
+      },
+      {
+        "case": "zh-CN-light-120",
+        "passed": true
+      },
+      {
+        "case": "zh-CN-light-144",
+        "passed": true
+      },
+      {
+        "case": "zh-CN-light-168",
+        "passed": true
+      },
+      {
+        "case": "zh-CN-light-192",
+        "passed": true
+      },
+      {
+        "case": "en-dark-96-missing",
+        "passed": true
+      },
+      {
+        "case": "zh-CN-light-144-missing",
+        "passed": true
+      },
+      {
+        "case": "close-active-search",
+        "passed": true
+      },
+      {
+        "case": "standard",
+        "passed": true
+      },
+      {
+        "case": "creative",
+        "passed": true
+      },
+      {
+        "case": "queue-failed-first-continues",
+        "passed": true
+      }
+    ],
+    "dpi_values": [
+      96,
+      120,
+      144,
+      168,
+      192
+    ],
+    "languages": [
+      "en",
+      "zh-CN"
+    ],
+    "themes": [
+      "dark",
+      "light"
+    ]
+  },
+  "layout": {
+    "passed": 960,
+    "snapshot_count": 20,
+    "gdi_stable_after_warmup": true,
+    "sizes": [
+      [
+        1280,
+        720
+      ],
+      [
+        1920,
+        1080
+      ],
+      [
+        2560,
+        1440
+      ]
+    ]
+  },
+  "release_exe": {
+    "bytes": 1629184,
+    "sha256": "32d04ad6effccbe7881c94dceeedf44502297a875e750fba6dc52579a2bf47cf"
+  },
+  "unchanged_sources_checked_against_starting_checkout": [
+    "AcademicPapers",
+    "src/color/AppleLog.cpp",
+    "src/color/HLG.cpp",
+    "src/color/FloatTransformer.cpp",
+    "src/color/ColorKernel.cu",
+    "src/color/ColorKernel.ptx.h",
+    "src/color/ColorKernel.manifest.json",
+    "src/PixelSanity.cpp",
+    "src/FFmpeg.cpp",
+    "src/ToolTrust.cpp"
+  ],
+  "limits": [
+    "Original reported 59.94 recording not supplied; reconstructed packet regression only.",
+    "Native iPhone/Blackmagic originals not used in this release run; generated structures tested.",
+    "No new editor import test; earlier Resolve evidence remains historical.",
+    "Only one physical GPU tested; multi-GPU ranking is unit-tested.",
+    "GUI color-override dialog not included in automated click scenarios; CLI override and shared interpretation tested.",
+    "No new CUDA copy/kernel overlap or Creative stripe redesign.",
+    "Media rename and report update are separate transactions; a crash may leave valid media with a pending report."
+  ],
+  "package_audit": "Performed separately after CPack; verify the shipped ZIP against its actual .zip.sha256 sidecar."
+}

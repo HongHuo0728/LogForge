@@ -4,9 +4,10 @@ import pymupdf as fitz
 import json, re
 
 root=Path(__file__).parent
-pdf=root.parent/'LogForge_源码解析与数学论证_学术论文.pdf'
+pdf=root.parent/'LogForge_源码解析与数学论证_学术论文_zhcn.pdf'
 doc=fitz.open(pdf)
 qa=root/'版式检查';qa.mkdir(exist_ok=True)
+for n,page in enumerate(doc):page.get_pixmap(matrix=fitz.Matrix(0.85,0.85)).save(qa/f'page-{n+1:03}.png')
 pages=sorted(qa.glob('page-*.png'))[:len(doc)]
 for start in range(0,len(pages),12):
     sheet=Image.new('RGB',(1600,2360),'#d8dee3');draw=ImageDraw.Draw(sheet)

@@ -1,4 +1,5 @@
 from pathlib import Path
+import zipfile
 import re, json, hashlib, subprocess, shutil, io, math, xml.etree.ElementTree as ET
 from xml.sax.saxutils import escape
 import numpy as np
@@ -24,8 +25,8 @@ ROOT=Path(__file__).resolve().parent
 REPO=Path('D:/LogForge')
 ASSETS=ROOT/'figures'; ASSETS.mkdir(exist_ok=True)
 EVID=ROOT/'evidence'; EVID.mkdir(exist_ok=True)
-PDF=ROOT.parent/'LogForge_源码解析与数学论证_学术论文.pdf'
-SHA='6b43a93fbd4d1457ff20b4c99a030c0e398f520a'
+PDF=ROOT.parent/'LogForge_源码解析与数学论证_学术论文_zhcn.pdf'
+SHA='913e4b9417fa0f32b88629c39062b54589d9dd21'
 BASE=f'https://github.com/HongHuo0728/LogForge/blob/{SHA}/'
 NAVY='#163247'; TEAL='#007E87'; BLUE='#3576B5'; ORANGE='#BD672A'; GREY='#586876'
 plt.rcParams.update({'font.family':'DejaVu Sans','font.size':9,'axes.titlesize':11,
@@ -132,9 +133,12 @@ def figures():
     diagram('cuda','CUDA transaction for one host chunk',[
       ['Original host block\nUnchanged','Pinned staging\nUpload','GPU kernel\nDouble expressions'],
       ['Download + statistics','Synchronize + qualify\nAny failure: no commit','Commit pixels + counts\nAuto may retry on CPU']])
-    fig,ax=setup(1,3);i=np.arange(81);qphase=np.round(i*1001/30)-i*1001/30;drift=i*.04
-    ax.plot(i,np.zeros_like(i),c=BLUE,label='Exact fixed cadence');ax.plot(i,qphase,c=TEAL,label='Quantized fixed cadence');ax.plot(i,drift,c=ORANGE,label='Sustained drift')
-    ax.axhline(1.05,c=GREY,ls='--');ax.axhline(-1.05,c=GREY,ls='--');ax.legend(fontsize=8,loc='upper left');ax.set(xlabel='Packet index',ylabel='Phase error (ticks)',ylim=(-1.3,3.8));save(fig,'cadence')
+    fig,ax=setup(2,3);i=np.arange(310);pts=np.floor(i*2061/103)
+    inferred=pts-i*2061/103;nominal=pts-i*20.02
+    ax[0].plot(i,nominal,c=ORANGE,label='Nominal 60000/1001');ax[0].plot(i,inferred,c=TEAL,label='Inferred 41200/687');ax[0].legend(fontsize=8)
+    ax[0].set(xlabel='Boundary index (final end included)',ylabel='Residual (ticks)',title='(a) Clock disagreement')
+    ax[1].plot(i,inferred,c=TEAL);ax[1].axhline(0,c=GREY,ls='--');ax[1].axhline(-1,c=GREY,ls='--')
+    ax[1].set(xlabel='Boundary index',ylabel='Residual (ticks)',title='(b) Shared one-tick quantization cell');save(fig,'cadence')
     fig,axes=plt.subplots(1,2,figsize=(7,3));arr=np.array([[.2,.5],[.75,.95]])
     for a,v,t in [(axes[0],arr,'Source raster + rotation metadata'),(axes[1],np.rot90(arr),'Upright pixels + identity matrix')]:
         a.imshow(v,cmap='Blues',vmin=0,vmax=1,interpolation='nearest',aspect=1.35 if a==axes[0] else .74)
@@ -159,10 +163,10 @@ def figures():
       ['Capabilities\nDecoder / Filters / Formats','Numerical qualification\nMatrix / Range / Phase','Production task\nOutput validation']])
     fig,ax=plt.subplots(figsize=(7,3.6));ax.axis('off');ax.set_xlim(-.1,10.1);ax.set_ylim(-.1,4)
     ax.set_title('Validation precedes final-file publication',loc='left',fontweight='bold',pad=12)
-    for x,t in [(0,'Reserve unique partial'),(3.45,'Encode + metadata'),(6.9,'Validate + save report')]:box(ax,x,2.7,3.1,.75,t,BLUE,8)
+    for x,t in [(0,'Reserve unique partial'),(3.45,'Encode + metadata'),(6.9,'Validate + pending report')]:box(ax,x,2.7,3.1,.75,t,BLUE,8)
     arrow(ax,(3.12,3.07),(3.42,3.07));arrow(ax,(6.57,3.07),(6.87,3.07))
     box(ax,6.9,.65,3.1,.8,'No-overwrite move\nSame directory',TEAL,8.5)
-    box(ax,3.45,.65,3.1,.8,'Final output\nOnly after publication',TEAL,8.5)
+    box(ax,3.45,.65,3.1,.8,'Published output\nThen update report',TEAL,8.5)
     box(ax,0,.65,3.1,.8,'On failure\nClean owned temporary files',ORANGE,8)
     arrow(ax,(8.45,2.65),(8.45,1.5),'Pass');arrow(ax,(6.85,1.05),(6.6,1.05))
     ax.plot([5,5,1.55,1.55],[2.65,2.02,2.02,1.48],c=ORANGE,ls='--',lw=1)
@@ -171,7 +175,7 @@ def figures():
     save(fig,'publication')
     measured=json.loads((EVID/'sustained_current.json').read_text(encoding='utf-8'));mm=np.array(measured['memory_samples'])
     fig,ax=setup(1,3);ax.plot(mm[:,0],mm[:,1]/2**20,c=TEAL,lw=1.6);ax.fill_between(mm[:,0],mm[:,1]/2**20,alpha=.08,color=TEAL)
-    ax.set(xlabel='Elapsed monitoring time (s)',ylabel='Application private bytes (MiB)',ylim=(0,17));ax.text(.97,.1,'Current reproduction | CPU Standard\n240 frames, 3840 x 2160',transform=ax.transAxes,ha='right',fontsize=9);save(fig,'memory')
+    ax.set(xlabel='Elapsed monitoring time (s)',ylabel='Application private bytes (MiB)',ylim=(0,17));ax.text(.97,.1,'Historical 1.2.1 | CPU Standard\n240 frames, 3840 x 2160',transform=ax.transAxes,ha='right',fontsize=9);save(fig,'memory')
     # Values transcribed from the repository table; immutable source retained.
     xx=np.arange(5);labels=['1080p24','4K24','4K30','4K60','4K120']
     fig,ax=setup(1,3.2)
@@ -183,17 +187,17 @@ def figures():
     ax.set_xticks(idx,['CPU\nStandard','CPU\nCreative','CUDA\nStandard','CUDA\nCreative']);ax.set_ylabel('Peak host private memory (MiB)');ax.legend(fontsize=8);save(fig,'perf_memory')
 
 CHAPTER_FILES={
-1:['README.md','CHANGELOG.md','docs/RELEASE_1.2.1.md'],2:['src/Transcode.cpp','src/Media.cpp','docs/COLOR_PIPELINE.md'],
+1:['README.md','CHANGELOG.md','docs/RELEASE_1.3.0.md'],2:['docs/INPUT_CONTRACT_1.3.0.md','src/Transcode.cpp','src/Media.cpp','docs/COLOR_PIPELINE.md'],
 3:['src/color/HLG.cpp','include/logforge/Color.h'],4:['src/color/AppleLog.cpp','include/logforge/Color.h','tests/tests.cpp'],
 5:['src/FFmpegNumeric.cpp','src/Transcode.cpp'],6:['src/color/HLG.cpp','docs/CREATIVE_ADJUSTMENTS.md'],7:['src/PixelSanity.cpp','src/FFmpegNumeric.cpp','tests/signal_integrity.py'],
 8:['CMakeLists.txt','src/Transcode.cpp','src/Platform.cpp'],9:['src/FloatBridge.cpp','include/logforge/FloatBridge.h'],10:['src/color/FloatTransformer.cpp','tests/hardening.cpp'],
-11:['src/color/CudaTransformer.cpp','src/color/ColorKernel.cu','tools/compile_cuda.py','tests/cuda_artifact.py'],12:['src/Cadence.cpp','src/Media.cpp'],
-13:['src/MediaSafety.cpp','src/Transcode.cpp','tests/compatibility_v121.py'],14:['src/MovAnalyzer.cpp','tests/hardening.cpp'],
+11:['src/color/CudaTransformer.cpp','src/color/ColorKernel.cu','tools/compile_cuda.py','tests/cuda_artifact.py'],12:['docs/CADENCE_1.3.0.md','tests/cadence_v130.cpp','src/Cadence.cpp','src/Media.cpp'],
+13:['src/AudioPayload.cpp','src/AudioPayload.cpp','src/MediaSafety.cpp','src/Transcode.cpp','tests/compatibility_v121.py'],14:['src/MovAnalyzer.cpp','tests/hardening.cpp'],
 15:['src/AppleLogIdentification.cpp','docs/APPLE_LOG_IDENTIFICATION.md','tests/identification.cpp'],16:['src/MetadataPolicy.cpp','src/MediaSafety.cpp','src/Media.cpp'],
 17:['src/ToolTrust.cpp','src/FFmpeg.cpp','src/Discovery.cpp','src/DiscoveryHelper.cpp'],18:['src/Platform.cpp','src/Transcode.cpp','tests/process_fixture.cpp','tests/reliability.cpp'],
 19:['src/StorageSafety.cpp','src/Settings.cpp','src/Transcode.cpp','tests/v120.cpp'],20:['src/MainWindow.cpp','src/SettingsWindow.cpp','src/Ui.cpp','src/Localization.cpp','src/Cli.cpp','src/Queue.cpp'],
 21:['CMakeLists.txt','tests/integration.py','tests/sustained.py','docs/VALIDATION.md'],22:['docs/BENCHMARK_1.2.0.md','docs/benchmarks/1.2.0.json','tests/benchmark.py'],
-23:['src/Transcode.cpp','src/FloatBridge.cpp','src/color/CudaTransformer.cpp'],24:['README.md','docs/RELEASE_1.2.1.md','docs/VALIDATION.md']}
+23:['src/Transcode.cpp','src/FloatBridge.cpp','src/color/CudaTransformer.cpp'],24:['README.md','docs/RELEASE_1.3.0.md','docs/VALIDATION.md']}
 ROLES={
 'AppleLog':'Apple Log 分段编解码与公开常数契约；第4章', 'HLG':'HLG 逆变换、参考尺度、创意调整和信号计数；第3、6章',
 'FloatTransformer':'持久 CPU 工作线程、tile 配对及统计合并；第10章','CudaTransformer':'动态驱动接口、资格验证和事务提交；第11章',
@@ -212,7 +216,7 @@ ROLES={
 'tests':'基础数学、媒体和平台测试；第21章','application':'偏好、发现和版本资源测试；第21章',
 'hardening':'节奏、工具信任、MOV、并行与发布回归；第21章','reliability':'进程、发现与CLI异常回归；第21章',
 'v120':'存储、矩阵、CUDA故障、队列和媒体回归；第21章','identification':'识别写入、幂等与失败结构测试；第15、21章',
-'integration':'端到端合成媒体测试；本次在第154行旧准入断言失败；第21章',
+'AudioPayload':'每音轨压缩包SHA-256载荷验证；第13章','cadence_v130':'全序列量化单元与时钟回归；第12、21章','v130':'队列、发布及CUDA缓存回归；第11、20、21章','integration':'端到端合成媒体测试；1.3.0 发布记录通过明确冲突与覆盖回归；第21章',
 'compatibility_v121':'竖拍像素、矩阵与音频偏移回归；第13、21章','signal_integrity':'独立整数色块、创意与范围计数；第7、21章',
 'sustained':'240帧4K120、内存和编码后亮度；第21章','benchmark':'正式吞吐矩阵与过程观测；第22章',
 'cuda_artifact':'CUDA源码、嵌入PTX哈希与选项一致性；第11章','fake_ffmpeg':'未知工具不得执行的标记夹具；第17章',
@@ -221,10 +225,12 @@ ROLES={
 'compile_cuda':'NVRTC精确选项编译和生成清单；第11章'}
 
 def inventory():
-    paths=subprocess.check_output(['git','ls-files'],cwd=REPO,text=True,encoding='utf-8').splitlines()
+    paths=subprocess.check_output(['git','-c','core.quotepath=false','ls-tree','-r','--name-only',SHA],cwd=REPO,text=True,encoding='utf-8').splitlines()
     rows=[]
+    snapshot=zipfile.ZipFile(ROOT/f'LogForge_{SHA[:7]}_源码快照.zip')
     for path in paths:
-        b=(REPO/path).read_bytes()
+        if path.startswith('AcademicPapers/'):continue
+        b=snapshot.read(path)
         try:t=b.decode('utf-8-sig');lines=len(t.splitlines());kind='text'
         except UnicodeDecodeError:t='';lines=None;kind='binary'
         stem=Path(path).stem
@@ -252,11 +258,7 @@ def inventory():
 def prepare():
     actual_sha=subprocess.check_output(['git','rev-parse','HEAD'],cwd=REPO,text=True).strip()
     if actual_sha!=SHA:raise RuntimeError('Repository revision differs from the paper revision: '+actual_sha)
-    for src,dst in [(REPO/'build/sustained/sustained-report.json',EVID/'sustained_current.json'),
-      (REPO/'build/Testing/Temporary/LastTest.log',EVID/'ctest_current.log'),
-      (REPO/'docs/benchmarks/1.2.0.json',EVID/'benchmark_historical_1.2.0.json'),
-      (REPO/'docs/verification/1.2.0.json',EVID/'verification_historical_1.2.0.json')]:
-        shutil.copy2(src,dst)
+    shutil.copy2(REPO/'docs/verification/1.3.0.json',EVID/'verification_1.3.0.json')
     return inventory()
 
 pdfmetrics.registerFont(TTFont('Song','C:/Windows/Fonts/simsun.ttc',subfontIndex=0))
@@ -314,7 +316,7 @@ def table(rows,widths=None):
 class Paper(BaseDocTemplate):
     def __init__(self,path):
         super().__init__(str(path),pagesize=A4,leftMargin=LEFT,rightMargin=RIGHT,topMargin=57,bottomMargin=51,
-          title='LogForge：HLG至Apple Log转换的数学原理、源码实现与验证',author='源码研究与技术整理',subject='固定提交6b43a93；版本1.2.1；中文技术论文',pageCompression=1)
+          title='LogForge：HLG至Apple Log转换的数学原理、源码实现与验证',author='源码研究与技术整理',subject='固定提交913e4b9；版本1.3.0；中文技术论文',pageCompression=1)
         f=Frame(LEFT,51,WIDTH,PAGEH-108,id='normal',leftPadding=0,rightPadding=0,topPadding=0,bottomPadding=0)
         self.addPageTemplates([PageTemplate(id='cover',frames=[f],onPage=self.coverpage),PageTemplate(id='main',frames=[f],onPage=self.header)])
         self.section='';self.hcount=0
@@ -323,7 +325,7 @@ class Paper(BaseDocTemplate):
     def header(self,c,doc):
         c.saveState();c.setStrokeColor(colors.HexColor(TEAL));c.setLineWidth(.55);c.line(LEFT,PAGEH-35,PAGEW-RIGHT,PAGEH-35)
         c.setFont('TimesBold',8);c.setFillColor(colors.HexColor(NAVY));c.drawString(LEFT,PAGEH-27,'LOGFORGE  |  SOURCE & MATHEMATICS')
-        c.setFont('Song',7.5);c.drawRightString(PAGEW-RIGHT,PAGEH-27,'1.2.1 · 26927B · 6b43a93')
+        c.setFont('Song',7.5);c.drawRightString(PAGEW-RIGHT,PAGEH-27,'1.3.0 · 26929A · 913e4b9')
         c.setStrokeColor(colors.HexColor('#CBD6DC'));c.line(LEFT,36,PAGEW-RIGHT,36)
         c.setFont('Song',7.4);c.setFillColor(colors.HexColor(GREY));c.drawString(LEFT,24,'固定版本研究  ·  2026-09-29')
         c.setFont('Times',9);c.drawRightString(PAGEW-RIGHT,24,str(doc.page));c.restoreState()
@@ -340,7 +342,7 @@ def refs():
     ('LogForge COLOR_PIPELINE：数值契约',BASE+'docs/COLOR_PIPELINE.md'),
     ('LogForge CREATIVE_ADJUSTMENTS：项目自定义调整',BASE+'docs/CREATIVE_ADJUSTMENTS.md'),
     ('LogForge ARCHITECTURE：架构说明，含历史政策',BASE+'docs/ARCHITECTURE.md'),
-    ('LogForge RELEASE_1.2.1：当前准入与像素方向策略',BASE+'docs/RELEASE_1.2.1.md'),
+    ('LogForge RELEASE_1.3.0：当前准入与像素方向策略',BASE+'docs/RELEASE_1.3.0.md'),
     ('LogForge VALIDATION：版本化历史验证记录',BASE+'docs/VALIDATION.md'),
     ('LogForge BENCHMARK_1.2.0：历史性能矩阵',BASE+'docs/BENCHMARK_1.2.0.md'),
     ('LogForge APPLE_LOG_IDENTIFICATION：原生参考与Resolve受控实验',BASE+'docs/APPLE_LOG_IDENTIFICATION.md'),
@@ -363,16 +365,18 @@ def build(rows):
     story=[]; tex=[]; eqnum=0; fignum=0; tabnum=0; chapter=0;figs=[]
     coverstyle=ParagraphStyle('cover',fontName='Hei',fontSize=31,leading=43,textColor=colors.HexColor(NAVY),wordWrap='CJK')
     story += [Spacer(1,70),p('SOURCE CODE MONOGRAPH','small'),Spacer(1,15),Paragraph('LogForge',ParagraphStyle('brand',fontName='TimesBold',fontSize=48,leading=55,textColor=colors.HexColor(TEAL))),Spacer(1,20),Paragraph('HLG 至 Apple Log 转换的<br/>数学原理、源码实现与验证',coverstyle),Spacer(1,25),p('从颜色传递函数到可靠媒体交付的逐层论证','h2'),Spacer(1,25),table([
-      ['研究对象','固定版本与证据'],['仓库','HongHuo0728 / LogForge'],['版本','1.2.1（26927B）'],['提交',SHA],['完成日期','2026 年 9 月 29 日'],['正文规模',f'{bodycjk:,} 个中文汉字（含摘要，不计公式、英文和附录）'],['验证摘要','Release 构建通过；24 项 CTest：23 通过、1 失败'],['证据政策','源码事实、数学推导、历史测量和本次复测分别标识']], [100,WIDTH-100]),Spacer(1,26),p('本文为公开源码的技术研究稿。未虚构作者单位、学术发表、相机认证或商业编辑器兼容性。','small'),NextPageTemplate('main'),PageBreak()]
+      ['研究对象','固定版本与证据'],['仓库','HongHuo0728 / LogForge'],['版本','1.3.0（26929A）'],['提交',SHA],['完成日期','2026 年 9 月 30 日'],['正文规模',f'{bodycjk:,} 个中文汉字（含摘要，不计公式、英文和附录）'],['验证摘要','Release 构建通过；29 项 CTest：29 通过、0 失败'],['证据政策','源码事实、数学推导、历史测量和发布验证分别标识']], [100,WIDTH-100]),Spacer(1,26),p('本文为公开源码的技术研究稿。未虚构作者单位、学术发表、相机认证或商业编辑器兼容性。','small'),NextPageTemplate('main'),PageBreak()]
     story.append(p('目录','h1'));toc=TableOfContents(tableStyle=TableStyle([('LEFTPADDING',(0,0),(-1,-1),0),('RIGHTPADDING',(0,0),(-1,-1),0),('TOPPADDING',(0,0),(-1,-1),0),('BOTTOMPADDING',(0,0),(-1,-1),0)]));toc.levelStyles=[ParagraphStyle('toc0',fontName='Song',fontSize=10,leading=21,leftIndent=0,firstLineIndent=0,spaceBefore=0,textColor=colors.HexColor(NAVY))];story.extend([toc,PageBreak()])
-    story.extend([p('图表说明与证据约定','h1'),p('本文的数学曲线按公开常数和当前源码公式直接计算。架构图与状态图为实现关系的抽象示意。标明“历史”的性能图使用仓库 1.2.0 数据；标明“本文复测”的结果使用 2026 年 9 月 29 日实际执行记录。所有图均不使用未经说明的虚构实验数据。'),p('正文中的公式连续编号，图和表分别连续编号。每章末给出关键源码定位，完整逐文件范围见附录 B 和配套清单。源码超链接固定到提交，避免主分支后续变化。'),p('阅读路径：第一至七章建立颜色与数值模型；第八至十二章解释执行和时钟；第十三至十九章解释媒体语义与可靠性；第二十至二十四章连接界面、复测、性能、实现演练和研究结论。'),PageBreak()])
+    story.extend([p('图表说明与证据约定','h1'),p('本文的数学曲线按公开常数和当前源码公式直接计算。架构图与状态图为实现关系的抽象示意。标明“历史”的性能图使用仓库 1.2.0 数据；持续内存图保留 1.2.1 历史记录；1.3.0 测试表引用 2026 年 9 月 29 日发布 JSON。所有图均不使用未经说明的虚构实验数据。'),p('正文中的公式连续编号，图和表分别连续编号。每章末给出关键源码定位，完整逐文件范围见附录 B 和配套清单。源码超链接固定到提交，避免主分支后续变化。'),p('阅读路径：第一至七章建立颜色与数值模型；第八至十二章解释执行和时钟；第十三至十九章解释媒体语义与可靠性；第二十至二十四章连接界面、复测、性能、实现演练和研究结论。'),PageBreak()])
     def texesc(t):
         return ''.join({'\\':r'\textbackslash{}','&':r'\&','%':r'\%','$':r'\$','#':r'\#','_':r'\_','{':r'\{','}':r'\}','~':r'\textasciitilde{}','^':r'\textasciicircum{}'}.get(c,c) for c in t)
     def citations(n):
         if n not in CHAPTER_FILES:return
-        text='本章主要源码依据：'+ '；'.join(CHAPTER_FILES[n])+'。均为固定提交 6b43a93。'
+        text='本章主要源码依据：'+ '；'.join(CHAPTER_FILES[n])+'。均为固定提交 913e4b9。'
         links='本章主要源码依据：'+'；'.join(f'<link href="{BASE+f}" color="{TEAL}">{escape(f)}</link>' for f in CHAPTER_FILES[n])+'。'
-        story.append(Spacer(1,8));story.append(Paragraph(links,ST['small']));tex.append('\n\\par\\small '+texesc(text)+'\\normalsize\n')
+        last=story.pop();group=[last,Spacer(1,8),Paragraph(links,ST['small'])]
+        if story and isinstance(story[-1],Paragraph) and story[-1].style.name=='h2':group.insert(0,story.pop())
+        story.append(KeepTogether(group));tex.append('\n\\par\\small '+texesc(text)+'\\normalsize\n')
     lines=source.splitlines();i=0
     while i<len(lines):
         l=lines[i].strip();i+=1
@@ -398,13 +402,13 @@ def build(rows):
         elif l=='@results':
             xr=ET.parse(ROOT/'本次回归测试.xml').getroot();data=[['测试名称','结果','耗时／秒']]
             for x in xr.iter('testcase'):data.append([x.attrib['name'],'失败' if x.find('failure') is not None else '通过',f"{float(x.attrib.get('time',0)):.3f}"])
-            tabnum+=1;story.extend([p(f'表 {tabnum}　本文实际运行的完整 CTest 结果','cap'),table(data,[WIDTH*.63,WIDTH*.17,WIDTH*.20]),Spacer(1,8)])
+            tabnum+=1;story.extend([p(f'表 {tabnum}　1.3.0 发布记录的完整 CTest 结果','cap'),table(data,[WIDTH*.63,WIDTH*.17,WIDTH*.20]),Spacer(1,8)])
             tex.append('\n\\begin{longtable}{p{.60\\linewidth}rr}\\toprule\n'+'\\\\\n'.join(' & '.join(texesc(v) for v in row) for row in data)+'\\\\\\bottomrule\\end{longtable}\n')
         elif l=='@inventory':
             tabnum+=1;story.append(p(f'表 {tabnum}　受控文件范围，共 {len(rows)} 项','cap'))
             data=[['文件路径与行数','实现责任／研究用途']]
             for r in rows:data.append([r['path']+'\n'+(f"{r['lines']} 行" if r['lines'] is not None else f"二进制 {r['bytes']} 字节"),r['role']])
-            story.append(table(data,[WIDTH*.45,WIDTH*.55]))
+            inventory_table=table(data,[WIDTH*.45,WIDTH*.55]);inventory_table.setStyle(TableStyle([('TOPPADDING',(0,0),(-1,-1),5.5),('BOTTOMPADDING',(0,0),(-1,-1),5.5)]));story.append(inventory_table)
             tex.append('\n\\begin{longtable}{p{.43\\linewidth}p{.47\\linewidth}}\\toprule\n'+'\\\\\n'.join(' & '.join(texesc(v) for v in row) for row in data)+'\\\\\\bottomrule\\end{longtable}\n')
         elif l=='@references':
             for n,(name,url) in enumerate(refs(),1):
@@ -421,16 +425,16 @@ def build(rows):
 \setlength{\parskip}{5pt}
 \pagestyle{fancy}\fancyhf{}\fancyhead[L]{LogForge 源码研究与数学论证}\fancyfoot[C]{\thepage}
 \title{LogForge：HLG 至 Apple Log 转换的数学原理、源码实现与验证}
-\author{公开源码技术研究稿}\date{2026年9月29日}
+\author{公开源码技术研究稿}\date{2026年9月30日}
 \begin{document}\maketitle\tableofcontents
 '''
     (ROOT/'LogForge_技术论文.tex').write_text(preamble+''.join(tex)+'\n\\end{document}\n',encoding='utf-8')
     (ROOT/'图表目录.json').write_text(json.dumps(figs,ensure_ascii=False,indent=2),encoding='utf-8')
     pdfdoc=fitz.open(PDF);pages=len(pdfdoc)
-    metrics={'commit':SHA,'version':'1.2.1 (26927B)','body_cjk_characters':bodycjk,'manuscript_cjk_characters':cjk,
+    metrics={'commit':SHA,'version':'1.3.0 (26929A)','body_cjk_characters':bodycjk,'manuscript_cjk_characters':cjk,
       'manuscript_characters':len(source),'pages':pages,'equations':eqnum,'figures':fignum,'tables':tabnum,'tracked_files':len(rows),
-      'pdf_sha256':hashlib.sha256(PDF.read_bytes()).hexdigest(),'ctest':{'tests':24,'passed':23,'failed':1,'failed_test':'media_pipeline'},
-      'latex_builtin_compile':'unavailable: Unable to find standard directories for platform','pdf_export':'ReportLab; embedded CJK fonts; vector SVG math and charts'}
+      'pdf_sha256':hashlib.sha256(PDF.read_bytes()).hexdigest(),'ctest':{'tests':29,'passed':29,'failed':0,'provenance':'docs/verification/1.3.0.json; existing release record'},
+      'latex_builtin_compile':'not run: multi-file project uses ReportLab export','pdf_export':'ReportLab; embedded CJK fonts; vector SVG math and charts'}
     (ROOT/'制作与验证统计.json').write_text(json.dumps(metrics,ensure_ascii=False,indent=2),encoding='utf-8')
     print(json.dumps(metrics,ensure_ascii=False,indent=2))
     return pdfdoc

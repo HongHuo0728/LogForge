@@ -21,7 +21,7 @@ The screenshot uses an empty workspace; no personal video or camera image is inc
 - **CUDA engineering:** deterministic device ranking and a process-local qualification cache bound to device, driver, kernel, build and Creative parameters. Color kernels and numerical tolerances are unchanged. Buffer reports distinguish individual slots, total bridge memory and GPU allocations.
 - **Strict CLI integers:** reject trailing garbage, overflow, empty values and nonpositive `--cancel-after-frames` values before tool discovery.
 
-See [1.3.0 release details](docs/RELEASE_1.3.0.md) and the [validation record](docs/VALIDATION.md). The historical v1.2.1 academic study remains tied to commit `6b43a93`; its 23/24 test result has not been rewritten.
+See [1.3.0 release details](docs/RELEASE_1.3.0.md) and the [validation record](docs/VALIDATION.md). The bilingual academic papers in `AcademicPapers` are updated for 1.3.0, with current release evidence and explicitly labeled historical measurements.
 
 ## Previous release: 1.2.1
 

@@ -16,9 +16,9 @@ from svglib.svglib import svg2rlg
 ROOT=Path(__file__).resolve().parent
 SOURCE=ROOT.parent/'LogForge_论文资料'
 TITLE='LogForge Source Code Analysis and Mathematical Proof - Academic Paper'
-PDF=ROOT.parent/(TITLE+'.pdf')
+PDF=ROOT.parent/(TITLE+'_enus.pdf')
 ASSETS=ROOT/'figures'
-SHA='6b43a93fbd4d1457ff20b4c99a030c0e398f520a'
+SHA='913e4b9417fa0f32b88629c39062b54589d9dd21'
 BASE=f'https://github.com/HongHuo0728/LogForge/blob/{SHA}/'
 NAVY='#163247';TEAL='#007E87';GREY='#586876'
 PAGEW,PAGEH=A4;LEFT=53;RIGHT=53;WIDTH=PAGEW-LEFT-RIGHT
@@ -28,6 +28,9 @@ tree=ast.parse((SOURCE/'build_paper.py').read_text(encoding='utf-8'))
 CHAPTER_FILES=next(ast.literal_eval(n.value) for n in tree.body if isinstance(n,ast.Assign) and any(isinstance(t,ast.Name) and t.id=='CHAPTER_FILES' for t in n.targets))
 
 ROLES={
+'AudioPayload':'Per-stream SHA-256 over copied audio packet content; Chapter 13',
+'v130':'Queue, report and CUDA cache regressions; Chapters 11, 20, 21',
+'cadence_v130':'Full-sequence rational quantization regressions; Chapters 12, 21',
 'AppleLog':'Piecewise Apple Log encoding/decoding and public constants; Chapter 4',
 'HLG':'Inverse HLG, reference scaling, creative adjustment, and signal counts; Chapters 3, 6',
 'FloatTransformer':'Persistent CPU workers, tile pairing, and statistics merging; Chapter 10',
@@ -62,7 +65,7 @@ ROLES={
 'reliability':'Process, discovery, and CLI abnormal-path regressions; Chapter 21',
 'v120':'Storage, matrices, CUDA faults, queues, and media regressions; Chapter 21',
 'identification':'Identification writing, idempotence, and structural-failure tests; Chapters 15, 21',
-'integration':'End-to-end synthetic media; the reported run fails at the old admission assertion on line 154; Chapter 21',
+'integration':'End-to-end synthetic media; 1.3.0 release verification passes explicit conflict and override regressions; Chapter 21',
 'compatibility_v121':'Portrait pixels, matrices, and audio-offset regression; Chapters 13, 21',
 'signal_integrity':'Independent integer patches, creative processing, and range counts; Chapters 7, 21',
 'sustained':'240-frame 4K120, memory, and post-encoding luma; Chapter 21',
@@ -87,7 +90,7 @@ def role(path):
     if path.startswith('resources/'):return 'Icons, manifests, version resources, and generated templates; build and interface'
     if path.startswith('.github/') or path=='CMakeLists.txt':return 'C++20/MSVC targets, test registration, build and release allowlists; Chapters 8, 21'
     if path.startswith('.'):return 'Repository formatting, line endings, and ignore rules; reproduction infrastructure'
-    return ROLES[Path(path).stem]
+    return ROLES.get(Path(path).stem, 'Version 1.3.0 implementation, interface, or supporting evidence')
 
 def prepare():
     ASSETS.mkdir(exist_ok=True)
@@ -97,7 +100,7 @@ def prepare():
     for p in (SOURCE/'evidence').iterdir():
         if p.is_file():shutil.copy2(p,ROOT/'evidence'/p.name)
     shutil.copy2(SOURCE/'本次回归测试.xml',ROOT/'evidence/ctest_current.xml')
-    shutil.copy2(SOURCE/'LogForge_6b43a93_源码快照.zip',ROOT/'LogForge_6b43a93_source_snapshot.zip')
+    shutil.copy2(SOURCE/'LogForge_913e4b9_源码快照.zip',ROOT/'LogForge_913e4b9_source_snapshot.zip')
     data=json.loads((SOURCE/'全仓库源码清单.json').read_text(encoding='utf-8'))
     rows=data['files']
     for r in rows:
@@ -150,16 +153,16 @@ def table(rows,widths=None):
 
 class Paper(BaseDocTemplate):
     def __init__(self):
-        super().__init__(str(PDF),pagesize=A4,leftMargin=LEFT,rightMargin=RIGHT,topMargin=57,bottomMargin=51,title=TITLE,author='Source-code research and technical analysis',subject='English edition; fixed revision 6b43a93; version 1.2.1',pageCompression=1)
+        super().__init__(str(PDF),pagesize=A4,leftMargin=LEFT,rightMargin=RIGHT,topMargin=57,bottomMargin=51,title=TITLE,author='Source-code research and technical analysis',subject='English edition; fixed revision 913e4b9; version 1.3.0',pageCompression=1)
         f=Frame(LEFT,51,WIDTH,PAGEH-108,id='normal',leftPadding=0,rightPadding=0,topPadding=0,bottomPadding=0)
         self.addPageTemplates([PageTemplate(id='cover',frames=[f],onPage=lambda c,d:None),PageTemplate(id='main',frames=[f],onPage=self.header)])
     def beforeDocument(self):self.hcount=0
     def header(self,c,doc):
         c.saveState();c.setStrokeColor(colors.HexColor(TEAL));c.setLineWidth(.55);c.line(LEFT,PAGEH-35,PAGEW-RIGHT,PAGEH-35)
         c.setFont('SansBold',7.6);c.setFillColor(colors.HexColor(NAVY));c.drawString(LEFT,PAGEH-27,'LOGFORGE  |  SOURCE & MATHEMATICS')
-        c.setFont('Body',8);c.drawRightString(PAGEW-RIGHT,PAGEH-27,'1.2.1  |  26927B  |  6b43a93')
+        c.setFont('Body',8);c.drawRightString(PAGEW-RIGHT,PAGEH-27,'1.3.0  |  26929A  |  913e4b9')
         c.setStrokeColor(colors.HexColor('#CBD6DC'));c.line(LEFT,36,PAGEW-RIGHT,36)
-        c.setFont('Body',8);c.setFillColor(colors.HexColor(GREY));c.drawString(LEFT,24,'English edition  |  Fixed-revision study  |  29 September 2026')
+        c.setFont('Body',8);c.setFillColor(colors.HexColor(GREY));c.drawString(LEFT,24,'English edition  |  Fixed-revision study  |  30 September 2026')
         c.drawRightString(PAGEW-RIGHT,24,str(doc.page));c.restoreState()
     def afterFlowable(self,flow):
         if isinstance(flow,Paragraph) and flow.style.name=='h1':
@@ -173,7 +176,7 @@ def references():
     ('LogForge COLOR_PIPELINE: numerical contract',BASE+'docs/COLOR_PIPELINE.md'),
     ('LogForge CREATIVE_ADJUSTMENTS: project-defined adjustments',BASE+'docs/CREATIVE_ADJUSTMENTS.md'),
     ('LogForge ARCHITECTURE: architecture and historical policies',BASE+'docs/ARCHITECTURE.md'),
-    ('LogForge RELEASE_1.2.1: current admission and raster-orientation policy',BASE+'docs/RELEASE_1.2.1.md'),
+    ('LogForge RELEASE_1.3.0: current admission and raster-orientation policy',BASE+'docs/RELEASE_1.3.0.md'),
     ('LogForge VALIDATION: versioned historical validation records',BASE+'docs/VALIDATION.md'),
     ('LogForge BENCHMARK_1.2.0: historical performance matrix',BASE+'docs/BENCHMARK_1.2.0.md'),
     ('LogForge APPLE_LOG_IDENTIFICATION: native references and controlled Resolve experiments',BASE+'docs/APPLE_LOG_IDENTIFICATION.md'),
@@ -206,16 +209,18 @@ def build(rows):
     story=[];tex=[];eqnum=0;fignum=0;tabnum=0;chapter=0;figs=[]
     cover=ParagraphStyle('coverTitle',fontName='SansBold',fontSize=29,leading=36,textColor=colors.HexColor(NAVY))
     story.extend([Spacer(1,63),p('SOURCE CODE MONOGRAPH  /  ENGLISH EDITION','small'),Spacer(1,19),Paragraph('LogForge',ParagraphStyle('brand',fontName='BodyBold',fontSize=47,leading=54,textColor=colors.HexColor(TEAL))),Spacer(1,19),Paragraph('Source Code Analysis<br/>and Mathematical Proof<br/>- Academic Paper',cover),Spacer(1,22),p('HLG to Apple Log: from color mathematics to reliable media delivery','h2'),Spacer(1,21),table([
-    ['Research object','Fixed revision and evidence'],['Repository','HongHuo0728 / LogForge'],['Version','1.2.1 (26927B)'],['Commit',SHA],['Study date','29 September 2026'],['Edition','Complete English translation of the Chinese research paper'],['Structure','24 chapters; 66 equations; 18 vector figures; 5 tables'],['Validation','Release build passed; 24 CTest entries: 23 passed, 1 failed']], [112,WIDTH-112]),Spacer(1,23),p('An inspectable technical study of public source code. No author affiliation, publication status, camera certification, or universal editor compatibility is asserted.','small'),NextPageTemplate('main'),PageBreak()])
+    ['Research object','Fixed revision and evidence'],['Repository','HongHuo0728 / LogForge'],['Version','1.3.0 (26929A)'],['Commit',SHA],['Study date','30 September 2026'],['Edition','Complete English translation of the Chinese research paper'],['Structure','24 chapters; 66 equations; 18 vector figures; 5 tables'],['Validation','Release build passed; 29 CTest entries: 29 passed, 0 failed']], [112,WIDTH-112]),Spacer(1,23),p('An inspectable technical study of public source code. No author affiliation, publication status, camera certification, or universal editor compatibility is asserted.','small'),NextPageTemplate('main'),PageBreak()])
     story.append(p('Contents','h1'))
     toc=TableOfContents(tableStyle=TableStyle([('LEFTPADDING',(0,0),(-1,-1),0),('RIGHTPADDING',(0,0),(-1,-1),0),('TOPPADDING',(0,0),(-1,-1),0),('BOTTOMPADDING',(0,0),(-1,-1),0)]))
     toc.levelStyles=[ParagraphStyle('toc',fontName='Body',fontSize=9.7,leading=20,leftIndent=0,firstLineIndent=0,spaceBefore=0,textColor=colors.HexColor(NAVY))]
-    story.extend([toc,PageBreak(),p('Edition and Evidence Notes','h1'),p('This English edition translates the existing Chinese paper without changing its research revision, conclusions, equations, figure sequence, or experimental records. The original Chinese PDF and materials are preserved. The full translated abstract and the original shorter English abstract are both retained to preserve the original structure.'),p('The title uses mathematical proof to refer to the conditional derivations and structural arguments developed in the text. It does not assert machine-checked, whole-program verification. The reported tests belong to the original study; preparing this translation is not a new experimental run.'),p('Mathematical curves are calculated from public constants and current source formulas. Architecture and state diagrams abstract implementation relationships. Figures labeled historical use repository version 1.2.0 measurements; figures describing the present reproduction use the actual September 29, 2026 study records. No illustrative curve is presented as an unreported experiment.'),p('Equations, figures, and tables retain separate continuous numbering. Principal source files appear at the end of each chapter, linked to the fixed commit. Appendix B and the companion inventory cover every version-controlled file.'),p('Reading route: Chapters 1-7 establish the signal and numerical model; Chapters 8-12 explain execution and clocks; Chapters 13-19 examine media semantics and reliability; Chapters 20-24 connect interfaces, reproduction results, performance, the implementation walkthrough, and conclusions.'),PageBreak()])
+    story.extend([toc,PageBreak(),p('Edition and Evidence Notes','h1'),p('This English edition and its Chinese counterpart are revised together for LogForge 1.3.0 at the recorded source revision. They replace the previous 1.2.1 editions. Existing release verification, historical measurements, and mathematical derivations retain distinct provenance.'),p('The title uses mathematical proof to refer to the conditional derivations and structural arguments developed in the text. It does not assert machine-checked, whole-program verification. The reported tests belong to the original study; preparing this translation is not a new experimental run.'),p('Mathematical curves are calculated from public constants and current source formulas. Architecture and state diagrams abstract implementation relationships. Figures labeled historical use repository version 1.2.0 measurements; figures describing the historical 1.2.1 reproduction retain the earlier study records. No illustrative curve is presented as an unreported experiment.'),p('Equations, figures, and tables retain separate continuous numbering. Principal source files appear at the end of each chapter, linked to the fixed commit. Appendix B and the companion inventory cover every source and project file (excluding paper artifacts).'),p('Reading route: Chapters 1-7 establish the signal and numerical model; Chapters 8-12 explain execution and clocks; Chapters 13-19 examine media semantics and reliability; Chapters 20-24 connect interfaces, reproduction results, performance, the implementation walkthrough, and conclusions.'),PageBreak()])
     def citations(n):
         if n not in CHAPTER_FILES:return
         links='Principal source files: '+'; '.join(f'<link href="{BASE+f}" color="{TEAL}">{escape(f)}</link>' for f in CHAPTER_FILES[n])+'.'
         last=story.pop()
-        story.append(KeepTogether([last,Spacer(1,7),Paragraph(links,ST['small'])]))
+        group=[last,Spacer(1,7),Paragraph(links,ST['small'])]
+        if story and isinstance(story[-1],Paragraph) and story[-1].style.name=='h2':group.insert(0,story.pop())
+        story.append(KeepTogether(group))
         tex.append('\n\\par\\small '+texesc('Principal source files: '+'; '.join(CHAPTER_FILES[n])+'.')+'\\normalsize\n')
     lines=source.splitlines();i=0
     while i<len(lines):
@@ -240,7 +245,7 @@ def build(rows):
         elif l=='@results':
             xr=ET.parse(ROOT/'evidence/ctest_current.xml').getroot();data=[['Test name','Outcome','Time (s)']]
             for x in xr.iter('testcase'):data.append([x.attrib['name'],'Failed' if x.find('failure') is not None else 'Passed',f"{float(x.attrib.get('time',0)):.3f}"])
-            caption='Complete CTest results from the reported reproduction';tabnum+=1
+            caption='Complete CTest results from the existing 1.3.0 release record';tabnum+=1
             story.append(KeepTogether([p(f'Table {tabnum}. {caption}','cap'),table(data,[WIDTH*.63,WIDTH*.17,WIDTH*.20]),Spacer(1,8)]));tex.append(tex_table(data,caption))
         elif l=='@inventory':
             caption=f'All {len(rows)} version-controlled files and their roles';tabnum+=1
@@ -263,13 +268,13 @@ def build(rows):
 \setlength{\parskip}{5pt}
 \pagestyle{fancy}\fancyhf{}\fancyhead[L]{LogForge: Source Code Analysis and Mathematical Proof}\fancyfoot[C]{\thepage}
 \title{LogForge Source Code Analysis and Mathematical Proof - Academic Paper}
-\author{Public-source technical research paper}\date{29 September 2026}
+\author{Public-source technical research paper}\date{30 September 2026}
 \begin{document}\maketitle\tableofcontents
 '''
     (ROOT/'LogForge_Academic_Paper_English.tex').write_text(preamble+''.join(tex)+'\n\\end{document}\n',encoding='utf-8')
     (ROOT/'figure_index_en.json').write_text(json.dumps(figs,indent=2),encoding='utf-8')
     doc=fitz.open(PDF)
-    metrics={'title':TITLE,'commit':SHA,'version':'1.2.1 (26927B)','pages':len(doc),'chapters':24,'subsections':translated['subsections'],'english_words':translated['english_words'],'equations':eqnum,'figures':fignum,'tables':tabnum,'tracked_files':len(rows),'pdf_sha256':hashlib.sha256(PDF.read_bytes()).hexdigest(),'ctest':{'tests':24,'passed':23,'failed':1,'failed_test':'media_pipeline','provenance':'original Chinese study; no new test run for translation'},'pdf_export':'ReportLab; embedded fonts; original vector equations and figures; translated captions and tables','latex_status':'Editable project source; built-in compiler unavailable during original study; compilation not asserted'}
+    metrics={'title':TITLE,'commit':SHA,'version':'1.3.0 (26929A)','pages':len(doc),'chapters':24,'subsections':translated['subsections'],'english_words':translated['english_words'],'equations':eqnum,'figures':fignum,'tables':tabnum,'tracked_files':len(rows),'pdf_sha256':hashlib.sha256(PDF.read_bytes()).hexdigest(),'ctest':{'tests':29,'passed':29,'failed':0,'provenance':'docs/verification/1.3.0.json; existing release record','provenance':'existing 1.3.0 release record; no new media run for revision'},'pdf_export':'ReportLab; embedded fonts; original vector equations and figures; translated captions and tables','latex_status':'Editable project source; built-in compiler unavailable during original study; compilation not asserted'}
     (ROOT/'production_metrics.json').write_text(json.dumps(metrics,indent=2),encoding='utf-8')
     print(json.dumps(metrics,indent=2))
 

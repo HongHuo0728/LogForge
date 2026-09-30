@@ -1,5 +1,5 @@
 {
-  "commit": "6b43a93fbd4d1457ff20b4c99a030c0e398f520a",
+  "commit": "913e4b9417fa0f32b88629c39062b54589d9dd21",
   "files": [
     {
       "path": ".clang-format",
@@ -21,9 +21,9 @@
     },
     {
       "path": ".github/workflows/build-windows.yml",
-      "bytes": 2764,
-      "lines": 71,
-      "sha256": "43e7e6f85a681e3408703ab7fd3d84d0ee34a664590ea3878a53a0b7cf4dbd6d",
+      "bytes": 2869,
+      "lines": 73,
+      "sha256": "4643932a494947863063872a7c7f7a82c6e4956588cb2e549c6d9a419d6f4b43",
       "kind": "text",
       "role": "C++20/MSVC目标、测试注册、构建与发布允许列表；第8、21章",
       "symbols": []
@@ -52,9 +52,9 @@
     },
     {
       "path": "CHANGELOG.md",
-      "bytes": 9659,
-      "lines": 141,
-      "sha256": "368b93867efae369da60e7946ccc8e4fb87752a2b81456c0d2a43eddbb3a6f76",
+      "bytes": 11866,
+      "lines": 175,
+      "sha256": "c4cd4d39b93273a1bb8d7a07ab1462098582c63bc36ab47ccefbd8b2ec6117c5",
       "kind": "text",
       "role": "项目说明、历史证据或开发流程；按章节主题交叉核对",
       "symbols": [
@@ -66,9 +66,9 @@
     },
     {
       "path": "CMakeLists.txt",
-      "bytes": 9296,
-      "lines": 124,
-      "sha256": "6a12fd2be0dd2bbca7b78cc601635a8222cf6856d5ca81dab0010064daace506",
+      "bytes": 10871,
+      "lines": 143,
+      "sha256": "3fb0fa432af3c6faa786fa18b7283d938463a262f6b7b8d116347b97bc491939",
       "kind": "text",
       "role": "C++20/MSVC目标、测试注册、构建与发布允许列表；第8、21章",
       "symbols": []
@@ -98,9 +98,9 @@
     },
     {
       "path": "README.md",
-      "bytes": 27355,
-      "lines": 233,
-      "sha256": "efb454924028a502302bb5b751cb43e70289fd0935d36989dc4e0b99c0a63fab",
+      "bytes": 30307,
+      "lines": 248,
+      "sha256": "90854d8689613597b86bc8729719b433a5e52b31de5ab1d5ab496f006d736d67",
       "kind": "text",
       "role": "项目说明、历史证据或开发流程；按章节主题交叉核对",
       "symbols": [
@@ -140,9 +140,9 @@
     },
     {
       "path": "docs/ARCHITECTURE.md",
-      "bytes": 14614,
-      "lines": 147,
-      "sha256": "7972eaf13401ff9a212d5f26554edf14b7a8cfa49a2d999737ab4edaf6145fb8",
+      "bytes": 17602,
+      "lines": 175,
+      "sha256": "bd747d8a28c539f0e6f3003e8cd53d20db9614f66993254a9c6ccd234141f0f5",
       "kind": "text",
       "role": "项目说明、历史证据或开发流程；按章节主题交叉核对",
       "symbols": [
@@ -154,9 +154,9 @@
     },
     {
       "path": "docs/BENCHMARK_1.2.0.md",
-      "bytes": 6010,
+      "bytes": 5967,
       "lines": 62,
-      "sha256": "5c289167580dd1c7b504ecea0227a8024714251ee931768c889eaa1be1854cdc",
+      "sha256": "dc1841627b235cc1a681f95ab540abf6eab4e3a7c047b9049ce29384dd9c37e6",
       "kind": "text",
       "role": "项目说明、历史证据或开发流程；按章节主题交叉核对",
       "symbols": [
@@ -168,15 +168,33 @@
     },
     {
       "path": "docs/BUG_AUDIT_1.1.1.md",
-      "bytes": 7273,
+      "bytes": 7210,
       "lines": 63,
-      "sha256": "063144bb62910596895ac7e172c7dc372483d0cb4bc4a5eead1c6f886afca4c8",
+      "sha256": "7a434cecc54910c661c678149b6850dd3675568f44190683f70e5d49dd7985ab",
       "kind": "text",
       "role": "项目说明、历史证据或开发流程；按章节主题交叉核对",
       "symbols": [
         {
           "line": 1,
           "text": "# LogForge 1.1.1 (26923D): defect audit"
+        }
+      ]
+    },
+    {
+      "path": "docs/CADENCE_1.3.0.md",
+      "bytes": 4540,
+      "lines": 84,
+      "sha256": "613a5227ff17be80d216a148df688317b5e231a03380d89d93b0cb1ab9a0ddd2",
+      "kind": "text",
+      "role": "项目说明、历史证据或开发流程；按章节主题交叉核对",
+      "symbols": [
+        {
+          "line": 1,
+          "text": "# Packet cadence contract in LogForge 1.3.0"
+        },
+        {
+          "line": 39,
+          "text": "Storage is O(n)."
         }
       ]
     },
@@ -210,9 +228,9 @@
     },
     {
       "path": "docs/FFMPEG_PROVIDER.md",
-      "bytes": 6952,
+      "bytes": 6898,
       "lines": 54,
-      "sha256": "ac40882a24bba073b2d3767f5143b0b68708cda219f6ff7a7a01f42837f0e8c1",
+      "sha256": "ff5ebdaa9bb8f4f241dca6163a7360f3417aee2be4312e59efcdf4277bdb511d",
       "kind": "text",
       "role": "项目说明、历史证据或开发流程；按章节主题交叉核对",
       "symbols": [
@@ -237,10 +255,24 @@
       ]
     },
     {
+      "path": "docs/INPUT_CONTRACT_1.3.0.md",
+      "bytes": 2804,
+      "lines": 41,
+      "sha256": "e8cc64be0ec7a7494ffe921d54c081cec86b8f6075bc2618a8fc26152e1cdb0b",
+      "kind": "text",
+      "role": "项目说明、历史证据或开发流程；按章节主题交叉核对",
+      "symbols": [
+        {
+          "line": 1,
+          "text": "# Input interpretation contract — LogForge 1.3.0"
+        }
+      ]
+    },
+    {
       "path": "docs/METADATA.md",
-      "bytes": 9176,
+      "bytes": 9097,
       "lines": 79,
-      "sha256": "a264ddece54935d751a25700cef4b8114bf198c771a222583e52398318924fe0",
+      "sha256": "95873dd530bbfec8f3fc93ed26c0b40ad6d2e187012b8351a3136c42859b5272",
       "kind": "text",
       "role": "项目说明、历史证据或开发流程；按章节主题交叉核对",
       "symbols": [
@@ -266,9 +298,9 @@
     },
     {
       "path": "docs/RELEASE_1.2.1.md",
-      "bytes": 2522,
+      "bytes": 2476,
       "lines": 46,
-      "sha256": "9eb3de52ff8ef9b1a520539724b2a83e3ac67f77cc3ab1c5d51f926d49932aea",
+      "sha256": "6ca71379eee8e4a43e19949017364d5b86631f324570e25a3b61057a2f9e4fbf",
       "kind": "text",
       "role": "项目说明、历史证据或开发流程；按章节主题交叉核对",
       "symbols": [
@@ -279,10 +311,24 @@
       ]
     },
     {
+      "path": "docs/RELEASE_1.3.0.md",
+      "bytes": 11035,
+      "lines": 147,
+      "sha256": "5873fde6841b773e25914ea0874dfc1531e84f070e688587a552a719aeb236eb",
+      "kind": "text",
+      "role": "项目说明、历史证据或开发流程；按章节主题交叉核对",
+      "symbols": [
+        {
+          "line": 1,
+          "text": "# LogForge 1.3.0 (26929A)"
+        }
+      ]
+    },
+    {
       "path": "docs/TECHNICAL_REFERENCES.md",
-      "bytes": 16149,
-      "lines": 137,
-      "sha256": "c97054741275e8a67750110e0cb133d3e441dfdd0ae15eea9bd21d6bbfafa24e",
+      "bytes": 17099,
+      "lines": 152,
+      "sha256": "50b9ce166ece13999b5a7ba02ee04f2b58c75fc7ddc63c09b6c8a69bf1578306",
       "kind": "text",
       "role": "项目说明、历史证据或开发流程；按章节主题交叉核对",
       "symbols": [
@@ -294,9 +340,9 @@
     },
     {
       "path": "docs/VALIDATION.md",
-      "bytes": 47231,
-      "lines": 598,
-      "sha256": "f35088aa312376842c8980fa08d80f604bc6ad64b9c397fdd837a5a6901b0341",
+      "bytes": 52802,
+      "lines": 684,
+      "sha256": "7caf3d9c7126107eb4f27af42646682b88f839bbe5721c1eeccf6a55d64175bb",
       "kind": "text",
       "role": "项目说明、历史证据或开发流程；按章节主题交叉核对",
       "symbols": [
@@ -305,38 +351,47 @@
           "text": "# Validation record"
         },
         {
-          "line": 593,
+          "line": 679,
           "text": "# Approve only a reviewed pair, or install the pinned build through --install-ffmpeg."
         },
         {
-          "line": 594,
+          "line": 680,
           "text": "# Use only a generated fixture with known left chroma siting for this declaration."
         }
       ]
     },
     {
       "path": "docs/benchmarks/1.2.0.json",
-      "bytes": 95920,
+      "bytes": 93115,
       "lines": 2805,
-      "sha256": "3347a311d28e712752661b4a2615725251dae4488eeced1565bf63390518cb27",
+      "sha256": "ca1531acd42ee74fe7fc56664801242f047446b39c7bc7b0a745ca9256ba9976",
       "kind": "text",
       "role": "项目说明、历史证据或开发流程；按章节主题交叉核对",
       "symbols": []
     },
     {
       "path": "docs/images/LogForge.png",
-      "bytes": 37255,
+      "bytes": 37377,
       "lines": null,
-      "sha256": "7cfc452f64600478b7944f7787b7ce3ba2a8aa2a60a9d7b03134ab22d15521dc",
+      "sha256": "feea70a693b0fe97c5c4f31df3d4496889cd8288e038362f01037d088cfbef4e",
       "kind": "binary",
       "role": "项目说明、历史证据或开发流程；按章节主题交叉核对",
       "symbols": []
     },
     {
       "path": "docs/verification/1.2.0.json",
-      "bytes": 8602,
+      "bytes": 8283,
       "lines": 320,
-      "sha256": "c054d034c823c62e9365ec2c20a440f1826e59a83664f45ef39cc0264a6e79f3",
+      "sha256": "ddfdcfc9b2753164a32138d6dcf6282f894b2ee58cc8a52d7b1faf08f28b513a",
+      "kind": "text",
+      "role": "项目说明、历史证据或开发流程；按章节主题交叉核对",
+      "symbols": []
+    },
+    {
+      "path": "docs/verification/1.3.0.json",
+      "bytes": 23552,
+      "lines": 947,
+      "sha256": "86af24fd056038c29c8aa6caccfd612daa280ebc6c87dd243ecc4f91097d28b8",
       "kind": "text",
       "role": "项目说明、历史证据或开发流程；按章节主题交叉核对",
       "symbols": []
@@ -352,6 +407,20 @@
         {
           "line": 8,
           "text": "class AppleLogIdentificationWriter {"
+        }
+      ]
+    },
+    {
+      "path": "include/logforge/AudioPayload.h",
+      "bytes": 382,
+      "lines": 8,
+      "sha256": "5a0f882da25b764c0958b8daf4eba8bb3a5a152e71bc603a5d09fade8ec6812a",
+      "kind": "text",
+      "role": "每音轨压缩包SHA-256载荷验证；第13章",
+      "symbols": [
+        {
+          "line": 6,
+          "text": "Json VerifyAudioPayload(const fs::path& ffmpeg, const fs::path& input, const fs::path& output,"
         }
       ]
     },
@@ -387,9 +456,9 @@
     },
     {
       "path": "include/logforge/CudaTransformer.h",
-      "bytes": 757,
-      "lines": 24,
-      "sha256": "cb3c78e9fda67240d2ab04304054d6e0c37379f926d88d879b62fe8203156181",
+      "bytes": 933,
+      "lines": 26,
+      "sha256": "021cc78ddc2cd1963d34b533f31f9f7209ccba346cf6811030ea5514646c12ce",
       "kind": "text",
       "role": "动态驱动接口、资格验证和事务提交；第11章",
       "symbols": [
@@ -398,7 +467,11 @@
           "text": "const char* BackendName(ProcessingBackend backend);"
         },
         {
-          "line": 9,
+          "line": 10,
+          "text": "nlohmann::json RankCudaCandidates(nlohmann::json candidates);"
+        },
+        {
+          "line": 11,
           "text": "class CudaTransformer {"
         }
       ]
@@ -527,51 +600,55 @@
     },
     {
       "path": "include/logforge/Media.h",
-      "bytes": 3821,
-      "lines": 87,
-      "sha256": "08e504ba764534e33beba756527126ec76bd52adc4f03cab7c9db17e785276f2",
+      "bytes": 4546,
+      "lines": 97,
+      "sha256": "04e4ba12a7f0a2ebb308bcaa22a3b214ffdc1650fcdd8bd56c72c05ada683aad",
       "kind": "text",
       "role": "探测解析、准入、元数据参数与输出验证；第2、16章",
       "symbols": [
         {
-          "line": 56,
+          "line": 62,
           "text": "bool SameMetadataValue(const std::string& key, const Json& a, const Json& b);"
         },
         {
-          "line": 57,
+          "line": 63,
           "text": "bool SupportedDisplayMatrix(const std::string& matrix, int width = 0, int height = 0);"
         },
         {
-          "line": 58,
+          "line": 64,
           "text": "Json PreserveMovCreationTimes(const Json& sourceAtoms, const fs::path& encodedPartial,"
         },
         {
-          "line": 60,
+          "line": 66,
           "text": "Json InspectMovTimeline(const MediaInfo& input, const Json& atoms, const fs::path& ffprobe = {},"
         },
         {
-          "line": 62,
+          "line": 68,
           "text": "MediaInfo Probe(const fs::path& ffprobe, const fs::path& path, const std::atomic_bool* cancel = nullptr);"
         },
         {
-          "line": 63,
+          "line": 69,
           "text": "CadenceReport AnalyzeCadence(std::span<const VideoPacketTiming> packets, const MediaInfo& media);"
         },
         {
-          "line": 64,
+          "line": 70,
+          "text": "AppError CadenceFailure(const CadenceReport& report, const MediaInfo& media);"
+        },
+        {
+          "line": 71,
           "text": "CadenceReport VerifyConstantFrameRate(const fs::path& ffprobe, const MediaInfo& media,"
         },
         {
-          "line": 74,
+          "line": 84,
           "text": "ValidationReport ValidateOutput(const MediaInfo& input, const MediaInfo& output, int64_t processedFrames);"
         }
       ]
     },
     {
       "path": "include/logforge/Messages.inc",
-      "bytes": 29793,
-      "lines": 262,
-      "sha256": "55f1ee07f6da30e7cbc368628c95b7ea84b55871f4937c05ac25e5f492d023ea",
+      "bytes": 31908,
+      "lines": 272,
+      "sha256": "2c07480743de8086a6fb4bbedb9843c1595f181e0ae6c9372ee30d1441cd0baf",
       "kind": "text",
       "role": "双语消息宏表、稳定键与占位符；第20章",
       "symbols": []
@@ -674,14 +751,26 @@
     },
     {
       "path": "include/logforge/Queue.h",
-      "bytes": 465,
-      "lines": 8,
-      "sha256": "3cc33ff450339cbeb5eee098dd78d615310798674496b42935fd0ed2ddb84378",
+      "bytes": 931,
+      "lines": 17,
+      "sha256": "c2fafdaec61f71bb41605a083d375475b89318854a013ba93011d4c5c7d4357d",
       "kind": "text",
       "role": "串行多文件任务及逐项失败记录；第20章",
       "symbols": [
         {
-          "line": 5,
+          "line": 9,
+          "text": "QueuePlan PlanQueue(const std::vector<fs::path>& inputs, const fs::path& directory);"
+        },
+        {
+          "line": 10,
+          "text": "Json QueuePlanJson(const QueuePlan& plan);"
+        },
+        {
+          "line": 11,
+          "text": "Json RunQueue(const FFmpegInstallation& tools, const QueuePlan& plan, Logger& logger,"
+        },
+        {
+          "line": 14,
           "text": "Json RunQueue(const FFmpegInstallation& tools, const std::vector<fs::path>& inputs, const fs::path& directory,"
         }
       ]
@@ -734,14 +823,14 @@
     },
     {
       "path": "include/logforge/Transcode.h",
-      "bytes": 1287,
-      "lines": 33,
-      "sha256": "c786cdbeffda746793f7c0bf5a1adef40b00a60c0b3c4bb037b809647886acff",
+      "bytes": 1478,
+      "lines": 36,
+      "sha256": "1e12ab267cb112e399972ec4295ebc0a0aaab396851e070e08cba02e7233375c",
       "kind": "text",
       "role": "完整媒体任务、后端、验证报告与最终发布；第8、23章",
       "symbols": [
         {
-          "line": 27,
+          "line": 30,
           "text": "class TranscodeJob {"
         }
       ]
@@ -843,18 +932,18 @@
     },
     {
       "path": "resources/VersionResource.h.in",
-      "bytes": 305,
+      "bytes": 301,
       "lines": 4,
-      "sha256": "8aac898816910f0604f7f07934b3330e382811025b877a20fbe212080803cb82",
+      "sha256": "c7983eed111b60afef652576a58a6eb001c50d4237b89da3cc6b09bf2d573501",
       "kind": "text",
       "role": "图标、清单、版本资源及生成模板；构建与界面",
       "symbols": []
     },
     {
       "path": "src/AppleLogIdentification.cpp",
-      "bytes": 9669,
+      "bytes": 9475,
       "lines": 194,
-      "sha256": "7e4e8bde35e9f959261de0fd3d7d46372e6d632093400f627c1fe3ae993dc52d",
+      "sha256": "d6efead7e6091a43151cdf75e125367ba9e0d11f3b102d73d1171da6a4ae6645",
       "kind": "text",
       "role": "35字节识别扩展写入及结构检查；第15章",
       "symbols": [
@@ -893,41 +982,95 @@
       ]
     },
     {
+      "path": "src/AudioPayload.cpp",
+      "bytes": 2901,
+      "lines": 54,
+      "sha256": "56d9cd4701f54a77dcf4aa22fb597d9b29c053a5c3b94c926e4039058fcd0e89",
+      "kind": "text",
+      "role": "每音轨压缩包SHA-256载荷验证；第13章",
+      "symbols": [
+        {
+          "line": 5,
+          "text": "Json VerifyAudioPayload(const fs::path& ffmpeg, const fs::path& input, const fs::path& output,"
+        }
+      ]
+    },
+    {
       "path": "src/Cadence.cpp",
-      "bytes": 7954,
-      "lines": 168,
-      "sha256": "e323be3a9a3500254a8d5dcc8d04f31173ed72368d32f0a997b59553c991b00e",
+      "bytes": 19331,
+      "lines": 381,
+      "sha256": "159919fe3406bd71e098f5c1465e9d4adee88a1a772592a79790af88b07a3d31",
       "kind": "text",
       "role": "全包周期、相位与固定时钟验证；第12章",
       "symbols": [
         {
-          "line": 9,
+          "line": 15,
+          "text": "long double Cross(const ClockPoint& a, const ClockPoint& b, const ClockPoint& c) {"
+        },
+        {
+          "line": 19,
+          "text": "std::vector<ClockPoint> Hull(const std::vector<ClockPoint>& points, bool upper) {"
+        },
+        {
+          "line": 32,
+          "text": "long double Residual(const ClockPoint& p, long double period) {"
+        },
+        {
+          "line": 35,
+          "text": "long double Support(const std::vector<ClockPoint>& hull, long double period, bool upper) {"
+        },
+        {
+          "line": 47,
+          "text": "long double Period(const Rational& r) {"
+        },
+        {
+          "line": 50,
+          "text": "Rational Reduced(int64_t numerator, int64_t denominator) {"
+        },
+        {
+          "line": 54,
+          "text": "Rational RateFromPeriod(Rational period, Rational timeBase) {"
+        },
+        {
+          "line": 68,
           "text": "Json CadenceReport::ToJson() const {"
         },
         {
-          "line": 21,
+          "line": 100,
           "text": "CadenceReport AnalyzeCadence(std::span<const VideoPacketTiming> p, const MediaInfo& m) {"
         },
         {
-          "line": 106,
+          "line": 301,
+          "text": "AppError CadenceFailure(const CadenceReport& r, const MediaInfo& m) {"
+        },
+        {
+          "line": 316,
           "text": "CadenceReport VerifyConstantFrameRate(const fs::path& ffprobe, const MediaInfo& m,"
         }
       ]
     },
     {
       "path": "src/Cli.cpp",
-      "bytes": 11521,
-      "lines": 223,
-      "sha256": "63a897aea0a2406ce77ffa18f83ca37eadab3ecaf144e8ef65c370ea8eac6bb2",
+      "bytes": 12742,
+      "lines": 248,
+      "sha256": "014aafef40b476d04953255925123023f4c16df67a747f59ec65c89d67904319",
       "kind": "text",
       "role": "命令与数值参数、核心自动化入口；第20章",
       "symbols": [
         {
-          "line": 9,
+          "line": 11,
           "text": "BOOL WINAPI Ctrl(DWORD) {"
         },
         {
-          "line": 14,
+          "line": 15,
+          "text": "int64_t PositiveInteger(const std::wstring& value) {"
+        },
+        {
+          "line": 23,
+          "text": "double Number(const std::wstring& value, logforge::TextId diagnostic) {"
+        },
+        {
+          "line": 35,
           "text": "int wmain(int argc, wchar_t** argv) {"
         }
       ]
@@ -1030,9 +1173,9 @@
     },
     {
       "path": "src/FFmpeg.cpp",
-      "bytes": 19743,
+      "bytes": 19327,
       "lines": 416,
-      "sha256": "796f085a9bc8d5bbb4859470189b6eef8a1514f110cbce005ecaf8848d561247",
+      "sha256": "f36edcf4e4401820282105cc11e4ade9187ab601890a8f124786b4db2ca80a9d",
       "kind": "text",
       "role": "工具能力、发现调度和固定下载；第17章",
       "symbols": [
@@ -1154,9 +1297,9 @@
     },
     {
       "path": "src/MainWindow.cpp",
-      "bytes": 81800,
-      "lines": 1710,
-      "sha256": "a548eece7ef0e4422934fc0383ca00153197b9420a66bad6d8e5a61cf957c179",
+      "bytes": 81839,
+      "lines": 1739,
+      "sha256": "b774b3d05f220558da01af28458b3fb1f01fb56a8b00861d3be4c5e3593278ea",
       "kind": "text",
       "role": "单后台工作者、事件与可测量布局；第20章",
       "symbols": [
@@ -1169,20 +1312,20 @@
           "text": "class MainWindow {"
         },
         {
-          "line": 1601,
+          "line": 1630,
           "text": "int Run(HINSTANCE instance) {"
         },
         {
-          "line": 1696,
+          "line": 1725,
           "text": "int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int) {"
         }
       ]
     },
     {
       "path": "src/Media.cpp",
-      "bytes": 19862,
-      "lines": 400,
-      "sha256": "6d6e7cfcc7b269cfd7a984bb2ac851755c3e8f685428e0cae826660b1b6a8a6a",
+      "bytes": 25009,
+      "lines": 497,
+      "sha256": "96f846f34b443a04e36843450f652be158eb61dfbc5226c53e15e3dc3d139232",
       "kind": "text",
       "role": "探测解析、准入、元数据参数与输出验证；第2、16章",
       "symbols": [
@@ -1207,48 +1350,68 @@
           "text": "int64_t frameCount(const Json& j) {"
         },
         {
-          "line": 54,
+          "line": 53,
+          "text": "bool Unspecified(const std::string& value) {"
+        },
+        {
+          "line": 56,
+          "text": "bool IsMovDemuxer(const std::string& value) {"
+        },
+        {
+          "line": 65,
           "text": "Rational Rational::Parse(const std::string& value) {"
         },
         {
-          "line": 75,
+          "line": 86,
           "text": "MediaInfo MediaInfo::Parse(const Json& j, const fs::path& path) {"
         },
         {
-          "line": 137,
+          "line": 152,
           "text": "std::string MediaInfo::EffectiveChromaLocation() const {"
         },
         {
-          "line": 142,
+          "line": 157,
+          "text": "std::string MediaInfo::EffectiveRange() const {"
+        },
+        {
+          "line": 160,
+          "text": "std::vector<Message> MediaInfo::InputWarnings() const {"
+        },
+        {
+          "line": 175,
+          "text": "Json MediaInfo::InputInterpretation() const {"
+        },
+        {
+          "line": 214,
           "text": "std::vector<Message> MediaInfo::UnsupportedReasons() const {"
         },
         {
-          "line": 154,
+          "line": 240,
           "text": "std::wstring MediaInfo::Summary(Language language) const {"
         },
         {
-          "line": 179,
+          "line": 273,
           "text": "MediaInfo Probe(const fs::path& ffprobe, const fs::path& path, const std::atomic_bool* cancel) {"
         },
         {
-          "line": 195,
+          "line": 289,
           "text": "Json ValidationReport::ToJson() const {"
         },
         {
-          "line": 216,
+          "line": 313,
           "text": "ValidationReport ValidateOutput(const MediaInfo& in, const MediaInfo& out, int64_t frames) {"
         },
         {
-          "line": 335,
+          "line": 432,
           "text": "std::vector<std::wstring> AppleLogMetadataWriter::Arguments(const MediaInfo& in, double exposureStops,"
         }
       ]
     },
     {
       "path": "src/MediaSafety.cpp",
-      "bytes": 12964,
-      "lines": 272,
-      "sha256": "60b21485eecea443deef5b2f338d1e968c0aa57eded463113884ddafa8cb27a1",
+      "bytes": 13961,
+      "lines": 292,
+      "sha256": "c46f3581e19c6caa6e0316219303473526483be1b888d8a70bdce91eae2f9ed2",
       "kind": "text",
       "role": "时间语义、显示矩阵和固定宽度头修补；第13、16章",
       "symbols": [
@@ -1269,7 +1432,7 @@
           "text": "Json PreserveMovCreationTimes(const Json& source, const fs::path& partial, const std::atomic_bool& cancel,"
         },
         {
-          "line": 234,
+          "line": 241,
           "text": "Json InspectMovTimeline(const MediaInfo& in, const Json& analysis, const fs::path&,"
         }
       ]
@@ -1336,9 +1499,9 @@
     },
     {
       "path": "src/PixelSanity.cpp",
-      "bytes": 8726,
+      "bytes": 8542,
       "lines": 184,
-      "sha256": "feb7a1d41c169c56e567d67c1fdc0706e702c362dfd611ee5e1951014515f41c",
+      "sha256": "2e9d78d9789e42df5c86d21da9ee42f66971f81823f41fe8124853f2becb71bc",
       "kind": "text",
       "role": "首中尾帧九块编码后粗差检查；第7章",
       "symbols": [
@@ -1444,23 +1607,35 @@
     },
     {
       "path": "src/Queue.cpp",
-      "bytes": 2401,
-      "lines": 49,
-      "sha256": "d83dd93f45866f2a2c771439bed820cd663ce8a4e333a91de282611de1464175",
+      "bytes": 4133,
+      "lines": 86,
+      "sha256": "49e9b5366a31ae2a82cf8b31c6019c77405a537206c96e70601fd288148079db",
       "kind": "text",
       "role": "串行多文件任务及逐项失败记录；第20章",
       "symbols": [
         {
-          "line": 3,
+          "line": 4,
+          "text": "QueuePlan PlanQueue(const std::vector<fs::path>& inputs, const fs::path& directory) {"
+        },
+        {
+          "line": 27,
+          "text": "Json QueuePlanJson(const QueuePlan& plan) {"
+        },
+        {
+          "line": 33,
           "text": "Json RunQueue(const FFmpegInstallation& tools, const std::vector<fs::path>& inputs, const fs::path& directory,"
+        },
+        {
+          "line": 38,
+          "text": "Json RunQueue(const FFmpegInstallation& tools, const QueuePlan& plan, Logger& logger,"
         }
       ]
     },
     {
       "path": "src/Settings.cpp",
-      "bytes": 4486,
+      "bytes": 4366,
       "lines": 120,
-      "sha256": "1683ff619a1314ae74fa902d8b49115daebb5268786df058eca4f1dd26bb8db6",
+      "sha256": "3431fccfd332e3d6efc7a32966f4c4c94769a3fc8edede8c9ea1c862fa599b61",
       "kind": "text",
       "role": "字段合并、并发锁及原子偏好保存；第19、20章",
       "symbols": [
@@ -1488,9 +1663,9 @@
     },
     {
       "path": "src/SettingsWindow.cpp",
-      "bytes": 30348,
+      "bytes": 29689,
       "lines": 659,
-      "sha256": "9f1bca19873f612fe38ed1ca9bbb9503eeed0cf9610cabbcb0f9d6f49a919ed6",
+      "sha256": "5e26d569706466287915c8b074ce04265840d0c4f6f9545f994a213e2b86063a",
       "kind": "text",
       "role": "设置草稿、保存取消、候选审阅与对话框；第20章",
       "symbols": [
@@ -1522,9 +1697,9 @@
     },
     {
       "path": "src/StorageSafety.cpp",
-      "bytes": 9503,
+      "bytes": 9289,
       "lines": 214,
-      "sha256": "30a783479ca3e505c65ab10290266079c2e76a9fe4f88daf9096327542744b12",
+      "sha256": "ff5df9bfecdf4153947998057fd69f67381f1ff6d610c00d32691c00bebf6680",
       "kind": "text",
       "role": "文件身份日志、状态锁与所有权恢复；第19章",
       "symbols": [
@@ -1576,9 +1751,9 @@
     },
     {
       "path": "src/ToolTrust.cpp",
-      "bytes": 5115,
+      "bytes": 4991,
       "lines": 124,
-      "sha256": "3a9905906290eb33ed1c67c109402ea1924e4c020369e26695f204ed3c969e9a",
+      "sha256": "3afe79a5067beb7a84445602b3d0d6dc96fc64f9c259758480f92f4f76404563",
       "kind": "text",
       "role": "双可执行文件身份、批准与租约；第17章",
       "symbols": [
@@ -1626,18 +1801,18 @@
     },
     {
       "path": "src/Transcode.cpp",
-      "bytes": 30850,
-      "lines": 584,
-      "sha256": "35882a70c5d2406359074a5ec98f096397206abe52ef51bb8377a58a9968e331",
+      "bytes": 34250,
+      "lines": 648,
+      "sha256": "2048666e671f971020b71ef034227fb6ecc35ec8593e7c64833b61b172b56ad2",
       "kind": "text",
       "role": "完整媒体任务、后端、验证报告与最终发布；第8、23章",
       "symbols": [
         {
-          "line": 16,
+          "line": 17,
           "text": "void logCommand(Logger& log, const fs::path& exe, const std::vector<std::wstring>& args) {"
         },
         {
-          "line": 20,
+          "line": 21,
           "text": "ValidationReport TranscodeJob::Run(const FFmpegInstallation& tools, const MediaInfo& input,"
         }
       ]
@@ -1754,53 +1929,65 @@
     },
     {
       "path": "src/color/ColorKernel.manifest.json",
-      "bytes": 465,
+      "bytes": 451,
       "lines": 14,
-      "sha256": "9d9adc2b2f38153fbca2aa45a0f6028a4d73108cf5b11e45db132cf1a7832cad",
+      "sha256": "ccae7226c1f1607047a4a184122080ae668fe7286c6b194d80534f130e3edb96",
       "kind": "text",
       "role": "CUDA源、PTX、编译器身份与精确参数记录；第11章",
       "symbols": []
     },
     {
       "path": "src/color/ColorKernel.ptx.h",
-      "bytes": 169037,
+      "bytes": 167417,
       "lines": 1620,
-      "sha256": "b31bd7dbe2e58b157e722976947e7a56465d26a5b7d31a98011005b16a39d2e2",
+      "sha256": "4f65eb1b19e795c947b7aa9599fbf52fc8831b70b3c75fabc23eca38141aba5d",
       "kind": "text",
       "role": "生成PTX字节数组：检查内容哈希及源清单，不视为手写算法；第11章",
       "symbols": []
     },
     {
       "path": "src/color/CudaTransformer.cpp",
-      "bytes": 16161,
-      "lines": 333,
-      "sha256": "fa362f0de9a4dba956e6f8ca7859ea7ec4f23f261badf2ed8f09839354415cde",
+      "bytes": 21217,
+      "lines": 423,
+      "sha256": "4058ad34f9d49df590d90e98fdcd05990973da00b4ccd2d1fec6691b8d7eab05",
       "kind": "text",
       "role": "动态驱动接口、资格验证和事务提交；第11章",
       "symbols": [
         {
-          "line": 11,
+          "line": 14,
           "text": "const char* BackendName(ProcessingBackend b) {"
         },
         {
-          "line": 317,
+          "line": 17,
+          "text": "nlohmann::json RankCudaCandidates(nlohmann::json candidates) {"
+        },
+        {
+          "line": 32,
+          "text": "std::string Hex(const unsigned char* bytes, size_t count) {"
+        },
+        {
+          "line": 40,
+          "text": "std::string PTXHash() {"
+        },
+        {
+          "line": 402,
           "text": "void CudaTransformer::Apply(std::span<float> p, SignalStatistics& s) {"
         },
         {
-          "line": 320,
+          "line": 410,
           "text": "nlohmann::json CudaTransformer::Report() const {"
         },
         {
-          "line": 330,
+          "line": 420,
           "text": "nlohmann::json CudaTransformer::Qualify() {"
         }
       ]
     },
     {
       "path": "src/color/FloatTransformer.cpp",
-      "bytes": 5395,
+      "bytes": 5268,
       "lines": 127,
-      "sha256": "9589f760dcbcd90f597a5c41f7bc5bf4966c664508499863ef3b49755fd856dd",
+      "sha256": "221068c17e85d0ea195908f4d8859f97a171ed4f0214a47ceb77529e24ce485a",
       "kind": "text",
       "role": "持久 CPU 工作线程、tile 配对及统计合并；第10章",
       "symbols": [
@@ -1858,9 +2045,9 @@
     },
     {
       "path": "tests/application.cpp",
-      "bytes": 13363,
+      "bytes": 13107,
       "lines": 262,
-      "sha256": "fe055c27f053e4fa4454f356eba02e1aa259128df9bc9aeddcdaaa34d064ce2e",
+      "sha256": "b70a5926620daf8829caa5b58dabbfe9e19c0209a4f68990778bab6161d93499",
       "kind": "text",
       "role": "偏好、发现和版本资源测试；第21章",
       "symbols": [
@@ -1913,10 +2100,36 @@
       ]
     },
     {
+      "path": "tests/cadence_v130.cpp",
+      "bytes": 6570,
+      "lines": 128,
+      "sha256": "17a7564b3b2388537e562c6e09739c930ebabe6a1fec02ec5be2def47212676b",
+      "kind": "text",
+      "role": "全序列量化单元与时钟回归；第12、21章",
+      "symbols": [
+        {
+          "line": 8,
+          "text": "void Require(bool value, const char* message) {"
+        },
+        {
+          "line": 12,
+          "text": "template <class Clock> std::vector<VideoPacketTiming> Packets(size_t count, Clock clock) {"
+        },
+        {
+          "line": 18,
+          "text": "void Invalid(const std::vector<VideoPacketTiming>& p, const MediaInfo& m, const char* what) {"
+        },
+        {
+          "line": 23,
+          "text": "int main() {"
+        }
+      ]
+    },
+    {
       "path": "tests/compatibility_v121.py",
-      "bytes": 8539,
-      "lines": 145,
-      "sha256": "57a927f3a0b289f006828dc49ce6799aaf43d4b388f9ef25fc0def97e825dbd6",
+      "bytes": 12096,
+      "lines": 200,
+      "sha256": "41ace765aa9f6301d0a75204ee317eb1d9bfe04a7a5319760ca9d4a9450ac64c",
       "kind": "text",
       "role": "竖拍像素、矩阵与音频偏移回归；第13、21章",
       "symbols": [
@@ -1965,9 +2178,9 @@
     },
     {
       "path": "tests/hardening.cpp",
-      "bytes": 17467,
-      "lines": 367,
-      "sha256": "c1e7a3104a91c902f6e683f19fa9981924082783bf3bde8147ea230533c1bbe8",
+      "bytes": 19277,
+      "lines": 396,
+      "sha256": "12307d6060bb346f1874e21970ef2500bef7f42988ce2f94df6b9c88eb38026d",
       "kind": "text",
       "role": "节奏、工具信任、MOV、并行与发布回归；第21章",
       "symbols": [
@@ -1980,35 +2193,35 @@
           "text": "void Cadence() {"
         },
         {
-          "line": 79,
+          "line": 89,
           "text": "void Security(const fs::path& root) {"
         },
         {
-          "line": 155,
+          "line": 165,
           "text": "std::string BE(uint32_t n) {"
         },
         {
-          "line": 161,
+          "line": 171,
           "text": "std::string Atom(const std::string& type, const std::string& data) {"
         },
         {
-          "line": 164,
+          "line": 174,
           "text": "std::string Data(int type, const std::string& data) {"
         },
         {
-          "line": 167,
+          "line": 177,
           "text": "void Mov(const fs::path& root) {"
         },
         {
-          "line": 244,
+          "line": 254,
           "text": "void Parallel() {"
         },
         {
-          "line": 283,
+          "line": 293,
           "text": "void Publication(const fs::path& ff, const fs::path& root) {"
         },
         {
-          "line": 345,
+          "line": 374,
           "text": "int main(int argc, char** argv) {"
         }
       ]
@@ -2053,11 +2266,11 @@
     },
     {
       "path": "tests/integration.py",
-      "bytes": 18347,
-      "lines": 255,
-      "sha256": "825b629e9056a8e9cd546a86f165bb914ca18d77a6362d95d3d0df5e3228c686",
+      "bytes": 24688,
+      "lines": 352,
+      "sha256": "d84dd2d5a30f5a46dff41458b70f17b68f434a4949b083ce12ed05d65cb4a711",
       "kind": "text",
-      "role": "端到端合成媒体测试；本次在第154行旧准入断言失败；第21章",
+      "role": "端到端合成媒体测试；1.3.0 发布记录通过明确冲突与覆盖回归；第21章",
       "symbols": [
         {
           "line": 12,
@@ -2085,9 +2298,9 @@
     },
     {
       "path": "tests/package_audit.py",
-      "bytes": 2219,
-      "lines": 38,
-      "sha256": "7968c0ae2965bbe8eedc27cb34e575174b0e8a35af1a821270e1c14c658e7b1e",
+      "bytes": 2282,
+      "lines": 39,
+      "sha256": "fada36d0c269fc29f22c2c534ff51c5bdbfeea1346ddd66ddf6c633c7ff27320",
       "kind": "text",
       "role": "归档允许列表、CRC、EXE与SHA-256审计；附录",
       "symbols": [
@@ -2099,9 +2312,9 @@
     },
     {
       "path": "tests/process_fixture.cpp",
-      "bytes": 1926,
-      "lines": 51,
-      "sha256": "e37f441837d9e51c40f0516c863dd02fc69244f7653c2a99781f4ae341c2084a",
+      "bytes": 2211,
+      "lines": 58,
+      "sha256": "ef4c0e5c9cfb1d3a23ce049c6c7b3185b5933a285872e7551eaa510c545eb49c",
       "kind": "text",
       "role": "后代持管道、长行、退出码夹具；第18章",
       "symbols": [
@@ -2117,9 +2330,9 @@
     },
     {
       "path": "tests/reliability.cpp",
-      "bytes": 12380,
-      "lines": 246,
-      "sha256": "ed95cf31a3c19c90166072d160b8f1a2c6ad0c1701de016e23a1e6b4df77544a",
+      "bytes": 13314,
+      "lines": 261,
+      "sha256": "20a380b423928d6460c7ba7bbc6d94039e5e9d3aba8d47fdf75d384885635c43",
       "kind": "text",
       "role": "进程、发现与CLI异常回归；第21章",
       "symbols": [
@@ -2144,7 +2357,7 @@
           "text": "void CommandLine() {"
         },
         {
-          "line": 232,
+          "line": 247,
           "text": "int main(int argc, char** argv) {"
         }
       ]
@@ -2169,9 +2382,9 @@
     },
     {
       "path": "tests/signal_integrity.py",
-      "bytes": 8543,
+      "bytes": 8383,
       "lines": 160,
-      "sha256": "c9771136e6c9d5cd4a03abb89215226bd40f401f0ad1d5b75fcafffccc85000d",
+      "sha256": "f6d1c742c78b011a1f29e1798b491842ec499ce20c6bcc0f2969d554e1db9071",
       "kind": "text",
       "role": "独立整数色块、创意与范围计数；第7、21章",
       "symbols": [
@@ -2183,9 +2396,9 @@
     },
     {
       "path": "tests/sustained.py",
-      "bytes": 5328,
+      "bytes": 5238,
       "lines": 90,
-      "sha256": "8c3d77c24fc197f57f3d2760b6fe5561fac7f7e79b97ecf2ef30a0a7cbe4e92a",
+      "sha256": "f0a0bbfe5535a4e17c89ab3712cc3b7eee4d5a5f20511609d4cd8e5cbd755872",
       "kind": "text",
       "role": "240帧4K120、内存和编码后亮度；第21章",
       "symbols": [
@@ -2201,9 +2414,9 @@
     },
     {
       "path": "tests/tests.cpp",
-      "bytes": 21303,
-      "lines": 396,
-      "sha256": "af78f2035ba814374648a04cb1b15f4c2229c539bf590fe47a11cee5efc1a627",
+      "bytes": 25952,
+      "lines": 463,
+      "sha256": "e7842e814433210a3a51375b16b001c63330e577f5cd053fd2260dd7feb9a5f2",
       "kind": "text",
       "role": "基础数学、媒体和平台测试；第21章",
       "symbols": [
@@ -2224,20 +2437,20 @@
           "text": "void MediaTests() {"
         },
         {
-          "line": 189,
+          "line": 256,
           "text": "void PlatformTests() {"
         },
         {
-          "line": 248,
+          "line": 315,
           "text": "int main(int argc, char** argv) {"
         }
       ]
     },
     {
       "path": "tests/v120.cpp",
-      "bytes": 18321,
+      "bytes": 17956,
       "lines": 386,
-      "sha256": "07e63cd2a09ea56f4a2c286cd913a2147038966e94da5c4a4fcecad21e9c2264",
+      "sha256": "64d7b77302e46c63762607510a92318ac0fe7affdc05eb409019e38f3e35e2d8",
       "kind": "text",
       "role": "存储、矩阵、CUDA故障、队列和媒体回归；第21章",
       "symbols": [
@@ -2267,6 +2480,44 @@
         },
         {
           "line": 356,
+          "text": "int wmain(int argc, wchar_t** argv) {"
+        }
+      ]
+    },
+    {
+      "path": "tests/v130.cpp",
+      "bytes": 14931,
+      "lines": 239,
+      "sha256": "499f45e9c6afe87af51aac4abb65e21f8454403da957d30f9c63f0d333c50386",
+      "kind": "text",
+      "role": "队列、发布及CUDA缓存回归；第11、20、21章",
+      "symbols": [
+        {
+          "line": 8,
+          "text": "void Check(bool ok, const char* what) { if (!ok) throw std::runtime_error(what); }"
+        },
+        {
+          "line": 9,
+          "text": "void Unit() {"
+        },
+        {
+          "line": 51,
+          "text": "void CudaCache() {"
+        },
+        {
+          "line": 93,
+          "text": "void CrashChild(const fs::path& ff, const fs::path& input, const fs::path& output, const std::string& stage) {"
+        },
+        {
+          "line": 107,
+          "text": "void Faults(const fs::path& ff) {"
+        },
+        {
+          "line": 193,
+          "text": "void Pipeline(const fs::path& ff) {"
+        },
+        {
+          "line": 228,
           "text": "int wmain(int argc, wchar_t** argv) {"
         }
       ]
@@ -3217,9 +3468,9 @@
     },
     {
       "path": "tools/compile_cuda.py",
-      "bytes": 2905,
+      "bytes": 2857,
       "lines": 48,
-      "sha256": "255e5af85e1054d08bbd1b45577999fe09220e4c0cb6e7e381b3210f07fa97bc",
+      "sha256": "4654f40513d2fb8645288577b70fd899b467274975ab45cefd70a326f2109573",
       "kind": "text",
       "role": "NVRTC精确选项编译和生成清单；第11章",
       "symbols": []

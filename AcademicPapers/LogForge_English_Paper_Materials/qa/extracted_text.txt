@@ -9,24 +9,24 @@ Fixed revision and evidence
 Repository
 HongHuo0728 / LogForge
 Version
-1.2.1 (26927B)
+1.3.0 (26929A)
 Commit
-6b43a93fbd4d1457ff20b4c99a030c0e398f520a
+913e4b9417fa0f32b88629c39062b54589d9dd21
 Study date
-29 September 2026
+30 September 2026
 Edition
 Complete English translation of the Chinese research paper
 Structure
 24 chapters; 66 equations; 18 vector figures; 5 tables
 Validation
-Release build passed; 24 CTest entries: 23 passed, 1 failed
+Release build passed; 29 CTest entries: 29 passed, 0 failed
 An inspectable technical study of public source code. No author affiliation, publication status, camera certification, or universal editor
 compatibility is asserted.
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
 2
 Contents
 4
@@ -55,66 +55,66 @@ Chapter 9. The Triple-Buffer Pipeline and Memory Bounds
 Chapter 10. Persistent CPU Workers and Determinism
 31
 Chapter 11. The CUDA Backend, Qualification, and Failure Atomicity
-33
+34
 Chapter 12. Fixed-Frame-Rate Validation and Timeline Reconstruction
-35
+36
 Chapter 13. Audiovisual Synchronization, Edit Lists, and Rotation Geometry
-38
+39
 Chapter 14. MOV Atom Parsing and Semantic Comparison
-40
+41
 Chapter 15. Apple Log Identification Fields and Metadata-Writing Proofs
-42
+43
 Chapter 16. Metadata Allowlists, Creation Times, and Fidelity Semantics
-44
+45
 Chapter 17. Tool Discovery, Execution Trust, and Numerical Qualification
-46
+47
 Chapter 18. Process Supervision, Pipe Deadlocks, and Cancellation Correctness
-48
+49
 Chapter 19. File Transactions, Disk Planning, and Crash Recovery
-50
-Chapter 20. GUI, CLI, Queues, and Inspectable Interaction
 52
+Chapter 20. GUI, CLI, Queues, and Inspectable Interaction
+54
 Chapter 21. Test Structure, the Present Reproduction, and Failure Analysis
-56
+58
 Chapter 22. Performance Data, Complexity, and Reproducible Comparison
-59
-Chapter 23. An Implementation Walkthrough from One Sample to the Final File
 61
-Chapter 24. Discussion, Implementation Limits, and Research Conclusions
+Chapter 23. An Implementation Walkthrough from One Sample to the Final File
 63
-Appendix A. Symbols, Units, and a Review Guide
+Chapter 24. Discussion, Implementation Limits, and Research Conclusions
 65
+Appendix A. Symbols, Units, and a Review Guide
+67
 Appendix B. Repository Files and Corresponding Research Chapters
-70
+72
 References and Source Locations
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
 3
 Edition and Evidence Notes
-This English edition translates the existing Chinese paper without changing its research revision, conclusions,
-equations, figure sequence, or experimental records. The original Chinese PDF and materials are preserved. The
-full translated abstract and the original shorter English abstract are both retained to preserve the original structure.
+This English edition and its Chinese counterpart are revised together for LogForge 1.3.0 at the recorded source
+revision. They replace the previous 1.2.1 editions. Existing release verification, historical measurements, and
+mathematical derivations retain distinct provenance.
 The title uses mathematical proof to refer to the conditional derivations and structural arguments developed in
 the text. It does not assert machine-checked, whole-program verification. The reported tests belong to the original
 study; preparing this translation is not a new experimental run.
 Mathematical curves are calculated from public constants and current source formulas. Architecture and state
 diagrams abstract implementation relationships. Figures labeled historical use repository version 1.2.0
-measurements; figures describing the present reproduction use the actual September 29, 2026 study records. No
-illustrative curve is presented as an unreported experiment.
+measurements; figures describing the historical 1.2.1 reproduction retain the earlier study records. No illustrative
+curve is presented as an unreported experiment.
 Equations, figures, and tables retain separate continuous numbering. Principal source files appear at the end of
-each chapter, linked to the fixed commit. Appendix B and the companion inventory cover every version-controlled
-file.
+each chapter, linked to the fixed commit. Appendix B and the companion inventory cover every source and project
+file (excluding paper artifacts).
 Reading route: Chapters 1-7 establish the signal and numerical model; Chapters 8-12 explain execution and
 clocks; Chapters 13-19 examine media semantics and reliability; Chapters 20-24 connect interfaces, reproduction
 results, performance, the implementation walkthrough, and conclusions.
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
 4
 Abstract
 Designed for color interchange between mobile imaging and professional post-production, LogForge converts
@@ -133,7 +133,7 @@ at
 the 
 fixed 
 commit
-6b43a93fbd4d1457ff20b4c99a030c0e398f520a, version 1.2.1, build 26927B. Source code, interfaces, tests, build
+913e4b9417fa0f32b88629c39062b54589d9dd21, version 1.3.0, build 26929A. Source code, interfaces, tests, build
 configuration, the README, and versioned documentation provide the basis for an explanation extending from the
 signal model to the executable application.
 The conversion is first decomposed into integer YCbCr decoding, nonlinear RGB reconstruction, inverse HLG
@@ -144,36 +144,36 @@ bridge, persistent CPU worker threads, and the CUDA implementation with runtime 
 Standard mode can process arbitrary component blocks, whereas Creative mode must pair the complete RGB
 planes. Finally, timestamps, MOV atoms, audio copying, tool trust, failure recovery, and publication transactions
 are used to establish the conditions on which system correctness depends. Historical repository measurements and
-tests executed for this paper are reported separately.
+existing 1.3.0 release verification are reported separately.
 The principal conclusion is conditional: when input interpretation, the numerical qualification of external tools,
 and output validation hold, LogForge implements traceable color re-encoding and a constrained media-delivery
 process. Mathematical derivation can explain conformity to the declared functional relationships; it cannot
 establish recovery of sensor information already lost, nor replace interoperability experiments with different
-cameras and editing applications. Version 1.2.1 differs from some historical documentation in input admission,
-defaults for missing chroma location, and pixel-rotation policy. These differences are explicitly resolved in favor of
-the current code. This paper is a reproducible source-code and engineering study; project statements, historical
-tests, and finite sampling are not elevated to unconditional certification.
+cameras and editing applications. Version 1.3.0 updates explicit input interpretation, the shared quantization-cell
+model, and publication reports while retaining color equations and camera pixel-rotation policy. These differences
+are explicitly resolved in favor of the current code. This paper is a reproducible source-code and engineering study;
+project statements, historical tests, and finite sampling are not elevated to unconditional certification.
 Keywords: HLG; Apple Log; BT.2020; floating-point video pipeline; CUDA; MOV metadata; software
 reliability; reproducible verification.
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
 5
 Original English Abstract
 LogForge is a native Windows application that converts BT.2020 HLG ProRes footage into Apple Log /
-BT.2020 ProRes 422 HQ. This monograph studies release 1.2.1 at an immutable repository revision. It derives the
+BT.2020 ProRes 422 HQ. This monograph studies release 1.3.0 at an immutable repository revision. It derives the
 implemented signal transform, explains bounded CPU and CUDA processing, and examines timestamp
 reconstruction, metadata signaling, executable trust, cancellation, and transactional publication. Mathematical
-properties, repository measurements, and newly executed regression tests are distinguished throughout. The
+properties, repository measurements, and existing versioned regression records are distinguished throughout. The
 resulting argument is conditional: conformance to a declared encoding does not imply sensor-data recovery,
 camera-look equivalence, lossless transcoding, or universal editor compatibility.
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
 6
 Chapter 1. Research Object, Evidence, and the Scope of
 the Argument
@@ -202,10 +202,11 @@ related, but require different forms of evidence.
 The local Git HEAD and remote origin HEAD were checked and both identified the fixed commit stated above.
 Recording a commit is preferable to recording only the main branch, because subsequent fixes cannot silently
 change the object being reviewed. Key implementations are located by file and function names. The appendix and
-accompanying manifests classify all version-controlled files and provide line counts and hashes. Project code, test
-scripts, build resources, and documentation are included in the analysis. The third-party nlohmann/json single
-header and generated PTX are recorded separately as a dependency and generated artifacts; their individual lines
-are not presented as algorithms independently designed by this project.
+accompanying manifests classify source and project files at the fixed commit (excluding paper artifacts) and
+provide line counts and hashes. Project code, test scripts, build resources, and documentation are included in the
+analysis. The third-party nlohmann/json single header and generated PTX are recorded separately as a dependency
+and generated artifacts; their individual lines are not presented as algorithms independently designed by this
+project.
 The repository contains documentation from several historical stages. The README is the user entry point, but
 the code at the selected commit is the final authority for implementation semantics. docs/ARCHITECTURE.md,
 docs/METADATA.md, and early validation records help explain design motivation, yet do not automatically
@@ -216,16 +217,16 @@ current EffectiveChromaLocation returns left by default. This affects confidence
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
 7
 1.3 Four non-interchangeable forms of evidence
 This paper uses four forms of evidence. Source-code facts establish that a path exists, such as multiplication by
 exposure gain in the scene-linear domain. Mathematical derivation explains why a property holds under stated
 conditions, such as strict monotonicity of the creative luminance mapping for positive neutral inputs. Historical
-measurements establish that the repository recorded a result on a particular machine, driver, and version. The
-present reproduction establishes the build and test outcomes actually obtained in the current environment. Each
-form is useful, and each has boundaries that cannot legitimately be crossed.
+measurements establish that the repository recorded a result on a particular machine, driver, and version. Version
+verification establishes build and test outcomes recorded in existing release evidence. Each form is useful, and each
+has boundaries that cannot legitimately be crossed.
 A typical invalid inference is to move from agreement between CPU and GPU outputs on six input sets to
 permanent, exact agreement for every floating-point value. Another is to infer support in all players from
 successful identification in one Resolve version. Finite tests are used here to find counterexamples, build
@@ -257,10 +258,10 @@ JSON
 Observations for the specified
 workload
 A performance guarantee for
-version 1.2.1 on every platform
-Present reproduction
+version 1.3.0 on every platform
+Release verification
 Release build and CTest
-Results in this environment
+Results in the release record
 A new commercial-editor
 certification
 1.4 Correctness as a conditional proposition
@@ -276,12 +277,12 @@ M consistent media semantics, V successful validation, and P successful publicat
 Boolean variable in the source code. It is a formal organization of the TranscodeJob lifecycle introduced by this
 paper. It makes explicit that the overall task should not be described as successfully converted if any one of these
 conditions fails.
-Principal source files: README.md; CHANGELOG.md; docs/RELEASE_1.2.1.md.
+Principal source files: README.md; CHANGELOG.md; docs/RELEASE_1.3.0.md.
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
 8
 Chapter 2. Signal Domains, Color Space, and the
 End-to-End Contract
@@ -313,8 +314,8 @@ same Apple Log encoding function. Creative adjustment does not redefine the Appl
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
 9
 Figure 1. End-to-end data flow and signal domains. Blue denotes FFmpeg processing, green denotes LogForge numerical results or
 container processing, and gray denotes the source material. Follow the arrows to the right, down, and then left. The audio bypass is not
@@ -343,26 +344,27 @@ interpreted under this model, not automatically as an original sensor electron c
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
 10
-2.5 Range and default interpretation in the source
-The version 1.2.1 transcoder uses full range when the source explicitly reports pc, and limited range otherwise.
-The matrix and primaries are explicitly supplied to the filters under a BT.2020 NCL HLG interpretation. This
-behavior reduces rejection caused by missing tags, but places greater responsibility on the default interpretation. If
-a file actually uses another matrix and merely carries an HLG transfer tag, permissive admission cannot establish
-that it satisfies the intended assumptions.
-This paper consequently separates format admission from reliable signal interpretation. The current
-UnsupportedReasons checks only the ProRes codec, Standard/HQ profile, and HLG transfer tag. Resolution, time
-base, duration, and related conditions are checked in later processing layers. The initial admission gate no longer
-enforces every historical restriction on color, sampling, or auxiliary metadata. Strict output validation does not
-eliminate the modeling risk that input defaults disagree with the actual recording configuration.
-Principal source files: src/Transcode.cpp; src/Media.cpp; docs/COLOR_PIPELINE.md.
+2.5 The explicit input-interpretation contract in 1.3.0
+Version 1.3.0 records declared, assumed, overridden, effective, origin, conflicting_fields, and warnings in
+input_interpretation. Declared BT.2020 primaries and BT.2020 NCL matrix are honored; missing, unknown, or
+unspecified values use BT.2020 defaults with warnings. Explicit conflicts fail before decoding unless a single-file
+GUI confirmation or CLI --force-bt2020-interpretation authorizes reinterpretation. This override performs no
+gamut conversion and does not prove that the source tag is incorrect.
+Transfer must explicitly be arib-std-b67; the override cannot bypass missing transfer, PQ, other non-HLG
+transfers, codec, or container requirements. Range tv/pc means limited/full; missing range assumes limited with a
+warning. Declared left/center chroma siting is honored; missing siting uses left or an explicit input option, which
+cannot replace a source declaration. Unsupported range and siting fail. The container must satisfy QuickTime
+MOV requirements, and multiple primary videos fail. A GUI queue does not inherit the first file's confirmation; a
+CLI batch override applies to the explicitly authorized command.
+Principal source files: docs/INPUT_CONTRACT_1.3.0.md; src/Transcode.cpp; src/Media.cpp; docs/COLOR_PIPELINE.md.
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
 11
 Chapter 3. Deriving Inverse HLG and Reference
 Exposure
@@ -401,8 +403,8 @@ does not imply that the final encoding preserves their full negative amplitude.
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
 12
 3.3 Determining the reference-white scale
 HLG's relative scene normalization is not itself the photographic reference quantity expressed as reflectance.
@@ -433,8 +435,8 @@ exposure.
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
 13
 3.5 Gain, derivatives, and noise
 Local error propagation can be described by a first-order approximation. A small perturbation of H changes the
@@ -451,8 +453,8 @@ Principal source files: src/color/HLG.cpp; include/logforge/Color.h.
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
 14
 Chapter 4. Apple Log Encoding, Inverse Mapping, and
 Provable Properties
@@ -495,8 +497,8 @@ the floor. Below the floor the function is constant, so the overall mapping incl
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
 15
 curves in this paper are evaluated using the repository constants. The join error is invisible at ordinary plotting
 scales, but numerical validation remains necessary.
@@ -545,8 +547,8 @@ real-valued formulas produces failures with no engineering significance.
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
 16
 4.5 A rigorous counterexample to invertibility
 Take two distinct linear values below R0. Their images under f are identical. By the definition of injectivity, no
@@ -563,8 +565,8 @@ Principal source files: src/color/AppleLog.cpp; include/logforge/Color.h; tests/
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
 17
 Chapter 5. YCbCr, Data Range, and Chroma Resampling
 5.1 Where the BT.2020 NCL matrix operates
@@ -606,8 +608,8 @@ inverses, particularly at sharp color edges. Choosing Spline36 is an engineering
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
 18
 the creation of missing chroma detail. Color-correctness tests should avoid discontinuities when checking the
 matrix and use separate phase tests to examine sample positions.
@@ -638,8 +640,8 @@ Principal source files: src/FFmpegNumeric.cpp; src/Transcode.cpp.
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
 19
 Chapter 6. The Creative-Adjustment Model, Proofs, and
 Limitations
@@ -681,8 +683,8 @@ clipped by a curve floor or integer boundary, the equality cannot be applied unc
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
 20
 6.4 A derivative proof of neutral-luminance monotonicity
 Let the output exposure coordinate z equal the input x plus the adjustment in stops. The smoothstep derivative is
@@ -715,8 +717,8 @@ Principal source files: src/color/HLG.cpp; docs/CREATIVE_ADJUSTMENTS.md.
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
 21
 Chapter 7. Floating-Point Precision, Error Budgets, and
 Numerical Validation
@@ -747,8 +749,8 @@ has an error below that number, because ProRes and resampling contribute indepen
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
 22
 Figure 6. Quantization relationships after reference conversion of neutral 10-bit HLG codes. Several dark input levels may map to the
 same output integer, illustrating the non-invertibility of a finite-codeword mapping. The figure simulates rounding only and excludes
@@ -778,8 +780,8 @@ They complement one another and cannot stand in for each other.
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
 23
 7.5 Interpreting coarse pixel thresholds correctly
 PixelSanity permits a peak block-mean error of thirty-two codes and an overall mean of eight codes. These
@@ -796,8 +798,8 @@ Principal source files: src/PixelSanity.cpp; src/FFmpegNumeric.cpp; tests/signal
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
 24
 Chapter 8. The C++20 Core and External-Process
 Architecture
@@ -828,8 +830,8 @@ progress value of 100% does not imply completion of final validation and publica
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
 25
 8.3 The roles of the two FFmpeg processes
 The decoder explicitly disables automatic rotation, selects the first video stream, removes audio, subtitles, and
@@ -865,8 +867,8 @@ Principal source files: CMakeLists.txt; src/Transcode.cpp; src/Platform.cpp.
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
 26
 Chapter 9. The Triple-Buffer Pipeline and Memory
 Bounds
@@ -898,8 +900,8 @@ blocks rather than growing at the same linear rate as pixel count.
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
 27
 9.3 End of stream and completeness
 A single Read from the decoder pipe is not guaranteed to return all requested bytes, so the reader loops to fill its
@@ -940,22 +942,26 @@ When any thread fails, fail saves the first exception, sets abort, wakes every w
 and encoder. Every wait condition includes abort, so a thread cannot remain waiting for a state that will never
 arrive. During exception unwinding, JoinGuard terminates the external processes before joining the read and write
 threads, avoiding a thread stuck in an unfinishable pipe operation.
+It is not enough to prove that states zero, one, and two cycle correctly during normal execution. Exit conditions
+must also break every type of wait. That is often the difficult part of reliable concurrent code. Library exceptions,
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
 28
-It is not enough to prove that states zero, one, and two cycle correctly during normal execution. Exit conditions
-must also break every type of wait. That is often the difficult part of reliable concurrent code. Library exceptions,
 user cancellation, broken pipes, and partial thread-creation failure must all converge on cleanup rather than leave a
 condition variable waiting for an owner that no longer exists.
+9.7 The scope of memory reporting
+bridge_buffer_bytes_each, count, and total identify one bridge slot, slot count, and total allocation. Creative
+frame and CUDA pinned/device allocations are separate. Legacy float_buffer_bytes denotes one slot and is
+deprecated. None is whole-process peak memory.
 Principal source files: src/FloatBridge.cpp; include/logforge/FloatBridge.h.
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
 29
 Chapter 10. Persistent CPU Workers and Determinism
 10.1 Avoiding thread creation for every block
@@ -1001,8 +1007,8 @@ total operating-system thread count: FFmpeg, drivers, and runtimes may create he
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
 30
 state their counting scope to avoid treating configured worker counts and measured process-tree counts as
 contradictory.
@@ -1020,8 +1026,8 @@ Principal source files: src/color/FloatTransformer.cpp; tests/hardening.cpp.
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
 31
 Chapter 11. The CUDA Backend, Qualification, and
 Failure Atomicity
@@ -1066,8 +1072,8 @@ output, while sample count and both risk counts are also checked.
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
 32
 A fixed seed makes the input sequence reproducible and useful for cross-driver investigations. Extreme
 exposures reach nonlinear boundaries and range risks more readily than zero-exposure tests alone. The backend
@@ -1095,13 +1101,25 @@ The source uses one nonblocking stream and synchronizes commits block by block. 
 deep, multistream, all-GPU video pipeline. ProRes decoding and encoding remain on CPU, as do zscale matrix and
 range operations. Describing the project as full-pipeline GPU hardware transcoding would be inaccurate. It
 accelerates the color-mathematics stage and uses thread budgeting and bridging to reduce waiting elsewhere.
+
+
+LOGFORGE  |  SOURCE & MATHEMATICS
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
+33
+11.7 Deterministic device ranking and process-local qualification caching
+Candidates sort by eligibility, descending VRAM and compute_score, lexicographic UUID, then ordinal; all
+candidates are reported. Qualification caches at most 16 entries in the current process. Identity binds GPU UUID,
+driver API/file version, embedded PTX SHA-256, application version/build, algorithm, and Creative parameters.
+Explicit qualification and retries after failure revalidate; failures evict entries. The 2e-6 tolerance and color kernel
+are unchanged. Physical multi-GPU selection was not exercised locally; this cache is not persistent approval.
 Principal source files: src/color/CudaTransformer.cpp; src/color/ColorKernel.cu; tools/compile_cuda.py; tests/cuda_artifact.py.
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
-33
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
+34
 Chapter 12. Fixed-Frame-Rate Validation and Timeline
 Reconstruction
 12.1 Information lost by rawvideo
@@ -1115,46 +1133,47 @@ whether they are equal. Nominal rate may be a probe estimate, while the average 
 duration and quantization. The values that actually require inspection are the PTS and duration of every video
 packet. This explains why the project can accept a nonstandard but fixed cadence such as 29.99 while rejecting a
 drifting sequence whose average appears normal.
-12.2 Describing cadence in integer time-base units
-Let the time base be tau seconds per tick, packet i begin at integer timestamp p_i, its duration be d_i, and a
-candidate period be T ticks. Fixed cadence requires every duration to be near T, adjacent starts to be separated by
-approximately T, and accumulated phase to be near iT. The program also strictly requires each adjacent PTS
-difference to equal the preceding packet's declared duration, first excluding gaps or overlaps in the internal time
-table.
+12.2 Integer timestamps and a shared quantization cell
+Let the video time base be tau seconds, all packet boundaries relative to the first PTS be t_i, and the candidate
+period be T ticks. The final packet end is also a boundary. Positive durations, increasing PTS, and exact equality of
+each interval to the preceding duration are required first; nonuniform durations must be adjacent integers.
+Duplicates, backward timestamps, missing durations, gaps, and overlaps fail early.
 (48)
 (49)
-All three error limits are 1.05 ticks, in the input video time base, not milliseconds or hundredths of a frame.
-Expressing the threshold in milliseconds without time_base loses its meaning. Repeated or decreasing PTS,
-missing or nonpositive duration, and disagreement between an interval and the preceding duration all fail early,
-with a zero-based packet index recorded.
-12.3 Exact and candidate periods
-If every packet duration and adjacent interval is exactly equal, that integer period is authoritative. With time
-base n/d and packet period m, the frame rate is d/(nm), reduced by the greatest common divisor. The code checks
-representable range before multiplication to prevent overflow in the product of time base and a long period. This
-branch does not force 29.99 to 30000/1001 merely because both are close to 30.
+Every boundary must share one closed quantization cell. This covers floor/ceil rounding and a bounded one-tick
+correction; it does not enlarge the former 1.05-tick empirical threshold. Local durations, intervals, and complete
+phase are checked. Reports retain inferred-clock errors separately from nominal-clock disagreement.
+12.3 Exact periods, candidates, and convex-envelope search
+When all durations and intervals agree, the integer period m is authoritative. Time base n/d yields a reduced rate
+after checked multiplication. Rates 29.99, 29.98, and 29.9701 are not forced onto standard rates.
 (50)
-When clock quantization makes periods unequal, the program first uses the most frequent packet duration as a
-conservative anchor. If the period implied by nominal frame rate lies within the observed duration range, it
-becomes the candidate. Errors are then checked across every packet. A fitted average is not used to remove
-accumulated drift, because such fitting could disguise an actual cadence change as normal behavior.
-12.4 Why accumulated phase must be checked
-Consider a very small excess in each local frame interval. Every individual error may remain within tolerance,
-yet after hundreds of frames the start-time phase error can exceed a frame. Local-interval checks alone miss this
-persistent drift. Accumulated phase directly compares the ideal clock measured from the first frame with the actual
-clock, eventually causing a systematic offset to exceed the threshold and be rejected.
+For nonuniform sequences, the nominal candidate is tested first but has no veto. An endpoint-derived rational
+period follows; if it fails, upper and lower hull-edge slopes locate the minimum residual span. Q is a maximum of
+affine residuals minus their minimum, hence convex and piecewise linear; support changes occur at envelope-edge
+slopes. A final complete-sequence cell check cannot be replaced by an average or least-squares fit. Integer
+subtraction of the floor period avoids cancellation across large timestamp spans; numerical allowance scales only
+with packet count. Hull construction is O(n), candidate sorting is at worst O(n log n), support queries are
+logarithmic, final checking is O(n), and storage is O(n).
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
-34
-Figure 10. Phase examples for exact fixed cadence, quantized alternating cadence, and sustained drift. Dashed lines show the 1.05-tick
-budget. These instructional curves demonstrate that small local error does not guarantee small accumulated phase error.
-Conversely, a correct rational frame rate on a coarse time base may require alternating long and short integer
-durations. If accumulated phase remains within budget, such quantization jitter should not simply be equated with
-arbitrary VFR. The policy allows bounded quantization around an interpretable fixed clock; it does not preserve
-every original timestamp. Accordingly, the paper describes validated reconstruction of fixed cadence rather than
-completely lossless copying of packet timestamps.
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
+35
+12.4 The 59.94 regression and identifiability limits
+The generated regression uses 309 packets, time base 1/1200, duration 6183 ticks, and nominal rate
+60000/1001. PTS[i]=floor(i*2061/103), giving average rate 59.970887918. Packet 53 differs from the nominal
+20.02-tick clock by 1.06 ticks and fails the old gate. The inferred period 2061/103 ticks and rate 41200/687 occupy
+approximately 0.990291262 ticks of residual span and pass. The maximum nominal phase disagreement of 4.16
+ticks remains reported. This reconstructs supplied numbers with generated timings; the original failing recording
+was not examined.
+Figure 10. The generated 309-packet reconstruction in 1.3.0. Left: nominal and inferred clock residuals. Right: the shared one-tick cell
+across all boundaries, including the final packet end.
+The former negative 20*i-floor(i/64) equals ceil(1279*i/64), a quantized fixed clock, and remains as a positive
+case. The genuine accelerating negative is 20*i-floor(i*i/4096); piecewise and clustered changes add negatives.
+Timestamps cannot distinguish different physical clocks producing the same integer sequence, or independently
+reveal sub-resolution deviations. Validated fixed cadence is reconstructed; original packet timestamps are not
+claimed to be copied losslessly.
 12.5 Why the output must be checked again
 Passing input validation establishes a basis for pipe reconstruction, not proof that the encoder actually produced
 the expected cadence. Output validation traverses every video packet again and compares frame count, average
@@ -1162,18 +1181,17 @@ frame rate, validated frame rate, and video duration. This can reveal changes ca
 encoder synchronization policy, or the muxer's time base. Media.cpp explicitly contains floating-point frame-rate
 thresholds and duration tolerances. They should be interpreted as implemented, rather than replaced by a claim of
 exact integer equality everywhere.
-Temporal scanning stores all packets in a vector, giving linear storage in packet count N. Building the
-duration-frequency table additionally involves ordered-map operations. Costs are manageable when footage
-contains only a few distinct duration values, but very long clips still increase preliminary scan time and memory.
-Future streaming, multipass validation could reduce memory, but would have to retain equivalent
-candidate-selection and phase-checking semantics.
-Principal source files: src/Cadence.cpp; src/Media.cpp.
+Temporal scanning stores all packets in a vector, giving linear storage in packet count N. The 1.3.0
+convex-envelope inference has at worst O(n log n) time and O(n) storage, so very long clips increase preliminary
+scan time and memory. Future streaming, multipass validation could reduce memory, but would have to retain
+equivalent candidate-selection and phase-checking semantics.
+Principal source files: docs/CADENCE_1.3.0.md; tests/cadence_v130.cpp; src/Cadence.cpp; src/Media.cpp.
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
-35
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
+36
 Chapter 13. Audiovisual Synchronization, Edit Lists, and
 Rotation Geometry
 13.1 Audio copying does not automatically ensure synchronization
@@ -1211,9 +1229,9 @@ results instead of using the old camera-specific shape allowlist as an admission
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
-36
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
+37
 13.4 Display matrices and angle tags
 A QuickTime display matrix can contain translation, scaling, and perspective, not merely an angle.
 SupportedDisplayMatrix parses nine integers and checks exact arrangements for the four permitted unit rotations.
@@ -1245,9 +1263,9 @@ arbitrary complete pipeline containing chroma filters.
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
-37
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
+38
 13.6 Remaining boundaries of the orientation policy
 When material does not meet the standard matrix conditions, the current version does not arbitrarily bake a
 reported angle into pixels; it may still use metadata-preservation and remuxing paths. The older statement that
@@ -1259,13 +1277,19 @@ program uses guess_layout_max 0 to prohibit inference and requires the output la
 Preserving an unknown value can be more honest than writing a plausible default. Compared with defaulting
 missing chroma location to left, this also shows that default policies differ across fields and should be presented
 clearly at the interface.
-Principal source files: src/MediaSafety.cpp; src/Transcode.cpp; tests/compatibility_v121.py.
+13.7 Audio payload identity and timing semantics
+AudioPayload.cpp launches FFmpeg for source and output, using stream copy and streamhash to SHA-256 the
+concatenated compressed packet content of each audio stream. It neither decodes nor stores whole tracks in
+memory. Stream counts and every digest must match before publication. Hashes omit timestamps, packet
+boundaries, and container layout; relative start, duration, and format checks remain separate. A no_audio state does
+not claim audio_payload_verified. The method adds two sequential audio reads and external-process launches.
+Principal source files: src/AudioPayload.cpp; src/AudioPayload.cpp; src/MediaSafety.cpp; src/Transcode.cpp; tests/compatibility_v121.py.
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
-38
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
+39
 Chapter 14. MOV Atom Parsing and Semantic
 Comparison
 14.1 Why an independent container analyzer is needed
@@ -1304,9 +1328,9 @@ of an Apple API constant is not itself a verified serialized file format.
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
-39
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
+40
 Figure 12. MOV hierarchy relevant to Apple Log identification. logs and colr are direct children of the ProRes sample entry.
 Movie-level meta/keys/ilst supplies a separate key-value metadata system; the two locations must not be conflated.
 14.4 Special handling of the four-byte terminator
@@ -1332,9 +1356,9 @@ Principal source files: src/MovAnalyzer.cpp; tests/hardening.cpp.
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
-40
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
+41
 Chapter 15. Apple Log Identification Fields and
 Metadata-Writing Proofs
 15.1 Three declarations with different responsibilities
@@ -1355,7 +1379,7 @@ experiment's software version and date and explicitly sets this_file_imported_in
 conformity of the current output structure to an established pattern, not that every transcode opens an editor for a
 fresh experiment.
 The paper preserves this distinction. The controlled version 1.1.0 result in Resolve Studio 20.3.2.9 on Windows
-supports compatibility evidence for that configuration. Reusing the writer in version 1.2.1 shows that the
+supports compatibility evidence for that configuration. Reusing the writer in version 1.3.0 shows that the
 mechanism continues, but does not automatically certify newer editors or other products. Apple Log and Apple
 Log 2 / Apple Wide Gamut are also different targets; similar names do not extend the scope.
 15.3 Structure of the thirty-five-byte extension
@@ -1378,9 +1402,9 @@ insertion point inside moov, leaving earlier media payload and packet offsets in
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
-41
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
+42
 The ancestor chain from moov to apch is checked for actual containment at every level rather than assumed to
 have a fixed depth. Each ancestor's size grows by thirty-five. Overflow of an ordinary 32-bit length is rejected;
 extended lengths are updated in their original representation. Under these structural premises, unchanged media
@@ -1410,9 +1434,9 @@ Principal source files: src/AppleLogIdentification.cpp; docs/APPLE_LOG_IDENTIFIC
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
-42
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
+43
 Chapter 16. Metadata Allowlists, Creation Times, and
 Fidelity Semantics
 16.1 From wholesale copying to an explicit plan
@@ -1457,9 +1481,9 @@ and restored values are checked field by field. An identity display matrix is al
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
-43
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
+44
 baked; otherwise the recorded source matrix is restored. Preservation of creation information thus extends beyond a
 single metadata tag to container structure.
 16.5 Timecode and chapters
@@ -1486,9 +1510,9 @@ Principal source files: src/MetadataPolicy.cpp; src/MediaSafety.cpp; src/Media.c
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
-44
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
+45
 Chapter 17. Tool Discovery, Execution Trust, and
 Numerical Qualification
 17.1 Discovering a path is not authorizing execution
@@ -1533,9 +1557,9 @@ installation areas; the test-oriented LOGFORGE_DATA_DIR is not mistaken for ever
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
-45
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
+46
 inject roots and fake tools to check whether searching exceeds its scope or accidentally executes unknown
 programs. These critical branches can be verified without scanning all user disks.
 17.5 Capability checks and numerical checks
@@ -1563,9 +1587,9 @@ Principal source files: src/ToolTrust.cpp; src/FFmpeg.cpp; src/Discovery.cpp; sr
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
-46
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
+47
 Chapter 18. Process Supervision, Pipe Deadlocks, and
 Cancellation Correctness
 18.1 The supervised launch sequence
@@ -1608,9 +1632,9 @@ safety in concurrent software belongs among the design premises, not as an error
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
-47
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
+48
 18.5 Exit codes and exception precedence
 The task checks user cancellation, progress-thread and error-reader exceptions, color-processing exceptions,
 decoder exit code, encoder exit code, and frame count. A zero process exit code cannot erase a reader exception; a
@@ -1635,9 +1659,9 @@ Principal source files: src/Platform.cpp; src/Transcode.cpp; tests/process_fixtu
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
-48
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
+49
 Chapter 19. File Transactions, Disk Planning, and Crash
 Recovery
 19.1 Separating final and temporary paths
@@ -1665,9 +1689,9 @@ hardware durability are different layers.
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
-49
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
+50
 19.3 Disk requirements are estimated heuristically
 The space preflight starts from approximately 220 Mb/s for 1080p ProRes HQ at about 29.97 fps, scales with
 pixels, frame rate, and duration, multiplies by a 1.75 margin, and adds estimated audio and fixed headroom. A
@@ -1709,13 +1733,27 @@ This design ties convenience to provable ownership. In large-media workflows, cl
 dangerous than a failed conversion. Recovery and retention should therefore not be treated as incidental code that
 simply deletes temporary files. They require path, identity, and concurrency assumptions as careful as those of
 publication.
+
+
+LOGFORGE  |  SOURCE & MATHEMATICS
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
+51
+19.7 Crash recovery and the two-transaction boundary
+Temporary-media cleanup must match file identity in the ownership journal; a filename does not authorize
+deletion. Remux tracks both old and new original paths before switching the active path, closing the crash gap
+between rename and identity update. Ten injected stages cover reservation, transformation, remux, patching,
+reports, and publication. Replacement identities, inaccessible evidence, or a crash before durable journaling may
+leave files for manual review. The no-overwrite movie rename and atomic report replacement are distinct
+transactions. Final report-write failure preserves a valid published movie and returns an error; recovery never
+deletes final media to roll back its report.
 Principal source files: src/StorageSafety.cpp; src/Settings.cpp; src/Transcode.cpp; tests/v120.cpp.
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
-50
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
+52
 Chapter 20. GUI, CLI, Queues, and Inspectable
 Interaction
 20.1 A single owner of background work
@@ -1759,9 +1797,9 @@ templates after formatting.
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
-51
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
+53
 20.5 Serial queues and per-item outcomes
 RunQueue derives an independent output name for each input, probes each item, and calls the same
 TranscodeJob. A failed item records an error and failure report before processing continues with the next item.
@@ -1782,13 +1820,19 @@ The CLI and GUI share mathematical, temporal, and publication rules through the 
 controls differ. The GUI offers discrete values from -4 to +4 stops; the CLI accepts -8 to +8. Reproducing
 experiments requires naming the entry point and all parameters rather than merely saying default settings. Defaults
 may refer to different configurations at different times, under saved state, or through different interfaces.
+20.7 Queue planning, arguments, and stream-disposition reports
+Queue.cpp freezes a complete deterministic destination plan before encoding, handling equal stems, case
+collisions, and existing targets; no-overwrite publication still protects against external races. CLI integers require
+full-token bounded parsing; empty, trailing-garbage, overflow, negative, and zero tokens fail before discovery.
+Multiple primary videos fail. Omitted attached pictures, data, and subtitles are reported separately from regenerated
+timecode; not every video stream is described as preserved.
 Principal source files: src/MainWindow.cpp; src/SettingsWindow.cpp; src/Ui.cpp; src/Localization.cpp; src/Cli.cpp; src/Queue.cpp.
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
-52
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
+54
 Chapter 21. Test Structure, the Present Reproduction,
 and Failure Analysis
 21.1 Tests are not a single score
@@ -1813,154 +1857,165 @@ theme, DPI, interaction paths, and screenshots. resolve_identification.py requir
 connection and suitable references, making it an editor-interoperability experiment. Historical outcomes from these
 latter categories are not presented as rerun results here, and simulated windows or fabricated editor responses were
 not used as substitutes.
-21.3 The build and complete CTest run
-On September 29, 2026, a Release build was executed in the current Windows workspace and every configured
-target built successfully. The twenty-four CTest entries in the current build configuration were then run, including
-actual CUDA qualification, media conversion, portrait compatibility, signal, publication, and sustained 4K120
-tests. Twenty-three passed and one failed, with a total test wall time of approximately 195.71 seconds. The CUDA
-artifact-consistency script was also executed and passed checks of source and PTX hashes, target architecture, and
-precise compilation options.
-Test logs and JUnit XML accompany the paper. The XML's top-level time field is an integer number of seconds
-as emitted by the tool; individual timings retain decimals. The total in the narrative comes from CTest's terminal
-summary. Source or tests were not modified and rerun to obtain an all-green outcome: the fixed revision remains
-unchanged. Failure is part of the research object and must not be hidden in an effort to prove the tool correct.
+21.3 The 1.3.0 release verification record
+docs/verification/1.3.0.json records the September 29, 2026 environment: Windows 11 x64, 20 logical CPUs,
+and MSVC Release /MT. Complete CTest has 29 passes, 0 failures, 0 skips, and 424.09 seconds elapsed;
+media_pipeline takes 182.571 seconds and sustained_4k120 83.3651 seconds. This paper cites existing release
+evidence; updating documents is not a newly executed media experiment.
+The companion ctest_current.xml is a case-by-case reading table exported from that JSON;
+evidence/verification_1.3.0.json retains the authoritative original record. It is not a new CTest execution log.
+Generated media cover interpretation, cadence, audio-byte corruption, queue collisions, publication races, and ten
+injected crash stages. No new commercial-editor or physical multi-GPU verification was performed.
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
-53
-Table 3. Complete CTest results from the reported reproduction
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
+55
+Table 3. Complete CTest results from the existing 1.3.0 release record
 Test name
 Outcome
 Time (s)
-robustness_v120
-Passed
-0.940
-cuda_qualification
-Passed
-0.133
-apple_log_identification
-Passed
-0.557
-reliability_process
-Passed
-1.762
-reliability_discovery
-Passed
-4.128
-reliability_cli
-Passed
-1.597
-hardening_cadence
-Passed
-0.085
-hardening_security
-Passed
-0.540
-hardening_mov
-Passed
-0.051
-hardening_parallel
-Passed
-2.486
-color_math
-Passed
-0.192
-media_metadata_validation
+queue_report_v130
 Passed
 0.015
+cadence_quantization_v130
+Passed
+0.091
+robustness_v120
+Passed
+3.297
+cuda_cache_v130
+Passed
+0.497
+cuda_qualification
+Passed
+0.136
+apple_log_identification
+Passed
+0.995
+reliability_process
+Passed
+1.590
+reliability_discovery
+Passed
+4.319
+reliability_cli
+Passed
+4.347
+hardening_cadence
+Passed
+0.014
+hardening_security
+Passed
+0.600
+hardening_mov
+Passed
+0.063
+hardening_parallel
+Passed
+2.288
+color_math
+Passed
+0.199
+media_metadata_validation
+Passed
+0.016
 ffmpeg_platform
 Passed
-1.007
+0.293
 application_preferences
 Passed
-0.265
+2.072
 ffmpeg_disk_discovery
 Passed
-0.084
+0.087
 application_resources
 Passed
-0.045
+0.061
+audio_crash_recovery_v130
+Passed
+44.929
+queue_collision_v130
+Passed
+7.126
 portrait_storage_queue_v120
 Passed
-36.855
+36.130
 compatibility_iphone_v121
 Passed
-6.448
+13.751
 compatibility_blackmagic_v121
 Passed
-5.188
+5.687
 media_pipeline
-Failed
-29.726
+Passed
+182.571
 color_signal
 Passed
-14.229
+16.203
 ffmpeg_discovery_capabilities
 Passed
-5.351
+5.346
 publication_no_overwrite
 Passed
-5.461
+5.647
 sustained_4k120
 Passed
-78.546
-21.4 Why media_pipeline failed
-The failing assertion is at line 154 of tests/integration.py. The test copies a valid source into a MOV with only
-color_primaries changed to bt709, retaining ProRes and HLG conditions, and expects conversion to be rejected
-with no destination file. Version 1.2.1 UnsupportedReasons no longer checks primaries. The file is therefore
-accepted, processed under the explicit BT.2020 NCL interpretation, and passes production output validation. The
-test consequently reports Unsupported input accepted.
+83.365
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
-54
-This is a contract conflict directly explained by the code. The older integration test expects stricter admission of
-color tags, while current release notes deliberately relax the format gate. Current unit tests already assert that
-missing optional tags do not block input, but this older end-to-end expectation was not synchronized. The
-immediate maintenance question is whether explicitly conflicting primary tags and missing tags should receive
-different policies. Implementation, tests, and documentation should then agree. This paper analyzes the issue
-without unilaterally changing repository policy.
-21.5 Why the failure is not simply harmless
-From a test-maintenance perspective, an outdated expectation caused the failure. From a signal-interpretation
-perspective, it also exposes the practical cost of permissive admission. An HLG file explicitly tagged BT.709 is
-processed as BT.2020. If the tag accurately describes its content, color may be wrong. Production output validation
-builds its reference from the same input interpretation and cannot independently prove that ignoring the source tag
-was justified. This is a shared modeling assumption, not a problem eliminated by output-format checks.
-The twenty-three passes therefore do not establish that the tool has no problems, and the single failure does not
-establish that all conversions are unreliable. More precisely, mathematics, parallel execution, tool qualification, and
-several media paths have evidence from this environment. The complete integration suite retains an unresolved
-inconsistency where the input contract evolved, and the policy needs clearer user communication and distinct tests.
-Because integration.py stopped at the assertion, its later variants did not execute in this run and cannot be counted
-as covered.
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
+56
+21.4 Repairing the earlier media_pipeline issue
+The 1.2.1 paper recorded 23/24 passes: explicit BT.709 primaries were automatically interpreted as BT.2020.
+Version 1.3.0 restores conflict rejection, retains the earlier rejection case, and adds actual MOV conversions with
+missing fields, consistent declarations, conflicts, and explicit overrides. The failed condition becomes a meaningful
+regression constraint rather than a deleted assertion.
+The new media_pipeline passes. Release evidence lists fixed 29.99, 29.98, and 29.9701 cadence, rotation, silent,
+AAC, multiple-audio, and camera-clock variants. The earlier coverage gap after the failed assertion is no longer a
+current-version conclusion. Passing supports the listed generated cases, not arbitrary original camera recordings.
+21.5 Passing results and remaining modeling assumptions
+29 passes are not a whole-program or all-device proof. Defaults for absent tags still assume that content matches
+the interpretation; user authorization does not establish true BT.2020 gamut. Shared assumptions of output
+references and production transforms require source provenance and independent integer-signal checks.
+Cadence is identifiable only at integer timestamp resolution. Audio hashes omit timestamps. Movie publication
+and report replacement are separate transactions. GPU ranking has unit-test and installed-device qualification
+evidence. The update relaxes no color tolerance and adds no Resolve, Premiere, or FCP import certification.
 21.6 Specific sustained-test results
-The sustained_4k120 reproduction used generated footage of two seconds, 240 frames, 3840 by 2160, and 120
-fps. Conversion took 43.449496 seconds, approximately 5.523654 fps. Peak application private memory was
-15142912 bytes, approximately 14.44 MiB. Frames 0, 119, and 239 were sampled, producing 1536 luma samples.
-Maximum post-encoding error was 0.86505094 codes, below the test's two-code threshold.
+The historical 1.2.1 paper's sustained_4k120 reproduction used generated footage of two seconds, 240 frames,
+3840 by 2160, and 120 fps. Conversion took 43.449496 seconds, approximately 5.523654 fps. Peak application
+private memory was 15142912 bytes, approximately 14.44 MiB. Frames 0, 119, and 239 were sampled, producing
+1536 luma samples. Maximum post-encoding error was 0.86505094 codes, below the test's two-code threshold.
 This conversion time differs from the 78.55 seconds reported by CTest for the case because the latter includes
 fixture generation, additional sampling, and script overhead. It also does not mean real-time 4K120 processing.
 Input acquisition rate is 120 frames per second; actual offline conversion throughput is approximately 5.5 frames
 per second. The two uses of fps describe different concepts and must be distinguished in figure titles and axes.
+Figure 16. Application private-memory trace from the historical 1.2.1 paper's 240-frame 4K120 reproduction in CPU Standard mode.
+Data comes from sustained-report.json and covers only the main application, excluding FFmpeg children and GPU device memory.
+This is an observation from one run.
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
-55
-Figure 16. Application private-memory trace from the paper's 240-frame 4K120 reproduction in CPU Standard mode. Data comes from
-sustained-report.json and covers only the main application, excluding FFmpeg children and GPU device memory. This is an
-observation from one run.
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
+57
+21.7 The 1.3.0 sustained-processing record
+The 1.3.0 release JSON uses generated 3840x2160, 120 fps, 240-frame, 2-second media. Conversion and job
+validation take 47.5439493 seconds, approximately 5.047960961 fps; peak application private memory is
+15183872 bytes, approximately 14.48 MiB. Frames 0, 119, and 239 yield 1536 luma samples and maximum
+post-encoding error 0.8650509424642223 codes. Legacy float_buffer_bytes=4194304 denotes only one bridge
+slot. This record has no complete memory trace, so the preceding figure retains the explicitly labeled historical
+1.2.1 trace; it must not be conflated with the new peak measurement.
 Principal source files: CMakeLists.txt; tests/integration.py; tests/sustained.py; docs/VALIDATION.md.
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
-56
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
+58
 Chapter 22. Performance Data, Complexity, and
 Reproducible Comparison
 22.1 Workloads in the historical matrix
@@ -1971,7 +2026,7 @@ comparing backend and workload costs on that machine, not for inferring throughp
 texture, disk arrays, or thermally stabilized hardware.
 The hardware record identifies twenty logical CPUs, an RTX 3080 Ti Laptop GPU with sixteen GB of device
 memory, and a specified NVIDIA driver. The paper plots these as historical measurements and keeps their version
-and date explicit. A dataset named 1.2.0 cannot be relabeled as a new version 1.2.1 measurement. Even with an
+and date explicit. A dataset named 1.2.0 cannot be relabeled as a new version 1.3.0 measurement. Even with an
 unchanged color kernel, thread allocation, operating-system state, and surrounding processing can affect timing.
 Figure 17. Historical throughput matrix from repository version 1.2.0. Solid and dashed lines distinguish Standard and Creative modes;
 colors distinguish CPU and CUDA. The vertical axis is measured pipeline throughput, not input capture rate. Each case is a single
@@ -1989,9 +2044,9 @@ should preferably be reported together to avoid misleading selection of the high
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
-57
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
+59
 22.3 Amdahl's law and bottleneck migration
 If the accelerable fraction of total work is p and local speedup is s, ignoring additional costs gives the following
 overall limit. In LogForge, ProRes codecs, matrix filters, container operations, and validation remain on CPU or
@@ -2022,9 +2077,9 @@ one-second clip linearly to an hour.
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
-58
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
+60
 The paper invents no confidence intervals and does not interpret small differences between one new test and one
 historical test as a version-level speedup. The present reproduction took approximately 43.45 seconds, compared
 with about 45.20 seconds for the historical overlapping bridge. Environmental noise and measurement conditions
@@ -2034,9 +2089,9 @@ Principal source files: docs/BENCHMARK_1.2.0.md; docs/benchmarks/1.2.0.json; tes
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
-59
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
+61
 Chapter 23. An Implementation Walkthrough from One
 Sample to the Final File
 23.1 Establishing an explicit input example
@@ -2080,9 +2135,9 @@ and report saving succeed is the partial moved to the user-selected name.
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
-60
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
+62
 23.5 Tracing a GPU failure branch
 Change the same example to Auto. If initialization fails, CPU is chosen from the outset. If CUDA fails on a later
 block, the original host block still holds HLG input before commit. Auto sends it to CPU, and subsequent blocks
@@ -2093,21 +2148,21 @@ block commits and reference qualification, the color contract can still hold, bu
 mixed execution. Swallowing the exception and displaying only completion loses diagnostics and leaves users
 unable to explain different durations under apparently identical settings.
 23.6 Tracing a final-path conflict
-If another process creates the destination during conversion, the initial absence check is stale. The final
-MoveFileExW forbids replacement, so the task reports OutputExists, preserves the externally created file, and
-cleans its own temporary media. A passing validation report can therefore exist without a final video published by
-this task. External scripts must not interpret the report's passed field as a guarantee of publication.
-This suggests a future interface refinement. The report is currently saved before publication, while
-publication-failure details reside mainly in the task error and log. An explicit publication state or a final
-transaction-result update would help automation distinguish content validated but publication failed from fully
-completed. This is an improvement proposal, not a claim that the current JSON already implements that field.
+If another process creates the destination during conversion, the initial absence check is stale. Final
+MoveFileExW forbids replacement, preserves the external file, and cleans only temporary media matching task
+ownership. validation_passed and legacy passed may be true while publication.published and completed are false
+and publication.status is failed. The report records attempted, final_path, and error.
+Version 1.3.0 implements explicit publication state: completed requires both validation and publication. A
+pending report is saved before publication, then updated to published after a successful move. Final report-write
+failure preserves the valid published media and returns an error. A crash between the two filesystem transactions
+may still leave a valid movie and pending report; this remains a current limitation.
 Principal source files: src/Transcode.cpp; src/FloatBridge.cpp; src/color/CudaTransformer.cpp.
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
-61
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
+63
 Chapter 24. Discussion, Implementation Limits, and
 Research Conclusions
 24.1 The principal arguments supported by the analysis
@@ -2138,31 +2193,21 @@ Nor has all C++ concurrency or every Win32 error branch been formally verified. 
 arguments based on inspectable implementation structure, numerical derivations, and test evidence, not a
 whole-program theorem generated by a proof assistant. Formula-derived curves, single historical measurements,
 and the present single reproduction must each be understood according to their own evidence class.
-24.3 The input contract most in need of clarification
-Version 1.2.1 relaxes admission for a clear compatibility purpose, but missing information, explicitly
-conflicting information, and uninterpretable information should be distinguished. Missing camera model need not
-affect color computation. Defaulting missing chroma location to left may be pragmatic. Explicitly declared
-alternative primaries followed by forced BT.2020 interpretation creates a different risk. A single category of
-optional tags does not express these distinctions adequately.
-Compatibility could be retained while recording defaults, alerting users to explicit conflicts, and giving different
-policies 
-stable 
-report 
-fields. 
-Tests 
-should 
-separately 
-cover 
-missing-but-allowed,
-conflicting-and-warned-or-rejected, and explicit user override. The failed integration test provides a concrete
-starting point: revise the contract, then synchronize code and tests, instead of deleting the assertion or restoring an
-old gate merely to obtain green results.
+24.3 The updated contract and retained limits
+Version 1.3.0 distinguishes missing, explicitly conflicting, and uninterpretable fields and records defaults,
+overrides, and warnings, resolving the earlier admission inconsistency. Camera model, absent timecode, auxiliary
+mebx tracks, and legal edit lists remain compatible. Cardinal rotations still operate on float32 pixels; 90/270
+degrees swap the raster and output orientation is identity.
+Explicit authorization, a shared quantization cell, audio-byte verification, and ownership-based recovery
+constrain failure modes. They cannot restore unrecorded capture settings, identify sub-resolution clock changes, or
+guarantee every editor's behavior. Versioned evidence must track implementation; historical 1.2.0 performance is
+not a new 1.3.0 benchmark.
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
-62
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
+64
 24.4 A stronger scientific validation program
 If the research objective becomes camera-appearance equivalence, paired HLG and native Log captures should
 use the same scene, exposure, white balance, lens, and traceable settings. Grayscale targets, color charts, and
@@ -2181,19 +2226,19 @@ transform, independent multimedia tools provide codecs, bounded memory and expli
 concurrency, and structured validation determines delivery. Its value lies not in inventing a new Log curve but in
 connecting existing standards with the timing, metadata, and failure behavior of a practical desktop workflow while
 leaving inspectable evidence.
-In this fixed-version study, the Release build and twenty-three tests passed; one older rejection expectation
-conflicted with newer input admission; and sustained 4K120 numerical samples met the current threshold. These
-outcomes support operation of the core transform and several reliability mechanisms as designed in this
-environment, while retaining limits concerning input interpretation, evolving documentation, and finite sampling.
-A rigorous implementation paper must explain why success follows and where its conclusions cease to apply. On
-that basis, the paper develops a layered argument from formulas and code through tests to the final file.
-Principal source files: README.md; docs/RELEASE_1.2.1.md; docs/VALIDATION.md.
+The 1.3.0 release record reports a successful Release build and 29 passing tests, resolves the earlier admission
+conflict, and retains passing sustained 4K120 numerical sampling. These outcomes support operation of the core
+transform and several reliability mechanisms as designed in this environment, while retaining limits concerning
+input interpretation, evolving documentation, and finite sampling. A rigorous implementation paper must explain
+why success follows and where its conclusions cease to apply. On that basis, the paper develops a layered argument
+from formulas and code through tests to the final file.
+Principal source files: README.md; docs/RELEASE_1.3.0.md; docs/VALIDATION.md.
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
-63
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
+65
 Appendix A. Symbols, Units, and a Review Guide
 A.1 Unified notation
 Table 4. Principal symbols and units
@@ -2257,15 +2302,15 @@ avoiding a mixture of source and tests from different revisions.
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
-64
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
+66
 A.4 Reading the experimental records
-The regression XML is the result of the reported run. The sustained-test JSON contains conversion duration, the
-application-private-memory sequence, and sampling error. Historical performance JSON comes from repository
-version 1.2.0. Keeping these datasets separate preserves temporal and version provenance. Theoretical curves are
-generated directly from formulas by the typesetting script, not fitted to camera captures or presented as actual
-waveform-monitor readings.
+The regression XML is a reading export of the 1.3.0 release JSON. The historical 1.2.1 sustained-test JSON
+contains conversion duration, the application-private-memory sequence, and sampling error. Historical
+performance JSON comes from repository version 1.2.0. Keeping these datasets separate preserves temporal and
+version provenance. Theoretical curves are generated directly from formulas by the typesetting script, not fitted to
+camera captures or presented as actual waveform-monitor readings.
 The accompanying LaTeX and Markdown are editable sources, while the PDF is generated by a local
 vector-typesetting program. A platform-directory error in the built-in LaTeX compiler prevents validation of the
 complete project, so the source is not labeled as successfully built by that compiler. PDF formulas are vector paths,
@@ -2273,9 +2318,9 @@ the body is searchable, and figures and tables carry numbers, units, data proven
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
-65
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
+67
 Appendix B. Repository Files and Corresponding
 Research Chapters
 The following index covers every version-controlled file at the fixed revision. It identifies each file's role in
@@ -2283,7 +2328,7 @@ implementation, testing, building, or documentary evidence, supplemented by a re
 and hash manifest. Third-party libraries, generated code, images, and licenses are not treated as handwritten project
 algorithms. The index is a traceability table of material scope and implementation responsibility, not a statement
 that every program line has been formally proved.
-Table 5. All 102 version-controlled files and their roles
+Table 5. All 110 version-controlled files and their roles
 File path and extent
 Implementation responsibility / research use
 .clang-format 9 lines
@@ -2292,16 +2337,16 @@ infrastructure
 .gitattributes 10 lines
 Repository formatting, line endings, and ignore rules; reproduction
 infrastructure
-.github/workflows/build-windows.yml 71 lines
+.github/workflows/build-windows.yml 73 lines
 C++20/MSVC targets, test registration, build and release allowlists;
 Chapters 8, 21
 .gitignore 48 lines
 Repository formatting, line endings, and ignore rules; reproduction
 infrastructure
-CHANGELOG.md 141 lines
+CHANGELOG.md 175 lines
 Project documentation, historical evidence, or development procedures;
 cross-checked by chapter topic
-CMakeLists.txt 124 lines
+CMakeLists.txt 143 lines
 C++20/MSVC targets, test registration, build and release allowlists;
 Chapters 8, 21
 CONTRIBUTING.md 19 lines
@@ -2309,7 +2354,7 @@ Project documentation, historical evidence, or development procedures;
 cross-checked by chapter topic
 LICENSE 21 lines
 Project or third-party licensing and attribution; distribution boundaries
-README.md 233 lines
+README.md 248 lines
 Project documentation, historical evidence, or development procedures;
 cross-checked by chapter topic
 THIRD_PARTY_NOTICES.md 41 lines
@@ -2317,7 +2362,7 @@ Project or third-party licensing and attribution; distribution boundaries
 docs/APPLE_LOG_IDENTIFICATION.md 153 lines
 Project documentation, historical evidence, or development procedures;
 cross-checked by chapter topic
-docs/ARCHITECTURE.md 147 lines
+docs/ARCHITECTURE.md 175 lines
 Project documentation, historical evidence, or development procedures;
 cross-checked by chapter topic
 docs/BENCHMARK_1.2.0.md 62 lines
@@ -2326,24 +2371,30 @@ cross-checked by chapter topic
 docs/BUG_AUDIT_1.1.1.md 63 lines
 Project documentation, historical evidence, or development procedures;
 cross-checked by chapter topic
-docs/COLOR_PIPELINE.md 97 lines
+docs/CADENCE_1.3.0.md 84 lines
 Project documentation, historical evidence, or development procedures;
 cross-checked by chapter topic
-docs/CREATIVE_ADJUSTMENTS.md 46 lines
+docs/COLOR_PIPELINE.md 97 lines
 Project documentation, historical evidence, or development procedures;
 cross-checked by chapter topic
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
-66
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
+68
 File path and extent
 Implementation responsibility / research use
+docs/CREATIVE_ADJUSTMENTS.md 46 lines
+Project documentation, historical evidence, or development procedures;
+cross-checked by chapter topic
 docs/FFMPEG_PROVIDER.md 54 lines
 Project documentation, historical evidence, or development procedures;
 cross-checked by chapter topic
 docs/ICON.md 28 lines
+Project documentation, historical evidence, or development procedures;
+cross-checked by chapter topic
+docs/INPUT_CONTRACT_1.3.0.md 41 lines
 Project documentation, historical evidence, or development procedures;
 cross-checked by chapter topic
 docs/METADATA.md 79 lines
@@ -2355,27 +2406,35 @@ cross-checked by chapter topic
 docs/RELEASE_1.2.1.md 46 lines
 Project documentation, historical evidence, or development procedures;
 cross-checked by chapter topic
-docs/TECHNICAL_REFERENCES.md 137 lines
+docs/RELEASE_1.3.0.md 147 lines
 Project documentation, historical evidence, or development procedures;
 cross-checked by chapter topic
-docs/VALIDATION.md 598 lines
+docs/TECHNICAL_REFERENCES.md 152 lines
+Project documentation, historical evidence, or development procedures;
+cross-checked by chapter topic
+docs/VALIDATION.md 684 lines
 Project documentation, historical evidence, or development procedures;
 cross-checked by chapter topic
 docs/benchmarks/1.2.0.json 2805 lines
 Project documentation, historical evidence, or development procedures;
 cross-checked by chapter topic
-docs/images/LogForge.png Binary: 37255 bytes
+docs/images/LogForge.png Binary: 37377 bytes
 Project documentation, historical evidence, or development procedures;
 cross-checked by chapter topic
 docs/verification/1.2.0.json 320 lines
 Project documentation, historical evidence, or development procedures;
 cross-checked by chapter topic
+docs/verification/1.3.0.json 947 lines
+Project documentation, historical evidence, or development procedures;
+cross-checked by chapter topic
 include/logforge/AppleLogIdentification.h 14 lines
 Writing the 35-byte identification extension and checking structure; Chapter
 15
+include/logforge/AudioPayload.h 8 lines
+Per-stream SHA-256 over copied audio packet content; Chapter 13
 include/logforge/Color.h 53 lines
 Color-model interfaces, constants, parameters, and statistics; Chapters 3-7
-include/logforge/CudaTransformer.h 24 lines
+include/logforge/CudaTransformer.h 26 lines
 Dynamic driver interface, qualification, and transactional commit; Chapter
 11
 include/logforge/Discovery.h 61 lines
@@ -2387,28 +2446,28 @@ Three-slot read/transform/write state machine and thread budgeting;
 Chapter 9
 include/logforge/FloatTransformer.h 18 lines
 Persistent CPU workers, tile pairing, and statistics merging; Chapter 10
+
+
+LOGFORGE  |  SOURCE & MATHEMATICS
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
+69
+File path and extent
+Implementation responsibility / research use
 include/logforge/Localization.h 34 lines
 Stable message keys and single-pass argument replacement; Chapter 20
-include/logforge/Media.h 87 lines
+include/logforge/Media.h 97 lines
 Probe parsing, admission, metadata arguments, and output validation;
 Chapters 2, 16
-include/logforge/Messages.inc 262 lines
+include/logforge/Messages.inc 272 lines
 Bilingual message macro table, stable keys, and placeholders; Chapter 20
 include/logforge/PixelSanity.h 24 lines
 Nine-block gross-error checks on first, middle, and last encoded frames;
 Chapter 7
 include/logforge/Platform.h 115 lines
 Wide strings, handles, process supervision, pipes, and hashing; Chapter 18
-include/logforge/Queue.h 8 lines
+include/logforge/Queue.h 17 lines
 Serial multi-file tasks and per-item failure recording; Chapter 20
-
-
-LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
-67
-File path and extent
-Implementation responsibility / research use
 include/logforge/Settings.h 23 lines
 Field merging, concurrency locks, and atomic preference persistence;
 Chapters 19, 20
@@ -2417,7 +2476,7 @@ File-identity journals, state locks, and ownership-based recovery; Chapter
 19
 include/logforge/ToolTrust.h 29 lines
 Identity, approval, and leases for the executable pair; Chapter 17
-include/logforge/Transcode.h 33 lines
+include/logforge/Transcode.h 36 lines
 Complete media task, backends, validation reports, and final publication;
 Chapters 8, 23
 include/logforge/Ui.h 49 lines
@@ -2443,9 +2502,11 @@ interface
 src/AppleLogIdentification.cpp 194 lines
 Writing the 35-byte identification extension and checking structure; Chapter
 15
-src/Cadence.cpp 168 lines
+src/AudioPayload.cpp 54 lines
+Per-stream SHA-256 over copied audio packet content; Chapter 13
+src/Cadence.cpp 381 lines
 All-packet period, phase, and fixed-clock validation; Chapter 12
-src/Cli.cpp 223 lines
+src/Cli.cpp 248 lines
 Commands, numeric arguments, and automation entry points; Chapter 20
 src/Discovery.cpp 141 lines
 Local volume and directory traversal; Chapter 17
@@ -2453,6 +2514,14 @@ src/DiscoveryHelper.cpp 501 lines
 Supervised hidden discovery entry point and source budgets; Chapter 17
 src/FFmpeg.cpp 416 lines
 Tool capabilities, discovery scheduling, and fixed downloads; Chapter 17
+
+
+LOGFORGE  |  SOURCE & MATHEMATICS
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
+70
+File path and extent
+Implementation responsibility / research use
 src/FFmpegNumeric.cpp 234 lines
 Independent integer signals and actual codec numerical qualification;
 Chapters 5, 7
@@ -2461,24 +2530,16 @@ Three-slot read/transform/write state machine and thread budgeting;
 Chapter 9
 src/Localization.cpp 77 lines
 Stable message keys and single-pass argument replacement; Chapter 20
-src/MainWindow.cpp 1710 lines
+src/MainWindow.cpp 1739 lines
 Single background worker, events, and measured layout; Chapter 20
-src/Media.cpp 400 lines
+src/Media.cpp 497 lines
 Probe parsing, admission, metadata arguments, and output validation;
 Chapters 2, 16
-src/MediaSafety.cpp 272 lines
+src/MediaSafety.cpp 292 lines
 Time semantics, display matrices, and fixed-width header repair; Chapters
 13, 16
 src/MetadataPolicy.cpp 53 lines
 Metadata allowlists and conflict classification; Chapter 16
-
-
-LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
-68
-File path and extent
-Implementation responsibility / research use
 src/MovAnalyzer.cpp 433 lines
 Bounded atom parsing and typed semantic comparison; Chapter 14
 src/PixelSanity.cpp 184 lines
@@ -2486,7 +2547,7 @@ Nine-block gross-error checks on first, middle, and last encoded frames;
 Chapter 7
 src/Platform.cpp 398 lines
 Wide strings, handles, process supervision, pipes, and hashing; Chapter 18
-src/Queue.cpp 49 lines
+src/Queue.cpp 86 lines
 Serial multi-file tasks and per-item failure recording; Chapter 20
 src/Settings.cpp 120 lines
 Field merging, concurrency locks, and atomic preference persistence;
@@ -2498,7 +2559,7 @@ File-identity journals, state locks, and ownership-based recovery; Chapter
 19
 src/ToolTrust.cpp 124 lines
 Identity, approval, and leases for the executable pair; Chapter 17
-src/Transcode.cpp 584 lines
+src/Transcode.cpp 648 lines
 Complete media task, backends, validation reports, and final publication;
 Chapters 8, 23
 src/Ui.cpp 322 lines
@@ -2512,7 +2573,7 @@ CUDA source, PTX, compiler identity, and precise options; Chapter 11
 src/color/ColorKernel.ptx.h 1620 lines
 Generated PTX byte array: content-hash and source-manifest checks; not
 handwritten algorithm code; Chapter 11
-src/color/CudaTransformer.cpp 333 lines
+src/color/CudaTransformer.cpp 423 lines
 Dynamic driver interface, qualification, and transactional commit; Chapter
 11
 src/color/FloatTransformer.cpp 127 lines
@@ -2522,9 +2583,19 @@ Inverse HLG, reference scaling, creative adjustment, and signal counts;
 Chapters 3, 6
 tests/application.cpp 262 lines
 Preferences, discovery, and version-resource tests; Chapter 21
+
+
+LOGFORGE  |  SOURCE & MATHEMATICS
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
+71
+File path and extent
+Implementation responsibility / research use
 tests/benchmark.py 97 lines
 Formal throughput matrix and process observations; Chapter 22
-tests/compatibility_v121.py 145 lines
+tests/cadence_v130.cpp 128 lines
+Full-sequence rational quantization regressions; Chapters 12, 21
+tests/compatibility_v121.py 200 lines
 Portrait pixels, matrices, and audio-offset regression; Chapters 13, 21
 tests/cuda_artifact.py 18 lines
 CUDA source, embedded PTX hashes, and option consistency; Chapter 11
@@ -2532,30 +2603,22 @@ tests/fake_ffmpeg.cpp 10 lines
 Marker fixture establishing non-execution of unknown tools; Chapter 17
 tests/gui_smoke.py 123 lines
 Interactive desktop GUI scenarios; not rerun for this paper; Chapter 20
-tests/hardening.cpp 367 lines
+tests/hardening.cpp 396 lines
 Cadence, tool trust, MOV, parallelism, and publication regressions; Chapter
 21
 tests/identification.cpp 101 lines
 Identification writing, idempotence, and structural-failure tests; Chapters 15,
 21
-
-
-LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
-69
-File path and extent
-Implementation responsibility / research use
-tests/integration.py 255 lines
-End-to-end synthetic media; the reported run fails at the old admission
-assertion on line 154; Chapter 21
+tests/integration.py 352 lines
+End-to-end synthetic media; 1.3.0 release verification passes explicit
+conflict and override regressions; Chapter 21
 tests/layout_snapshots.py 35 lines
 Production layout, theme, and DPI screenshot assertions; Chapter 20
-tests/package_audit.py 38 lines
+tests/package_audit.py 39 lines
 Archive allowlist, CRC, executable, and SHA-256 audit; Appendix
-tests/process_fixture.cpp 51 lines
+tests/process_fixture.cpp 58 lines
 Descendant-held pipes, long lines, and exit-code fixtures; Chapter 18
-tests/reliability.cpp 246 lines
+tests/reliability.cpp 261 lines
 Process, discovery, and CLI abnormal-path regressions; Chapter 21
 tests/resolve_identification.py 110 lines
 Real Resolve controlled-import script; not rerun for this paper; Chapter 15
@@ -2564,10 +2627,12 @@ Independent integer patches, creative processing, and range counts;
 Chapters 7, 21
 tests/sustained.py 90 lines
 240-frame 4K120, memory, and post-encoding luma; Chapter 21
-tests/tests.cpp 396 lines
+tests/tests.cpp 463 lines
 Basic mathematical, media, and platform tests; Chapter 21
 tests/v120.cpp 386 lines
 Storage, matrices, CUDA faults, queues, and media regressions; Chapter 21
+tests/v130.cpp 239 lines
+Queue, report and CUDA cache regressions; Chapters 11, 20, 21
 third_party/NVIDIA-CUDA-NOTICE.txt 23 lines
 Project or third-party licensing and attribution; distribution boundaries
 third_party/nlohmann/LICENSE.MIT 21 lines
@@ -2581,9 +2646,9 @@ NVRTC compilation with precise options and generated manifest; Chapter
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
-70
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
+72
 References and Source Locations
 Implementation discussion relies primarily on the fixed-revision source. Chapter-end source locations identify
 the principal files. The following list provides project material and key external primary references. External
@@ -2591,34 +2656,34 @@ documentation is used to check public definitions and interfaces; historical rep
 observations made at the time. Neither substitutes for the execution results reported in this paper. Web references
 were checked on September 29, 2026.
 [1] Project source and README at the fixed revision.
-https://github.com/HongHuo0728/LogForge/tree/6b43a93fbd4d1457ff20b4c99a030c0e398f520a
+https://github.com/HongHuo0728/LogForge/tree/913e4b9417fa0f32b88629c39062b54589d9dd21
 [2] LogForge COLOR_PIPELINE: numerical contract.
-https://github.com/HongHuo0728/LogForge/blob/6b43a93fbd4d1457ff20b4c99a030c0e398f520a/docs/COLOR_PIPELINE.md
+https://github.com/HongHuo0728/LogForge/blob/913e4b9417fa0f32b88629c39062b54589d9dd21/docs/COLOR_PIPELINE.md
 [3] LogForge CREATIVE_ADJUSTMENTS: project-defined adjustments.
-https://github.com/HongHuo0728/LogForge/blob/6b43a93fbd4d1457ff20b4c99a030c0e398f520a/docs/CREATIVE_ADJUSTMENTS.
-md
+https://github.com/HongHuo0728/LogForge/blob/913e4b9417fa0f32b88629c39062b54589d9dd21/docs/CREATIVE_ADJUSTMENT
+S.md
 [4] LogForge ARCHITECTURE: architecture and historical policies.
-https://github.com/HongHuo0728/LogForge/blob/6b43a93fbd4d1457ff20b4c99a030c0e398f520a/docs/ARCHITECTURE.md
-[5] LogForge RELEASE_1.2.1: current admission and raster-orientation policy.
-https://github.com/HongHuo0728/LogForge/blob/6b43a93fbd4d1457ff20b4c99a030c0e398f520a/docs/RELEASE_1.2.1.md
+https://github.com/HongHuo0728/LogForge/blob/913e4b9417fa0f32b88629c39062b54589d9dd21/docs/ARCHITECTURE.md
+[5] LogForge RELEASE_1.3.0: current admission and raster-orientation policy.
+https://github.com/HongHuo0728/LogForge/blob/913e4b9417fa0f32b88629c39062b54589d9dd21/docs/RELEASE_1.3.0.md
 [6] LogForge VALIDATION: versioned historical validation records.
-https://github.com/HongHuo0728/LogForge/blob/6b43a93fbd4d1457ff20b4c99a030c0e398f520a/docs/VALIDATION.md
+https://github.com/HongHuo0728/LogForge/blob/913e4b9417fa0f32b88629c39062b54589d9dd21/docs/VALIDATION.md
 [7] LogForge BENCHMARK_1.2.0: historical performance matrix.
-https://github.com/HongHuo0728/LogForge/blob/6b43a93fbd4d1457ff20b4c99a030c0e398f520a/docs/BENCHMARK_1.2.0.md
+https://github.com/HongHuo0728/LogForge/blob/913e4b9417fa0f32b88629c39062b54589d9dd21/docs/BENCHMARK_1.2.0.md
 [8] LogForge APPLE_LOG_IDENTIFICATION: native references and controlled Resolve experiments.
-https://github.com/HongHuo0728/LogForge/blob/6b43a93fbd4d1457ff20b4c99a030c0e398f520a/docs/APPLE_LOG_IDENTIFICATI
-ON.md
+https://github.com/HongHuo0728/LogForge/blob/913e4b9417fa0f32b88629c39062b54589d9dd21/docs/APPLE_LOG_IDENTIFICAT
+ION.md
 [9] LogForge METADATA and FFMPEG_PROVIDER: container and tool policies.
-https://github.com/HongHuo0728/LogForge/blob/6b43a93fbd4d1457ff20b4c99a030c0e398f520a/docs/METADATA.md
+https://github.com/HongHuo0728/LogForge/blob/913e4b9417fa0f32b88629c39062b54589d9dd21/docs/METADATA.md
 [10] LogForge TECHNICAL_REFERENCES: index of external primary references.
-https://github.com/HongHuo0728/LogForge/blob/6b43a93fbd4d1457ff20b4c99a030c0e398f520a/docs/TECHNICAL_REFERENCES.
-md
+https://github.com/HongHuo0728/LogForge/blob/913e4b9417fa0f32b88629c39062b54589d9dd21/docs/TECHNICAL_REFERENCE
+S.md
 
 
 LOGFORGE  |  SOURCE & MATHEMATICS
-1.2.1  |  26927B  |  6b43a93
-English edition  |  Fixed-revision study  |  29 September 2026
-71
+1.3.0  |  26929A  |  913e4b9
+English edition  |  Fixed-revision study  |  30 September 2026
+73
 References and Source Locations (continued)
 [11] Apple-supplied ACES IDT, fixed commit 528c78fe: Apple Log decoding constants.
 https://github.com/ampas/aces-dev/blob/528c78fe2c0f4e7eb322581e98aba05de79466cb/transforms/ctl/idt/vendorSupplied/apple/IDT.

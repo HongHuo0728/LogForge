@@ -1,22 +1,21 @@
 {
   "title": "LogForge Source Code Analysis and Mathematical Proof - Academic Paper",
-  "commit": "6b43a93fbd4d1457ff20b4c99a030c0e398f520a",
-  "version": "1.2.1 (26927B)",
-  "pages": 71,
+  "commit": "913e4b9417fa0f32b88629c39062b54589d9dd21",
+  "version": "1.3.0 (26929A)",
+  "pages": 73,
   "chapters": 24,
-  "subsections": 134,
-  "english_words": 20868,
+  "subsections": 140,
+  "english_words": 21046,
   "equations": 66,
   "figures": 18,
   "tables": 5,
-  "tracked_files": 102,
-  "pdf_sha256": "37197811eea770defbe7fad16849167bd659fab4176db8583d1dbf8822314252",
+  "tracked_files": 110,
+  "pdf_sha256": "8bd05afe84d92377e81f7ae6a0dcaf01be1308fcd78817c7e519ddce940e1085",
   "ctest": {
-    "tests": 24,
-    "passed": 23,
-    "failed": 1,
-    "failed_test": "media_pipeline",
-    "provenance": "original Chinese study; no new test run for translation"
+    "tests": 29,
+    "passed": 29,
+    "failed": 0,
+    "provenance": "existing 1.3.0 release record; no new media run for revision"
   },
   "pdf_export": "ReportLab; embedded fonts; original vector equations and figures; translated captions and tables",
   "latex_status": "Editable project source; built-in compiler unavailable during original study; compilation not asserted"

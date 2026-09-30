@@ -1,11 +1,11 @@
 {
-  "pages": 71,
+  "pages": 73,
   "issues": [],
-  "chinese_files_checked": 224,
+  "chinese_files_checked": 6,
   "changed_chinese_files": [],
-  "chinese_pdf_sha256": "f4f3277e50b780f89f1dafa876ec3b9052db9a5718745579527e48794140b99e",
+  "chinese_pdf_sha256": "7c8cdf3a748590c7ebb426b1694daf2f815ba58f442ba27e6c0e83c38c1b4c5c",
   "changed_figure_assets": [],
-  "english_pdf_sha256": "37197811eea770defbe7fad16849167bd659fab4176db8583d1dbf8822314252",
+  "english_pdf_sha256": "8bd05afe84d92377e81f7ae6a0dcaf01be1308fcd78817c7e519ddce940e1085",
   "page_stats": [
     {
       "page": 1,
@@ -15,352 +15,362 @@
     {
       "page": 2,
       "characters": 1998,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n2\nContents\n4\nAbstract\n5\nOriginal English Abstract\n6\nChapter 1. Research Object, Evidence, and the Scope of the Arg"
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n2\nContents\n4\nAbstract\n5\nOriginal English Abstract\n6\nChapter 1. Research Object, Evidence, and the Scope of the Arg"
     },
     {
       "page": 3,
-      "characters": 1696,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n3\nEdition and Evidence Notes\nThis English edition translates the existing Chinese paper without changing its resea"
+      "characters": 1651,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n3\nEdition and Evidence Notes\nThis English edition and its Chinese counterpart are revised together for LogForge 1."
     },
     {
       "page": 4,
-      "characters": 2869,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n4\nAbstract\nDesigned for color interchange between mobile imaging and professional post-production, LogForge conver"
+      "characters": 2912,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n4\nAbstract\nDesigned for color interchange between mobile imaging and professional post-production, LogForge conver"
     },
     {
       "page": 5,
-      "characters": 868,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n5\nOriginal English Abstract\nLogForge is a native Windows application that converts BT.2020 HLG ProRes footage into"
+      "characters": 874,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n5\nOriginal English Abstract\nLogForge is a native Windows application that converts BT.2020 HLG ProRes footage into"
     },
     {
       "page": 6,
-      "characters": 3925,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n6\nChapter 1. Research Object, Evidence, and the Scope of\nthe Argument\n1.1 From product requirements to research qu"
+      "characters": 3969,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n6\nChapter 1. Research Object, Evidence, and the Scope of\nthe Argument\n1.1 From product requirements to research qu"
     },
     {
       "page": 7,
-      "characters": 3247,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n7\n1.3 Four non-interchangeable forms of evidence\nThis paper uses four forms of evidence. Source-code facts establi"
+      "characters": 3234,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n7\n1.3 Four non-interchangeable forms of evidence\nThis paper uses four forms of evidence. Source-code facts establi"
     },
     {
       "page": 8,
       "characters": 2413,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n8\nChapter 2. Signal Domains, Color Space, and the\nEnd-to-End Contract\n2.1 Five quantities that must remain distinc"
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n8\nChapter 2. Signal Domains, Color Space, and the\nEnd-to-End Contract\n2.1 Five quantities that must remain distinc"
     },
     {
       "page": 9,
       "characters": 2409,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n9\nFigure 1. End-to-end data flow and signal domains. Blue denotes FFmpeg processing, green denotes LogForge numeri"
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n9\nFigure 1. End-to-end data flow and signal domains. Blue denotes FFmpeg processing, green denotes LogForge numeri"
     },
     {
       "page": 10,
-      "characters": 1299,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n10\n2.5 Range and default interpretation in the source\nThe version 1.2.1 transcoder uses full range when the source"
+      "characters": 1429,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n10\n2.5 The explicit input-interpretation contract in 1.3.0\nVersion 1.3.0 records declared, assumed, overridden, ef"
     },
     {
       "page": 11,
       "characters": 2829,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n11\nChapter 3. Deriving Inverse HLG and Reference\nExposure\n3.1 Inverting the piecewise OETF\nHLG uses a square-root "
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n11\nChapter 3. Deriving Inverse HLG and Reference\nExposure\n3.1 Inverting the piecewise OETF\nHLG uses a square-root "
     },
     {
       "page": 12,
       "characters": 2275,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n12\n3.3 Determining the reference-white scale\nHLG's relative scene normalization is not itself the photographic ref"
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n12\n3.3 Determining the reference-white scale\nHLG's relative scene normalization is not itself the photographic ref"
     },
     {
       "page": 13,
       "characters": 1153,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n13\n3.5 Gain, derivatives, and noise\nLocal error propagation can be described by a first-order approximation. A sma"
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n13\n3.5 Gain, derivatives, and noise\nLocal error propagation can be described by a first-order approximation. A sma"
     },
     {
       "page": 14,
       "characters": 3151,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n14\nChapter 4. Apple Log Encoding, Inverse Mapping, and\nProvable Properties\n4.1 Constants, thresholds, and three br"
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n14\nChapter 4. Apple Log Encoding, Inverse Mapping, and\nProvable Properties\n4.1 Constants, thresholds, and three br"
     },
     {
       "page": 15,
       "characters": 1926,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n15\ncurves in this paper are evaluated using the repository constants. The join error is invisible at ordinary plot"
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n15\ncurves in this paper are evaluated using the repository constants. The join error is invisible at ordinary plot"
     },
     {
       "page": 16,
       "characters": 1209,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n16\n4.5 A rigorous counterexample to invertibility\nTake two distinct linear values below R0. Their images under f a"
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n16\n4.5 A rigorous counterexample to invertibility\nTake two distinct linear values below R0. Their images under f a"
     },
     {
       "page": 17,
       "characters": 3016,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n17\nChapter 5. YCbCr, Data Range, and Chroma Resampling\n5.1 Where the BT.2020 NCL matrix operates\nThe three planes "
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n17\nChapter 5. YCbCr, Data Range, and Chroma Resampling\n5.1 Where the BT.2020 NCL matrix operates\nThe three planes "
     },
     {
       "page": 18,
       "characters": 2534,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n18\nthe creation of missing chroma detail. Color-correctness tests should avoid discontinuities when checking the\nm"
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n18\nthe creation of missing chroma detail. Color-correctness tests should avoid discontinuities when checking the\nm"
     },
     {
       "page": 19,
       "characters": 3132,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n19\nChapter 6. The Creative-Adjustment Model, Proofs, and\nLimitations\n6.1 Why creative processing has a separate sw"
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n19\nChapter 6. The Creative-Adjustment Model, Proofs, and\nLimitations\n6.1 Why creative processing has a separate sw"
     },
     {
       "page": 20,
       "characters": 2538,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n20\n6.4 A derivative proof of neutral-luminance monotonicity\nLet the output exposure coordinate z equal the input x"
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n20\n6.4 A derivative proof of neutral-luminance monotonicity\nLet the output exposure coordinate z equal the input x"
     },
     {
       "page": 21,
       "characters": 2326,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n21\nChapter 7. Floating-Point Precision, Error Budgets, and\nNumerical Validation\n7.1 Allocating precision along the"
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n21\nChapter 7. Floating-Point Precision, Error Budgets, and\nNumerical Validation\n7.1 Allocating precision along the"
     },
     {
       "page": 22,
       "characters": 2447,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n22\nFigure 6. Quantization relationships after reference conversion of neutral 10-bit HLG codes. Several dark input"
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n22\nFigure 6. Quantization relationships after reference conversion of neutral 10-bit HLG codes. Several dark input"
     },
     {
       "page": 23,
       "characters": 1229,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n23\n7.5 Interpreting coarse pixel thresholds correctly\nPixelSanity permits a peak block-mean error of thirty-two co"
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n23\n7.5 Interpreting coarse pixel thresholds correctly\nPixelSanity permits a peak block-mean error of thirty-two co"
     },
     {
       "page": 24,
       "characters": 2634,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n24\nChapter 8. The C++20 Core and External-Process\nArchitecture\n8.1 Module boundaries and dependency direction\nLogF"
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n24\nChapter 8. The C++20 Core and External-Process\nArchitecture\n8.1 Module boundaries and dependency direction\nLogF"
     },
     {
       "page": 25,
       "characters": 3024,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n25\n8.3 The roles of the two FFmpeg processes\nThe decoder explicitly disables automatic rotation, selects the first"
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n25\n8.3 The roles of the two FFmpeg processes\nThe decoder explicitly disables automatic rotation, selects the first"
     },
     {
       "page": 26,
       "characters": 2381,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n26\nChapter 9. The Triple-Buffer Pipeline and Memory\nBounds\n9.1 Why serial frame processing is insufficient\nIf the "
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n26\nChapter 9. The Triple-Buffer Pipeline and Memory\nBounds\n9.1 Why serial frame processing is insufficient\nIf the "
     },
     {
       "page": 27,
-      "characters": 3441,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n27\n9.3 End of stream and completeness\nA single Read from the decoder pipe is not guaranteed to return all requeste"
+      "characters": 3673,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n27\n9.3 End of stream and completeness\nA single Read from the decoder pipe is not guaranteed to return all requeste"
     },
     {
       "page": 28,
-      "characters": 619,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n28\nIt is not enough to prove that states zero, one, and two cycle correctly during normal execution. Exit conditio"
+      "characters": 685,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n28\nuser cancellation, broken pipes, and partial thread-creation failure must all converge on cleanup rather than l"
     },
     {
       "page": 29,
       "characters": 4049,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n29\nChapter 10. Persistent CPU Workers and Determinism\n10.1 Avoiding thread creation for every block\nFloatTransform"
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n29\nChapter 10. Persistent CPU Workers and Determinism\n10.1 Avoiding thread creation for every block\nFloatTransform"
     },
     {
       "page": 30,
       "characters": 1227,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n30\nstate their counting scope to avoid treating configured worker counts and measured process-tree counts as\ncontr"
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n30\nstate their counting scope to avoid treating configured worker counts and measured process-tree counts as\ncontr"
     },
     {
       "page": 31,
       "characters": 3504,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n31\nChapter 11. The CUDA Backend, Qualification, and\nFailure Atomicity\n11.1 The dynamic driver interface and deploy"
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n31\nChapter 11. The CUDA Backend, Qualification, and\nFailure Atomicity\n11.1 The dynamic driver interface and deploy"
     },
     {
       "page": 32,
-      "characters": 2814,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n32\nA fixed seed makes the input sequence reproducible and useful for cross-driver investigations. Extreme\nexposure"
+      "characters": 2686,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n32\nA fixed seed makes the input sequence reproducible and useful for cross-driver investigations. Extreme\nexposure"
     },
     {
       "page": 33,
-      "characters": 3427,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n33\nChapter 12. Fixed-Frame-Rate Validation and Timeline\nReconstruction\n12.1 Information lost by rawvideo\nA rawvide"
+      "characters": 891,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n33\n11.7 Deterministic device ranking and process-local qualification caching\nCandidates sort by eligibility, desce"
     },
     {
       "page": 34,
-      "characters": 2047,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n34\nFigure 10. Phase examples for exact fixed cadence, quantized alternating cadence, and sustained drift. Dashed l"
+      "characters": 3000,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n34\nChapter 12. Fixed-Frame-Rate Validation and Timeline\nReconstruction\n12.1 Information lost by rawvideo\nA rawvide"
     },
     {
       "page": 35,
-      "characters": 3138,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n35\nChapter 13. Audiovisual Synchronization, Edit Lists, and\nRotation Geometry\n13.1 Audio copying does not automati"
+      "characters": 2534,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n35\n12.4 The 59.94 regression and identifiability limits\nThe generated regression uses 309 packets, time base 1/120"
     },
     {
       "page": 36,
-      "characters": 2437,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n36\n13.4 Display matrices and angle tags\nA QuickTime display matrix can contain translation, scaling, and perspecti"
+      "characters": 3138,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n36\nChapter 13. Audiovisual Synchronization, Edit Lists, and\nRotation Geometry\n13.1 Audio copying does not automati"
     },
     {
       "page": 37,
-      "characters": 1268,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n37\n13.6 Remaining boundaries of the orientation policy\nWhen material does not meet the standard matrix conditions,"
+      "characters": 2437,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n37\n13.4 Display matrices and angle tags\nA QuickTime display matrix can contain translation, scaling, and perspecti"
     },
     {
       "page": 38,
-      "characters": 3236,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n38\nChapter 14. MOV Atom Parsing and Semantic\nComparison\n14.1 Why an independent container analyzer is needed\nffpro"
+      "characters": 1898,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n38\n13.6 Remaining boundaries of the orientation policy\nWhen material does not meet the standard matrix conditions,"
     },
     {
       "page": 39,
-      "characters": 2238,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n39\nFigure 12. MOV hierarchy relevant to Apple Log identification. logs and colr are direct children of the ProRes "
+      "characters": 3236,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n39\nChapter 14. MOV Atom Parsing and Semantic\nComparison\n14.1 Why an independent container analyzer is needed\nffpro"
     },
     {
       "page": 40,
-      "characters": 3577,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n40\nChapter 15. Apple Log Identification Fields and\nMetadata-Writing Proofs\n15.1 Three declarations with different "
+      "characters": 2238,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n40\nFigure 12. MOV hierarchy relevant to Apple Log identification. logs and colr are direct children of the ProRes "
     },
     {
       "page": 41,
-      "characters": 2676,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n41\nThe ancestor chain from moov to apch is checked for actual containment at every level rather than assumed to\nha"
+      "characters": 3577,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n41\nChapter 15. Apple Log Identification Fields and\nMetadata-Writing Proofs\n15.1 Three declarations with different "
     },
     {
       "page": 42,
-      "characters": 3747,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n42\nChapter 16. Metadata Allowlists, Creation Times, and\nFidelity Semantics\n16.1 From wholesale copying to an expli"
+      "characters": 2676,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n42\nThe ancestor chain from moov to apch is checked for actual containment at every level rather than assumed to\nha"
     },
     {
       "page": 43,
-      "characters": 2206,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n43\nbaked; otherwise the recorded source matrix is restored. Preservation of creation information thus extends beyo"
+      "characters": 3747,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n43\nChapter 16. Metadata Allowlists, Creation Times, and\nFidelity Semantics\n16.1 From wholesale copying to an expli"
     },
     {
       "page": 44,
-      "characters": 3819,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n44\nChapter 17. Tool Discovery, Execution Trust, and\nNumerical Qualification\n17.1 Discovering a path is not authori"
+      "characters": 2206,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n44\nbaked; otherwise the recorded source matrix is restored. Preservation of creation information thus extends beyo"
     },
     {
       "page": 45,
-      "characters": 2404,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n45\ninject roots and fake tools to check whether searching exceeds its scope or accidentally executes unknown\nprogr"
+      "characters": 3819,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n45\nChapter 17. Tool Discovery, Execution Trust, and\nNumerical Qualification\n17.1 Discovering a path is not authori"
     },
     {
       "page": 46,
-      "characters": 3634,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n46\nChapter 18. Process Supervision, Pipe Deadlocks, and\nCancellation Correctness\n18.1 The supervised launch sequen"
+      "characters": 2404,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n46\ninject roots and fake tools to check whether searching exceeds its scope or accidentally executes unknown\nprogr"
     },
     {
       "page": 47,
-      "characters": 2081,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n47\n18.5 Exit codes and exception precedence\nThe task checks user cancellation, progress-thread and error-reader ex"
+      "characters": 3634,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n47\nChapter 18. Process Supervision, Pipe Deadlocks, and\nCancellation Correctness\n18.1 The supervised launch sequen"
     },
     {
       "page": 48,
-      "characters": 2217,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n48\nChapter 19. File Transactions, Disk Planning, and Crash\nRecovery\n19.1 Separating final and temporary paths\nTran"
+      "characters": 2081,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n48\n18.5 Exit codes and exception precedence\nThe task checks user cancellation, progress-thread and error-reader ex"
     },
     {
       "page": 49,
-      "characters": 3835,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n49\n19.3 Disk requirements are estimated heuristically\nThe space preflight starts from approximately 220 Mb/s for 1"
+      "characters": 2217,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n49\nChapter 19. File Transactions, Disk Planning, and Crash\nRecovery\n19.1 Separating final and temporary paths\nTran"
     },
     {
       "page": 50,
-      "characters": 3631,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n50\nChapter 20. GUI, CLI, Queues, and Inspectable\nInteraction\n20.1 A single owner of background work\nMainWindow use"
+      "characters": 3735,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n50\n19.3 Disk requirements are estimated heuristically\nThe space preflight starts from approximately 220 Mb/s for 1"
     },
     {
       "page": 51,
-      "characters": 2123,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n51\n20.5 Serial queues and per-item outcomes\nRunQueue derives an independent output name for each input, probes eac"
+      "characters": 981,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n51\n19.7 Crash recovery and the two-transaction boundary\nTemporary-media cleanup must match file identity in the ow"
     },
     {
       "page": 52,
-      "characters": 3273,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n52\nChapter 21. Test Structure, the Present Reproduction,\nand Failure Analysis\n21.1 Tests are not a single score\nRe"
+      "characters": 3631,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n52\nChapter 20. GUI, CLI, Queues, and Inspectable\nInteraction\n20.1 A single owner of background work\nMainWindow use"
     },
     {
       "page": 53,
-      "characters": 1556,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n53\nTable 3. Complete CTest results from the reported reproduction\nTest name\nOutcome\nTime (s)\nrobustness_v120\nPasse"
+      "characters": 2699,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n53\n20.5 Serial queues and per-item outcomes\nRunQueue derives an independent output name for each input, probes eac"
     },
     {
       "page": 54,
-      "characters": 2819,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n54\nThis is a contract conflict directly explained by the code. The older integration test expects stricter admissi"
+      "characters": 3041,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n54\nChapter 21. Test Structure, the Present Reproduction,\nand Failure Analysis\n21.1 Tests are not a single score\nRe"
     },
     {
       "page": 55,
-      "characters": 505,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n55\nFigure 16. Application private-memory trace from the paper's 240-frame 4K120 reproduction in CPU Standard mode."
+      "characters": 1210,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n55\nTable 3. Complete CTest results from the existing 1.3.0 release record\nTest name\nOutcome\nTime (s)\nqueue_report_"
     },
     {
       "page": 56,
-      "characters": 2349,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n56\nChapter 22. Performance Data, Complexity, and\nReproducible Comparison\n22.1 Workloads in the historical matrix\nd"
+      "characters": 2832,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n56\n21.4 Repairing the earlier media_pipeline issue\nThe 1.2.1 paper recorded 23/24 passes: explicit BT.709 primarie"
     },
     {
       "page": 57,
-      "characters": 2624,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n57\n22.3 Amdahl's law and bottleneck migration\nIf the accelerable fraction of total work is p and local speedup is "
+      "characters": 867,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n57\n21.7 The 1.3.0 sustained-processing record\nThe 1.3.0 release JSON uses generated 3840x2160, 120 fps, 240-frame,"
     },
     {
       "page": 58,
-      "characters": 760,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n58\nThe paper invents no confidence intervals and does not interpret small differences between one new test and one"
+      "characters": 2349,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n58\nChapter 22. Performance Data, Complexity, and\nReproducible Comparison\n22.1 Workloads in the historical matrix\nd"
     },
     {
       "page": 59,
-      "characters": 3655,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n59\nChapter 23. An Implementation Walkthrough from One\nSample to the Final File\n23.1 Establishing an explicit input"
+      "characters": 2624,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n59\n22.3 Amdahl's law and bottleneck migration\nIf the accelerable fraction of total work is p and local speedup is "
     },
     {
       "page": 60,
-      "characters": 2016,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n60\n23.5 Tracing a GPU failure branch\nChange the same example to Auto. If initialization fails, CPU is chosen from "
+      "characters": 760,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n60\nThe paper invents no confidence intervals and does not interpret small differences between one new test and one"
     },
     {
       "page": 61,
-      "characters": 3891,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n61\nChapter 24. Discussion, Implementation Limits, and\nResearch Conclusions\n24.1 The principal arguments supported "
+      "characters": 3655,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n61\nChapter 23. An Implementation Walkthrough from One\nSample to the Final File\n23.1 Establishing an explicit input"
     },
     {
       "page": 62,
-      "characters": 2457,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n62\n24.4 A stronger scientific validation program\nIf the research objective becomes camera-appearance equivalence, "
+      "characters": 1977,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n62\n23.5 Tracing a GPU failure branch\nChange the same example to Auto. If initialization fails, CPU is chosen from "
     },
     {
       "page": 63,
-      "characters": 2849,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n63\nAppendix A. Symbols, Units, and a Review Guide\nA.1 Unified notation\nTable 4. Principal symbols and units\nSymbol"
+      "characters": 3665,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n63\nChapter 24. Discussion, Implementation Limits, and\nResearch Conclusions\n24.1 The principal arguments supported "
     },
     {
       "page": 64,
-      "characters": 1074,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n64\nA.4 Reading the experimental records\nThe regression XML is the result of the reported run. The sustained-test J"
+      "characters": 2422,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n64\n24.4 A stronger scientific validation program\nIf the research objective becomes camera-appearance equivalence, "
     },
     {
       "page": 65,
-      "characters": 2772,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n65\nAppendix B. Repository Files and Corresponding\nResearch Chapters\nThe following index covers every version-contr"
+      "characters": 2849,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n65\nAppendix A. Symbols, Units, and a Review Guide\nA.1 Unified notation\nTable 4. Principal symbols and units\nSymbol"
     },
     {
       "page": 66,
-      "characters": 3019,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n66\nFile path and extent\nImplementation responsibility / research use\ndocs/FFMPEG_PROVIDER.md 54 lines\nProject docu"
+      "characters": 1103,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n66\nA.4 Reading the experimental records\nThe regression XML is a reading export of the 1.3.0 release JSON. The hist"
     },
     {
       "page": 67,
-      "characters": 2788,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n67\nFile path and extent\nImplementation responsibility / research use\ninclude/logforge/Settings.h 23 lines\nField me"
+      "characters": 2765,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n67\nAppendix B. Repository Files and Corresponding\nResearch Chapters\nThe following index covers every version-contr"
     },
     {
       "page": 68,
-      "characters": 2852,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n68\nFile path and extent\nImplementation responsibility / research use\nsrc/MovAnalyzer.cpp 433 lines\nBounded atom pa"
+      "characters": 3001,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n68\nFile path and extent\nImplementation responsibility / research use\ndocs/CREATIVE_ADJUSTMENTS.md 46 lines\nProject"
     },
     {
       "page": 69,
-      "characters": 1718,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n69\nFile path and extent\nImplementation responsibility / research use\ntests/integration.py 255 lines\nEnd-to-end syn"
+      "characters": 2830,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n69\nFile path and extent\nImplementation responsibility / research use\ninclude/logforge/Localization.h 34 lines\nStab"
     },
     {
       "page": 70,
-      "characters": 2399,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n70\nReferences and Source Locations\nImplementation discussion relies primarily on the fixed-revision source. Chapte"
+      "characters": 2851,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n70\nFile path and extent\nImplementation responsibility / research use\nsrc/FFmpegNumeric.cpp 234 lines\nIndependent i"
     },
     {
       "page": 71,
+      "characters": 2645,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n71\nFile path and extent\nImplementation responsibility / research use\ntests/benchmark.py 97 lines\nFormal throughput"
+    },
+    {
+      "page": 72,
+      "characters": 2399,
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n72\nReferences and Source Locations\nImplementation discussion relies primarily on the fixed-revision source. Chapte"
+    },
+    {
+      "page": 73,
       "characters": 1648,
-      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.2.1  |  26927B  |  6b43a93\nEnglish edition  |  Fixed-revision study  |  29 September 2026\n71\nReferences and Source Locations (continued)\n[11] Apple-supplied ACES IDT, fixed commit 528c78fe: Apple Log deco"
+      "first_text": "LOGFORGE  |  SOURCE & MATHEMATICS\n1.3.0  |  26929A  |  913e4b9\nEnglish edition  |  Fixed-revision study  |  30 September 2026\n73\nReferences and Source Locations (continued)\n[11] Apple-supplied ACES IDT, fixed commit 528c78fe: Apple Log deco"
     }
   ],
   "font_names": [
@@ -372,5 +382,5 @@
     "Times-Roman"
   ],
   "outline_entries": 31,
-  "pdf_bytes": 976212
+  "pdf_bytes": 993625
 }
