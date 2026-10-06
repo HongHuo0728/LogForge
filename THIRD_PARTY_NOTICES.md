@@ -17,6 +17,16 @@
 - FFmpeg license information: https://ffmpeg.org/legal.html
 - The MIT license for LogForge does not cover FFmpeg. Anyone separately redistributing FFmpeg must meet the applicable license requirements, including corresponding source requirements. A link in this document is not a substitute for those obligations.
 
+## iOS software ProRes codecs / FFmpeg 8.1.2
+
+- Native iOS libavcodec/libavutil subset, compiled from pinned source. Includes the `prores` decoder and `prores_ks` encoder; GPL, nonfree components and desktop executables are disabled.
+- License: GNU Lesser General Public License 2.1 or later, independently of LogForge's MIT source license.
+- Source: https://ffmpeg.org/releases/ffmpeg-8.1.2.tar.xz
+- Source SHA-256: `464beb5e7bf0c311e68b45ae2f04e9cc2af88851abb4082231742a74d97b524c`.
+- Build configuration and bridge: `LogForgeMac/LogForge For iPhone/NativeCodec/` in the main repository.
+- Static distributions include matching codec source, library, application objects and link logs in the versioned RelinkKit. Preserve these materials and license notices when distributing a signed IPA; a source URL alone is not a substitute.
+- Apple SwiftUI, AVFoundation, VideoToolbox, CoreMedia, CoreVideo and Metal are Apple-platform APIs. Xcode and an Apple SDK are cloud/local Mac build prerequisites.
+
 ## Color standards and reference material
 
 Apple's vendor-supplied ACES input transform and ITU specifications were consulted to implement the mathematical functions. LogForge does not bundle Apple LUTs, Apple logos, Apple media samples, or Apple SDK code. Technical references and the retrieval limitations are recorded in `docs/TECHNICAL_REFERENCES.md`.

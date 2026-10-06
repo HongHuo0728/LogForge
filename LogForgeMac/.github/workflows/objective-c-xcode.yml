@@ -1,0 +1,68 @@
+name: Build iOS IPA
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      run_tests:
+        description: Run simulator unit tests as well
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ios-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ipa:
+    name: iPhone IPA (unsigned)
+    runs-on: macos-26
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Archive and package
+        run: bash tools/build-ios.sh archive
+      - name: Upload IPA and relink sources
+        if: success()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: LogForge-iPhone-unsigned-${{ github.run_number }}
+          path: build/artifacts/*
+          if-no-files-found: error
+          retention-days: 14
+      - name: Upload build diagnostics
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: LogForge-build-logs-${{ github.run_number }}
+          path: |
+            build/logs/
+            build/*.xcresult
+          if-no-files-found: warn
+          retention-days: 14
+
+  tests:
+    name: Simulator unit tests
+    if: github.event_name != 'workflow_dispatch' || inputs.run_tests
+    runs-on: macos-26
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Test on an available iPhone simulator
+        run: bash tools/build-ios.sh test
+      - name: Upload test diagnostics
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: LogForge-test-logs-${{ github.run_number }}
+          path: |
+            build/logs/
+            build/*.xcresult
+          if-no-files-found: warn
+          retention-days: 14

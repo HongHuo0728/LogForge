@@ -1,0 +1,67 @@
+name: iOS build and tests
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+    paths:
+      - 'LogForgeMac/**'
+      - 'CMakeLists.txt'
+      - '.github/workflows/build-ios.yml'
+  pull_request:
+    paths:
+      - 'LogForgeMac/**'
+      - 'CMakeLists.txt'
+      - '.github/workflows/build-ios.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ios-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+    working-directory: LogForgeMac
+
+jobs:
+  iphone:
+    name: Test and package iOS
+    runs-on: macos-26
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Check release identity and tag
+        run: |
+          python3 tools/test_release_info.py
+          release_identity=$(python3 tools/release-info.py)
+          read -r version release_build <<< "$release_identity"
+          if [[ "$GITHUB_REF_TYPE" == tag && "$GITHUB_REF_NAME" != "v$version" ]]; then
+            echo 'Tag and main project version differ' >&2
+            exit 1
+          fi
+          printf 'LOGFORGE_ARTIFACT=LogForge-%s-iOS-%s-unsigned-%s\n' "$version" "$release_build" "$GITHUB_RUN_NUMBER" >> "$GITHUB_ENV"
+      - name: Simulator regression tests
+        run: bash tools/build-ios.sh test
+      - name: Archive and package iPhone release
+        run: bash tools/build-ios.sh archive
+      - name: Upload IPA, checksums and relink sources
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ${{ env.LOGFORGE_ARTIFACT }}
+          path: LogForgeMac/build/artifacts/*
+          if-no-files-found: error
+          retention-days: 14
+      - name: Upload build and test diagnostics
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: LogForge-iOS-diagnostics-${{ github.run_number }}
+          path: |
+            LogForgeMac/build/logs/
+            LogForgeMac/build/*.xcresult
+          if-no-files-found: warn
+          retention-days: 14

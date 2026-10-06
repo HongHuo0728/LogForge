@@ -10,7 +10,7 @@ def main():
     parser.add_argument('--zip', type=Path, required=True)
     parser.add_argument('--exe', type=Path, required=True)
     args = parser.parse_args()
-    expected = {'LogForge.exe', 'README.md', 'CHANGELOG.md', 'LICENSE', 'THIRD_PARTY_NOTICES.md',
+    expected = {'LogForge.exe', 'README.md', 'README.zh-CN.md', 'CHANGELOG.md', 'LICENSE', 'THIRD_PARTY_NOTICES.md',
                 'licenses/nlohmann-json-MIT.txt', 'licenses/NVIDIA-CUDA-NOTICE.txt', 'docs/images/LogForge.png',
                 'docs/benchmarks/1.2.0.json', 'docs/verification/1.2.0.json', 'docs/verification/1.3.0.json'}
     expected |= {f'docs/{name}.md' for name in (

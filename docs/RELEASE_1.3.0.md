@@ -1,4 +1,36 @@
-# LogForge 1.3.0 (26929A)
+# LogForge 1.3.0 — Windows 26929A / iOS 26106A
+
+## iOS addition to the existing 1.3.0 release
+
+The main LogForge repository now contains the native Swift / SwiftUI / Metal iOS
+application under `LogForgeMac/`. Its user-visible version is **1.3.0 (26106A)**;
+the numeric Apple bundle build remains separate. Windows stays **1.3.0 (26929A)**.
+
+iOS 26+ offers CPU/Metal color processing, automatic system/software ProRes
+decode and encode fallback, ProRes 422/HQ export, Photos/files/folder import,
+queue retry, Liquid Glass UI/icon, haptics and five languages. Its input contract
+requires ProRes 422/HQ BT.2020 HLG MOV; valid variable frame timing is retained.
+Audio, rotation, stored frame timing and Apple Log metadata are independently
+checked. The Windows timing and input policy in the following sections remains
+Windows-specific.
+
+The preceding iOS test build passed 27 simulator tests without failures or skips.
+This release-identity and main-repository workflow update has not yet been
+compiled in the cloud; device performance and editor import remain separate
+checks. No new Windows media/editor validation is claimed.
+
+Run **iOS build and tests** in the main repository. Tests must pass before archive
+and packaging. Release assets are `LogForge-1.3.0-iOS-26106A-unsigned.ipa`, its
+SHA-256 file, the matching versioned RelinkKit and its checksum. Supply your own
+valid Apple signature/profile to install. Preserve corresponding source and
+relink material when distributing a signed build. App Store/TestFlight and
+automatic Release publication are not configured.
+
+These are additions to the existing **v1.3.0** release, not a new Windows version
+or a replacement for its original verification history. See the
+[main-repository iOS release steps](https://github.com/HongHuo0728/LogForge/blob/main/LogForgeMac/docs/RELEASE_1.3.0_IOS.md).
+
+## Windows release
 
 LogForge 1.3.0 fixes fractional camera timing, makes input color interpretation
 explicit, and strengthens queue naming, publication reports and media recovery.

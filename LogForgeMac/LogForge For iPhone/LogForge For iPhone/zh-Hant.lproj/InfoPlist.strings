@@ -1,0 +1,3 @@
+"CFBundleDisplayName" = "LogForge";
+"NSPhotoLibraryUsageDescription" = "選擇要轉換為 Apple Log 的影片。";
+"NSPhotoLibraryAddUsageDescription" = "將轉換後的影片儲存至相簿。";

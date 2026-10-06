@@ -1,0 +1,758 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		B2B6142C306A9CE400DD288B /* ProResEncoderDiagnostics.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2B6142B306A9CE400DD288B /* ProResEncoderDiagnostics.swift */; };
+		B2B61470306C02A300DD288B /* LanguageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2B6146F306C02A300DD288B /* LanguageManager.swift */; };
+		B2B61473306C034600DD288B /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = B2B61475306C034600DD288B /* Localizable.strings */; };
+		B2DB043D30667BD400699934 /* LogForge_For_iPhoneApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2DB043C30667BD400699934 /* LogForge_For_iPhoneApp.swift */; };
+		B2DB043F30667BD400699934 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2DB043E30667BD400699934 /* ContentView.swift */; };
+		B2DB044130667BD900699934 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B2DB044030667BD900699934 /* Assets.xcassets */; };
+		B2DB044430667BD900699934 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B2DB044330667BD900699934 /* Preview Assets.xcassets */; };
+		B2DB044E30667BDA00699934 /* LogForge_For_iPhoneTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2DB044D30667BDA00699934 /* LogForge_For_iPhoneTests.swift */; };
+		B2DB045830667BDA00699934 /* LogForge_For_iPhoneUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2DB045730667BDA00699934 /* LogForge_For_iPhoneUITests.swift */; };
+		B2DB045A30667BDA00699934 /* LogForge_For_iPhoneUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2DB045930667BDA00699934 /* LogForge_For_iPhoneUITestsLaunchTests.swift */; };
+		B2DB046730667C3700699934 /* VideoInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2DB046630667C3700699934 /* VideoInfo.swift */; };
+		B2DB046930667C6E00699934 /* VideoAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2DB046830667C6E00699934 /* VideoAnalyzer.swift */; };
+		B2DB046B30667C9E00699934 /* VideoPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2DB046A30667C9E00699934 /* VideoPicker.swift */; };
+		B2DB046D30667CC700699934 /* VideoInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2DB046C30667CC700699934 /* VideoInfoView.swift */; };
+		B2DB046F3066969300699934 /* VideoDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2DB046E3066969300699934 /* VideoDecoder.swift */; };
+		B2DB0471306697BC00699934 /* HLGProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2DB0470306697BC00699934 /* HLGProcessor.swift */; };
+		B2DB04733066981A00699934 /* ColorConverter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2DB04723066981A00699934 /* ColorConverter.swift */; };
+		B2DB047530669FA300699934 /* VideoProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2DB047430669FA300699934 /* VideoProcessor.swift */; };
+		B2F21F4C3067CAFD00481C75 /* MetalColorProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2F21F4B3067CAFD00481C75 /* MetalColorProcessor.swift */; };
+		B2F21F4E3067CFD000481C75 /* LogForgeShaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = B2F21F4D3067CFD000481C75 /* LogForgeShaders.metal */; };
+		B2F21F503068B94A00481C75 /* OutputValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2F21F4F3068B94A00481C75 /* OutputValidator.swift */; };
+		B2F80C3D30673C6D006D5917 /* AppleLogProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2F80C3C30673C6D006D5917 /* AppleLogProcessor.swift */; };
+		B2F80C3F30673FD1006D5917 /* V210Converter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2F80C3E30673FD1006D5917 /* V210Converter.swift */; };
+		FF30560F6DD91E808B188FD4 /* ConversionOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B83B98F968F229A21D19F73 /* ConversionOptions.swift */; };
+		7B7805B08B2D5F8BEB5F8751 /* NativeColorPipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 432358199B91262062029BFA /* NativeColorPipeline.swift */; };
+		708CE822378C445B713C279B /* NativePipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5D6C7A1A56370E32EC645AA /* NativePipeline.swift */; };
+		546938FD2F099623E81A1890 /* AppleLogMOV.swift in Sources */ = {isa = PBXBuildFile; fileRef = 538F890837E625FFD8C842D8 /* AppleLogMOV.swift */; };
+		B34E39C75B7F21CBAEDA3103 /* ConversionQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC8C8700FE4B833A9AB9B21A /* ConversionQueue.swift */; };
+		81EB8E981FB7D851EBB52336 /* GlassComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89C51895E2BF4EC9F5AFB496 /* GlassComponents.swift */; };
+		369D61B51174F0D392AAD264 = {isa = PBXBuildFile; fileRef = 16EE4C4E706506C9F500EB35; };
+		D0A292AC7B5E7F371CB3DB12 = {isa = PBXBuildFile; fileRef = 89832BF4CA493217BDB4BD8B; };
+		2A55399248ECC22545B203BE = {isa = PBXBuildFile; fileRef = 6141C24FDFB324CEC5597A63; };
+		9943F16401D1E99FA2774403 = {isa = PBXBuildFile; fileRef = 7C54D502EA3130AABB288894; };
+		11C3E6DA55757DF68C9BE5D0 = {isa = PBXBuildFile; fileRef = 49EB8AC4F976837235DB8A64; };
+		876E52A280041BC464814F01 = {isa = PBXBuildFile; fileRef = 51EB05A34F6B27447FB33CFB; };
+		710AAF66268EFDD93E7F8061 = {isa = PBXBuildFile; fileRef = 710AAF66268EFDD93E7F8062; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		B2DB044A30667BDA00699934 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B2DB043130667BD400699934 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = B2DB043830667BD400699934;
+			remoteInfo = "LogForge For iPhone";
+		};
+		B2DB045430667BDA00699934 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B2DB043130667BD400699934 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = B2DB043830667BD400699934;
+			remoteInfo = "LogForge For iPhone";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		B2B6142B306A9CE400DD288B /* ProResEncoderDiagnostics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProResEncoderDiagnostics.swift; sourceTree = "<group>"; };
+		B2B6146F306C02A300DD288B /* LanguageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LanguageManager.swift; sourceTree = "<group>"; };
+		B2B61474306C034600DD288B /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		B2B61476306C041D00DD288B /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
+		B2DB043930667BD400699934 /* LogForge For iPhone.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "LogForge For iPhone.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		B2DB043C30667BD400699934 /* LogForge_For_iPhoneApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogForge_For_iPhoneApp.swift; sourceTree = "<group>"; };
+		B2DB043E30667BD400699934 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		B2DB044030667BD900699934 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		B2DB044330667BD900699934 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		B2DB044930667BDA00699934 /* LogForge For iPhoneTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "LogForge For iPhoneTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		B2DB044D30667BDA00699934 /* LogForge_For_iPhoneTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogForge_For_iPhoneTests.swift; sourceTree = "<group>"; };
+		B2DB045330667BDA00699934 /* LogForge For iPhoneUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "LogForge For iPhoneUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		B2DB045730667BDA00699934 /* LogForge_For_iPhoneUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogForge_For_iPhoneUITests.swift; sourceTree = "<group>"; };
+		B2DB045930667BDA00699934 /* LogForge_For_iPhoneUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogForge_For_iPhoneUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		B2DB046630667C3700699934 /* VideoInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoInfo.swift; sourceTree = "<group>"; };
+		B2DB046830667C6E00699934 /* VideoAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoAnalyzer.swift; sourceTree = "<group>"; };
+		B2DB046A30667C9E00699934 /* VideoPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoPicker.swift; sourceTree = "<group>"; };
+		B2DB046C30667CC700699934 /* VideoInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoInfoView.swift; sourceTree = "<group>"; };
+		B2DB046E3066969300699934 /* VideoDecoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoDecoder.swift; sourceTree = "<group>"; };
+		B2DB0470306697BC00699934 /* HLGProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HLGProcessor.swift; sourceTree = "<group>"; };
+		B2DB04723066981A00699934 /* ColorConverter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorConverter.swift; sourceTree = "<group>"; };
+		B2DB047430669FA300699934 /* VideoProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoProcessor.swift; sourceTree = "<group>"; };
+		B2F21F4B3067CAFD00481C75 /* MetalColorProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetalColorProcessor.swift; sourceTree = "<group>"; };
+		B2F21F4D3067CFD000481C75 /* LogForgeShaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = LogForgeShaders.metal; sourceTree = "<group>"; };
+		B2F21F4F3068B94A00481C75 /* OutputValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutputValidator.swift; sourceTree = "<group>"; };
+		B2F80C3C30673C6D006D5917 /* AppleLogProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleLogProcessor.swift; sourceTree = "<group>"; };
+		B2F80C3E30673FD1006D5917 /* V210Converter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = V210Converter.swift; sourceTree = "<group>"; };
+		3B83B98F968F229A21D19F73 /* ConversionOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversionOptions.swift; sourceTree = "<group>"; };
+		432358199B91262062029BFA /* NativeColorPipeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeColorPipeline.swift; sourceTree = "<group>"; };
+		D5D6C7A1A56370E32EC645AA /* NativePipeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativePipeline.swift; sourceTree = "<group>"; };
+		538F890837E625FFD8C842D8 /* AppleLogMOV.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleLogMOV.swift; sourceTree = "<group>"; };
+		CC8C8700FE4B833A9AB9B21A /* ConversionQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversionQueue.swift; sourceTree = "<group>"; };
+		89C51895E2BF4EC9F5AFB496 /* GlassComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassComponents.swift; sourceTree = "<group>"; };
+		16EE4C4E706506C9F500EB35 = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NativeCodec/LogForgeCodec.m; sourceTree = SOURCE_ROOT; };
+		B13AD8501CAC8D28DB8F7ADF = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "zh-Hant.lproj/Localizable.strings"; sourceTree = "<group>"; };
+		FEE1B5938E8AC86CDB0BBD84 = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "fr"; path = "fr.lproj/Localizable.strings"; sourceTree = "<group>"; };
+		C1C308E27674138CE65FB9B3 = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "es"; path = "es.lproj/Localizable.strings"; sourceTree = "<group>"; };
+		6B7BFE806AE1CBC7867F0F43 = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "en"; path = "en.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
+		90A49BDC8087DD7379DBA4DD = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
+		B0B6EC61920D3EB9341081AB = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "zh-Hant.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
+		BEE064F2A10A743E0506B226 = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "fr"; path = "fr.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
+		E8B2D43F2F90FCAD2476B8A1 = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "es"; path = "es.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
+		6141C24FDFB324CEC5597A63 = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer; path = LogForge.icon; sourceTree = "<group>"; };
+		7C54D502EA3130AABB288894 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativePipelineTests.swift; sourceTree = "<group>"; };
+		49EB8AC4F976837235DB8A64 = {isa = PBXFileReference; lastKnownFileType = text; path = SoftwareCodec-LICENSE.txt; sourceTree = "<group>"; };
+		51EB05A34F6B27447FB33CFB = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassFlowTests.swift; sourceTree = "<group>"; };
+		710AAF66268EFDD93E7F8062 = {isa = PBXFileReference; lastKnownFileType = text; path = NativeCodec/NOTICE.txt; sourceTree = SOURCE_ROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		B2DB043630667BD400699934 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B2DB044630667BDA00699934 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B2DB045030667BDA00699934 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		B2DB043030667BD400699934 = {
+			isa = PBXGroup;
+			children = (
+				B2B6142B306A9CE400DD288B /* ProResEncoderDiagnostics.swift */,
+				B2F21F4B3067CAFD00481C75 /* MetalColorProcessor.swift */,
+				B2F21F4D3067CFD000481C75 /* LogForgeShaders.metal */,
+				B2DB043B30667BD400699934 /* LogForge For iPhone */,
+				B2DB044C30667BDA00699934 /* LogForge For iPhoneTests */,
+				B2DB045630667BDA00699934 /* LogForge For iPhoneUITests */,
+				B2DB043A30667BD400699934 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		B2DB043A30667BD400699934 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				B2DB043930667BD400699934 /* LogForge For iPhone.app */,
+				B2DB044930667BDA00699934 /* LogForge For iPhoneTests.xctest */,
+				B2DB045330667BDA00699934 /* LogForge For iPhoneUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		B2DB043B30667BD400699934 /* LogForge For iPhone */ = {
+			isa = PBXGroup;
+			children = (
+				16EE4C4E706506C9F500EB35 /* Native codec bridge */,
+				B2DB043C30667BD400699934 /* LogForge_For_iPhoneApp.swift */,
+				89C51895E2BF4EC9F5AFB496 /* GlassComponents.swift */,
+				CC8C8700FE4B833A9AB9B21A /* ConversionQueue.swift */,
+				538F890837E625FFD8C842D8 /* AppleLogMOV.swift */,
+				D5D6C7A1A56370E32EC645AA /* NativePipeline.swift */,
+				432358199B91262062029BFA /* NativeColorPipeline.swift */,
+				3B83B98F968F229A21D19F73 /* ConversionOptions.swift */,
+				B2DB046630667C3700699934 /* VideoInfo.swift */,
+				B2DB046E3066969300699934 /* VideoDecoder.swift */,
+				B2DB047430669FA300699934 /* VideoProcessor.swift */,
+				B2DB0470306697BC00699934 /* HLGProcessor.swift */,
+				B2F80C3C30673C6D006D5917 /* AppleLogProcessor.swift */,
+				B2F21F4F3068B94A00481C75 /* OutputValidator.swift */,
+				B2DB04723066981A00699934 /* ColorConverter.swift */,
+				B2F80C3E30673FD1006D5917 /* V210Converter.swift */,
+				B2DB046830667C6E00699934 /* VideoAnalyzer.swift */,
+				B2DB046A30667C9E00699934 /* VideoPicker.swift */,
+				B2DB046C30667CC700699934 /* VideoInfoView.swift */,
+				B2DB043E30667BD400699934 /* ContentView.swift */,
+				89832BF4CA493217BDB4BD8B /* InfoPlist.strings */,
+				B2B61475306C034600DD288B /* Localizable.strings */,
+				B2B6146F306C02A300DD288B /* LanguageManager.swift */,
+				6141C24FDFB324CEC5597A63 /* LogForge.icon */,
+				49EB8AC4F976837235DB8A64 /* SoftwareCodec-LICENSE.txt */,
+				710AAF66268EFDD93E7F8062 /* Software codec notice */,
+				B2DB044030667BD900699934 /* Assets.xcassets */,
+				B2DB044230667BD900699934 /* Preview Content */,
+			);
+			path = "LogForge For iPhone";
+			sourceTree = "<group>";
+		};
+		B2DB044230667BD900699934 /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				B2DB044330667BD900699934 /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		B2DB044C30667BDA00699934 /* LogForge For iPhoneTests */ = {
+			isa = PBXGroup;
+			children = (
+				7C54D502EA3130AABB288894 /* NativePipelineTests.swift */,
+				B2DB044D30667BDA00699934 /* LogForge_For_iPhoneTests.swift */,
+			);
+			path = "LogForge For iPhoneTests";
+			sourceTree = "<group>";
+		};
+		B2DB045630667BDA00699934 /* LogForge For iPhoneUITests */ = {
+			isa = PBXGroup;
+			children = (
+				51EB05A34F6B27447FB33CFB /* GlassFlowTests.swift */,
+				B2DB045730667BDA00699934 /* LogForge_For_iPhoneUITests.swift */,
+				B2DB045930667BDA00699934 /* LogForge_For_iPhoneUITestsLaunchTests.swift */,
+			);
+			path = "LogForge For iPhoneUITests";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		B2DB043830667BD400699934 /* LogForge For iPhone */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B2DB045D30667BDA00699934 /* Build configuration list for PBXNativeTarget "LogForge For iPhone" */;
+			buildPhases = (
+				D74C0EDFD7880E78684FA1C9 /* Build software ProRes */,
+				B2DB043530667BD400699934 /* Sources */,
+				B2DB043630667BD400699934 /* Frameworks */,
+				B2DB043730667BD400699934 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "LogForge For iPhone";
+			productName = "LogForge For iPhone";
+			productReference = B2DB043930667BD400699934 /* LogForge For iPhone.app */;
+			productType = "com.apple.product-type.application";
+		};
+		B2DB044830667BDA00699934 /* LogForge For iPhoneTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B2DB046030667BDA00699934 /* Build configuration list for PBXNativeTarget "LogForge For iPhoneTests" */;
+			buildPhases = (
+				B2DB044530667BDA00699934 /* Sources */,
+				B2DB044630667BDA00699934 /* Frameworks */,
+				B2DB044730667BDA00699934 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				B2DB044B30667BDA00699934 /* PBXTargetDependency */,
+			);
+			name = "LogForge For iPhoneTests";
+			productName = "LogForge For iPhoneTests";
+			productReference = B2DB044930667BDA00699934 /* LogForge For iPhoneTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		B2DB045230667BDA00699934 /* LogForge For iPhoneUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B2DB046330667BDA00699934 /* Build configuration list for PBXNativeTarget "LogForge For iPhoneUITests" */;
+			buildPhases = (
+				B2DB044F30667BDA00699934 /* Sources */,
+				B2DB045030667BDA00699934 /* Frameworks */,
+				B2DB045130667BDA00699934 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				B2DB045530667BDA00699934 /* PBXTargetDependency */,
+			);
+			name = "LogForge For iPhoneUITests";
+			productName = "LogForge For iPhoneUITests";
+			productReference = B2DB045330667BDA00699934 /* LogForge For iPhoneUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		B2DB043130667BD400699934 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1520;
+				LastUpgradeCheck = 1520;
+				TargetAttributes = {
+					B2DB043830667BD400699934 = {
+						CreatedOnToolsVersion = 15.2;
+					};
+					B2DB044830667BDA00699934 = {
+						CreatedOnToolsVersion = 15.2;
+						TestTargetID = B2DB043830667BD400699934;
+					};
+					B2DB045230667BDA00699934 = {
+						CreatedOnToolsVersion = 15.2;
+						TestTargetID = B2DB043830667BD400699934;
+					};
+				};
+			};
+			buildConfigurationList = B2DB043430667BD400699934 /* Build configuration list for PBXProject "LogForge For iPhone" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+				fr,
+				es,
+				"zh-Hant",
+				"zh-Hans",
+			);
+			mainGroup = B2DB043030667BD400699934;
+			productRefGroup = B2DB043A30667BD400699934 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				B2DB043830667BD400699934 /* LogForge For iPhone */,
+				B2DB044830667BDA00699934 /* LogForge For iPhoneTests */,
+				B2DB045230667BDA00699934 /* LogForge For iPhoneUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		B2DB043730667BD400699934 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B2DB044430667BD900699934 /* Preview Assets.xcassets in Resources */,
+				D0A292AC7B5E7F371CB3DB12 /* InfoPlist.strings in Resources */,
+				B2B61473306C034600DD288B /* Localizable.strings in Resources */,
+				2A55399248ECC22545B203BE /* LogForge.icon in Resources */,
+				11C3E6DA55757DF68C9BE5D0 /* Software codec license in Resources */,
+				710AAF66268EFDD93E7F8061 /* Software codec notice in Resources */,
+				B2DB044130667BD900699934 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B2DB044730667BDA00699934 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B2DB045130667BDA00699934 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+        D74C0EDFD7880E78684FA1C9 = {isa = PBXShellScriptBuildPhase; alwaysOutOfDate = 1; buildActionMask = 2147483647; files = (); inputPaths = (); outputPaths = (); name = "Build LGPL software ProRes"; runOnlyForDeploymentPostprocessing = 0; shellPath = /bin/bash; shellScript = "/bin/bash \"$SRCROOT/NativeCodec/build-codec.sh\""; };
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		B2DB043530667BD400699934 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B2F80C3D30673C6D006D5917 /* AppleLogProcessor.swift in Sources */,
+				B2F21F4E3067CFD000481C75 /* LogForgeShaders.metal in Sources */,
+				B2F21F503068B94A00481C75 /* OutputValidator.swift in Sources */,
+				B2F21F4C3067CAFD00481C75 /* MetalColorProcessor.swift in Sources */,
+				B2DB047530669FA300699934 /* VideoProcessor.swift in Sources */,
+				B2DB0471306697BC00699934 /* HLGProcessor.swift in Sources */,
+				B2DB04733066981A00699934 /* ColorConverter.swift in Sources */,
+				B2DB046D30667CC700699934 /* VideoInfoView.swift in Sources */,
+				B2DB046F3066969300699934 /* VideoDecoder.swift in Sources */,
+				B2DB046730667C3700699934 /* VideoInfo.swift in Sources */,
+				B2DB046930667C6E00699934 /* VideoAnalyzer.swift in Sources */,
+				B2DB043F30667BD400699934 /* ContentView.swift in Sources */,
+				B2B6142C306A9CE400DD288B /* ProResEncoderDiagnostics.swift in Sources */,
+				B2DB046B30667C9E00699934 /* VideoPicker.swift in Sources */,
+				369D61B51174F0D392AAD264 /* Native codec bridge in Sources */,
+				B2DB043D30667BD400699934 /* LogForge_For_iPhoneApp.swift in Sources */,
+				81EB8E981FB7D851EBB52336 /* GlassComponents.swift in Sources */,
+				B34E39C75B7F21CBAEDA3103 /* ConversionQueue.swift in Sources */,
+				546938FD2F099623E81A1890 /* AppleLogMOV.swift in Sources */,
+				708CE822378C445B713C279B /* NativePipeline.swift in Sources */,
+				7B7805B08B2D5F8BEB5F8751 /* NativeColorPipeline.swift in Sources */,
+				FF30560F6DD91E808B188FD4 /* ConversionOptions.swift in Sources */,
+				B2B61470306C02A300DD288B /* LanguageManager.swift in Sources */,
+				B2F80C3F30673FD1006D5917 /* V210Converter.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B2DB044530667BDA00699934 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9943F16401D1E99FA2774403 /* NativePipelineTests.swift in Sources */,
+				B2DB044E30667BDA00699934 /* LogForge_For_iPhoneTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B2DB044F30667BDA00699934 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B2DB045A30667BDA00699934 /* LogForge_For_iPhoneUITestsLaunchTests.swift in Sources */,
+				876E52A280041BC464814F01 /* GlassFlowTests.swift in Sources */,
+				B2DB045830667BDA00699934 /* LogForge_For_iPhoneUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		B2DB044B30667BDA00699934 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = B2DB043830667BD400699934 /* LogForge For iPhone */;
+			targetProxy = B2DB044A30667BDA00699934 /* PBXContainerItemProxy */;
+		};
+		B2DB045530667BDA00699934 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = B2DB043830667BD400699934 /* LogForge For iPhone */;
+			targetProxy = B2DB045430667BDA00699934 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		B2B61475306C034600DD288B /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				B2B61474306C034600DD288B /* en */,
+				B2B61476306C041D00DD288B /* zh-Hans */,
+				C1C308E27674138CE65FB9B3 /* es */,
+				FEE1B5938E8AC86CDB0BBD84 /* fr */,
+				B13AD8501CAC8D28DB8F7ADF /* zh-Hant */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+		89832BF4CA493217BDB4BD8B = {isa = PBXVariantGroup; children = (6B7BFE806AE1CBC7867F0F43, 90A49BDC8087DD7379DBA4DD, B0B6EC61920D3EB9341081AB, BEE064F2A10A743E0506B226, E8B2D43F2F90FCAD2476B8A1); name = InfoPlist.strings; sourceTree = "<group>"; };
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		B2DB045B30667BDA00699934 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = NO;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		B2DB045C30667BDA00699934 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = NO;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		B2DB045E30667BDA00699934 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = LogForge;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"LogForge For iPhone/Preview Content\"";
+				DEVELOPMENT_TEAM = Q3Z9742SXZ;
+                ENABLE_PREVIEWS = YES;
+                ENABLE_USER_SCRIPT_SANDBOXING = NO;
+                SWIFT_OBJC_BRIDGING_HEADER = "$(SRCROOT)/NativeCodec/LogForge-Bridging-Header.h";
+                HEADER_SEARCH_PATHS = ("$(inherited)", "$(BUILT_PRODUCTS_DIR)/LogForgeCodec/include");
+                LIBRARY_SEARCH_PATHS = ("$(inherited)", "$(BUILT_PRODUCTS_DIR)/LogForgeCodec/lib");
+                OTHER_LDFLAGS = ("$(inherited)", "-lLogForgeFFmpeg", "-lm");
+                INFOPLIST_FILE = "LogForge For iPhone/Info.plist";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.3.0;
+				LOGFORGE_RELEASE_BUILD = 26106A;
+				PRODUCT_BUNDLE_IDENTIFIER = "Shizhihe.LogForge-For-iPhone";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		B2DB045F30667BDA00699934 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = LogForge;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"LogForge For iPhone/Preview Content\"";
+				DEVELOPMENT_TEAM = Q3Z9742SXZ;
+                ENABLE_PREVIEWS = YES;
+                ENABLE_USER_SCRIPT_SANDBOXING = NO;
+                SWIFT_OBJC_BRIDGING_HEADER = "$(SRCROOT)/NativeCodec/LogForge-Bridging-Header.h";
+                HEADER_SEARCH_PATHS = ("$(inherited)", "$(BUILT_PRODUCTS_DIR)/LogForgeCodec/include");
+                LIBRARY_SEARCH_PATHS = ("$(inherited)", "$(BUILT_PRODUCTS_DIR)/LogForgeCodec/lib");
+                OTHER_LDFLAGS = ("$(inherited)", "-lLogForgeFFmpeg", "-lm");
+                INFOPLIST_FILE = "LogForge For iPhone/Info.plist";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.3.0;
+				LOGFORGE_RELEASE_BUILD = 26106A;
+				PRODUCT_BUNDLE_IDENTIFIER = "Shizhihe.LogForge-For-iPhone";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		B2DB046130667BDA00699934 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.3.0;
+				LOGFORGE_RELEASE_BUILD = 26106A;
+				PRODUCT_BUNDLE_IDENTIFIER = "Shizhihe.LogForge-For-iPhoneTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/LogForge For iPhone.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/LogForge For iPhone";
+			};
+			name = Debug;
+		};
+		B2DB046230667BDA00699934 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.3.0;
+				LOGFORGE_RELEASE_BUILD = 26106A;
+				PRODUCT_BUNDLE_IDENTIFIER = "Shizhihe.LogForge-For-iPhoneTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/LogForge For iPhone.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/LogForge For iPhone";
+			};
+			name = Release;
+		};
+		B2DB046430667BDA00699934 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.3.0;
+				LOGFORGE_RELEASE_BUILD = 26106A;
+				PRODUCT_BUNDLE_IDENTIFIER = "Shizhihe.LogForge-For-iPhoneUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = "LogForge For iPhone";
+			};
+			name = Debug;
+		};
+		B2DB046530667BDA00699934 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.3.0;
+				LOGFORGE_RELEASE_BUILD = 26106A;
+				PRODUCT_BUNDLE_IDENTIFIER = "Shizhihe.LogForge-For-iPhoneUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = "LogForge For iPhone";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		B2DB043430667BD400699934 /* Build configuration list for PBXProject "LogForge For iPhone" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B2DB045B30667BDA00699934 /* Debug */,
+				B2DB045C30667BDA00699934 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B2DB045D30667BDA00699934 /* Build configuration list for PBXNativeTarget "LogForge For iPhone" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B2DB045E30667BDA00699934 /* Debug */,
+				B2DB045F30667BDA00699934 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B2DB046030667BDA00699934 /* Build configuration list for PBXNativeTarget "LogForge For iPhoneTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B2DB046130667BDA00699934 /* Debug */,
+				B2DB046230667BDA00699934 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B2DB046330667BDA00699934 /* Build configuration list for PBXNativeTarget "LogForge For iPhoneUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B2DB046430667BDA00699934 /* Debug */,
+				B2DB046530667BDA00699934 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = B2DB043130667BD400699934 /* Project object */;
+}

@@ -1,0 +1,295 @@
+{
+  "generated_at_utc": "2026-10-05T13:59:09.820574+00:00",
+  "checks": [
+    "Swift grammar: 27 files (not type checking)",
+    "Xcode objects: 121; file references and Swift target membership resolve",
+    "Target source separation and codec build-before-Sources phase verified",
+    "Five localizations: 118 identical keys and format arguments",
+    "Icon package: four layers resolve (Icon Composer compilation unverified)",
+    "Metal parameter ABI, owned buffers, retained jobs, precision checks and iOS 26 deployment inspected",
+    "Per-frame pool allocation, exact time scales, synchronous codec threading and clear glass source constraints inspected",
+    "All 34 original paths and original raster icon retained"
+  ],
+  "apple_platform_execution": false,
+  "swift_type_checking": false,
+  "unverified": [
+    "Xcode build",
+    "FFmpeg iOS linking",
+    "Metal execution",
+    "media integration tests",
+    "Icon Composer compilation",
+    "Liquid Glass contrast on device",
+    "haptics",
+    "editor Apple Log recognition"
+  ],
+  "files": [
+    {
+      "path": ".gitignore",
+      "sha256": "d067824e0d58bf0dc3beb9c2e92ff9c9a06bf0c7f1fe76806d5a46289ad9a0b3"
+    },
+    {
+      "path": "IconArtwork\\LogForge-Glass-Generated.png",
+      "sha256": "474253530842234caa4877548d45fec6e1c64003cdccf669a54bb5d374214939"
+    },
+    {
+      "path": "IconArtwork\\README.md",
+      "sha256": "92762e0d2938e2eef4c82270d77db229a7160b7f9380f73c557bb0fcb5875307"
+    },
+    {
+      "path": "LogForge For iPhone\\AppleLogMOV.swift",
+      "sha256": "da2cd50d1b3d432d984a90e9d1d2f77bdf4666f70de3a9abebca074dd00258c0"
+    },
+    {
+      "path": "LogForge For iPhone\\AppleLogProcessor.swift",
+      "sha256": "b981d541bc5057bfee21d409a68b2839baf6e86004c2b94c7373d067d4c9d4f8"
+    },
+    {
+      "path": "LogForge For iPhone\\Assets.xcassets\\AccentColor.colorset\\Contents.json",
+      "sha256": "9af65086fa30b49252fae1a1225731691de794f7775af74d71befeb507d12b7c"
+    },
+    {
+      "path": "LogForge For iPhone\\Assets.xcassets\\AppIcon.appiconset\\Contents.json",
+      "sha256": "3be608bf63dd01791d1036c07399292b652f86f1d4039e72cbff63fa9228b194"
+    },
+    {
+      "path": "LogForge For iPhone\\Assets.xcassets\\AppIcon.appiconset\\image_2020f09299dd0832a8746ff15aa4f93e.PNG",
+      "sha256": "05f7b0c49289de4703abfe54d758a569954c0b37ead71baf4efa1c1fa3267eac"
+    },
+    {
+      "path": "LogForge For iPhone\\Assets.xcassets\\AppIcon.appiconset\\LogForge-Glass-1024.png",
+      "sha256": "0680edea915ceb148d32c744d0db7b7d93bd72f8d99f4a6319928a25cd6eb2bc"
+    },
+    {
+      "path": "LogForge For iPhone\\Assets.xcassets\\Contents.json",
+      "sha256": "0fd49ba3c3585c709678e0046a821c3c60685ec7063720d30d3a3448be3a208b"
+    },
+    {
+      "path": "LogForge For iPhone\\ColorConverter.swift",
+      "sha256": "8478f5b8e61778867ed989fb1e080ae2258ffabde7a698273ceded982e6561af"
+    },
+    {
+      "path": "LogForge For iPhone\\ContentView.swift",
+      "sha256": "bfb11263c0d0d1b3d7bc62f0efc0ce8e88ae880fc2d1ec78a5bdefaed12a95c0"
+    },
+    {
+      "path": "LogForge For iPhone\\ConversionOptions.swift",
+      "sha256": "9067bcd2bc4cec4dfc3277f070ccc8b8c00ee4829b298524dfff32323ac4c7e5"
+    },
+    {
+      "path": "LogForge For iPhone\\ConversionQueue.swift",
+      "sha256": "75a967b6968df10fe0e95184b5fe3c4e3f355284213f5446b79c28f1a937ac0b"
+    },
+    {
+      "path": "LogForge For iPhone\\en.lproj\\InfoPlist.strings",
+      "sha256": "bc935a569bc3ebd42a5e55f752e2604123d4c94e7da528d6faddeb41b7665cbf"
+    },
+    {
+      "path": "LogForge For iPhone\\en.lproj\\Localizable.strings",
+      "sha256": "ed3f3a42be6c7325efd2baf0fed9949bb71148624db5beacf0f65720c0e5bcb3"
+    },
+    {
+      "path": "LogForge For iPhone\\es.lproj\\InfoPlist.strings",
+      "sha256": "1283e9e5a9e13029b330ef2fec4e5b5b7dac48072c7804964fd9724f83394e37"
+    },
+    {
+      "path": "LogForge For iPhone\\es.lproj\\Localizable.strings",
+      "sha256": "fe9a0ad79e7a471cf30fd24692e6ed504095a140bcb36591a506225d407384b0"
+    },
+    {
+      "path": "LogForge For iPhone\\fr.lproj\\InfoPlist.strings",
+      "sha256": "cc83c08c6b0d3e49d473dcc10241d99d65231640b60cc26e147d748387ef6beb"
+    },
+    {
+      "path": "LogForge For iPhone\\fr.lproj\\Localizable.strings",
+      "sha256": "13df4b591b19e75cc03ca19fce6f8118109dda2d60b07b3b3f74b865251656f7"
+    },
+    {
+      "path": "LogForge For iPhone\\GlassComponents.swift",
+      "sha256": "90901da8c3083d67dd111978229dc075ac784a28e1f57ed08828e0ab379d69a4"
+    },
+    {
+      "path": "LogForge For iPhone\\HLGProcessor.swift",
+      "sha256": "f705736d6fb9e660ea4a81b6c2756da7ca1821c111b57f38f8ed4fc90905d06e"
+    },
+    {
+      "path": "LogForge For iPhone\\Info.plist",
+      "sha256": "b2cfbd90aec01d5bee37043018189c58e9ebb49046cebf08f627fcfecddc8242"
+    },
+    {
+      "path": "LogForge For iPhone\\LanguageManager.swift",
+      "sha256": "ada67156de3da6024048fe6209373b8a923d64b0f0448c80490b328c1f3fb4b9"
+    },
+    {
+      "path": "LogForge For iPhone\\LogForge.icon\\Assets\\Log-Curve.svg",
+      "sha256": "828e2f9a8d10340435a138e6dfed2a59a94152bfa560ecc5909db4a3c3d7471d"
+    },
+    {
+      "path": "LogForge For iPhone\\LogForge.icon\\Assets\\Ribbon-1.svg",
+      "sha256": "54de7b63dd71ec157bf13d52566cbd1ca9cce8cabe07c1bcab3188fdad158c97"
+    },
+    {
+      "path": "LogForge For iPhone\\LogForge.icon\\Assets\\Ribbon-2.svg",
+      "sha256": "8f55d70c09219d1d2a3b14e3fce5397c44955aa0ac5897bcd6794edb892f8d43"
+    },
+    {
+      "path": "LogForge For iPhone\\LogForge.icon\\Assets\\Ribbon-3.svg",
+      "sha256": "0e0e69f60c7a65d6365e6d4cc4c9f786fdf170064049427090d81645b19ee923"
+    },
+    {
+      "path": "LogForge For iPhone\\LogForge.icon\\icon.json",
+      "sha256": "d75c6388a45af993ebe682b49bfbb1665c8814592e601d0485e2cbcbba670a06"
+    },
+    {
+      "path": "LogForge For iPhone\\LogForge_For_iPhoneApp.swift",
+      "sha256": "8d3c9b3b198bb3b0684f3edfceec35820e28772f4512ccfff70d5b33ed72e595"
+    },
+    {
+      "path": "LogForge For iPhone\\NativeColorPipeline.swift",
+      "sha256": "f86eb4a365b6fb6aa251ba0d13000cee2e17a62e5f353f345edb36904ee485e5"
+    },
+    {
+      "path": "LogForge For iPhone\\NativePipeline.swift",
+      "sha256": "6319fc24691f49c89408bf391149713dc719c081a20abb2ab18e0492bc5290ff"
+    },
+    {
+      "path": "LogForge For iPhone\\OutputValidator.swift",
+      "sha256": "d6f90fea5d5b9216f32e6b2e0a5979828b16ac129969337b5274a98216fba630"
+    },
+    {
+      "path": "LogForge For iPhone\\Preview Content\\Preview Assets.xcassets\\Contents.json",
+      "sha256": "0fd49ba3c3585c709678e0046a821c3c60685ec7063720d30d3a3448be3a208b"
+    },
+    {
+      "path": "LogForge For iPhone\\SoftwareCodec-LICENSE.txt",
+      "sha256": "246041b6ecf9bc32d718a62c57877c78b5eb397b6467e74ed7ae2626ab189c30"
+    },
+    {
+      "path": "LogForge For iPhone\\V210Converter.swift",
+      "sha256": "781d136366efcc4fc0f8ed4e07003f52f2a06459e7e61f02665f131c4805da44"
+    },
+    {
+      "path": "LogForge For iPhone\\VideoAnalyzer.swift",
+      "sha256": "282831bcc4f13c6d85245670b53fc0139058c75b30695364b2f3a5a41a749265"
+    },
+    {
+      "path": "LogForge For iPhone\\VideoDecoder.swift",
+      "sha256": "960f8bf69c3f82cf5be37e45d120fe6d6d6697d7bc2809e18e322d18165f0ac2"
+    },
+    {
+      "path": "LogForge For iPhone\\VideoInfo.swift",
+      "sha256": "f1a7fe12c7c4bf7447c8ba48dcc618ea26d03daadf42c5f8254da64510f16457"
+    },
+    {
+      "path": "LogForge For iPhone\\VideoInfoView.swift",
+      "sha256": "6b8106ce34a86651ba46d337a5feba6c783d5aea34c479e9c6dadbfac766baef"
+    },
+    {
+      "path": "LogForge For iPhone\\VideoPicker.swift",
+      "sha256": "f9620d2b35b65f3f68e4eb6e6fea48b4d78ac8dd6f31c18cc5805f30a25454a0"
+    },
+    {
+      "path": "LogForge For iPhone\\VideoProcessor.swift",
+      "sha256": "f0d10454bb2d80c4e7d336c3c4e528c0787726bf351b2e0aa1606780a95c894c"
+    },
+    {
+      "path": "LogForge For iPhone\\zh-Hans.lproj\\InfoPlist.strings",
+      "sha256": "ea0f682872ab6c66d3965cc6c1274b743014366c23d0b0fbdf67765d3f22cf05"
+    },
+    {
+      "path": "LogForge For iPhone\\zh-Hans.lproj\\Localizable.strings",
+      "sha256": "b8d1cb7709d903f75a0a65c6335be7bbe512c37a27b916adf92b79a997102964"
+    },
+    {
+      "path": "LogForge For iPhone\\zh-Hant.lproj\\InfoPlist.strings",
+      "sha256": "ee50a73e72cedf3ea1dd7230693129f7642d8c6679a47daef9f333ab693725e4"
+    },
+    {
+      "path": "LogForge For iPhone\\zh-Hant.lproj\\Localizable.strings",
+      "sha256": "32b770d2ab2e60bb5f3c8c832a3c67b08e9b1cbba07e4f61d61cdba168b199e1"
+    },
+    {
+      "path": "LogForge For iPhone.xcodeproj\\project.pbxproj",
+      "sha256": "bf6f912928fdb4502348fc653817dbde89ae6922b1f1b07fd60f1abedf2f0076"
+    },
+    {
+      "path": "LogForge For iPhone.xcodeproj\\project.xcworkspace\\contents.xcworkspacedata",
+      "sha256": "7f3b00b5c3fdb45242d7b87e1e5c4e25d1fa8129a16c94295ecc4e8ea2235c5f"
+    },
+    {
+      "path": "LogForge For iPhone.xcodeproj\\project.xcworkspace\\xcshareddata\\IDEWorkspaceChecks.plist",
+      "sha256": "dfa0f9bb85b95ccba9c6811adadf8cb407fb5d52088e89db83ebc308ec448542"
+    },
+    {
+      "path": "LogForge For iPhone.xcodeproj\\project.xcworkspace\\xcuserdata\\x1aveg.xcuserdatad\\UserInterfaceState.xcuserstate",
+      "sha256": "9e42b50db396099353c89b2c8a340c3859f5d0f500fbc9ec4f0a405b481c46c2"
+    },
+    {
+      "path": "LogForge For iPhone.xcodeproj\\xcshareddata\\xcschemes\\LogForge For iPhone.xcscheme",
+      "sha256": "9bf06178a5fc8d95ce8172ef01f7d1751c376406c62b28615d3888cb32aa868d"
+    },
+    {
+      "path": "LogForge For iPhone.xcodeproj\\xcuserdata\\x1aveg.xcuserdatad\\xcdebugger\\Breakpoints_v2.xcbkptlist",
+      "sha256": "15ccaa784c627b34befd4f5c10890c60638146867b19844add4afa4c4a1ebc60"
+    },
+    {
+      "path": "LogForge For iPhone.xcodeproj\\xcuserdata\\x1aveg.xcuserdatad\\xcschemes\\xcschememanagement.plist",
+      "sha256": "b4a1d9b7f1f13a43418b43f3321d67bd6db37749a2306b3caaed3e8bba29f29f"
+    },
+    {
+      "path": "LogForge For iPhoneTests\\LogForge_For_iPhoneTests.swift",
+      "sha256": "1b74cb5404e2b3e61311ccfe4576f9bc7148e40f0caa1938c37de67a48471e03"
+    },
+    {
+      "path": "LogForge For iPhoneTests\\NativePipelineTests.swift",
+      "sha256": "62132f67c5c3253b0959be8cc339596e9dae08378ed4a1268b6c7e42c63ffeda"
+    },
+    {
+      "path": "LogForge For iPhoneUITests\\GlassFlowTests.swift",
+      "sha256": "e9b61d3dbb6e7d325253d46fe8bb9372feb02352d5aadfba6e0cdad0eafdb6aa"
+    },
+    {
+      "path": "LogForge For iPhoneUITests\\LogForge_For_iPhoneUITests.swift",
+      "sha256": "f1fd3fb01a5f8b719faf9a7d9a65d0365b5b043c8efa993da759956c67eee530"
+    },
+    {
+      "path": "LogForge For iPhoneUITests\\LogForge_For_iPhoneUITestsLaunchTests.swift",
+      "sha256": "c526ad1d6186697f302eb466f9611ff5633bbc612d468a332a5439032a5b9988"
+    },
+    {
+      "path": "LogForgeShaders.metal",
+      "sha256": "f5469671b82f095fb2a1dcea5ae096add47e3d311f3e19dcea83c5e53d210ce3"
+    },
+    {
+      "path": "MetalColorProcessor.swift",
+      "sha256": "36580f3f99adcbf1ae6423a543776dfeb54451dd6bf53bc0582eb3b4538a08c5"
+    },
+    {
+      "path": "NativeCodec\\build-codec.sh",
+      "sha256": "0d68db1e5c5bee2205e967e9da1f5a4cfff8c1bf534dfd40042c260372c0146c"
+    },
+    {
+      "path": "NativeCodec\\LogForge-Bridging-Header.h",
+      "sha256": "9d0105233e42298356a2fc3fec2ba52f88a05b8490b267ed0ccc99a1df44bdfb"
+    },
+    {
+      "path": "NativeCodec\\LogForgeCodec.h",
+      "sha256": "a50dcabca18924c4a6820beaaaca0e4f67c11f74ef43220ab690d10d82651425"
+    },
+    {
+      "path": "NativeCodec\\LogForgeCodec.m",
+      "sha256": "ea988f0422fbfcf56075d28086cf087c4c080fe9733ad41faa39d6f08b3326f4"
+    },
+    {
+      "path": "NativeCodec\\NOTICE.txt",
+      "sha256": "a5a67c605909232796a37686260e491be373088177b5e2e04fb06da2dbb28768"
+    },
+    {
+      "path": "NativeCodec\\package-relink.sh",
+      "sha256": "4729baa94e568e255ce09d8994af87a6ab08418c14f57406985495f1fc566452"
+    },
+    {
+      "path": "ProResEncoderDiagnostics.swift",
+      "sha256": "f4f58a5c47615e4f87979efb8887a813c824670f6daf99a3cd93fe79b6535d8c"
+    }
+  ]
+}

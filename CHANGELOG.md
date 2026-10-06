@@ -2,6 +2,17 @@
 
 ## 1.3.0 (26929A)
 
+### iOS addition — release build 26106A
+
+- Add the native iOS 26+ Swift / SwiftUI / Metal application to the main 1.3.0 release, alongside the existing Windows build.
+- Provide CPU/Metal color processing and automatic system/software ProRes decoder and encoder fallback; retain independent media timing, audio, rotation and Apple Log output checks.
+- Include Liquid Glass controls and icon, haptics, Photos/files/folder import, queue retry and five interface languages.
+- Display `1.3.0 (26106A)` and a separate numeric Apple build number; conversion reports retain each attempt's release and bundle identity.
+- Add the main-repository iOS test/archive workflow, versioned unsigned IPA, checksums and corresponding source/relink package. The new release configuration awaits a cloud build and user signing.
+- Provide English and Simplified Chinese project READMEs. No release publication is performed by these workflows.
+
+### Windows build 26929A
+
 - Replace the nominal-rate phase threshold with an all-packet integer-quantization
   model. Accept verified fractional camera cadence even when average/nominal tags
   differ; retain negative tests for changing speed, VFR, gaps, duplicate/backward

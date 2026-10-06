@@ -1,0 +1,12 @@
+LogForge iOS software ProRes decoder and encoder
+FFmpeg 8.1.2: https://ffmpeg.org/
+Only LGPL components are enabled. GPL and nonfree components are explicitly disabled.
+prores_ks encoder by FFmpeg contributors, including Kostya Shishkov.
+prores decoder by FFmpeg contributors.
+License: GNU Lesser General Public License version 2.1 or later.
+Corresponding source: https://ffmpeg.org/releases/ffmpeg-8.1.2.tar.xz
+SHA-256: 464beb5e7bf0c311e68b45ae2f04e9cc2af88851abb4082231742a74d97b524c
+Build configuration and bridge source: NativeCodec/build-codec.sh and NativeCodec/LogForgeCodec.m.
+FFmpeg is linked statically. Distributions must include the corresponding source and relink material;
+see NativeCodec/package-relink.sh and docs/NATIVE_UPGRADE.md. This repository does not claim
+that a source URL alone satisfies the obligations of a distributed static binary.

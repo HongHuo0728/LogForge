@@ -1,0 +1,411 @@
+{
+  "date": "2026-10-04",
+  "scope": "D:\\LogForge\\LogForgeMac\\LogForge For iPhone",
+  "validation": "Static inspection only; no Apple SDK compilation or device execution",
+  "inventory": [
+    {
+      "path": "LogForge For iPhone/AppleLogProcessor.swift",
+      "bytes": 1562,
+      "sha256": "b981d541bc5057bfee21d409a68b2839baf6e86004c2b94c7373d067d4c9d4f8"
+    },
+    {
+      "path": "LogForge For iPhone/Assets.xcassets/AccentColor.colorset/Contents.json",
+      "bytes": 123,
+      "sha256": "9af65086fa30b49252fae1a1225731691de794f7775af74d71befeb507d12b7c"
+    },
+    {
+      "path": "LogForge For iPhone/Assets.xcassets/AppIcon.appiconset/Contents.json",
+      "bytes": 242,
+      "sha256": "8cd58a50952b0471bd6cafe8a3391c916bbb023dd2ab103dca354e9214640063"
+    },
+    {
+      "path": "LogForge For iPhone/Assets.xcassets/AppIcon.appiconset/image_2020f09299dd0832a8746ff15aa4f93e.PNG",
+      "bytes": 1029773,
+      "sha256": "05f7b0c49289de4703abfe54d758a569954c0b37ead71baf4efa1c1fa3267eac"
+    },
+    {
+      "path": "LogForge For iPhone/Assets.xcassets/Contents.json",
+      "bytes": 63,
+      "sha256": "0fd49ba3c3585c709678e0046a821c3c60685ec7063720d30d3a3448be3a208b"
+    },
+    {
+      "path": "LogForge For iPhone/ColorConverter.swift",
+      "bytes": 1091,
+      "sha256": "8478f5b8e61778867ed989fb1e080ae2258ffabde7a698273ceded982e6561af"
+    },
+    {
+      "path": "LogForge For iPhone/ContentView.swift",
+      "bytes": 27438,
+      "sha256": "893e9187508cd4e48e76f4e3f233339aa982aa75d0b3218cd283fbbbae8d5b3f"
+    },
+    {
+      "path": "LogForge For iPhone/en.lproj/Localizable.strings",
+      "bytes": 1047,
+      "sha256": "6a7f30e149ec9ca5e18597f38eee3b94c523264e5a6a79457b497443415d1198"
+    },
+    {
+      "path": "LogForge For iPhone/HLGProcessor.swift",
+      "bytes": 1325,
+      "sha256": "a49262938dd11f78a8c28fc7e765154fe274ebddd5fda6ef43469780099c5fd4"
+    },
+    {
+      "path": "LogForge For iPhone/LanguageManager.swift",
+      "bytes": 1192,
+      "sha256": "8b08878f9ca2b5a25eb7307c65202a0fc04b36fb981a49e72bf05a0f007e164d"
+    },
+    {
+      "path": "LogForge For iPhone/LogForge_For_iPhoneApp.swift",
+      "bytes": 150,
+      "sha256": "8d3c9b3b198bb3b0684f3edfceec35820e28772f4512ccfff70d5b33ed72e595"
+    },
+    {
+      "path": "LogForge For iPhone/OutputValidator.swift",
+      "bytes": 9950,
+      "sha256": "98c21444aee18d54debeb3d15d39166d67f1c532190bd3ca4d24c4abc22706b4"
+    },
+    {
+      "path": "LogForge For iPhone/Preview Content/Preview Assets.xcassets/Contents.json",
+      "bytes": 63,
+      "sha256": "0fd49ba3c3585c709678e0046a821c3c60685ec7063720d30d3a3448be3a208b"
+    },
+    {
+      "path": "LogForge For iPhone/V210Converter.swift",
+      "bytes": 17384,
+      "sha256": "066ae5d8e8b748062529ee05321df96b83cda72f597b6b785e6c72247cbc06de"
+    },
+    {
+      "path": "LogForge For iPhone/VideoAnalyzer.swift",
+      "bytes": 6712,
+      "sha256": "8d39741f3e85aea883c129a0bc3db0e39b56d1675b6afd08c5b9b041c78b1ee2"
+    },
+    {
+      "path": "LogForge For iPhone/VideoDecoder.swift",
+      "bytes": 2329,
+      "sha256": "77d4d438c05ffb57a4bb4a96f53bd059a579cfd461b9d5acc738e697a789cd19"
+    },
+    {
+      "path": "LogForge For iPhone/VideoInfo.swift",
+      "bytes": 542,
+      "sha256": "fa4353a53132d27d5f97541d1e1fc35b31dd09676247a7624f776dabed7f786e"
+    },
+    {
+      "path": "LogForge For iPhone/VideoInfoView.swift",
+      "bytes": 2439,
+      "sha256": "d30d9ca776c9f650608f8bfc596c09c53f3898dd62254ff6e2b4a9528a212da6"
+    },
+    {
+      "path": "LogForge For iPhone/VideoPicker.swift",
+      "bytes": 1177,
+      "sha256": "f9620d2b35b65f3f68e4eb6e6fea48b4d78ac8dd6f31c18cc5805f30a25454a0"
+    },
+    {
+      "path": "LogForge For iPhone/VideoProcessor.swift",
+      "bytes": 35887,
+      "sha256": "1a806f393ba95ce02cfb64d79ff28c82a8eec5e14315c5c364590b521b80d4d8"
+    },
+    {
+      "path": "LogForge For iPhone/zh-Hans.lproj/Localizable.strings",
+      "bytes": 1042,
+      "sha256": "0880ab05369f42ddcecd5a93b1c551ae0240295a0ee1daa9297dd5a4d16444f8"
+    },
+    {
+      "path": "LogForge For iPhone.xcodeproj/project.pbxproj",
+      "bytes": 31533,
+      "sha256": "db87fb80d2c1ea01bb691759d759f905b482489d991825568ccf642b340b94fc"
+    },
+    {
+      "path": "LogForge For iPhone.xcodeproj/project.xcworkspace/contents.xcworkspacedata",
+      "bytes": 135,
+      "sha256": "7f3b00b5c3fdb45242d7b87e1e5c4e25d1fa8129a16c94295ecc4e8ea2235c5f"
+    },
+    {
+      "path": "LogForge For iPhone.xcodeproj/project.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist",
+      "bytes": 238,
+      "sha256": "dfa0f9bb85b95ccba9c6811adadf8cb407fb5d52088e89db83ebc308ec448542"
+    },
+    {
+      "path": "LogForge For iPhone.xcodeproj/project.xcworkspace/xcuserdata/x1aveg.xcuserdatad/UserInterfaceState.xcuserstate",
+      "bytes": 95258,
+      "sha256": "9e42b50db396099353c89b2c8a340c3859f5d0f500fbc9ec4f0a405b481c46c2"
+    },
+    {
+      "path": "LogForge For iPhone.xcodeproj/xcshareddata/xcschemes/LogForge For iPhone.xcscheme",
+      "bytes": 3993,
+      "sha256": "9bf06178a5fc8d95ce8172ef01f7d1751c376406c62b28615d3888cb32aa868d"
+    },
+    {
+      "path": "LogForge For iPhone.xcodeproj/xcuserdata/x1aveg.xcuserdatad/xcdebugger/Breakpoints_v2.xcbkptlist",
+      "bytes": 140,
+      "sha256": "15ccaa784c627b34befd4f5c10890c60638146867b19844add4afa4c4a1ebc60"
+    },
+    {
+      "path": "LogForge For iPhone.xcodeproj/xcuserdata/x1aveg.xcuserdatad/xcschemes/xcschememanagement.plist",
+      "bytes": 683,
+      "sha256": "b4a1d9b7f1f13a43418b43f3321d67bd6db37749a2306b3caaed3e8bba29f29f"
+    },
+    {
+      "path": "LogForge For iPhoneTests/LogForge_For_iPhoneTests.swift",
+      "bytes": 1264,
+      "sha256": "1b74cb5404e2b3e61311ccfe4576f9bc7148e40f0caa1938c37de67a48471e03"
+    },
+    {
+      "path": "LogForge For iPhoneUITests/LogForge_For_iPhoneUITests.swift",
+      "bytes": 1406,
+      "sha256": "f1fd3fb01a5f8b719faf9a7d9a65d0365b5b043c8efa993da759956c67eee530"
+    },
+    {
+      "path": "LogForge For iPhoneUITests/LogForge_For_iPhoneUITestsLaunchTests.swift",
+      "bytes": 834,
+      "sha256": "c526ad1d6186697f302eb466f9611ff5633bbc612d468a332a5439032a5b9988"
+    },
+    {
+      "path": "LogForgeShaders.metal",
+      "bytes": 18036,
+      "sha256": "53e7f8829a680fd5a8bbf6e3cc2ea2e6278d4abdcd6a154a349f5287c0bffc57"
+    },
+    {
+      "path": "MetalColorProcessor.swift",
+      "bytes": 16006,
+      "sha256": "a9e4448e2c6b63b5c72d9c01a4216f9c55a6c88e97dfd4a758e56b407f33760a"
+    },
+    {
+      "path": "ProResEncoderDiagnostics.swift",
+      "bytes": 14596,
+      "sha256": "f4f58a5c47615e4f87979efb8887a813c824670f6daf99a3cd93fe79b6535d8c"
+    }
+  ],
+  "project_checks": {
+    "parse": "pass",
+    "object_count": 86,
+    "dangling_object_ids": [],
+    "missing_files": [],
+    "sources_by_target": {
+      "LogForge For iPhone": [
+        "LogForge For iPhone/AppleLogProcessor.swift",
+        "LogForgeShaders.metal",
+        "LogForge For iPhone/OutputValidator.swift",
+        "MetalColorProcessor.swift",
+        "LogForge For iPhone/VideoProcessor.swift",
+        "LogForge For iPhone/HLGProcessor.swift",
+        "LogForge For iPhone/ColorConverter.swift",
+        "LogForge For iPhone/VideoInfoView.swift",
+        "LogForge For iPhone/VideoDecoder.swift",
+        "LogForge For iPhone/VideoInfo.swift",
+        "LogForge For iPhone/VideoAnalyzer.swift",
+        "LogForge For iPhone/ContentView.swift",
+        "ProResEncoderDiagnostics.swift",
+        "LogForge For iPhone/VideoPicker.swift",
+        "LogForge For iPhone/LogForge_For_iPhoneApp.swift",
+        "LogForge For iPhone/LanguageManager.swift",
+        "LogForge For iPhone/V210Converter.swift"
+      ],
+      "LogForge For iPhoneTests": [
+        "LogForge For iPhoneTests/LogForge_For_iPhoneTests.swift"
+      ],
+      "LogForge For iPhoneUITests": [
+        "LogForge For iPhoneUITests/LogForge_For_iPhoneUITestsLaunchTests.swift",
+        "LogForge For iPhoneUITests/LogForge_For_iPhoneUITests.swift"
+      ]
+    },
+    "unlisted_swift_metal": []
+  },
+  "structured_files": {
+    "status": "pass",
+    "files": [
+      "LogForge For iPhone/Assets.xcassets/AccentColor.colorset/Contents.json",
+      "LogForge For iPhone/Assets.xcassets/AppIcon.appiconset/Contents.json",
+      "LogForge For iPhone/Assets.xcassets/Contents.json",
+      "LogForge For iPhone/Preview Content/Preview Assets.xcassets/Contents.json",
+      "LogForge For iPhone.xcodeproj/project.xcworkspace/contents.xcworkspacedata",
+      "LogForge For iPhone.xcodeproj/project.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist",
+      "LogForge For iPhone.xcodeproj/xcshareddata/xcschemes/LogForge For iPhone.xcscheme",
+      "LogForge For iPhone.xcodeproj/xcuserdata/x1aveg.xcuserdatad/xcdebugger/Breakpoints_v2.xcbkptlist",
+      "LogForge For iPhone.xcodeproj/xcuserdata/x1aveg.xcuserdatad/xcschemes/xcschememanagement.plist"
+    ]
+  },
+  "localization": {
+    "status": "pass",
+    "keys_per_locale": {
+      "en.lproj": 23,
+      "zh-Hans.lproj": 23
+    }
+  },
+  "shader_static_contract": {
+    "constants_match": true,
+    "constants": {
+      "HLG_A": 0.17883277,
+      "HLG_B": 0.28466892,
+      "HLG_C": 0.55991073,
+      "HLG_REFERENCE_WHITE": 0.26496256,
+      "APPLE_LOG_R0": -0.05641088,
+      "APPLE_LOG_RT": 0.01,
+      "APPLE_LOG_SIGMA": 47.28711236,
+      "APPLE_LOG_BETA": 0.00964052,
+      "APPLE_LOG_GAMMA": 0.08550479,
+      "APPLE_LOG_DELTA": 0.69336945
+    },
+    "kernel": "logForgeV210Kernel",
+    "buffer_indices": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "caveat": "Binding types and CPU/GPU mathematical sequence also manually reviewed; numerical parity not executed"
+  },
+  "formula_reference_calculations": {
+    "execution": "Python double reference, not Swift or Metal execution",
+    "hlg_inverse_075": 0.26496255978640015,
+    "normalization_scale": 3.7741181244625652,
+    "apple_log_points": [
+      {
+        "linear": -0.05641088,
+        "log": 0.0,
+        "decoded": -0.05641088
+      },
+      {
+        "linear": -0.03,
+        "log": 0.032984396171723926,
+        "decoded": -0.03
+      },
+      {
+        "linear": 0,
+        "log": 0.15047645230091253,
+        "decoded": 0.0
+      },
+      {
+        "linear": 0.005,
+        "log": 0.1783337063187773,
+        "decoded": 0.0049999999999999975
+      },
+      {
+        "linear": 0.01,
+        "log": 0.20855531870307897,
+        "decoded": 0.010000000000000002
+      },
+      {
+        "linear": 0.18,
+        "log": 0.4882724585268676,
+        "decoded": 0.18000000000000005
+      },
+      {
+        "linear": 1,
+        "log": 0.6945529830551911,
+        "decoded": 1.0000000000000002
+      },
+      {
+        "linear": 3.774118216425025,
+        "log": 0.8575232645853312,
+        "decoded": 3.7741182164250233
+      }
+    ],
+    "hlg_pipeline_points": [
+      {
+        "hlg": 0,
+        "normalized_linear": 0.0,
+        "log": 0.15047645230091253,
+        "luma10": 196
+      },
+      {
+        "hlg": 0.5,
+        "normalized_linear": 0.3145098437052138,
+        "log": 0.5544015157552747,
+        "luma10": 550
+      },
+      {
+        "hlg": 0.75,
+        "normalized_linear": 0.9999999991938489,
+        "log": 0.694552982956696,
+        "luma10": 672
+      },
+      {
+        "hlg": 1,
+        "normalized_linear": 3.774118216425025,
+        "log": 0.8575232645853312,
+        "luma10": 815
+      }
+    ],
+    "max_roundtrip_error": 1.7763568394002505e-15
+  },
+  "known_absent_paths": {
+    "VTCompressionSession": 0,
+    "VTDecompressionSession": 0,
+    "HEVC": 0,
+    ".hevc": 0,
+    "startAccessingSecurityScopedResource": 0,
+    "stopAccessingSecurityScopedResource": 0,
+    "AVVideoColorPropertiesKey": 0
+  },
+  "app_icon_dimensions": [
+    1024,
+    1024
+  ],
+  "binary_editor_state": [
+    "LogForge For iPhone.xcodeproj/project.xcworkspace/xcuserdata/x1aveg.xcuserdatad/UserInterfaceState.xcuserstate"
+  ],
+  "official_apple_api_availability": [
+    {
+      "documentation_url": "https://developer.apple.com/documentation/corevideo/kcvimagebufferlogtransferfunctionkey",
+      "metadata_url": "https://developer.apple.com/tutorials/data/documentation/corevideo/kcvimagebufferlogtransferfunctionkey.json",
+      "title": "kCVImageBufferLogTransferFunctionKey",
+      "ios_availability": [
+        {
+          "beta": false,
+          "deprecated": false,
+          "introducedAt": "17.2",
+          "name": "iOS",
+          "unavailable": false
+        }
+      ],
+      "checked_date": "2026-10-04"
+    },
+    {
+      "documentation_url": "https://developer.apple.com/documentation/corevideo/kcvimagebufferlogtransferfunction_applelog",
+      "metadata_url": "https://developer.apple.com/tutorials/data/documentation/corevideo/kcvimagebufferlogtransferfunction_applelog.json",
+      "title": "kCVImageBufferLogTransferFunction_AppleLog",
+      "ios_availability": [
+        {
+          "beta": false,
+          "deprecated": false,
+          "introducedAt": "17.2",
+          "name": "iOS",
+          "unavailable": false
+        }
+      ],
+      "checked_date": "2026-10-04"
+    },
+    {
+      "documentation_url": "https://developer.apple.com/documentation/coremedia/kcmformatdescriptionextension_logtransferfunction",
+      "metadata_url": "https://developer.apple.com/tutorials/data/documentation/coremedia/kcmformatdescriptionextension_logtransferfunction.json",
+      "title": "kCMFormatDescriptionExtension_LogTransferFunction",
+      "ios_availability": [
+        {
+          "beta": false,
+          "deprecated": false,
+          "introducedAt": "17.2",
+          "name": "iOS",
+          "unavailable": false
+        }
+      ],
+      "checked_date": "2026-10-04"
+    },
+    {
+      "documentation_url": "https://developer.apple.com/documentation/coremedia/kcmformatdescriptionlogtransferfunction_applelog",
+      "metadata_url": "https://developer.apple.com/tutorials/data/documentation/coremedia/kcmformatdescriptionlogtransferfunction_applelog.json",
+      "title": "kCMFormatDescriptionLogTransferFunction_AppleLog",
+      "ios_availability": [
+        {
+          "beta": false,
+          "deprecated": false,
+          "introducedAt": "17.2",
+          "name": "iOS",
+          "unavailable": false
+        }
+      ],
+      "checked_date": "2026-10-04"
+    }
+  ],
+  "original_files_unchanged_after_review": true
+}

@@ -1,0 +1,3 @@
+"CFBundleDisplayName" = "LogForge";
+"NSPhotoLibraryUsageDescription" = "Select videos to convert to Apple Log.";
+"NSPhotoLibraryAddUsageDescription" = "Save converted videos to your photo library.";

@@ -1,16 +1,48 @@
 # LogForge
 
-A small native Windows tool that re-encodes **BT.2020 HLG ProRes** into **Apple Log / BT.2020 ProRes 422 HQ** for a consistent grading workflow.
+[English](README.md) · [简体中文](README.zh-CN.md)
+
+Native **Windows and iOS** applications that convert **BT.2020 HLG ProRes** into **Apple Log / BT.2020 ProRes** for a consistent grading workflow.
 
 LogForge changes the pixels using published color mathematics. It does not restore clipped highlights, crushed shadows, tone-mapped-away detail, or information lost in a camera's ISP. It cannot turn processed phone footage into the original sensor capture.
 
-**Version 1.3.0 · Build 26929A.** Output is **Apple Log / Rec.2020 with Video levels**. The identification fields were **verified in 1.1.0 with DaVinci Resolve Studio 20.3.2.9 on Windows**, using DaVinci YRGB Color Managed. The latest build's verification scope is recorded in [VALIDATION](docs/VALIDATION.md); historical editor evidence is not a fresh import test. This is Apple Log, not Apple Log 2 / Apple Wide Gamut. See the [native-reference and real-import evidence](docs/APPLE_LOG_IDENTIFICATION.md).
+**Version 1.3.0 · Windows build 26929A · iOS release build 26106A.** Windows exports ProRes 422 HQ; iOS offers ProRes 422 and 422 HQ. Output uses **Apple Log / Rec.2020 with Video levels**. The identification fields were **verified in the Windows 1.1.0 release with DaVinci Resolve Studio 20.3.2.9**, using DaVinci YRGB Color Managed. The Windows verification scope is recorded in [VALIDATION](docs/VALIDATION.md); this historical evidence does not verify a new iOS editor import. This is Apple Log, not Apple Log 2 / Apple Wide Gamut. See the [native-reference and real-import evidence](docs/APPLE_LOG_IDENTIFICATION.md).
+
+## Platforms
+
+| | Windows | iOS |
+| --- | --- | --- |
+| Application | Native Win32 / C++ | Native Swift / SwiftUI / Metal |
+| System | Windows 10 22H2 / Windows 11 x64 | iOS 26 or newer |
+| Color processing | CPU or runtime-qualified NVIDIA CUDA | CPU or runtime-qualified Apple Metal |
+| ProRes codecs | CPU through approved external FFmpeg tools | System codecs, with embedded software decoder/encoder fallback |
+| Export | ProRes 422 HQ MOV | ProRes 422 / 422 HQ MOV |
+| Interface languages | English, Simplified Chinese | English, Simplified Chinese, Traditional Chinese, French, Spanish |
+| Distribution | Portable Windows ZIP | iPhone arm64 IPA; signing required |
+
+Both platforms belong to the main [LogForge repository](https://github.com/HongHuo0728/LogForge) and the 1.3.0 release. Availability depends on the assets uploaded to [Releases](https://github.com/HongHuo0728/LogForge/releases/tag/v1.3.0); a prepared release configuration does not mean its IPA has already been published. macOS and Linux applications are not provided.
+
+## iOS 1.3.0 (26106A)
+
+- Native transparent Liquid Glass interface, layered glass icon, accessibility contrast handling and haptic feedback.
+- Import from Photos, files or folders; choose an export directory, process a queue, cancel and retry failed videos.
+- Automatically fall back from unavailable system ProRes decoding/encoding to the embedded software codecs. CPU color processing and Metal color processing remain selectable.
+- Convert supported **ProRes 422 / 422 HQ, BT.2020 HLG MOV** footage to Apple Log; HEVC, PQ, SDR and other ProRes profiles are not accepted by the current input contract. A phone's camera-recording capability is separate from software conversion capability.
+- Preserve and independently validate frame timing, audio, auxiliary tracks and display rotation. iOS accepts valid variable frame timing; the Windows fixed-cadence requirement below applies to Windows.
+- Open the app's Apple Settings page with the top-left language button. Select English, Simplified Chinese, Traditional Chinese, French or Spanish when the system exposes the preferred-language setting.
+- Show `1.3.0 (26106A)` and a separate numeric Apple build number in the app; reports identify the version actually used for each conversion attempt.
+
+Download the iOS IPA and matching RelinkKit from the main release when uploaded. The provided build pipeline produces an **unsigned** IPA: sign it with your own valid Apple identity and provisioning profile before installation. No App Store or TestFlight release is configured. Keep the corresponding source, license and relink material when distributing the app.
+
+For cloud builds, use **iOS build and tests** in the main repository's [Actions](https://github.com/HongHuo0728/LogForge/actions/workflows/build-ios.yml). Simulator tests must pass before the iPhone archive is packaged. See the [iOS build and installation guide](https://github.com/HongHuo0728/LogForge/blob/main/LogForgeMac/docs/GITHUB_BUILD.md).
+
+The preceding iOS test build passed 27 simulator tests with no failures or skips, including software conversion, Metal/CPU comparison, 4K ProRes decoding and audio/timing preservation. The 1.3.0 release-identity changes still require a new cloud build. Simulator results do not establish iPhone 12 Pro performance or editor recognition; the user's original videos have not been supplied for regression testing.
 
 ![LogForge Windows interface](docs/images/LogForge.png)
 
 The screenshot uses an empty workspace; no personal video or camera image is included.
 
-## What's new in 1.3.0
+## Windows: what's new in 1.3.0
 
 - **Fractional CFR compatibility:** verify the shared integer-timestamp quantization model over every packet boundary. A generated 309-frame regression reproduces the reported 59.94/59.970888 case and its old 1.06-tick rejection. Nominal FPS does not veto an otherwise verified fixed clock; real changing cadence and damaged timestamps still fail. See the [timing contract](docs/CADENCE_1.3.0.md).
 - **Explicit input interpretation:** missing primaries, matrix, range and chroma tags use documented defaults with warnings. Explicit BT.709 conflicts are rejected unless deliberately overridden. CLI probe, GUI Details and reports distinguish declarations, assumptions and overrides. See the [input contract](docs/INPUT_CONTRACT_1.3.0.md).
@@ -71,7 +103,7 @@ Version **1.1.0 (26923C)** includes all changes beginning with the 29.99 fps CFR
 
 Automatic identification was checked with an unmodified iPhone 15 Pro Max / Blackmagic Camera original, a negative LogForge baseline, isolated metadata candidates and a real converted output. No camera model or Apple encoder is spoofed. Other Resolve versions/editions, Premiere and Final Cut remain unverified. See the [metadata contract](docs/METADATA.md) and [validation record](docs/VALIDATION.md).
 
-## Features
+## Windows features
 
 - Native Win32 GUI, file dialogs, Unicode paths and file drag-and-drop.
 - Bounded Quick FFmpeg discovery and optional manual Deep search; explicit path/hash approval before external tools may run, plus a pinned HTTPS installer.
@@ -88,7 +120,7 @@ Automatic identification was checked with an unmodified iPhone 15 Pro Max / Blac
 - Per-component signal-range accounting over every frame, with visible warnings for Apple Log floor clipping or above-nominal-white signals.
 - A developer CLI and a MOV atom / metadata comparison tool.
 
-## Install and run
+## Windows installation
 
 1. Download `LogForge-1.3.0-Windows-x64.zip` and its `.sha256` file from this project's GitHub Releases when published.
 2. Extract the ZIP and run `LogForge.exe`. No installer or administrator rights are required.
@@ -96,13 +128,13 @@ Automatic identification was checked with an unmodified iPhone 15 Pro Max / Blac
 4. Open or drop supported videos. Missing chroma siting defaults to left for this ProRes camera workflow; an explicit CLI override remains available. Choose a new output `.mov` for one file, or an output directory for a queue, then select **Convert to Apple Log**.
 5. Wait for output validation and final publication. An existing output file is never overwritten. If the final report update fails after a successful rename, the valid movie is retained and the job reports an error; see the release notes for this two-file transaction limitation.
 
-The executable is unsigned. Windows may show an unrecognized-publisher prompt. The Release build uses the static MSVC runtime (`/MT`); no separately installed VC++ runtime is required by LogForge. Windows 10 22H2 / Windows 11 x64 is the supported target. ARM64, macOS and Linux are not supported in v1.
+The Windows executable is unsigned. Windows may show an unrecognized-publisher prompt. The Release build uses the static MSVC runtime (`/MT`); no separately installed VC++ runtime is required by LogForge. Windows 10 22H2 / Windows 11 x64 is the Windows target; Windows ARM64 is not supported. The iOS arm64 application is distributed separately as an IPA.
 
 The source build also produces `LogForge-cli.exe`; this developer tool is not required for the portable GUI release.
 
 For exposure matching, keep **0 EV** unless you have a deliberate reason to adjust it. A positive offset lifts scene exposure before Apple Log encoding. It does not correct unknown camera rendering or certify a native-camera match. In the developer CLI, use `--exposure-ev 1` for +1 stop, for example.
 
-## Settings
+## Windows settings
 
 Open **Settings** in the top right:
 
@@ -115,9 +147,9 @@ Open **Settings** in the top right:
 
 Creative adjustment is an intentional grade applied before the unchanged Apple Log encoding, not a native-camera appearance match. Turning it off restores the standard conversion. See the [equations and limits](docs/CREATIVE_ADJUSTMENTS.md). Exposure remains a separate control on the main window. Status, errors, progress details, license and local-processing notes appear at the bottom left; recording requirements and editor assignment appear at the bottom right.
 
-## Supported input
+## Windows supported input
 
-| Property | V1 requirement |
+| Property | Windows requirement |
 | --- | --- |
 | Container | Nonfragmented QuickTime MOV; `qt  ` major brand, or legacy MOV without a brand |
 | Codec | ProRes 422 (Standard) or ProRes 422 HQ |
@@ -136,7 +168,7 @@ Identical packet durations/intervals establish the exact rational cadence. Nonun
 
 The optional CLI flag `--force-bt2020-interpretation` is only for a known incorrect primaries/matrix declaration. It does **not** perform gamut conversion and can produce incorrect colors if the source really is BT.709. The GUI offers an explicit, default-No confirmation for a single conflicting clip. PQ/non-HLG, unsupported chroma/range, codec/profile and container cannot be forced through this option. A GUI batch keeps normal admission for every item; the CLI flag applies deliberately to that CLI job or batch.
 
-## Output format and Apple Log workflow
+## Windows output format and Apple Log workflow
 
 - QuickTime MOV, ProRes `apch` / 422 HQ, 10-bit 4:2:2, BT.2020.
 - Original pixel count, rational fps and video frame count; 90/270-degree orientation swaps raster width/height, and audio is copied without re-encoding.
@@ -148,7 +180,7 @@ The optional CLI flag `--force-bt2020-interpretation` is only for a known incorr
 
 **Exposure reference:** 75% normalized HLG is interpreted as 100% scene reflectance, following the nominal reference in BT.2408. At zero exposure offset, an 18% gray reference maps from HLG 0.378259 to Apple Log 0.488272. This does not establish the phone's original metering or ISP behavior. Use the **Exposure** control only for an intentional exposure adjustment; zero is the default. The standard path applies inverse OETF and a scene-linear gain, without a display OOTF, tone mapping, saturation changes or gamut conversion. Optional creative rendering is applied only when explicitly enabled and is recorded in output metadata. See [color mathematics and monitoring](docs/COLOR_PIPELINE.md).
 
-## How FFmpeg works
+## Windows FFmpeg tools
 
 The release ZIP contains **no FFmpeg binaries**. Quick discovery searches managed/saved paths, app-adjacent tools, PATH, App Paths, actual WinGet/Scoop/Chocolatey installations, bounded common folders and the existing Windows Search index. It never starts a full-drive search automatically. Deep search of accessible local drives is an explicit user action. It records unknown paths without running them. Only a pinned, SHA-256-verified download or an explicitly approved pair may execute. Approval is stored separately as canonical paths plus SHA-256 for **both ffmpeg and ffprobe**; changes require approval again. While in use, deny-write/delete handles protect the approved executable images. Network shares, inaccessible/offline directories and reparse subdirectories are excluded from disk traversal; skipped locations are reported.
 
@@ -169,7 +201,7 @@ The installer currently pins **Gyan.dev FFmpeg 8.1.2 essentials**, a third-party
 
 The provider interface allows controlled future version/source changes; this is intentionally not a floating "latest" URL. See [provider and licensing details](docs/FFMPEG_PROVIDER.md). FFmpeg.org supplies source and links to third-party Windows builds; it does not publish this binary.
 
-## Build from source
+## Build Windows from source
 
 Prerequisites: Visual Studio 2022 C++ desktop workload, Windows SDK 10.0.22621 or newer, CMake 3.24+, Git. Python 3 is needed only for optional generated-media integration tests. The small nlohmann/json dependency is vendored; configure/build performs no dependency download.
 
@@ -205,7 +237,7 @@ python tests/gui_smoke.py --exe build/Release/LogForge.exe --ffmpeg C:/ffmpeg/bi
 
 After the integration suite has generated its fixtures, add `--input build/integration/standard.mov` to test the actual drop-to-conversion flow in both standard and creative modes. Test hooks capture only LogForge windows and use an isolated `LOGFORGE_DATA_DIR`. The explicitly injected missing-FFmpeg UI case does not replace the real disk-discovery/capability tests. No personal recordings are needed.
 
-## Local diagnostics and reference analysis
+## Windows diagnostics and reference analysis
 
 Logs, settings, transient files and validation JSON are stored under `%LOCALAPPDATA%\LogForge`. Nothing is uploaded. Logs contain media filenames, commands and media properties; review them before sharing. A custom `LOGFORGE_DATA_DIR` environment variable is supported for isolated test runs.
 
@@ -218,7 +250,7 @@ Logs, settings, transient files and validation JSON are stored under `%LOCALAPPD
 
 The CLI also provides `--version`, `--help` and `--language en|zh-CN`; English is the CLI default. Pass `--ffmpeg "C:\path\ffmpeg.exe"` to select an explicitly approved build. `--install-ffmpeg` exercises the GUI installer. Reference analysis includes raw atoms/probe data plus a semantic diff of resolved metadata and stream parameters; it does not guess unknown private meanings or assert binary equivalence.
 
-## Limits and next validation
+## Windows limits and next validation
 
 - A private iPhone HDR clip was used for earlier regression fixes; its test derivatives have been removed and are excluded from source and packages. Routine regression tests use generated media. The public camera reference used for Resolve metadata testing is also excluded from source/packages.
 - No claim of native sensor dynamic range, recovery of clipped data, Apple encoder identity, camera certification, or exact iPhone MOV atom equivalence.
@@ -228,7 +260,7 @@ The CLI also provides `--version`, `--help` and `--language en|zh-CN`; English i
 
 Highest priority: repeat the controlled metadata import test in other Resolve versions, Premiere and Final Cut; obtain matched HLG/native-Log captures for exposure and camera-rendering comparisons.
 
-## Developer CLI approval and analysis
+## Windows developer CLI approval and analysis
 
 ```powershell
 .\build\Release\LogForge-cli.exe --approve-ffmpeg --ffmpeg C:\ffmpeg\bin\ffmpeg.exe
@@ -241,7 +273,7 @@ Highest priority: repeat the controlled metadata import test in other Resolve ve
 
 ## License and trademarks
 
-LogForge source is [MIT](LICENSE). See [third-party notices](THIRD_PARTY_NOTICES.md) for nlohmann/json and the independently obtained FFmpeg tools. GPL FFmpeg is a separate executable, not linked into LogForge; downloading it does not relicense its components under MIT. Redistributing FFmpeg yourself entails its own license/source obligations.
+LogForge source is [MIT](LICENSE). See [third-party notices](THIRD_PARTY_NOTICES.md). Windows obtains GPL FFmpeg as a separate executable. iOS statically links a separately licensed LGPL-only subset of FFmpeg and distributes corresponding source and relink material. These components retain their own licenses; LogForge's MIT license does not relicense them.
 
 LogForge is an independent open-source project and is not affiliated with or endorsed by Apple Inc.
 

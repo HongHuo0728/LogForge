@@ -46,3 +46,13 @@ trust-*.tmp
 *.ilk
 *.zip
 *.7z
+
+# Native iOS source is part of this repository; local Apple build products are not.
+/LogForgeMac/build/
+/LogForgeMac/DerivedData/
+*.ipa
+*.xcarchive/
+*.xcresult/
+*.xcuserstate
+xcuserdata/
+/.codex-work/

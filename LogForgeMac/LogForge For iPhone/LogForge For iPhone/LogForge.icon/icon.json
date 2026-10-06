@@ -1,0 +1,98 @@
+{
+  "fill": {
+    "linear-gradient": [
+      "srgb:0.04,0.12,0.26,1.0",
+      "srgb:0.015,0.03,0.09,1.0"
+    ]
+  },
+  "fill-specializations": [
+    {
+      "appearance": "dark",
+      "value": "system-dark"
+    }
+  ],
+  "groups": [
+    {
+      "name": "Glass ribbon 1",
+      "layers": [
+        {
+          "name": "Ribbon 1",
+          "image-name": "Ribbon-1.svg",
+          "glass": true
+        }
+      ],
+      "specular": true,
+      "lighting": "individual",
+      "translucency": {
+        "enabled": true,
+        "value": 0.8
+      },
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.2
+      }
+    },
+    {
+      "name": "Glass ribbon 2",
+      "layers": [
+        {
+          "name": "Ribbon 2",
+          "image-name": "Ribbon-2.svg",
+          "glass": true
+        }
+      ],
+      "specular": true,
+      "lighting": "individual",
+      "translucency": {
+        "enabled": true,
+        "value": 0.8
+      },
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.2
+      }
+    },
+    {
+      "name": "Glass ribbon 3",
+      "layers": [
+        {
+          "name": "Ribbon 3",
+          "image-name": "Ribbon-3.svg",
+          "glass": true
+        }
+      ],
+      "specular": true,
+      "lighting": "individual",
+      "translucency": {
+        "enabled": true,
+        "value": 0.8
+      },
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.2
+      }
+    },
+    {
+      "name": "Glass log curve",
+      "layers": [
+        {
+          "name": "Log curve",
+          "image-name": "Log-Curve.svg",
+          "glass": true
+        }
+      ],
+      "specular": true,
+      "translucency": {
+        "enabled": true,
+        "value": 0.65
+      },
+      "shadow": {
+        "kind": "neutral",
+        "opacity": 0.15
+      }
+    }
+  ],
+  "supported-platforms": {
+    "squares": "shared"
+  }
+}
