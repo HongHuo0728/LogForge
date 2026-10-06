@@ -39,5 +39,21 @@ Release notes 可采用主 `docs/RELEASE_1.3.0.md` 新增的 iOS 段落，附上
 不要移动已有 `v1.3.0` tag 或覆盖旧 Windows 附件；本次 iOS 源码的提交和构建链接
 应单独记录，避免将原 tag 的 Windows 验证误当作新增 iOS 的证据。
 
+### iOS 26106A 的源码与构建记录
+
+- `v1.3.0` tag 保留在 2026 年 9 月 29 日的 Windows 提交
+  `913e4b9417fa0f32b88629c39062b54589d9dd21`。
+- Release 自动生成的 **Source code (zip)** 和 **Source code (tar.gz)**
+  跟随原 tag，**不包含 iOS 工程**。
+- iOS 正式附件对应提交
+  [`4b9b7771be97663cd3a3cb2dc3074a4cd1675fa0`](https://github.com/HongHuo0728/LogForge/commit/4b9b7771be97663cd3a3cb2dc3074a4cd1675fa0)，
+  原生工程位于该提交的 `LogForgeMac/`。
+- 下载该提交的完整源码：
+  [ZIP](https://github.com/HongHuo0728/LogForge/archive/4b9b7771be97663cd3a3cb2dc3074a4cd1675fa0.zip)
+  或 [tar.gz](https://github.com/HongHuo0728/LogForge/archive/4b9b7771be97663cd3a3cb2dc3074a4cd1675fa0.tar.gz)。
+- [主仓库 iOS 第 2 次构建](https://github.com/HongHuo0728/LogForge/actions/runs/37495072326)
+  已通过 5 项打包检查、28 项模拟器测试（无失败或跳过），并成功归档和生成 IPA。
+  真机性能和编辑器识别仍需单独验证。
+
 确认主仓库可独立构建、正式附件及源码已保存后，再由维护者决定测试仓库的移除。
 正式说明和工作流不依赖测试仓库，删除它不应影响主项目构建。

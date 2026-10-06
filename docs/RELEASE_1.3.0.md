@@ -14,10 +14,22 @@ Audio, rotation, stored frame timing and Apple Log metadata are independently
 checked. The Windows timing and input policy in the following sections remains
 Windows-specific.
 
-The preceding iOS test build passed 27 simulator tests without failures or skips.
-This release-identity and main-repository workflow update has not yet been
-compiled in the cloud; device performance and editor import remain separate
-checks. No new Windows media/editor validation is claimed.
+The iOS release was built from commit
+[`4b9b7771be97663cd3a3cb2dc3074a4cd1675fa0`](https://github.com/HongHuo0728/LogForge/commit/4b9b7771be97663cd3a3cb2dc3074a4cd1675fa0).
+[Main-repository iOS build #2](https://github.com/HongHuo0728/LogForge/actions/runs/37495072326)
+passed all 5 packaging checks and 28 simulator tests without failures or skips,
+and successfully archived and packaged the iPhone application. Device performance
+and editor import remain separate checks. No new Windows media/editor validation
+is claimed.
+
+The existing **v1.3.0** tag remains at the September 29 Windows commit
+`913e4b9417fa0f32b88629c39062b54589d9dd21`. GitHub's automatically generated
+**Source code (zip)** and **Source code (tar.gz)** assets follow that tag and
+**do not contain the iOS project**. For the source corresponding to the iOS
+26106A assets, use the pinned commit above or download its
+[source ZIP](https://github.com/HongHuo0728/LogForge/archive/4b9b7771be97663cd3a3cb2dc3074a4cd1675fa0.zip)
+or [source tar.gz](https://github.com/HongHuo0728/LogForge/archive/4b9b7771be97663cd3a3cb2dc3074a4cd1675fa0.tar.gz).
+The native project is in `LogForgeMac/`. The original release tag is not moved.
 
 Run **iOS build and tests** in the main repository. Tests must pass before archive
 and packaging. Release assets are `LogForge-1.3.0-iOS-26106A-unsigned.ipa`, its
