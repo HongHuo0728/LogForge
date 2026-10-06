@@ -47,14 +47,14 @@ archive)
         && shasum -a 256 "$relink_name" > "$relink_name.sha256")
     cp build/logs/xcode-version.txt build/artifacts/
     cat > build/artifacts/READ-ME.txt <<EOF
-LogForge $version ($release_build), Apple bundle build $bundle_build.
-$ipa_name is a real iPhone (arm64) build, without an Apple signature.
+LogForge ${version} (${release_build}), Apple bundle build ${bundle_build}.
+${ipa_name} is a real iPhone (arm64) build, without an Apple signature.
 It cannot be installed by tapping the file. Sign it using your own valid Apple
 development/distribution identity and an appropriate provisioning profile.
 The included RelinkKit contains FFmpeg source, static library, app objects and
 the original build log. Keep it with the app when distributing a signed build.
 
-LogForge $version ($release_build)，Apple 内部构建号 $bundle_build。
+LogForge ${version} (${release_build})，Apple 内部构建号 ${bundle_build}。
 IPA 为未签名的 iPhone 正式配置构建，需要使用自己的有效 Apple 签名和配置文件安装。
 分发签名后的应用时，请同时提供对应的 RelinkKit、源码和许可声明。
 主项目：https://github.com/HongHuo0728/LogForge
