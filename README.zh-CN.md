@@ -36,7 +36,7 @@ LogForge 使用公开的色彩数学改变像素。它无法恢复已裁切的�
 
 云端构建使用主仓库 [Actions](https://github.com/HongHuo0728/LogForge/actions/workflows/build-ios.yml) 中的 **iOS build and tests**。模拟器测试通过后才会归档并打包 iPhone 应用。详见 [iOS 构建与安装指南](https://github.com/HongHuo0728/LogForge/blob/main/LogForgeMac/docs/GITHUB_BUILD.md)。
 
-iOS 1.3.1 修复 AAC / 时码轨道保留差异，并改进开源许可页面导航。[本次发布说明](docs/RELEASE_1.3.1_IOS.md)区分新增回归测试、云端构建与真机验证范围。用户原始视频尚未提供用于回归测试，模拟器结果不能证明真机性能或编辑器识别。
+iOS 1.3.1 修复 AAC / 时码轨道保留差异，并改进开源许可页面导航。[本次发布说明](https://github.com/HongHuo0728/LogForge/blob/main/docs/RELEASE_1.3.1_IOS.md)区分新增回归测试、云端构建与真机验证范围。用户原始视频尚未提供用于回归测试，模拟器结果不能证明真机性能或编辑器识别。
 
 ![LogForge Windows 界面](docs/images/LogForge.png)
 

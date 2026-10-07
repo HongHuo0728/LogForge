@@ -9,7 +9,9 @@ final class GlassFlowTests: XCTestCase {
         XCTAssertTrue(app.buttons["conversionSettings"].waitForExistence(timeout:10))
         app.buttons["conversionSettings"].tap()
         XCTAssertTrue(app.staticTexts["settingsVersion"].waitForExistence(timeout:5))
-        XCTAssertEqual(app.staticTexts["settingsVersion"].label,"1.3.1")
+        let version = Bundle(for:GlassFlowTests.self).object(forInfoDictionaryKey:"CFBundleShortVersionString") as? String
+        XCTAssertNotNil(version)
+        XCTAssertEqual(app.staticTexts["settingsVersion"].label,version)
         XCTAssertFalse(app.staticTexts["bundleBuild"].exists)
         for _ in 0..<3 {
             for _ in 0..<3 where !app.buttons["openSourceLicenses"].isHittable { app.swipeUp() }

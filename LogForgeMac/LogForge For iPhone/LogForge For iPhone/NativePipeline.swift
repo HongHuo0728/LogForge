@@ -66,9 +66,12 @@ struct InputContract {
         }
         func value(_ key: CFString) -> String? { CMFormatDescriptionGetExtension(d,extensionKey:key).map { String(describing:$0) } }
         let primaries = value(kCMFormatDescriptionExtension_ColorPrimaries), matrix = value(kCMFormatDescriptionExtension_YCbCrMatrix)
-        guard value(kCMFormatDescriptionExtension_TransferFunction) == String(describing:kCMFormatDescriptionTransferFunction_ITU_R_2100_HLG),
+        let transfer = value(kCMFormatDescriptionExtension_TransferFunction)
+        guard transfer == String(describing:kCMFormatDescriptionTransferFunction_ITU_R_2100_HLG),
               primaries == nil || primaries == String(describing:kCMFormatDescriptionColorPrimaries_ITU_R_2020),
-              matrix == nil || matrix == String(describing:kCMFormatDescriptionYCbCrMatrix_ITU_R_2020) else { throw NativeFailure("error.color") }
+              matrix == nil || matrix == String(describing:kCMFormatDescriptionYCbCrMatrix_ITU_R_2020) else {
+            throw NativeFailure("error.color","primaries=\(primaries ?? "unspecified"), transfer=\(transfer ?? "unspecified"), matrix=\(matrix ?? "unspecified")")
+        }
         var warnings: [String] = []
         if primaries == nil || matrix == nil { warnings.append(L10n.text("warning.2020")) }
         let range = CMFormatDescriptionGetExtension(d,extensionKey:kCMFormatDescriptionExtension_FullRangeVideo) as? NSNumber

@@ -36,7 +36,7 @@ Download the iOS IPA and matching RelinkKit from the main release when uploaded.
 
 For cloud builds, use **iOS build and tests** in the main repository's [Actions](https://github.com/HongHuo0728/LogForge/actions/workflows/build-ios.yml). Simulator tests must pass before the iPhone archive is packaged. See the [iOS build and installation guide](https://github.com/HongHuo0728/LogForge/blob/main/LogForgeMac/docs/GITHUB_BUILD.md).
 
-iOS 1.3.1 fixes AAC/timecode track preservation and improves license navigation. [Release details](docs/RELEASE_1.3.1_IOS.md) distinguish regressions, cloud builds and device verification. The user's original video has not been supplied; simulator results do not establish physical-device performance or editor recognition.
+iOS 1.3.1 fixes AAC/timecode track preservation and improves license navigation. [Release details](https://github.com/HongHuo0728/LogForge/blob/main/docs/RELEASE_1.3.1_IOS.md) distinguish regressions, cloud builds and device verification. The user's original video has not been supplied; simulator results do not establish physical-device performance or editor recognition.
 
 ![LogForge Windows interface](docs/images/LogForge.png)
 
