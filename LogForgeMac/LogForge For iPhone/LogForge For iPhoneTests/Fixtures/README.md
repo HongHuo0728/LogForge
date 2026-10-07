@@ -26,9 +26,10 @@ pipeline, repeat strict packet/timing checks, and exercise original MOV table
 restoration, media bounds and 64-bit duration promotion. The reported camera
 MOV has not been supplied; this fixture reproduces its AAC count/start values,
 not its original encoded payload or complete track structure. On the tested
-iOS simulator, AVAssetReader normalizes this fixture's audio start to zero and
-does not expose its timecode association through loadAssociatedTracks. Tests
-compare the source/output as observed by AVFoundation and also check the raw
-MOV association. A separate damaged-payload regression exercises production
+iOS simulator, AVAssetReader normalizes this fixture's audio start to zero.
+AVFoundation exposes one associated timecode track. Tests keep the owning
+AVURLAsset alive (AVAssetTrack.asset is weak), compare source/output track IDs
+and associations, and also check the raw MOV association. A separate
+damaged-payload regression exercises production
 validation, restoration and validation again, without assuming reader behavior
 matches ffprobe or the camera report.

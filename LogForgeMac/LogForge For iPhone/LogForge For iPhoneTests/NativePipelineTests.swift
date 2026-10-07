@@ -594,11 +594,18 @@ final class NativePipelineTests: XCTestCase {
             videoTrackID:UInt32(bitPattern:contract.track.trackID),retainedTrackIDs:retained)
         try await TrackIntegrity.validate(source:asset,output:AVURLAsset(url:copied),offset:.zero)
         // The video and its timecode association still resolve, with no duplicate IDs.
-        let outputVideos = try await AVURLAsset(url:copied).loadTracks(withMediaType:.video)
+        // AVAssetTrack.asset is weak. Keep the owning asset alive while resolving
+        // cross-track references, rather than loading tracks from a temporary.
+        let outputAsset = AVURLAsset(url:copied)
+        defer { withExtendedLifetime(outputAsset) {} }
+        let outputVideos = try await outputAsset.loadTracks(withMediaType:.video)
         let outputVideo = try XCTUnwrap(outputVideos.first)
+        XCTAssertNotNil(outputVideo.asset)
         let associated = try await outputVideo.loadAssociatedTracks(ofType:.timecode)
         let sourceAssociations = try await contract.track.loadAssociatedTracks(ofType:.timecode)
+        XCTAssertEqual(sourceAssociations.count,1)
         XCTAssertEqual(associated.count,sourceAssociations.count)
+        XCTAssertEqual(associated.map(\.trackID),sourceAssociations.map(\.trackID))
         let reader = try FileHandle(forReadingFrom:source); defer { try? reader.close() }
         let movie = try PreservedTracksMOV.readMovie(reader)
         let rootTracks = try PreservedTracksMOV.children(movie.data).filter { $0.type == "trak" }
