@@ -544,7 +544,8 @@ final class NativePipelineTests: XCTestCase {
         let report = try JSONSerialization.jsonObject(with:Data(contentsOf:result.outputURL.appendingPathExtension("json"))) as? [String:Any]
         XCTAssertEqual(report?["decoding"] as? String,result.diagnostics.decodingBackend)
         XCTAssertEqual(report?["appVersion"] as? String,AppBuild.version)
-        XCTAssertNil(report?["releaseBuild"])
+        XCTAssertEqual(report?["releaseBuild"] as? String,AppBuild.releaseBuild)
+        XCTAssertEqual(AppBuild.releaseBuild,"26107B")
         XCTAssertEqual(report?["bundleBuild"] as? String,AppBuild.buildNumber)
         XCTAssertTrue(["AVFoundation","prores"].contains(report?["validationDecoding"] as? String ?? ""))
     }

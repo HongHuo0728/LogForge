@@ -104,18 +104,23 @@ def main():
             assert key in tables['en'], f'Missing localization {key}: {path}'
     info = plistlib.loads((app/'Info.plist').read_bytes())
     assert set(info['CFBundleLocalizations']) == set(tables)
-    assert 'LogForgeReleaseBuild' not in info
+    assert info['LogForgeReleaseBuild'] == '$(LOGFORGE_RELEASE_BUILD)'
     assert info['CFBundleVersion'] == '$(CURRENT_PROJECT_VERSION)'
     spec = importlib.util.spec_from_file_location('logforge_release_info', root.parent/'tools/release-info.py')
     identity = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(identity)
     version = identity.release_identity(root.parent)
+    release_build = identity.release_build(root.parent)
     for obj in objects.values():
         settings = obj.get('buildSettings', {})
         if 'MARKETING_VERSION' in settings:
             assert settings['MARKETING_VERSION'] == version
-            assert 'LOGFORGE_RELEASE_BUILD' not in settings
-    findings.append(f'iOS release identity: {version}; Apple bundle build stays numeric and internal')
+            assert settings['LOGFORGE_RELEASE_BUILD'] == release_build
+            if settings.get('GENERATE_INFOPLIST_FILE') == 'YES':
+                assert settings['INFOPLIST_FILE'] == 'TestReleaseInfo.plist'
+                test_info = plistlib.loads((root/'TestReleaseInfo.plist').read_bytes())
+                assert test_info['LogForgeReleaseBuild'] == '$(LOGFORGE_RELEASE_BUILD)'
+    findings.append(f'iOS release identity: {version} ({release_build}); Apple bundle build stays numeric and internal')
     findings.append(f'Five localizations: {len(tables["en"])} identical keys and format arguments')
     icon = app/'LogForge.icon'
     manifest = json.loads((icon/'icon.json').read_text())

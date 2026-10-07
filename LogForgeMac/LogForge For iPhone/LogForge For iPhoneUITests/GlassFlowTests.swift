@@ -1,7 +1,7 @@
 import XCTest
 
 final class GlassFlowTests: XCTestCase {
-    func testLicenseNavigationKeepsSettingsAndVersion() {
+    func testLicenseNavigationKeepsSettingsAndVersion() throws {
         continueAfterFailure = false
         let app = XCUIApplication()
         app.launchArguments += ["-AppleLanguages","(en)","-AppleLocale","en_US"]
@@ -9,9 +9,11 @@ final class GlassFlowTests: XCTestCase {
         XCTAssertTrue(app.buttons["conversionSettings"].waitForExistence(timeout:10))
         app.buttons["conversionSettings"].tap()
         XCTAssertTrue(app.staticTexts["settingsVersion"].waitForExistence(timeout:5))
-        let version = Bundle(for:GlassFlowTests.self).object(forInfoDictionaryKey:"CFBundleShortVersionString") as? String
-        XCTAssertNotNil(version)
-        XCTAssertEqual(app.staticTexts["settingsVersion"].label,version)
+        let testBundle = Bundle(for:GlassFlowTests.self)
+        let version = try XCTUnwrap(testBundle.object(forInfoDictionaryKey:"CFBundleShortVersionString") as? String)
+        let releaseBuild = try XCTUnwrap(testBundle.object(forInfoDictionaryKey:"LogForgeReleaseBuild") as? String)
+        XCTAssertEqual(releaseBuild,"26107B")
+        XCTAssertEqual(app.staticTexts["settingsVersion"].label,"\(version) (\(releaseBuild))")
         XCTAssertFalse(app.staticTexts["bundleBuild"].exists)
         for _ in 0..<3 {
             for _ in 0..<3 where !app.buttons["openSourceLicenses"].isHittable { app.swipeUp() }

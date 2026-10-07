@@ -219,7 +219,7 @@ final class ConversionQueue: ObservableObject {
                 if Task.isCancelled { break }
                 entries[i].attemptBuild = AppBuild.diagnosticLabel
                 entries[i].attemptVersion = AppBuild.version
-                entries[i].attemptReleaseBuild = nil
+                entries[i].attemptReleaseBuild = AppBuild.releaseBuild
                 entries[i].attemptBundleBuild = AppBuild.buildNumber
                 entries[i].status = .running; activeID = entries[i].id; progress = 0; frameCount = 0; elapsedStart = Date(); persist()
                 let source = entries[i].source, jobID = entries[i].id

@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.3.1 — iOS
+## 1.3.1 — iOS (26107B)
 
 - Fix AAC and timecode passthrough changes by restoring original stored chunks,
   sample tables and edit lists when the strict track validator detects a mismatch.
@@ -10,7 +10,7 @@
   to 64 bits when needed. Invalid/external media references still fail.
 - Cache open-source license text and render it in paragraphs with a consistent
   settings background, avoiding repeated whole-document layout during navigation.
-- Display only iOS version `1.3.1`; keep the numeric Apple bundle build internal.
+- Display iOS version `1.3.1 (26107B)` and restore release-build fields in conversion reports; keep the numeric Apple bundle build internal.
   Resolve iOS versions independently of the unchanged Windows 1.3.0 project.
 - Add generated AAC/edit-list/timecode regressions and a license navigation UI test.
 

@@ -1,9 +1,10 @@
 # LogForge iOS 1.3.1
 
+**Build 26107B — iOS-only release**
+
 This is an iOS patch release. The Windows project stays at 1.3.0 (26929A), and
 the existing v1.3.0 tag and historical release assets remain unchanged.
-The app and download filenames show the iOS version without an alphanumeric
-release build. Apple still requires a numeric `CFBundleVersion`; it remains in
+The app and download filenames show the iOS version and release build **26107B**. Apple still requires a numeric `CFBundleVersion`; it remains in
 technical diagnostics to identify the exact binary used for a conversion.
 
 ## AAC and timecode preservation
@@ -26,7 +27,7 @@ publication. The checks are not weakened. External media references, fragmented
 MOVs and invalid chunk tables are not eligible for restoration. Nonzero common
 timeline shifts retain the existing passthrough path and strict validation.
 
-## License navigation and version display
+## License navigation and version/build display
 
 The license destination caches bundled text and displays paragraphs lazily.
 The glass panel is applied to the fixed scroll viewport rather than the full
@@ -36,10 +37,10 @@ license text retains selection and glass styling. A navigation regression opens,
 scrolls and closes this screen repeatedly. Visual flicker still requires a
 physical-device check.
 
-The homepage and settings show **1.3.1**. iOS marketing versions are taken from
+The homepage and settings show **1.3.1 (26107B)**. Conversion reports retain the release build for each attempt. iOS marketing versions are taken from
 the native Xcode project instead of being overwritten by Windows CMake.
-Packaging produces `LogForge-1.3.1-iOS-unsigned.ipa`, its SHA-256,
-`LogForge-1.3.1-iOS-RelinkKit.zip` and its SHA-256. The IPA needs a valid Apple
+Packaging produces `LogForge-1.3.1-iOS-26107B-unsigned.ipa`, its SHA-256,
+`LogForge-1.3.1-iOS-26107B-RelinkKit.zip` and its SHA-256. The IPA needs a valid Apple
 signature and provisioning profile before installation.
 
 ## Verification

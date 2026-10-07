@@ -5,9 +5,9 @@ Windows 开发环境也可以编辑原生工程并通过 GitHub 云端 Mac 编�
 
 ## 获取正式版
 
-当前 iOS 开发版本为 **1.3.1**。从成功的主仓库 Actions 获取
-`LogForge-1.3.1-iOS-unsigned.ipa`、对应 `.sha256`，以及
-`LogForge-1.3.1-iOS-RelinkKit.zip` 和校验文件。构建成功后仍需维护者发布附件；
+当前 iOS 开发版本为 **1.3.1 (26107B)**。从成功的主仓库 Actions 获取
+`LogForge-1.3.1-iOS-26107B-unsigned.ipa`、对应 `.sha256`，以及
+`LogForge-1.3.1-iOS-26107B-RelinkKit.zip` 和校验文件。构建成功后仍需维护者发布附件；
 版本号配置不代表线上 Release 已更新。历史 v1.3.0 附件保留原始版本。
 见 [1.3.1 发布说明](../../docs/RELEASE_1.3.1_IOS.md)。
 
@@ -18,7 +18,7 @@ Windows 开发环境也可以编辑原生工程并通过 GitHub 云端 Mac 编�
 2. 点击 **Run workflow**，选择目标分支并运行。
 3. 等待 **Test and package iOS** 成功：先运行模拟器回归，再归档并打包真机应用。
    正式工作流没有跳过测试选项，测试失败不产生新的 IPA。
-4. 从底部 Artifacts 下载 `LogForge-1.3.1-iOS-unsigned-运行编号`。
+4. 从底部 Artifacts 下载 `LogForge-1.3.1-iOS-26107B-unsigned-运行编号`。
    解压获得 IPA、RelinkKit、两份 SHA-256、`release-info.json`、`READ-ME.txt`
    和 `xcode-version.txt`。下载通常需要登录 GitHub。
 
@@ -42,14 +42,14 @@ App Store/TestFlight 还需要开发者账号和 App Store Connect 配置，目�
 
 ## 版本与报告
 
-应用首页和设置页只显示 `1.3.1`，不列发行构建号。
+应用首页和设置页显示 `1.3.1 (26107B)`。发行构建号为 `26107B`。
 `CFBundleShortVersionString` 为 `1.3.1`；`CFBundleVersion` 保持数字，
 以 Actions 运行编号标识具体构建，仅用于内部诊断。
 脚本从原生 Xcode 工程读取 iOS 版本，在打包前核验实际应用 Info.plist。
 Windows 版本不覆盖 iOS patch 版本。
 独立打开原生工程时使用 Xcode 项目中的版本默认值。
 
-成功转换报告包含 `appVersion`、内部 `bundleBuild` 和轨道表恢复状态；不设置新发行构建号。
+成功转换报告包含 `appVersion`、`releaseBuild`（`26107B`）、内部 `bundleBuild` 和轨道表恢复状态。
 批量报告只记录每条视频最后一次尝试的版本；旧任务缺少新增字段时保留 `unknown`，
 不会自动冒充新版测试。安装后可重试失败视频生成新的记录。
 

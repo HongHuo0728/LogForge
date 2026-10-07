@@ -6,7 +6,7 @@
 
 LogForge 使用公开的色彩数学改变像素。它无法恢复已裁切的高光、压死的阴影、被色调映射丢弃的细节或相机 ISP 已丢失的信息，也不能把经过处理的手机视频还原为原始传感器采集。
 
-**Windows 1.3.0（26929A）· iOS 1.3.1。** Windows 导出 ProRes 422 HQ；iOS 可选 ProRes 422 或 422 HQ。输出使用 **Apple Log / Rec.2020、视频范围（Video levels）**。识别字段曾在 **Windows 1.1.0、DaVinci Resolve Studio 20.3.2.9、DaVinci YRGB Color Managed** 下验证。Windows 的验证范围见 [VALIDATION](docs/VALIDATION.md)；这些历史证据不能当作新 iOS 输出的编辑器导入验证。这里使用 Apple Log，不是 Apple Log 2 / Apple Wide Gamut。见[原生参考及真实导入证据](docs/APPLE_LOG_IDENTIFICATION.md)。
+**Windows 1.3.0（26929A）· iOS 1.3.1（26107B）。** Windows 导出 ProRes 422 HQ；iOS 可选 ProRes 422 或 422 HQ。输出使用 **Apple Log / Rec.2020、视频范围（Video levels）**。识别字段曾在 **Windows 1.1.0、DaVinci Resolve Studio 20.3.2.9、DaVinci YRGB Color Managed** 下验证。Windows 的验证范围见 [VALIDATION](docs/VALIDATION.md)；这些历史证据不能当作新 iOS 输出的编辑器导入验证。这里使用 Apple Log，不是 Apple Log 2 / Apple Wide Gamut。见[原生参考及真实导入证据](docs/APPLE_LOG_IDENTIFICATION.md)。
 
 ## 平台
 
@@ -30,7 +30,7 @@ LogForge 使用公开的色彩数学改变像素。它无法恢复已裁切的�
 - 将支持的 **ProRes 422 / 422 HQ、BT.2020 HLG MOV** 转为 Apple Log。当前输入合同不接受 HEVC、PQ、SDR 或其他 ProRes profile。手机能否拍摄 ProRes 与能否通过软件转换是不同能力。
 - 保留并独立验证帧时间、音频、辅助轨道和显示旋转。iOS 保留有效的可变帧时间；下文 Windows 的固定帧节奏要求仅适用于 Windows。
 - 点击左上角语言按钮打开 Apple 系统中的本应用设置。系统提供首选语言选项时，可选择英语、简体中文、繁体中文、法语或西班牙语。
-- 应用内只显示 `1.3.1`；报告保留每次转换版本及内部诊断信息。
+- 应用内显示 `1.3.1 (26107B)`；报告保留每次转换的版本、发行构建号及内部诊断信息。
 
 正式附件上传后，从主仓库 Release 下载 iOS IPA 及匹配的 RelinkKit。构建流程生成的是**未签名 IPA**，安装前需使用自己的有效 Apple 签名和 provisioning profile。当前没有配置 App Store 或 TestFlight 发布。分发应用时，请保留对应源码、许可及重新链接材料。
 

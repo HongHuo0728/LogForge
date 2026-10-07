@@ -624,7 +624,7 @@ struct NativePipeline {
             yCbCrMatrix:String(describing:kCMFormatDescriptionYCbCrMatrix_ITU_R_2020),colorInterpretation:.bt2020HLG,warnings:warnings,processingBackend:metal == nil ? .cpu : .metal,encodingBackend:software ? "prores_ks" : "AVFoundation",decodingBackend:softwareDecoding ? "prores" : "AVFoundation")
         let result = VideoProcessingResult(outputURL:destination,frameCount:count,duration:validation.duration,diagnostics:diagnostics)
         let report: [String:Any] = ["frames":count,"duration":validation.duration,"warnings":warnings,"validated":true,
-            "appVersion":AppBuild.version,"bundleBuild":AppBuild.buildNumber,"restoredOriginalTrackTables":restoredTrackTables,
+            "appVersion":AppBuild.version,"releaseBuild":AppBuild.releaseBuild,"bundleBuild":AppBuild.buildNumber,"restoredOriginalTrackTables":restoredTrackTables,
             "decoding":softwareDecoding ? "prores" : "AVFoundation","validationDecoding":validation.decodingBackend,
             "encoding":software ? "prores_ks" : "AVFoundation","color":metal == nil ? "CPU" : "Metal",
             "source":asset.url.lastPathComponent,"profile":quality.rawValue,"commonTimingOffsetSeconds":offset.seconds,

@@ -7,9 +7,10 @@ export LOGFORGE_SOURCE_CACHE="${LOGFORGE_SOURCE_CACHE:-${RUNNER_TEMP:-$root/buil
 project="$root/LogForge For iPhone/LogForge For iPhone.xcodeproj"
 scheme='LogForge For iPhone'
 version=$(python3 tools/release-info.py)
+release_build=$(python3 tools/release-info.py --release-build)
 bundle_build="${GITHUB_RUN_NUMBER:-1}"
-ipa_name="LogForge-${version}-iOS-unsigned.ipa"
-relink_name="LogForge-${version}-iOS-RelinkKit.zip"
+ipa_name="LogForge-${version}-iOS-${release_build}-unsigned.ipa"
+relink_name="LogForge-${version}-iOS-${release_build}-RelinkKit.zip"
 mkdir -p build/logs build/artifacts
 xcodebuild -version | tee build/logs/xcode-version.txt
 sdk_version=$(xcrun --sdk iphoneos --show-sdk-version)
@@ -19,6 +20,7 @@ if [ "${sdk_version%%.*}" -lt 26 ]; then
 fi
 common=(-project "$project" -scheme "$scheme" -derivedDataPath "$root/build/DerivedData"
     "MARKETING_VERSION=$version"
+    "LOGFORGE_RELEASE_BUILD=$release_build"
     "CURRENT_PROJECT_VERSION=$bundle_build"
     CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO 'CODE_SIGN_IDENTITY=' 'DEVELOPMENT_TEAM=')
 case "${1:-archive}" in
@@ -46,20 +48,20 @@ archive)
         && shasum -a 256 "$relink_name" > "$relink_name.sha256")
     cp build/logs/xcode-version.txt build/artifacts/
     cat > build/artifacts/READ-ME.txt <<EOF
-LogForge iOS ${version}.
+LogForge iOS ${version} (${release_build}).
 ${ipa_name} is a real iPhone (arm64) build, without an Apple signature.
 It cannot be installed by tapping the file. Sign it using your own valid Apple
 development/distribution identity and an appropriate provisioning profile.
 The included RelinkKit contains FFmpeg source, static library, app objects and
 the original build log. Keep it with the app when distributing a signed build.
 
-LogForge iOS ${version}。
+LogForge iOS ${version} (${release_build})。
 IPA 为未签名的 iPhone 正式配置构建，需要使用自己的有效 Apple 签名和配置文件安装。
 分发签名后的应用时，请同时提供对应的 RelinkKit、源码和许可声明。
 主项目：https://github.com/HongHuo0728/LogForge
 EOF
     if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
-        printf '### iPhone build ready\nVersion: **%s**\n\nDownload `%s` and the RelinkKit from this run’s Artifacts section.\n\nThe IPA needs signing before installation. No Apple certificate was used.\n' "$version" "$ipa_name" >> "$GITHUB_STEP_SUMMARY"
+        printf '### iPhone build ready\nVersion: **%s (%s)**\n\nDownload `%s` and the RelinkKit from this run’s Artifacts section.\n\nThe IPA needs signing before installation. No Apple certificate was used.\n' "$version" "$release_build" "$ipa_name" >> "$GITHUB_STEP_SUMMARY"
     fi
     ;;
 test)
