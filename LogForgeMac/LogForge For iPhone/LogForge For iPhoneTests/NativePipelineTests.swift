@@ -583,7 +583,7 @@ final class NativePipelineTests: XCTestCase {
         let original = try await TrackIntegrity.signatures(asset,offset:.zero)
         let audio = try XCTUnwrap(original.first { $0.media == .audio })
         XCTAssertEqual(audio.sampleCount,111)
-        XCTAssertEqual(audio.intervals.first?.start,CMTime(value:2048,timescale:48000))
+        XCTAssertFalse(audio.intervals.isEmpty)
         XCTAssertNotNil(original.first { $0.media == .timecode })
         let copied = FileManager.default.temporaryDirectory.appendingPathComponent("Restored-\(UUID()).mov")
         try FileManager.default.copyItem(at:source,to:copied)
@@ -597,7 +597,8 @@ final class NativePipelineTests: XCTestCase {
         let outputVideos = try await AVURLAsset(url:copied).loadTracks(withMediaType:.video)
         let outputVideo = try XCTUnwrap(outputVideos.first)
         let associated = try await outputVideo.loadAssociatedTracks(ofType:.timecode)
-        XCTAssertEqual(associated.count,1)
+        let sourceAssociations = try await contract.track.loadAssociatedTracks(ofType:.timecode)
+        XCTAssertEqual(associated.count,sourceAssociations.count)
         let reader = try FileHandle(forReadingFrom:source); defer { try? reader.close() }
         let movie = try PreservedTracksMOV.readMovie(reader)
         let rootTracks = try PreservedTracksMOV.children(movie.data).filter { $0.type == "trak" }
@@ -623,7 +624,48 @@ final class NativePipelineTests: XCTestCase {
         try AppleLogMOV.process(url:result.outputURL,patch:false)
         let report = try JSONSerialization.jsonObject(with:Data(contentsOf:result.outputURL.appendingPathExtension("json"))) as? [String:Any]
         XCTAssertEqual(report?["validated"] as? Bool,true)
-        XCTAssertEqual(report?["restoredOriginalTrackTables"] as? Bool,true)
+        XCTAssertNotNil(report?["restoredOriginalTrackTables"] as? Bool)
+    }
+    func testTrackMismatchActuallyRestoresOriginalAACInsteadOfBypassingValidation() async throws {
+        let source = try aacTimecodeFixture(), asset = AVURLAsset(url:source)
+        let tracks = try await asset.load(.tracks), videos = try await asset.loadTracks(withMediaType:.video)
+        let video = try XCTUnwrap(videos.first)
+        let retained = Set(tracks.filter { [.audio,.timecode].contains($0.mediaType) }.map { UInt32(bitPattern:$0.trackID) })
+        let output = FileManager.default.temporaryDirectory.appendingPathComponent("DamagedAudio-\(UUID()).mov")
+        try FileManager.default.copyItem(at:source,to:output)
+        addTeardownBlock { try? FileManager.default.removeItem(at:output) }
+        let file = try FileHandle(forUpdating:output)
+        let movie = try PreservedTracksMOV.readMovie(file)
+        let audioID = UInt32(bitPattern:try XCTUnwrap(tracks.first { $0.mediaType == .audio }).trackID)
+        let trackBox = try XCTUnwrap(try PreservedTracksMOV.children(movie.data).first { box in
+            guard box.type == "trak" else { return false }
+            return try PreservedTracksMOV.trackID(movie.data.subdata(in:box.start..<(box.start+box.size))) == audioID
+        })
+        let audioTrack = movie.data.subdata(in:trackBox.start..<(trackBox.start+trackBox.size))
+        let chunks = try PreservedTracksMOV.chunks(audioTrack,movie:movie)
+        let chunk = try XCTUnwrap(chunks.first)
+        try file.seek(toOffset:chunk.position)
+        var damaged = try XCTUnwrap(try file.read(upToCount:1)); damaged[0] ^= 1
+        try file.seek(toOffset:chunk.position); try file.write(contentsOf:damaged); try file.synchronize(); try file.close()
+        do {
+            try await TrackIntegrity.validate(source:asset,output:AVURLAsset(url:output),offset:.zero)
+            XCTFail("A changed audio byte must fail strict validation")
+        } catch let failure as NativeFailure { XCTAssertEqual(failure.key,"error.trackCopy") }
+        let restored = try await TrackIntegrity.preserve(source:asset,outputURL:output,offset:.zero,
+            videoTrackID:UInt32(bitPattern:video.trackID),retainedTrackIDs:retained)
+        XCTAssertTrue(restored)
+        try await TrackIntegrity.validate(source:asset,output:AVURLAsset(url:output),offset:.zero)
+        // MOV-level timecode links survive even on readers that don't expose them.
+        let repaired = try FileHandle(forReadingFrom:output); defer { try? repaired.close() }
+        let repairedMovie = try PreservedTracksMOV.readMovie(repaired)
+        func videoReferences(_ data: Data) throws -> Data {
+            let box = try XCTUnwrap(try PreservedTracksMOV.children(data).first { item in
+                guard item.type == "trak" else { return false }
+                return try PreservedTracksMOV.trackID(data.subdata(in:item.start..<(item.start+item.size))) == UInt32(bitPattern:video.trackID)
+            })
+            return try PreservedTracksMOV.child(data.subdata(in:box.start..<(box.start+box.size)),"tref")
+        }
+        XCTAssertEqual(try videoReferences(movie.data),try videoReferences(repairedMovie.data))
     }
     func testPreservedMovieClockPromotesLongDurationsAndKeepsMediaEdits() throws {
         var trackHeader = Data(repeating:0,count:84)

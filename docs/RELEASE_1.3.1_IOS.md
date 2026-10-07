@@ -48,8 +48,11 @@ Windows static checks cover Swift grammar, project membership, plist/localizatio
 consistency, release identity, actual Bash packaging text and the Actions workflow.
 They do not compile Swift or execute Apple frameworks. Cloud XCTest and archive
 results must be checked in [the main iOS workflow](https://github.com/HongHuo0728/LogForge/actions/workflows/build-ios.yml).
-The generated test movie reproduces the reported AAC count and start time; it is
-not the user's original recording. Device performance, visual transitions and
+The generated test movie has the reported AAC count and container edit offset;
+AVFoundation can normalize its visible start differently. A damaged-audio-byte
+regression separately exercises the actual production restoration path and
+strict validation before and after repair. It is not the user's original
+recording. Device performance, visual transitions and
 editor recognition remain separate checks.
 
 Apple references: [AAC encoder delay](https://developer.apple.com/documentation/quicktime-file-format/background_aac_encoding),

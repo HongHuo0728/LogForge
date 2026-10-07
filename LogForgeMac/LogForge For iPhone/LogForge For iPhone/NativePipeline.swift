@@ -600,22 +600,14 @@ struct NativePipeline {
         var validation = try await OutputValidator().validate(outputURL:partial,expectedFrameCount:count,expectedDuration:actualDuration,
             expectedPTS:timestamps,expectedDurations:durations,expectedCodec:quality.codec,forceSoftwareDecoding:softwareDecoding)
         guard validation.passed else { throw NativeFailure("error.validation", String(describing:validation)) }
-        var restoredTrackTables = false
-        do { try await TrackIntegrity.validate(source:asset,output:AVURLAsset(url:partial),offset:offset) }
-        catch let failure as NativeFailure {
-            // Reader/Writer passthrough can alter AAC preroll/edit lists and tmcd
-            // duration. Restore original stored tracks, then repeat both strict
-            // validators. A common nonzero shift still uses the existing path.
-            guard failure.key == "error.trackCopy", offset == .zero else { throw failure }
-            let retained = Set(trackInputs.keys.filter { $0 != contract.track.trackID }.map { UInt32(bitPattern:$0) })
-            try PreservedTracksMOV.restore(sourceURL:asset.url,outputURL:partial,
-                videoTrackID:UInt32(bitPattern:contract.track.trackID),retainedTrackIDs:retained)
+        let retained = Set(trackInputs.keys.filter { $0 != contract.track.trackID }.map { UInt32(bitPattern:$0) })
+        let restoredTrackTables = try await TrackIntegrity.preserve(source:asset,outputURL:partial,offset:offset,
+            videoTrackID:UInt32(bitPattern:contract.track.trackID),retainedTrackIDs:retained)
+        if restoredTrackTables {
             try AppleLogMOV.process(url:partial,patch:false)
             validation = try await OutputValidator().validate(outputURL:partial,expectedFrameCount:count,expectedDuration:actualDuration,
                 expectedPTS:timestamps,expectedDurations:durations,expectedCodec:quality.codec,forceSoftwareDecoding:softwareDecoding)
             guard validation.passed else { throw NativeFailure("error.validation",String(describing:validation)) }
-            try await TrackIntegrity.validate(source:asset,output:AVURLAsset(url:partial),offset:offset)
-            restoredTrackTables = true
         }
         try Task.checkCancellation()
         let base = asset.url.deletingPathExtension().lastPathComponent + "_AppleLog_" + (quality == .proRes422HQ ? "ProRes422HQ" : "ProRes422")
@@ -664,6 +656,19 @@ struct NativePipeline {
 }
 
 enum TrackIntegrity {
+    static func preserve(source: AVURLAsset, outputURL: URL, offset: CMTime, videoTrackID: UInt32,
+                         retainedTrackIDs: Set<UInt32>) async throws -> Bool {
+        do { try await validate(source:source,output:AVURLAsset(url:outputURL),offset:offset); return false }
+        catch let failure as NativeFailure {
+            // Passthrough can change AAC preroll/edits or timecode duration.
+            // Restoration must still pass the original strict validator.
+            guard failure.key == "error.trackCopy", offset == .zero else { throw failure }
+            try PreservedTracksMOV.restore(sourceURL:source.url,outputURL:outputURL,
+                videoTrackID:videoTrackID,retainedTrackIDs:retainedTrackIDs)
+            try await validate(source:source,output:AVURLAsset(url:outputURL),offset:offset)
+            return true
+        }
+    }
     struct Interval: Equatable { var start: CMTime; var end: CMTime }
     struct Signature: Equatable {
         let media: AVMediaType
