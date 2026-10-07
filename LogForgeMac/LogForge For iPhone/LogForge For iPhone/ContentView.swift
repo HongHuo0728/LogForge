@@ -22,10 +22,13 @@ struct ContentView: View {
     @Environment(\.colorScheme) private var scheme
     private enum PickerPurpose { case files, folder, destination }
     private var busy: Bool { queue.running || queue.importing }
+    private var appBackground: some View {
+        LinearGradient(colors:scheme == .dark ? [Color(red:0.025,green:0.06,blue:0.12),Color(red:0.05,green:0.12,blue:0.2),Color(red:0.10,green:0.08,blue:0.18)] : [Color(red:0.90,green:0.96,blue:0.99),Color(red:0.84,green:0.92,blue:0.97),Color(red:0.94,green:0.91,blue:0.99)],startPoint:.topLeading,endPoint:.bottomTrailing).ignoresSafeArea()
+    }
     var body: some View {
         NavigationStack {
             ZStack {
-                LinearGradient(colors: scheme == .dark ? [Color(red:0.025,green:0.06,blue:0.12),Color(red:0.05,green:0.12,blue:0.2),Color(red:0.10,green:0.08,blue:0.18)] : [Color(red:0.90,green:0.96,blue:0.99),Color(red:0.84,green:0.92,blue:0.97),Color(red:0.94,green:0.91,blue:0.99)],startPoint:.topLeading,endPoint:.bottomTrailing).ignoresSafeArea()
+                appBackground
                 ScrollView {
                     GlassEffectContainer(spacing:12) {
                         VStack(spacing:18) {
@@ -92,7 +95,6 @@ struct ContentView: View {
         GlassCard("") {
             Text("LogForge").font(.largeTitle.bold())
             Text(AppBuild.label).font(.caption).foregroundStyle(.secondary).accessibilityIdentifier("appBuild")
-            Text(String(format:L10n.text("version.build"),AppBuild.buildNumber)).font(.caption).foregroundStyle(.secondary).accessibilityIdentifier("bundleBuild")
             Text(L10n.text("subtitle")).font(.subheadline)
             Text(queue.capability).font(.footnote).foregroundStyle(.secondary).accessibilityIdentifier("capability")
         }
@@ -192,8 +194,7 @@ struct ContentView: View {
                 GlassEffectContainer(spacing:12) {
                     VStack(spacing:18) {
                         GlassCard(L10n.text("version.title")) {
-                            Text(AppBuild.label).font(.headline).textSelection(.enabled)
-                            Text(String(format:L10n.text("version.build"),AppBuild.buildNumber)).font(.footnote).textSelection(.enabled)
+                            Text(AppBuild.label).font(.headline).textSelection(.enabled).accessibilityIdentifier("settingsVersion")
                         }
                         GlassCard(L10n.text("exposure")) { optionMenu("exposure",value:$draft.exposure,choices:ConversionOptions.exposureChoices,percentage:false) }
                         GlassCard(L10n.text("creative")) {
@@ -210,7 +211,7 @@ struct ContentView: View {
                                 Label(L10n.text("haptics")+": "+L10n.text(draftHaptics ? "enabled" : "disabled"),systemImage:"waveform")
                             }.buttonStyle(GlassActionStyle())
                         }
-                        NavigationLink { licenseView } label: { Label(L10n.text("licenses"),systemImage:"doc.text") }.buttonStyle(GlassActionStyle())
+                        NavigationLink { LicenseView() } label: { Label(L10n.text("licenses"),systemImage:"doc.text") }.buttonStyle(GlassActionStyle()).accessibilityIdentifier("openSourceLicenses")
                             .simultaneousGesture(TapGesture().onEnded { Haptics.play(.small) })
                         HStack {
                             Button { showSettings = false; Haptics.play(.medium) } label: { Text(L10n.text("cancel")) }.buttonStyle(GlassActionStyle()); Spacer()
@@ -219,16 +220,7 @@ struct ContentView: View {
                     }.padding(20).frame(maxWidth:700)
                 }.frame(maxWidth:.infinity)
             }.navigationTitle(L10n.text("settings"))
-        }.presentationBackground(.clear)
-    }
-    private var licenseView: some View {
-        ScrollView {
-            GlassCard(L10n.text("licenses")) {
-                Text(["NOTICE","SoftwareCodec-LICENSE"].compactMap { name in
-                    Bundle.main.url(forResource:name,withExtension:"txt").flatMap { try? String(contentsOf:$0,encoding:.utf8) }
-                }.joined(separator:"\n\n")).font(.footnote).textSelection(.enabled)
-            }.padding(20)
-        }.navigationTitle(L10n.text("licenses"))
+        }.presentationBackground { appBackground }
     }
     private func optionMenu(_ key: String, value: Binding<Float>, choices: [Float], percentage: Bool) -> some View {
         func label(_ v: Float) -> String { percentage ? "\(Int((v*100).rounded()))%" : String(format:"%g EV",v) }
@@ -236,5 +228,28 @@ struct ContentView: View {
             Text(L10n.text(key)); Spacer()
             Menu { ForEach(choices,id:\.self) { v in Button(label(v)) { value.wrappedValue = v; Haptics.play(.small) } } } label: { Label(label(value.wrappedValue),systemImage:"chevron.down").padding(14).clearGlass(interactive:true,radius:18) }
         }
+    }
+}
+
+private struct LicenseView: View {
+    // Read once, outside body/layout. Break up the long legal text so navigation
+    // does not repeatedly load and measure the entire document as a single Text.
+    private static let paragraphs = ["NOTICE","SoftwareCodec-LICENSE"].compactMap { name in
+        Bundle.main.url(forResource:name,withExtension:"txt").flatMap { try? String(contentsOf:$0,encoding:.utf8) }
+    }.joined(separator:"\n\n").components(separatedBy:"\n\n").filter { !$0.isEmpty }
+    var body: some View {
+        GlassEffectContainer {
+            ScrollView {
+                LazyVStack(alignment:.leading,spacing:12) {
+                    ForEach(Array(Self.paragraphs.enumerated()),id:\.offset) { _, paragraph in
+                        Text(paragraph).font(.footnote).textSelection(.enabled).frame(maxWidth:.infinity,alignment:.leading)
+                    }
+                }.padding(20)
+            }.accessibilityIdentifier("licenseDocument")
+                // Glass belongs to the fixed viewport, not the changing height
+                // of the long document. Scrolling cannot resize its white scrim.
+                .frame(maxWidth:700,maxHeight:.infinity).clearGlass().padding(20)
+        }.frame(maxWidth:.infinity,maxHeight:.infinity)
+            .navigationTitle(L10n.text("licenses")).navigationBarTitleDisplayMode(.inline)
     }
 }

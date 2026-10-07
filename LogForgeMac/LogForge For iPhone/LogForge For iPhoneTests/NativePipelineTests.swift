@@ -544,7 +544,7 @@ final class NativePipelineTests: XCTestCase {
         let report = try JSONSerialization.jsonObject(with:Data(contentsOf:result.outputURL.appendingPathExtension("json"))) as? [String:Any]
         XCTAssertEqual(report?["decoding"] as? String,result.diagnostics.decodingBackend)
         XCTAssertEqual(report?["appVersion"] as? String,AppBuild.version)
-        XCTAssertEqual(report?["releaseBuild"] as? String,AppBuild.releaseBuild)
+        XCTAssertNil(report?["releaseBuild"])
         XCTAssertEqual(report?["bundleBuild"] as? String,AppBuild.buildNumber)
         XCTAssertTrue(["AVFoundation","prores"].contains(report?["validationDecoding"] as? String ?? ""))
     }
@@ -573,6 +573,79 @@ final class NativePipelineTests: XCTestCase {
             let outputTransform = try await track.load(.preferredTransform)
             XCTAssertEqual(sourceTransform,outputTransform)
         }
+    }
+    private func aacTimecodeFixture() throws -> URL {
+        try XCTUnwrap(Bundle(for:NativePipelineTests.self).url(forResource:"aac-edits-timecode",withExtension:"mov"))
+    }
+    func testOriginalAACAndTimecodeTablesSurviveBoundedChunkRestore() async throws {
+        let source = try aacTimecodeFixture(), asset = AVURLAsset(url:source)
+        let contract = try await InputContract.inspect(asset)
+        let original = try await TrackIntegrity.signatures(asset,offset:.zero)
+        let audio = try XCTUnwrap(original.first { $0.media == .audio })
+        XCTAssertEqual(audio.sampleCount,111)
+        XCTAssertEqual(audio.intervals.first?.start,CMTime(value:2048,timescale:48000))
+        XCTAssertNotNil(original.first { $0.media == .timecode })
+        let copied = FileManager.default.temporaryDirectory.appendingPathComponent("Restored-\(UUID()).mov")
+        try FileManager.default.copyItem(at:source,to:copied)
+        addTeardownBlock { try? FileManager.default.removeItem(at:copied) }
+        let tracks = try await asset.load(.tracks)
+        let retained = Set(tracks.filter { [.audio,.timecode].contains($0.mediaType) }.map { UInt32(bitPattern:$0.trackID) })
+        try PreservedTracksMOV.restore(sourceURL:source,outputURL:copied,
+            videoTrackID:UInt32(bitPattern:contract.track.trackID),retainedTrackIDs:retained)
+        try await TrackIntegrity.validate(source:asset,output:AVURLAsset(url:copied),offset:.zero)
+        // The video and its timecode association still resolve, with no duplicate IDs.
+        let outputVideos = try await AVURLAsset(url:copied).loadTracks(withMediaType:.video)
+        let outputVideo = try XCTUnwrap(outputVideos.first)
+        let associated = try await outputVideo.loadAssociatedTracks(ofType:.timecode)
+        XCTAssertEqual(associated.count,1)
+        let reader = try FileHandle(forReadingFrom:source); defer { try? reader.close() }
+        let movie = try PreservedTracksMOV.readMovie(reader)
+        let rootTracks = try PreservedTracksMOV.children(movie.data).filter { $0.type == "trak" }
+        let audioTrack = try XCTUnwrap(rootTracks.first { box in
+            let track = movie.data.subdata(in:box.start..<(box.start+box.size))
+            return try PreservedTracksMOV.trackID(track) == UInt32(bitPattern:tracks.first { $0.mediaType == .audio }!.trackID)
+        })
+        XCTAssertThrowsError(try PreservedTracksMOV.chunks(movie.data.subdata(in:audioTrack.start..<(audioTrack.start+audioTrack.size)),
+            movie:PreservedTracksMOV.Movie(position:movie.position,data:movie.data,media:[])))
+    }
+    func testAACEditAndTimecodeConversionUsesStrictTrackValidation() async throws {
+        let source = try aacTimecodeFixture(), asset = AVURLAsset(url:source)
+        let contract = try await InputContract.inspect(asset)
+        var options = ConversionOptions(); options.backend = .cpu
+        let result = try await NativePipeline(options:options,quality:.proRes422HQ,progress:{ _,_ in }).run(
+            asset:asset,contract:contract,software:true,softwareDecoding:true)
+        addTeardownBlock {
+            try? FileManager.default.removeItem(at:result.outputURL)
+            try? FileManager.default.removeItem(at:result.outputURL.appendingPathExtension("json"))
+        }
+        XCTAssertEqual(result.frameCount,72)
+        try await TrackIntegrity.validate(source:asset,output:AVURLAsset(url:result.outputURL),offset:.zero)
+        try AppleLogMOV.process(url:result.outputURL,patch:false)
+        let report = try JSONSerialization.jsonObject(with:Data(contentsOf:result.outputURL.appendingPathExtension("json"))) as? [String:Any]
+        XCTAssertEqual(report?["validated"] as? Bool,true)
+        XCTAssertEqual(report?["restoredOriginalTrackTables"] as? Bool,true)
+    }
+    func testPreservedMovieClockPromotesLongDurationsAndKeepsMediaEdits() throws {
+        var trackHeader = Data(repeating:0,count:84)
+        trackHeader.replaceSubrange(12..<16,with:PreservedTracksMOV.bytes(2))
+        trackHeader.replaceSubrange(20..<24,with:PreservedTracksMOV.bytes(5000))
+        let atom = try AppleLogMOV.atom("tkhd",trackHeader)
+        let updated = try PreservedTracksMOV.header(atom,type:"tkhd",duration:5_000_000_000)
+        let payload = try PreservedTracksMOV.body(updated)
+        XCTAssertEqual(payload[0],1)
+        XCTAssertEqual(try PreservedTracksMOV.number(payload,20),2)
+        XCTAssertEqual(try PreservedTracksMOV.number(payload,28,8),5_000_000_000)
+        var edits = Data(repeating:0,count:4); edits.append(PreservedTracksMOV.bytes(2))
+        for (duration,media) in [(UInt64(43),UInt64(UInt32.max)),(UInt64(5000),UInt64(2048))] {
+            edits.append(PreservedTracksMOV.bytes(duration)); edits.append(PreservedTracksMOV.bytes(media)); edits.append(Data([0,1,0,0]))
+        }
+        let updatedEdits = try PreservedTracksMOV.edits(AppleLogMOV.atom("elst",edits),from:1000,to:1_000_000_000)
+        let p = try PreservedTracksMOV.body(updatedEdits)
+        XCTAssertEqual(p[0],1)
+        XCTAssertEqual(try PreservedTracksMOV.number(p,8,8),43_000_000)
+        XCTAssertEqual(try PreservedTracksMOV.number(p,16,8),UInt64.max)
+        XCTAssertEqual(try PreservedTracksMOV.number(p,28,8),5_000_000_000)
+        XCTAssertEqual(try PreservedTracksMOV.number(p,36,8),2048)
     }
     func testMetalPackedColorChromaPhaseAndTailMatchCPU() async throws {
         guard MetalColorProcessor.isAvailable else { throw XCTSkip("Metal unavailable on this test destination") }

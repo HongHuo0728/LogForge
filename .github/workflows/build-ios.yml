@@ -37,13 +37,12 @@ jobs:
       - name: Check release identity and tag
         run: |
           python3 tools/test_release_info.py
-          release_identity=$(python3 tools/release-info.py)
-          read -r version release_build <<< "$release_identity"
+          version=$(python3 tools/release-info.py)
           if [[ "$GITHUB_REF_TYPE" == tag && "$GITHUB_REF_NAME" != "v$version" ]]; then
-            echo 'Tag and main project version differ' >&2
+            echo 'Tag and iOS project version differ' >&2
             exit 1
           fi
-          printf 'LOGFORGE_ARTIFACT=LogForge-%s-iOS-%s-unsigned-%s\n' "$version" "$release_build" "$GITHUB_RUN_NUMBER" >> "$GITHUB_ENV"
+          printf 'LOGFORGE_ARTIFACT=LogForge-%s-iOS-unsigned-%s\n' "$version" "$GITHUB_RUN_NUMBER" >> "$GITHUB_ENV"
       - name: Simulator regression tests
         run: bash tools/build-ios.sh test
       - name: Archive and package iPhone release

@@ -6,7 +6,7 @@ Native **Windows and iOS** applications that convert **BT.2020 HLG ProRes** into
 
 LogForge changes the pixels using published color mathematics. It does not restore clipped highlights, crushed shadows, tone-mapped-away detail, or information lost in a camera's ISP. It cannot turn processed phone footage into the original sensor capture.
 
-**Version 1.3.0 · Windows build 26929A · iOS release build 26106A.** Windows exports ProRes 422 HQ; iOS offers ProRes 422 and 422 HQ. Output uses **Apple Log / Rec.2020 with Video levels**. The identification fields were **verified in the Windows 1.1.0 release with DaVinci Resolve Studio 20.3.2.9**, using DaVinci YRGB Color Managed. The Windows verification scope is recorded in [VALIDATION](docs/VALIDATION.md); this historical evidence does not verify a new iOS editor import. This is Apple Log, not Apple Log 2 / Apple Wide Gamut. See the [native-reference and real-import evidence](docs/APPLE_LOG_IDENTIFICATION.md).
+**Windows 1.3.0 (26929A) · iOS 1.3.1.** Windows exports ProRes 422 HQ; iOS offers ProRes 422 and 422 HQ. Output uses **Apple Log / Rec.2020 with Video levels**. The identification fields were **verified in the Windows 1.1.0 release with DaVinci Resolve Studio 20.3.2.9**, using DaVinci YRGB Color Managed. The Windows verification scope is recorded in [VALIDATION](docs/VALIDATION.md); this historical evidence does not verify a new iOS editor import. This is Apple Log, not Apple Log 2 / Apple Wide Gamut. See the [native-reference and real-import evidence](docs/APPLE_LOG_IDENTIFICATION.md).
 
 ## Platforms
 
@@ -20,9 +20,9 @@ LogForge changes the pixels using published color mathematics. It does not resto
 | Interface languages | English, Simplified Chinese | English, Simplified Chinese, Traditional Chinese, French, Spanish |
 | Distribution | Portable Windows ZIP | iPhone arm64 IPA; signing required |
 
-Both platforms belong to the main [LogForge repository](https://github.com/HongHuo0728/LogForge) and the 1.3.0 release. Availability depends on the assets uploaded to [Releases](https://github.com/HongHuo0728/LogForge/releases/tag/v1.3.0); a prepared release configuration does not mean its IPA has already been published. macOS and Linux applications are not provided.
+Both platforms belong to the main [LogForge repository](https://github.com/HongHuo0728/LogForge). Windows remains 1.3.0; the current iOS patch version is 1.3.1. Availability depends on the assets uploaded to [Releases](https://github.com/HongHuo0728/LogForge/releases/tag/v1.3.0); a prepared release configuration does not mean its IPA has already been published. macOS and Linux applications are not provided.
 
-## iOS 1.3.0 (26106A)
+## iOS 1.3.1
 
 - Native transparent Liquid Glass interface, layered glass icon, accessibility contrast handling and haptic feedback.
 - Import from Photos, files or folders; choose an export directory, process a queue, cancel and retry failed videos.
@@ -30,13 +30,13 @@ Both platforms belong to the main [LogForge repository](https://github.com/HongH
 - Convert supported **ProRes 422 / 422 HQ, BT.2020 HLG MOV** footage to Apple Log; HEVC, PQ, SDR and other ProRes profiles are not accepted by the current input contract. A phone's camera-recording capability is separate from software conversion capability.
 - Preserve and independently validate frame timing, audio, auxiliary tracks and display rotation. iOS accepts valid variable frame timing; the Windows fixed-cadence requirement below applies to Windows.
 - Open the app's Apple Settings page with the top-left language button. Select English, Simplified Chinese, Traditional Chinese, French or Spanish when the system exposes the preferred-language setting.
-- Show `1.3.0 (26106A)` and a separate numeric Apple build number in the app; reports identify the version actually used for each conversion attempt.
+- Show only `1.3.1` in the app; reports retain each conversion attempt’s version and internal diagnostics.
 
 Download the iOS IPA and matching RelinkKit from the main release when uploaded. The provided build pipeline produces an **unsigned** IPA: sign it with your own valid Apple identity and provisioning profile before installation. No App Store or TestFlight release is configured. Keep the corresponding source, license and relink material when distributing the app.
 
 For cloud builds, use **iOS build and tests** in the main repository's [Actions](https://github.com/HongHuo0728/LogForge/actions/workflows/build-ios.yml). Simulator tests must pass before the iPhone archive is packaged. See the [iOS build and installation guide](https://github.com/HongHuo0728/LogForge/blob/main/LogForgeMac/docs/GITHUB_BUILD.md).
 
-The preceding iOS test build passed 27 simulator tests with no failures or skips, including software conversion, Metal/CPU comparison, 4K ProRes decoding and audio/timing preservation. The 1.3.0 release-identity changes still require a new cloud build. Simulator results do not establish iPhone 12 Pro performance or editor recognition; the user's original videos have not been supplied for regression testing.
+iOS 1.3.1 fixes AAC/timecode track preservation and improves license navigation. [Release details](docs/RELEASE_1.3.1_IOS.md) distinguish regressions, cloud builds and device verification. The user's original video has not been supplied; simulator results do not establish physical-device performance or editor recognition.
 
 ![LogForge Windows interface](docs/images/LogForge.png)
 

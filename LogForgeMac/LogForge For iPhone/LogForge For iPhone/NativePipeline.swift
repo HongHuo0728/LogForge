@@ -594,10 +594,26 @@ struct NativePipeline {
         try AppleLogMOV.process(url:partial,patch:true)
         progress(0.96,count)
         let actualDuration = (videoEnd-(first ?? .zero)).seconds
-        let validation = try await OutputValidator().validate(outputURL:partial,expectedFrameCount:count,expectedDuration:actualDuration,
+        var validation = try await OutputValidator().validate(outputURL:partial,expectedFrameCount:count,expectedDuration:actualDuration,
             expectedPTS:timestamps,expectedDurations:durations,expectedCodec:quality.codec,forceSoftwareDecoding:softwareDecoding)
         guard validation.passed else { throw NativeFailure("error.validation", String(describing:validation)) }
-        try await TrackIntegrity.validate(source:asset,output:AVURLAsset(url:partial),offset:offset)
+        var restoredTrackTables = false
+        do { try await TrackIntegrity.validate(source:asset,output:AVURLAsset(url:partial),offset:offset) }
+        catch let failure as NativeFailure {
+            // Reader/Writer passthrough can alter AAC preroll/edit lists and tmcd
+            // duration. Restore original stored tracks, then repeat both strict
+            // validators. A common nonzero shift still uses the existing path.
+            guard failure.key == "error.trackCopy", offset == .zero else { throw failure }
+            let retained = Set(trackInputs.keys.filter { $0 != contract.track.trackID }.map { UInt32(bitPattern:$0) })
+            try PreservedTracksMOV.restore(sourceURL:asset.url,outputURL:partial,
+                videoTrackID:UInt32(bitPattern:contract.track.trackID),retainedTrackIDs:retained)
+            try AppleLogMOV.process(url:partial,patch:false)
+            validation = try await OutputValidator().validate(outputURL:partial,expectedFrameCount:count,expectedDuration:actualDuration,
+                expectedPTS:timestamps,expectedDurations:durations,expectedCodec:quality.codec,forceSoftwareDecoding:softwareDecoding)
+            guard validation.passed else { throw NativeFailure("error.validation",String(describing:validation)) }
+            try await TrackIntegrity.validate(source:asset,output:AVURLAsset(url:partial),offset:offset)
+            restoredTrackTables = true
+        }
         try Task.checkCancellation()
         let base = asset.url.deletingPathExtension().lastPathComponent + "_AppleLog_" + (quality == .proRes422HQ ? "ProRes422HQ" : "ProRes422")
         var suffix = 0, destination = directory.appendingPathComponent(base+".mov")
@@ -613,7 +629,7 @@ struct NativePipeline {
             yCbCrMatrix:String(describing:kCMFormatDescriptionYCbCrMatrix_ITU_R_2020),colorInterpretation:.bt2020HLG,warnings:warnings,processingBackend:metal == nil ? .cpu : .metal,encodingBackend:software ? "prores_ks" : "AVFoundation",decodingBackend:softwareDecoding ? "prores" : "AVFoundation")
         let result = VideoProcessingResult(outputURL:destination,frameCount:count,duration:validation.duration,diagnostics:diagnostics)
         let report: [String:Any] = ["frames":count,"duration":validation.duration,"warnings":warnings,"validated":true,
-            "appVersion":AppBuild.version,"releaseBuild":AppBuild.releaseBuild,"bundleBuild":AppBuild.buildNumber,
+            "appVersion":AppBuild.version,"bundleBuild":AppBuild.buildNumber,"restoredOriginalTrackTables":restoredTrackTables,
             "decoding":softwareDecoding ? "prores" : "AVFoundation","validationDecoding":validation.decodingBackend,
             "encoding":software ? "prores_ks" : "AVFoundation","color":metal == nil ? "CPU" : "Metal",
             "source":asset.url.lastPathComponent,"profile":quality.rawValue,"commonTimingOffsetSeconds":offset.seconds,

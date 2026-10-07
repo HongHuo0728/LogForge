@@ -71,7 +71,7 @@ def main():
             if objects[phase]['isa'] == 'PBXSourcesBuildPhase':
                 source_members += [references[objects[b]['fileRef']] for b in objects[phase]['files']]
         name = target['name']
-        expected = 24 if name == 'LogForge For iPhone' else 2 if name.endswith('Tests') and not name.endswith('UITests') else 3
+        expected = 25 if name == 'LogForge For iPhone' else 2 if name.endswith('Tests') and not name.endswith('UITests') else 3
         assert len(source_members) == expected, f'Sources in {name}: {len(source_members)}'
         if name == 'LogForge For iPhone':
             assert not any('Tests' in str(p.relative_to(root)) for p in source_members)
@@ -104,18 +104,18 @@ def main():
             assert key in tables['en'], f'Missing localization {key}: {path}'
     info = plistlib.loads((app/'Info.plist').read_bytes())
     assert set(info['CFBundleLocalizations']) == set(tables)
-    assert info['LogForgeReleaseBuild'] == '$(LOGFORGE_RELEASE_BUILD)'
+    assert 'LogForgeReleaseBuild' not in info
     assert info['CFBundleVersion'] == '$(CURRENT_PROJECT_VERSION)'
     spec = importlib.util.spec_from_file_location('logforge_release_info', root.parent/'tools/release-info.py')
     identity = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(identity)
-    version, release_build = identity.release_identity(root.parent)
+    version = identity.release_identity(root.parent)
     for obj in objects.values():
         settings = obj.get('buildSettings', {})
         if 'MARKETING_VERSION' in settings:
             assert settings['MARKETING_VERSION'] == version
-            assert settings['LOGFORGE_RELEASE_BUILD'] == release_build
-    findings.append(f'Release identity: {version} ({release_build}); Apple bundle build stays numeric')
+            assert 'LOGFORGE_RELEASE_BUILD' not in settings
+    findings.append(f'iOS release identity: {version}; Apple bundle build stays numeric and internal')
     findings.append(f'Five localizations: {len(tables["en"])} identical keys and format arguments')
     icon = app/'LogForge.icon'
     manifest = json.loads((icon/'icon.json').read_text())

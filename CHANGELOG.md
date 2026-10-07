@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.3.1 — iOS
+
+- Fix AAC and timecode passthrough changes by restoring original stored chunks,
+  sample tables and edit lists when the strict track validator detects a mismatch.
+  Repeat video and retained-track validation before publishing the output.
+- Keep copying bounded and preserve audio payloads, AAC preroll, track language,
+  timecode associations and original media clocks; promote movie-clock durations
+  to 64 bits when needed. Invalid/external media references still fail.
+- Cache open-source license text and render it in paragraphs with a consistent
+  settings background, avoiding repeated whole-document layout during navigation.
+- Display only iOS version `1.3.1`; keep the numeric Apple bundle build internal.
+  Resolve iOS versions independently of the unchanged Windows 1.3.0 project.
+- Add generated AAC/edit-list/timecode regressions and a license navigation UI test.
+
 ## 1.3.0 (26929A)
 
 ### iOS addition — release build 26106A

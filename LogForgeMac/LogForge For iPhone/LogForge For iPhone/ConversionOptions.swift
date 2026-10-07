@@ -39,10 +39,9 @@ struct NativeFailure: LocalizedError {
 
 enum AppBuild {
     static var version: String { Bundle.main.object(forInfoDictionaryKey:"CFBundleShortVersionString") as? String ?? "unknown" }
-    static var releaseBuild: String { Bundle.main.object(forInfoDictionaryKey:"LogForgeReleaseBuild") as? String ?? "unknown" }
     static var buildNumber: String { Bundle.main.object(forInfoDictionaryKey:"CFBundleVersion") as? String ?? "unknown" }
     static var label: String {
-        "\(version) (\(releaseBuild))"
+        version
     }
     static var diagnosticLabel: String { "\(label) [build \(buildNumber)]" }
 }

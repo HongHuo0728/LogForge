@@ -6,7 +6,7 @@
 
 LogForge 使用公开的色彩数学改变像素。它无法恢复已裁切的高光、压死的阴影、被色调映射丢弃的细节或相机 ISP 已丢失的信息，也不能把经过处理的手机视频还原为原始传感器采集。
 
-**版本 1.3.0 · Windows 构建 26929A · iOS 发行构建 26106A。** Windows 导出 ProRes 422 HQ；iOS 可选 ProRes 422 或 422 HQ。输出使用 **Apple Log / Rec.2020、视频范围（Video levels）**。识别字段曾在 **Windows 1.1.0、DaVinci Resolve Studio 20.3.2.9、DaVinci YRGB Color Managed** 下验证。Windows 的验证范围见 [VALIDATION](docs/VALIDATION.md)；这些历史证据不能当作新 iOS 输出的编辑器导入验证。这里使用 Apple Log，不是 Apple Log 2 / Apple Wide Gamut。见[原生参考及真实导入证据](docs/APPLE_LOG_IDENTIFICATION.md)。
+**Windows 1.3.0（26929A）· iOS 1.3.1。** Windows 导出 ProRes 422 HQ；iOS 可选 ProRes 422 或 422 HQ。输出使用 **Apple Log / Rec.2020、视频范围（Video levels）**。识别字段曾在 **Windows 1.1.0、DaVinci Resolve Studio 20.3.2.9、DaVinci YRGB Color Managed** 下验证。Windows 的验证范围见 [VALIDATION](docs/VALIDATION.md)；这些历史证据不能当作新 iOS 输出的编辑器导入验证。这里使用 Apple Log，不是 Apple Log 2 / Apple Wide Gamut。见[原生参考及真实导入证据](docs/APPLE_LOG_IDENTIFICATION.md)。
 
 ## 平台
 
@@ -20,9 +20,9 @@ LogForge 使用公开的色彩数学改变像素。它无法恢复已裁切的�
 | 界面语言 | 英语、简体中文 | 英语、简体中文、繁体中文、法语、西班牙语 |
 | 分发 | Windows 便携 ZIP | iPhone arm64 IPA，安装前需要签名 |
 
-两端均属于主 [LogForge 仓库](https://github.com/HongHuo0728/LogForge) 的 1.3.0 版本。可下载的文件以 [Releases](https://github.com/HongHuo0728/LogForge/releases/tag/v1.3.0) 实际上传的附件为准；准备好正式版配置不代表 IPA 已发布。目前没有 macOS 或 Linux 应用。
+两端均属于主 [LogForge 仓库](https://github.com/HongHuo0728/LogForge)。当前 Windows 为 1.3.0，iOS patch 为 1.3.1。可下载的文件以 [Releases](https://github.com/HongHuo0728/LogForge/releases/tag/v1.3.0) 实际上传的附件为准；准备好正式版配置不代表 IPA 已发布。目前没有 macOS 或 Linux 应用。
 
-## iOS 1.3.0（26106A）
+## iOS 1.3.1
 
 - 原生透明液态玻璃界面、分层玻璃图标、辅助功能对比度适配及触感反馈。
 - 从相册、文件或文件夹导入；选择导出目录、处理队列、取消任务、重试失败视频。
@@ -30,13 +30,13 @@ LogForge 使用公开的色彩数学改变像素。它无法恢复已裁切的�
 - 将支持的 **ProRes 422 / 422 HQ、BT.2020 HLG MOV** 转为 Apple Log。当前输入合同不接受 HEVC、PQ、SDR 或其他 ProRes profile。手机能否拍摄 ProRes 与能否通过软件转换是不同能力。
 - 保留并独立验证帧时间、音频、辅助轨道和显示旋转。iOS 保留有效的可变帧时间；下文 Windows 的固定帧节奏要求仅适用于 Windows。
 - 点击左上角语言按钮打开 Apple 系统中的本应用设置。系统提供首选语言选项时，可选择英语、简体中文、繁体中文、法语或西班牙语。
-- 应用内显示 `1.3.0 (26106A)`，另显示数字形式的 Apple 内部构建号；报告记录每次转换实际使用的版本。
+- 应用内只显示 `1.3.1`；报告保留每次转换版本及内部诊断信息。
 
 正式附件上传后，从主仓库 Release 下载 iOS IPA 及匹配的 RelinkKit。构建流程生成的是**未签名 IPA**，安装前需使用自己的有效 Apple 签名和 provisioning profile。当前没有配置 App Store 或 TestFlight 发布。分发应用时，请保留对应源码、许可及重新链接材料。
 
 云端构建使用主仓库 [Actions](https://github.com/HongHuo0728/LogForge/actions/workflows/build-ios.yml) 中的 **iOS build and tests**。模拟器测试通过后才会归档并打包 iPhone 应用。详见 [iOS 构建与安装指南](https://github.com/HongHuo0728/LogForge/blob/main/LogForgeMac/docs/GITHUB_BUILD.md)。
 
-此前 iOS 测试构建通过了 27 项模拟器测试，无失败或跳过，覆盖软件转换、Metal/CPU 对照、4K ProRes 解码、音频和时间保留。本次 1.3.0 版本标识改动仍需新的云端构建。模拟器结果不能证明 iPhone 12 Pro 的性能或编辑器识别；用户原始视频尚未提供用于回归测试。
+iOS 1.3.1 修复 AAC / 时码轨道保留差异，并改进开源许可页面导航。[本次发布说明](docs/RELEASE_1.3.1_IOS.md)区分新增回归测试、云端构建与真机验证范围。用户原始视频尚未提供用于回归测试，模拟器结果不能证明真机性能或编辑器识别。
 
 ![LogForge Windows 界面](docs/images/LogForge.png)
 

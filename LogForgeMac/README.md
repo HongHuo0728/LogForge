@@ -1,25 +1,24 @@
-# LogForge iOS — 1.3.0 (26106A)
+# LogForge iOS — 1.3.1
 
 [English project README](https://github.com/HongHuo0728/LogForge/blob/main/README.md) · [简体中文主说明](https://github.com/HongHuo0728/LogForge/blob/main/README.zh-CN.md)
 
-This directory contains the native **Swift / SwiftUI / Metal** iOS application in
-the main [LogForge repository](https://github.com/HongHuo0728/LogForge). The
-directory name `LogForgeMac` is historical; this target is an iOS application.
-Minimum system: **iOS 26**. Version follows the Windows project: **1.3.0**;
-iOS release build: **26106A**. The numeric Apple bundle build is shown separately.
+This is the native Swift / SwiftUI / Metal iOS 26+ application in the main
+LogForge repository. `LogForgeMac` is a historical directory name. iOS patch
+versions now come from the Xcode project independently of the Windows version.
+The homepage and settings show **1.3.1**; Apple’s numeric bundle build remains
+internal. Windows stays at 1.3.0 (26929A).
 
-本目录是主 LogForge 项目中的原生 iOS 工程，与 Windows 端共同属于 1.3.0。
-现有 Swift / SwiftUI / Metal 架构保留；CPU/Metal 负责色彩转换，系统 ProRes
-编解码不可用时自动回退内嵌软件编解码。当前支持 ProRes 422/HQ BT.2020 HLG MOV，
-导出 Apple Log ProRes 422/HQ，并独立验证帧时间、音频、旋转和输出元数据。
+本次 iOS 1.3.1 修复 AAC / 时码轨道复制差异，并改进设置中的开源许可页面。
+发生轨道验证差异时，从原 MOV 保留音频样本、预滚及编辑列表，再重新严格核验；
+不跳过验证。保留 Swift / SwiftUI / Metal、CPU/Metal 色彩处理和软件 ProRes 回退。
+输入仍为 ProRes 422/HQ BT.2020 HLG MOV，输出为 Apple Log ProRes 422/HQ。
 
-**[主仓库云端构建和安装教程](docs/GITHUB_BUILD.md)** · **[1.3.0 iOS 发布步骤](docs/RELEASE_1.3.0_IOS.md)**
+[构建与安装](docs/GITHUB_BUILD.md) · [1.3.1 发布说明](../docs/RELEASE_1.3.1_IOS.md)
 
-正式发布从主仓库 [Release v1.3.0](https://github.com/HongHuo0728/LogForge/releases/tag/v1.3.0)
-下载已上传的 iOS 附件；云端构建使用主仓库的 **iOS build and tests**。
-测试通过后打包 `LogForge-1.3.0-iOS-26106A-unsigned.ipa`，并提供 SHA-256 和匹配的
-RelinkKit。IPA 需要自己的有效 Apple 签名才能安装，当前没有 App Store/TestFlight 配置。
+从主仓库的 **iOS build and tests** 成功构建中获取
+`LogForge-1.3.1-iOS-unsigned.ipa`、SHA-256 和匹配的 RelinkKit。
+IPA 必须使用有效 Apple 签名和配置文件后安装。构建成功不等于 Release 已发布。
+历史 v1.3.0 的 iOS 附件仍对应 4b9b777，不能用旧 IPA 验证本轮修复。
 
-此前测试构建的 27 项模拟器检查全部通过，无失败或跳过。本次版本显示和正式项目
-工作流更新还需新的 Apple 云端构建；液态玻璃可读性、触感、老设备性能及编辑器
-识别仍需真机验证。Windows 静态检查不能替代这些检查。
+新增夹具覆盖 111 个 AAC 样本、2048/48000 秒音频起点、时码和编辑列表。
+Windows 仅进行静态检查；原始视频、真机闪烁、老设备性能及编辑器识别需独立验证。

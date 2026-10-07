@@ -43,6 +43,8 @@
 		11C3E6DA55757DF68C9BE5D0 = {isa = PBXBuildFile; fileRef = 49EB8AC4F976837235DB8A64; };
 		876E52A280041BC464814F01 = {isa = PBXBuildFile; fileRef = 51EB05A34F6B27447FB33CFB; };
 		710AAF66268EFDD93E7F8061 = {isa = PBXBuildFile; fileRef = 710AAF66268EFDD93E7F8062; };
+		D13D131A0000000000000001 /* PreservedTracksMOV.swift in Sources */ = {isa = PBXBuildFile; fileRef = D13D131A0000000000000002 /* PreservedTracksMOV.swift */; };
+		D13D131A0000000000000003 /* aac-edits-timecode.mov in Resources */ = {isa = PBXBuildFile; fileRef = D13D131A0000000000000004; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -110,6 +112,8 @@
 		49EB8AC4F976837235DB8A64 = {isa = PBXFileReference; lastKnownFileType = text; path = SoftwareCodec-LICENSE.txt; sourceTree = "<group>"; };
 		51EB05A34F6B27447FB33CFB = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassFlowTests.swift; sourceTree = "<group>"; };
 		710AAF66268EFDD93E7F8062 = {isa = PBXFileReference; lastKnownFileType = text; path = NativeCodec/NOTICE.txt; sourceTree = SOURCE_ROOT; };
+		D13D131A0000000000000002 /* PreservedTracksMOV.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreservedTracksMOV.swift; sourceTree = "<group>"; };
+		D13D131A0000000000000004 /* aac-edits-timecode.mov */ = {isa = PBXFileReference; lastKnownFileType = video.quicktime; path = "Fixtures/aac-edits-timecode.mov"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -169,6 +173,7 @@
 				CC8C8700FE4B833A9AB9B21A /* ConversionQueue.swift */,
 				538F890837E625FFD8C842D8 /* AppleLogMOV.swift */,
 				D5D6C7A1A56370E32EC645AA /* NativePipeline.swift */,
+				D13D131A0000000000000002 /* PreservedTracksMOV.swift */,
 				432358199B91262062029BFA /* NativeColorPipeline.swift */,
 				3B83B98F968F229A21D19F73 /* ConversionOptions.swift */,
 				B2DB046630667C3700699934 /* VideoInfo.swift */,
@@ -208,6 +213,7 @@
 			children = (
 				7C54D502EA3130AABB288894 /* NativePipelineTests.swift */,
 				B2DB044D30667BDA00699934 /* LogForge_For_iPhoneTests.swift */,
+				D13D131A0000000000000004 /* aac-edits-timecode.mov */,
 			);
 			path = "LogForge For iPhoneTests";
 			sourceTree = "<group>";
@@ -345,6 +351,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D13D131A0000000000000003 /* aac-edits-timecode.mov in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -386,6 +393,7 @@
 				B34E39C75B7F21CBAEDA3103 /* ConversionQueue.swift in Sources */,
 				546938FD2F099623E81A1890 /* AppleLogMOV.swift in Sources */,
 				708CE822378C445B713C279B /* NativePipeline.swift in Sources */,
+				D13D131A0000000000000001 /* PreservedTracksMOV.swift in Sources */,
 				7B7805B08B2D5F8BEB5F8751 /* NativeColorPipeline.swift in Sources */,
 				FF30560F6DD91E808B188FD4 /* ConversionOptions.swift in Sources */,
 				B2B61470306C02A300DD288B /* LanguageManager.swift in Sources */,
@@ -591,8 +599,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.3.0;
-				LOGFORGE_RELEASE_BUILD = 26106A;
+				MARKETING_VERSION = 1.3.1;
 				PRODUCT_BUNDLE_IDENTIFIER = "Shizhihe.LogForge-For-iPhone";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -627,8 +634,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.3.0;
-				LOGFORGE_RELEASE_BUILD = 26106A;
+				MARKETING_VERSION = 1.3.1;
 				PRODUCT_BUNDLE_IDENTIFIER = "Shizhihe.LogForge-For-iPhone";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -646,8 +652,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
-				MARKETING_VERSION = 1.3.0;
-				LOGFORGE_RELEASE_BUILD = 26106A;
+				MARKETING_VERSION = 1.3.1;
 				PRODUCT_BUNDLE_IDENTIFIER = "Shizhihe.LogForge-For-iPhoneTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
@@ -666,8 +671,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
-				MARKETING_VERSION = 1.3.0;
-				LOGFORGE_RELEASE_BUILD = 26106A;
+				MARKETING_VERSION = 1.3.1;
 				PRODUCT_BUNDLE_IDENTIFIER = "Shizhihe.LogForge-For-iPhoneTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
@@ -684,8 +688,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.3.0;
-				LOGFORGE_RELEASE_BUILD = 26106A;
+				MARKETING_VERSION = 1.3.1;
 				PRODUCT_BUNDLE_IDENTIFIER = "Shizhihe.LogForge-For-iPhoneUITests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
@@ -702,8 +705,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.3.0;
-				LOGFORGE_RELEASE_BUILD = 26106A;
+				MARKETING_VERSION = 1.3.1;
 				PRODUCT_BUNDLE_IDENTIFIER = "Shizhihe.LogForge-For-iPhoneUITests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;

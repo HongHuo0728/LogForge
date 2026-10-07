@@ -21,31 +21,32 @@ class ReleaseIdentityTests(unittest.TestCase):
         self.native = self.main / 'LogForgeMac'
         project = self.native / 'LogForge For iPhone/LogForge For iPhone.xcodeproj/project.pbxproj'
         project.parent.mkdir(parents=True)
-        project.write_text('MARKETING_VERSION = 1.3.0;\nLOGFORGE_RELEASE_BUILD = 26106A;\n', encoding='utf-8')
+        project.write_text('MARKETING_VERSION = 1.3.1;\n', encoding='utf-8')
 
     def test_standalone_project_defaults(self):
-        self.assertEqual(release_identity(self.native), ('1.3.0', '26106A'))
+        self.assertEqual(release_identity(self.native), '1.3.1')
 
-    def test_main_windows_version_is_authoritative(self):
+    def test_ios_patch_version_is_independent_of_windows(self):
         (self.main / 'CMakeLists.txt').write_text('project(LogForge VERSION 1.4.0 LANGUAGES CXX)', encoding='utf-8')
-        self.assertEqual(release_identity(self.native), ('1.4.0', '26106A'))
+        self.assertEqual(release_identity(self.native), '1.3.1')
 
-    def test_malformed_main_version_cannot_silently_fall_back(self):
-        (self.main / 'CMakeLists.txt').write_text('project(LogForge VERSION invalid)', encoding='utf-8')
+    def test_malformed_ios_version_cannot_silently_fall_back(self):
+        project = self.native / 'LogForge For iPhone/LogForge For iPhone.xcodeproj/project.pbxproj'
+        project.write_text('MARKETING_VERSION = invalid;', encoding='utf-8')
         with self.assertRaises(ValueError):
             release_identity(self.native)
 
     def test_built_bundle_identity_and_numeric_build(self):
-        info = {'CFBundleShortVersionString':'1.3.0', 'LogForgeReleaseBuild':'26106A', 'CFBundleVersion':'20'}
-        verify_bundle(info, '1.3.0', '26106A', '20')
+        info = {'CFBundleShortVersionString':'1.3.1', 'CFBundleVersion':'20'}
+        verify_bundle(info, '1.3.1', '20')
         for key in info:
             bad = dict(info); bad[key] = 'wrong'
             with self.subTest(key=key), self.assertRaises(ValueError):
-                verify_bundle(bad, '1.3.0', '26106A', '20')
+                verify_bundle(bad, '1.3.1', '20')
         for value in ['26106A', '0', '', '1.2.3.4']:
             bad = dict(info); bad['CFBundleVersion'] = value
             with self.subTest(value=value), self.assertRaises(ValueError):
-                verify_bundle(bad, '1.3.0', '26106A', value)
+                verify_bundle(bad, '1.3.1', value)
 
     def test_actual_package_readme_renders_both_languages(self):
         script = Path(__file__).with_name('build-ios.sh').read_text(encoding='utf-8')
@@ -57,16 +58,16 @@ class ReleaseIdentityTests(unittest.TestCase):
         artifacts = self.main / 'build/artifacts'
         artifacts.mkdir(parents=True)
         env = os.environ.copy()
-        env.update(version='1.3.0', release_build='26106A', bundle_build='20',
-                   ipa_name='LogForge-1.3.0-iOS-26106A-unsigned.ipa')
+        env.update(version='1.3.1', bundle_build='20',
+                   ipa_name='LogForge-1.3.1-iOS-unsigned.ipa')
         bash = env.get('LOGFORGE_TEST_BASH') or shutil.which('bash')
         self.assertIsNotNone(bash, 'Bash is required to exercise packaging')
         subprocess.run([bash, '-euo', 'pipefail'], input=match.group(0)+'\n',
                        text=True, encoding='utf-8', cwd=self.main, env=env, check=True,
                        capture_output=True)
         text = (artifacts / 'READ-ME.txt').read_text(encoding='utf-8')
-        self.assertIn('LogForge 1.3.0 (26106A), Apple bundle build 20.', text)
-        self.assertIn('LogForge 1.3.0 (26106A)，Apple 内部构建号 20。', text)
+        self.assertIn('LogForge iOS 1.3.1.', text)
+        self.assertIn('LogForge iOS 1.3.1。', text)
         self.assertIn(env['ipa_name'], text)
         self.assertNotIn('$', text)
 

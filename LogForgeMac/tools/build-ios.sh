@@ -6,11 +6,10 @@ root="$PWD"
 export LOGFORGE_SOURCE_CACHE="${LOGFORGE_SOURCE_CACHE:-${RUNNER_TEMP:-$root/build}/LogForgeSource}"
 project="$root/LogForge For iPhone/LogForge For iPhone.xcodeproj"
 scheme='LogForge For iPhone'
-release_identity=$(python3 tools/release-info.py)
-read -r version release_build <<< "$release_identity"
+version=$(python3 tools/release-info.py)
 bundle_build="${GITHUB_RUN_NUMBER:-1}"
-ipa_name="LogForge-${version}-iOS-${release_build}-unsigned.ipa"
-relink_name="LogForge-${version}-iOS-${release_build}-RelinkKit.zip"
+ipa_name="LogForge-${version}-iOS-unsigned.ipa"
+relink_name="LogForge-${version}-iOS-RelinkKit.zip"
 mkdir -p build/logs build/artifacts
 xcodebuild -version | tee build/logs/xcode-version.txt
 sdk_version=$(xcrun --sdk iphoneos --show-sdk-version)
@@ -19,7 +18,7 @@ if [ "${sdk_version%%.*}" -lt 26 ]; then
     exit 1
 fi
 common=(-project "$project" -scheme "$scheme" -derivedDataPath "$root/build/DerivedData"
-    "MARKETING_VERSION=$version" "LOGFORGE_RELEASE_BUILD=$release_build"
+    "MARKETING_VERSION=$version"
     "CURRENT_PROJECT_VERSION=$bundle_build"
     CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO 'CODE_SIGN_IDENTITY=' 'DEVELOPMENT_TEAM=')
 case "${1:-archive}" in
@@ -47,20 +46,20 @@ archive)
         && shasum -a 256 "$relink_name" > "$relink_name.sha256")
     cp build/logs/xcode-version.txt build/artifacts/
     cat > build/artifacts/READ-ME.txt <<EOF
-LogForge ${version} (${release_build}), Apple bundle build ${bundle_build}.
+LogForge iOS ${version}.
 ${ipa_name} is a real iPhone (arm64) build, without an Apple signature.
 It cannot be installed by tapping the file. Sign it using your own valid Apple
 development/distribution identity and an appropriate provisioning profile.
 The included RelinkKit contains FFmpeg source, static library, app objects and
 the original build log. Keep it with the app when distributing a signed build.
 
-LogForge ${version} (${release_build})，Apple 内部构建号 ${bundle_build}。
+LogForge iOS ${version}。
 IPA 为未签名的 iPhone 正式配置构建，需要使用自己的有效 Apple 签名和配置文件安装。
 分发签名后的应用时，请同时提供对应的 RelinkKit、源码和许可声明。
 主项目：https://github.com/HongHuo0728/LogForge
 EOF
     if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
-        printf '### iPhone build ready\nVersion: **%s (%s)** · Apple build: **%s**\n\nDownload `%s` and the RelinkKit from this run’s Artifacts section.\n\nThe IPA needs signing before installation. No Apple certificate was used.\n' "$version" "$release_build" "$bundle_build" "$ipa_name" >> "$GITHUB_STEP_SUMMARY"
+        printf '### iPhone build ready\nVersion: **%s**\n\nDownload `%s` and the RelinkKit from this run’s Artifacts section.\n\nThe IPA needs signing before installation. No Apple certificate was used.\n' "$version" "$ipa_name" >> "$GITHUB_STEP_SUMMARY"
     fi
     ;;
 test)
@@ -89,6 +88,7 @@ PY
     fi
     xcodebuild "${common[@]}" -configuration Debug -destination "platform=iOS Simulator,id=$simulator" \
         -parallel-testing-enabled NO -only-testing:'LogForge For iPhoneTests' \
+        -only-testing:'LogForge For iPhoneUITests/GlassFlowTests/testLicenseNavigationKeepsSettingsAndVersion' \
         -test-timeouts-enabled YES -default-test-execution-time-allowance 120 \
         -maximum-test-execution-time-allowance 180 \
         -resultBundlePath "$root/build/Tests.xcresult" test 2>&1 | tee build/logs/tests.log

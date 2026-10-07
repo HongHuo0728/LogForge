@@ -56,3 +56,6 @@ trust-*.tmp
 *.xcuserstate
 xcuserdata/
 /.codex-work/
+
+# One documented generated native regression; no camera originals are included.
+!/LogForgeMac/LogForge For iPhone/LogForge For iPhoneTests/Fixtures/aac-edits-timecode.mov
