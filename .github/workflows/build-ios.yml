@@ -8,11 +8,15 @@ on:
       - 'LogForgeMac/**'
       - 'CMakeLists.txt'
       - '.github/workflows/build-ios.yml'
+      - '.github/scripts/release_target.py'
+      - 'tests/release_target.py'
   pull_request:
     paths:
       - 'LogForgeMac/**'
       - 'CMakeLists.txt'
       - '.github/workflows/build-ios.yml'
+      - '.github/scripts/release_target.py'
+      - 'tests/release_target.py'
   workflow_dispatch:
 
 permissions:
@@ -28,7 +32,25 @@ defaults:
     working-directory: LogForgeMac
 
 jobs:
+  release-target:
+    name: Select iOS release target
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: .
+    outputs:
+      should_build: ${{ steps.release.outputs.should_build }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Test platform release routing
+        run: python3 tests/release_target.py
+      - name: Select release platform
+        id: release
+        run: python3 .github/scripts/release_target.py --platform ios
+
   iphone:
+    needs: release-target
+    if: needs.release-target.outputs.should_build == 'true'
     name: Test and package iOS
     runs-on: macos-26
     timeout-minutes: 60

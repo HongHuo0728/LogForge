@@ -11,7 +11,22 @@ permissions:
   contents: read
 
 jobs:
+  release-target:
+    name: Select Windows release target
+    runs-on: ubuntu-latest
+    outputs:
+      should_build: ${{ steps.release.outputs.should_build }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test platform release routing
+        run: python3 tests/release_target.py
+      - name: Select release platform
+        id: release
+        run: python3 .github/scripts/release_target.py --platform windows
+
   windows-x64:
+    needs: release-target
+    if: needs.release-target.outputs.should_build == 'true'
     runs-on: windows-2022
     env:
       LOGFORGE_DATA_DIR: ${{ github.workspace }}\build\ci-data
