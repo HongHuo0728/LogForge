@@ -68,6 +68,11 @@ and release notes; an unavailable simulator posture is never recorded as a pass.
 Use `LOGFORGE_DUO_SUITE=full` for the extended appearance, cross-app drop and running
 conversion transitions, and `LOGFORGE_NATIVE_SUITE=full` for the full native test suite.
 These extended suites are not repeatedly run as part of the focused release.
+The AAC edit/timecode pipeline test passed in run 18 but exceeded XCTest's time
+allowance in run 19 with unchanged application sources. Its failure is retained
+at https://github.com/HongHuo0728/LogForge/actions/runs/40011526515 and it remains
+in the optional full native suite. The focused suite retains 14 checks, including
+the real 4K ProRes MOV/audio test, instead of repeatedly running that long test.
 The manual workflow's `extended_checks` option also enables iOS 26/iPad runtime
 regressions; the default release run stays focused on Duo. Minimum deployment
 remains iOS 26, with SDK availability checks and adaptive fallback source retained.

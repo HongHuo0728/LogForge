@@ -77,7 +77,6 @@ test)
     elif [ "$role" = duo ]; then
         tests+=(-only-testing:'LogForge For iPhoneTests/WorkspaceLayoutTests'
             -only-testing:'LogForge For iPhoneTests/WorkspaceFileTransferTests'
-            -only-testing:'LogForge For iPhoneTests/NativePipelineTests/testAACEditAndTimecodeConversionUsesStrictTrackValidation'
             -only-testing:'LogForge For iPhoneTests/NativePipelineTests/test4K30ProResNanosecondClockAndAudioSurviveMOVWriting')
     else tests+=(-only-testing:'LogForge For iPhoneTests/WorkspaceLayoutTests'); fi
     test_status=0

@@ -79,6 +79,12 @@ workflow run can enable `extended_checks` to run the full suites and iOS 26/iPad
 Diagnostic artifacts are retained for 14 days. Simulator verification does not
 establish physical-device performance, thermal behavior, haptics or editor recognition.
 
+An additional AAC edit/timecode pipeline test passed in [run 18](https://github.com/HongHuo0728/LogForge/actions/runs/40006976918)
+and exceeded XCTest's execution-time allowance in [run 19](https://github.com/HongHuo0728/LogForge/actions/runs/40011526515)
+with unchanged application sources. That diagnostic is retained and the test
+remains in the optional full suite; it is not reported as a pass in the final
+focused run. The 14 focused checks retain real 4K ProRes MOV/audio validation.
+
 ## Download and installation
 
 - `LogForge-1.3.2-iOS-261023A-unsigned.ipa` and its `.sha256`.

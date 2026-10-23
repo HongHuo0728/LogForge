@@ -76,6 +76,10 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Select Xcode 27.1 and install required simulator runtimes
         run: bash tools/prepare-xcode.sh
+      - name: Prepare and verify Duo automation versions
+        id: automation
+        timeout-minutes: 5
+        run: bash tools/run-duo-tests.sh prepare
       - name: Check release identity and tag
         id: identity
         run: |
@@ -106,7 +110,7 @@ jobs:
           retention-days: 14
       - name: Duo simulator regression tests
         id: duo
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && steps.automation.outcome == 'success' }}
         timeout-minutes: 25
         run: bash tools/build-ios.sh test duo
       - name: Upload Duo regression logs and screenshots immediately
@@ -120,7 +124,7 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
       - name: Real Duo poses and state continuity
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && steps.automation.outcome == 'success' }}
         timeout-minutes: 30
         run: bash tools/run-duo-tests.sh
       - name: Upload Duo interaction diagnostics immediately

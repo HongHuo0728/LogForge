@@ -154,14 +154,16 @@ class Driver:
         # Use the reviewed, pinned simulator-only duoctl helper for this one
         # diagnostic. It never enters the application or a release package.
         revision = 'efd5e3d62fd85f555057b429deafcc9c81123454'
-        source = OUTPUT / 'duoctl-helper.m'
+        helper_directory = ROOT / 'build/automation-tools'
+        helper_directory.mkdir(parents=True, exist_ok=True)
+        source = helper_directory / 'duoctl-helper.m'
         url = f'https://raw.githubusercontent.com/skarol/duoctl/{revision}/skills/duoctl/scripts/duoctl-helper.m'
         with urllib.request.urlopen(url, timeout=30) as response:
             body = response.read()
         expected = 'b2d8fb45b0abab1802316ac0c0fa953e9cf644ac54dfbf06281593d4bae28b1f'
         assert hashlib.sha256(body).hexdigest() == expected, 'Simulator helper checksum differs'
         source.write_bytes(body)
-        binary = OUTPUT / 'duoctl-helper'
+        binary = helper_directory / 'duoctl-helper'
         for command in (
             ['xcrun','-sdk','iphonesimulator','clang','-fobjc-arc','-O2','-arch','arm64',
              '-mios-simulator-version-min=17.0','-framework','Foundation','-framework','IOKit',
