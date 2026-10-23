@@ -15,12 +15,72 @@ struct ImportedMovie: Transferable {
     }
 }
 
+/// Coordinates provider callbacks with task cancellation, including cancellation
+/// before the provider has returned its Progress and callbacks arriving afterward.
+final class MovieImportRequest: @unchecked Sendable {
+    private let lock = NSLock()
+    private var continuation: CheckedContinuation<URL, Error>?
+    private var progress: Progress?
+    private var finished = false
+    private var cancelled = false
+
+    var isPending: Bool {
+        lock.lock(); defer { lock.unlock() }
+        return !finished
+    }
+    func install(_ continuation: CheckedContinuation<URL, Error>) -> Bool {
+        lock.lock()
+        let pending = !finished
+        if pending { self.continuation = continuation }
+        lock.unlock()
+        if !pending { continuation.resume(throwing: CancellationError()) }
+        return pending
+    }
+    func install(_ progress: Progress) {
+        lock.lock()
+        let shouldCancel = cancelled
+        if !finished { self.progress = progress }
+        lock.unlock()
+        // Cancellation can synchronously invoke a provider callback: never hold
+        // the state lock while cancelling progress or resuming a continuation.
+        if shouldCancel { progress.cancel() }
+    }
+    func cancel() {
+        lock.lock()
+        guard !finished else { lock.unlock(); return }
+        finished = true; cancelled = true
+        let continuation = self.continuation, progress = self.progress
+        self.continuation = nil; self.progress = nil
+        lock.unlock()
+        continuation?.resume(throwing: CancellationError())
+        progress?.cancel()
+    }
+    func finish(_ result: Result<URL, Error>) {
+        lock.lock()
+        let accepted = !finished
+        if accepted { finished = true }
+        let continuation = accepted ? self.continuation : nil
+        if accepted { self.continuation = nil; progress = nil }
+        lock.unlock()
+        if let continuation { continuation.resume(with: result) }
+        else if case .success(let owned) = result {
+            // A copy may have finished after cancellation won the race. This URL
+            // belongs to ImportStorage.copy, never to the source provider.
+            try? FileManager.default.removeItem(at: owned.deletingLastPathComponent())
+        }
+    }
+}
+
 enum ImportStorage {
     /// NSItemProvider's temporary URL expires after its completion handler returns.
     /// Copy inside that handler, before handing the URL to the asynchronous queue.
     static func receiveMovie(_ provider: NSItemProvider) async throws -> URL {
-        try await withCheckedThrowingContinuation { continuation in
+        let request = MovieImportRequest()
+        return try await withTaskCancellationHandler(operation: {
+          try await withCheckedThrowingContinuation { continuation in
+            guard request.install(continuation), request.isPending else { return }
             let receive: @Sendable (URL?, Error?) -> Void = { source, error in
+                guard request.isPending else { return }
                 do {
                     if let error { throw error }
                     guard let source, source.isFileURL else { throw NativeFailure("error.input") }
@@ -28,18 +88,22 @@ enum ImportStorage {
                     defer { if access { source.stopAccessingSecurityScopedResource() } }
                     let values = try source.resourceValues(forKeys:[.isRegularFileKey,.isSymbolicLinkKey])
                     guard values.isRegularFile == true, values.isSymbolicLink != true else { throw NativeFailure("error.input") }
-                    continuation.resume(returning:try copy(source))
-                } catch { continuation.resume(throwing:error) }
+                    request.finish(.success(try copy(source)))
+                } catch { request.finish(.failure(error)) }
             }
             if provider.hasItemConformingToTypeIdentifier(UTType.movie.identifier) {
-                provider.loadFileRepresentation(forTypeIdentifier:UTType.movie.identifier,completionHandler:receive)
+                let progress = provider.loadFileRepresentation(forTypeIdentifier:UTType.movie.identifier,completionHandler:receive)
+                request.install(progress)
             } else {
+                // Legacy file-URL coercion has no Progress return value. The
+                // request still releases its waiter and ignores a late callback.
                 provider.loadItem(forTypeIdentifier:UTType.fileURL.identifier,options:nil) { item, error in
                     let url = (item as? URL) ?? (item as? Data).flatMap { URL(dataRepresentation:$0,relativeTo:nil) }
                     receive(url,error)
                 }
             }
-        }
+          }
+        }, onCancel: { request.cancel() })
     }
     static func copy(_ source: URL) throws -> URL {
         let fm = FileManager.default

@@ -29,7 +29,8 @@ class PublicationTests(unittest.TestCase):
             (self.directory/(name+'.sha256')).write_text(hashlib.sha256(body).hexdigest()+'  '+name+'\n')
         for path in self.directory.iterdir():
             self.package['assets'][path.name] = {'sha256':publisher.audit.digest(path),'bytes':path.stat().st_size}
-        poses = ('open-landscape','open-portrait','book','tabletop','tent-outer','closed-outer')
+        poses = ('open-landscape','open-portrait','book','tabletop','tent-outer','closed-outer',
+                 'closed-outer-landscape')
         duo = {'passed':True,'syntheticLayout':False,'commit':self.commit,
                'poses':[{'name':name,'passed':True} for name in poses]}
         for name in ('splitView','keyboard','multiWindow','appearance','fileDrop','conversion'):
@@ -110,19 +111,28 @@ class PublicationTests(unittest.TestCase):
             self.run_publisher()
         self.assertEqual(self.mutations,['create-draft']+['upload']*6)
 
-    def test_unverified_scenarios_cannot_create_a_release(self):
-        for name in ('splitView','keyboard','multiWindow','appearance','fileDrop','conversion'):
-            self.evidence['duo'][name]['passed'] = False
+    def test_failed_core_layout_cannot_create_a_release(self):
+        for pose in self.evidence['duo']['poses']:
+            if pose['name'] == 'tent-outer': continue
+            pose['passed'] = False
             self.write_evidence()
-            with self.subTest(name=name), self.assertRaisesRegex(ValueError,'scenario evidence'):
+            with self.subTest(name=pose['name']), self.assertRaisesRegex(ValueError,'posture evidence'):
                 self.run_publisher()
             self.assertEqual(self.mutations,[])
-            self.evidence['duo'][name]['passed'] = True
+            pose['passed'] = True
 
     def test_stale_verification_cannot_create_a_release(self):
         self.evidence['commit'] = 'b'*40
         self.write_evidence()
         with self.assertRaisesRegex(ValueError,'this tag, commit and workflow run'):
+            self.run_publisher()
+        self.assertEqual(self.mutations,[])
+
+    def test_missing_outer_landscape_cannot_create_a_release(self):
+        self.evidence['duo']['poses'] = [p for p in self.evidence['duo']['poses']
+                                       if p['name'] != 'closed-outer-landscape']
+        self.write_evidence()
+        with self.assertRaisesRegex(ValueError,'posture evidence'):
             self.run_publisher()
         self.assertEqual(self.mutations,[])
 

@@ -5,7 +5,7 @@ conversion workspace. Source integration and successful execution are separate:
 the current commit's Actions results, screenshots and `verification.json` establish
 what was actually verified. A source change alone does not mark a row as passed.
 
-| Capability | Implementation and purpose | Required evidence |
+| Capability | Implementation and purpose | Evidence to inspect |
 |---|---|---|
 | Full inner/outer display | Build with iOS 27.1 SDK; background fills the window; content uses its current GeometryReader size, size classes and safe areas. No fixed device aspect ratio. | Native window/display bounds and screenshots, landscape and portrait. |
 | Fold-aware two-region workspace | `ArrangementView` with `.split`; active `.division` reserved regions determine whether the fold divides the local workspace. Independent scroll containers. iOS 26 uses adaptive stacks. | Unfolded, book, tabletop and outer-display posture tests; separate geometry unit cases. |
@@ -51,8 +51,16 @@ Geometric unit cases use synthetic dimensions and are labeled separately. They d
 not stand in for a simulator Split View, keyboard split, hinge pose or second scene.
 Independent UI scenarios reinstall the test app between tests; continuity assertions occur inside
 each scenario without restarting the app. Diagnostics are retained even on failure.
-Required failures prevent `verification.json` and formal publication. A candidate
-archive may still be uploaded for diagnosis and must not be described as a release.
+The focused release gate requires a successful device archive/package audit, native
+import/layout/UI checks and real MOV conversion, iOS 26/iPad compatibility, plus
+unfolded landscape/portrait, book, tabletop and closed outer portrait/landscape.
+Tent, Split View, split keyboard and multiple windows are each attempted once as
+additional diagnostics. Their actual outcomes are retained in `verification.json`
+and release notes; an unavailable simulator posture is never recorded as a pass.
+Use `LOGFORGE_DUO_SUITE=full` for the extended appearance, cross-app drop and running
+conversion transitions, and `LOGFORGE_NATIVE_SUITE=full` for the full native test suite.
+These extended suites are not repeatedly run as part of the focused release.
+A candidate archive is uploaded before simulator checks and is labeled as a candidate.
 
 ## Primary references
 

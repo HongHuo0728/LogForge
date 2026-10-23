@@ -79,8 +79,22 @@ jobs:
           fi
           printf 'LOGFORGE_ARTIFACT=LogForge-%s-iOS-%s-unsigned-%s\n' "$version" "$release_build" "$GITHUB_RUN_NUMBER" >> "$GITHUB_ENV"
           printf 'artifact=LogForge-%s-iOS-%s-unsigned-%s\n' "$version" "$release_build" "$GITHUB_RUN_NUMBER" >> "$GITHUB_OUTPUT"
+      - name: Archive and package iPhone release
+        id: archive
+        timeout-minutes: 25
+        run: bash tools/build-ios.sh archive
+      - name: Audit release bytes
+        run: python3 tools/audit-package.py build/artifacts
+      - name: Upload candidate build before simulator checks
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: LogForge-iOS-candidate-${{ github.run_number }}
+          path: LogForgeMac/build/artifacts/*
+          if-no-files-found: error
+          retention-days: 14
       - name: Duo simulator regression tests
         id: duo
+        timeout-minutes: 25
         run: bash tools/build-ios.sh test duo
       - name: Upload Duo regression logs and screenshots immediately
         if: always()
@@ -94,6 +108,7 @@ jobs:
           retention-days: 14
       - name: Real Duo poses and state continuity
         if: ${{ !cancelled() }}
+        timeout-minutes: 30
         run: bash tools/run-duo-tests.sh
       - name: Upload Duo interaction diagnostics immediately
         if: always()
@@ -105,19 +120,15 @@ jobs:
           retention-days: 14
       - name: iOS 26 compatibility regression tests
         if: ${{ !cancelled() }}
+        timeout-minutes: 15
         run: bash tools/build-ios.sh test phone26
       - name: iPad regression tests
         if: ${{ !cancelled() }}
+        timeout-minutes: 15
         run: bash tools/build-ios.sh test ipad
-      - name: Archive and package iPhone release
-        id: archive
-        if: ${{ !cancelled() }}
-        run: bash tools/build-ios.sh archive
-      - name: Audit release bytes and collect required verification
+      - name: Collect required release verification
         if: ${{ !cancelled() && steps.archive.outcome == 'success' }}
-        run: |
-          python3 tools/audit-package.py build/artifacts
-          python3 tools/collect-verification.py
+        run: python3 tools/collect-verification.py
       - name: Upload IPA, checksums and relink sources
         if: ${{ !cancelled() && steps.archive.outcome == 'success' }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

@@ -11,13 +11,15 @@
   parameter controls and long filenames while retaining Liquid Glass and localization.
 - Support native Split View, shared-queue multiple windows, a system scene activation
   action, hinge/lifecycle checkpoints, movie/file URL drops and draggable completed
-  movies. Copy provider-owned files before their callbacks return. Check actual system split
+  movies. Copy provider-owned files before their callbacks return and release cancelled
+  provider requests promptly, cleaning up late copies. Check actual system split
   keyboard entry and resizing through the native Files picker.
 - Set iOS identity to `1.3.2 (261023A)` without changing the media pipeline, report
   schema or Windows `1.3.0 (26929A)` identity. Accept both historical five-digit
   and six-digit release-build codes; retain numeric Apple bundle builds.
-- Pin Xcode 27.1, install Duo and iOS 26 runtimes, add real posture/state tests and
-  package audits, and block publication when required verification is incomplete.
+- Pin Xcode 27.1, archive before running a focused native/UI/layout suite, and boot
+  one simulator at a time. Preserve optional extended diagnostics and report their
+  actual status; core build/layout failures still prevent publication.
 - Publish four new iOS assets plus the exact two Windows 1.3.0 assets from v1.3.1,
   checking all six files after draft upload before making the release public.
 

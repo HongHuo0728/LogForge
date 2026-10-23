@@ -37,7 +37,7 @@ Both platforms belong to the main [LogForge repository](https://github.com/HongH
 
 Download the iOS IPA and matching RelinkKit from the main release when uploaded. The provided build pipeline produces an **unsigned** IPA: sign it with your own valid Apple identity and provisioning profile before installation. No App Store or TestFlight release is configured. Keep the corresponding source, license and relink material when distributing the app.
 
-For cloud builds, use **iOS build and tests** in the main repository's [Actions](https://github.com/HongHuo0728/LogForge/actions/workflows/build-ios.yml). Simulator tests must pass before the iPhone archive is packaged. See the [iOS build and installation guide](https://github.com/HongHuo0728/LogForge/blob/main/LogForgeMac/docs/GITHUB_BUILD.md).
+For cloud builds, use **iOS build and tests** in the main repository's [Actions](https://github.com/HongHuo0728/LogForge/actions/workflows/build-ios.yml). It packages a candidate first, then requires focused build, native UI/conversion and inner/outer layout checks before publication. Additional Duo diagnostics are reported individually. See the [iOS build and installation guide](https://github.com/HongHuo0728/LogForge/blob/main/LogForgeMac/docs/GITHUB_BUILD.md).
 
 iOS 1.3.2 focuses on Duo layouts and toolbars, retaining the AAC/timecode fixes from 1.3.1. [Release details](docs/RELEASE_1.3.2_IOS.md) describe the required Xcode 27.1, real Duo posture and iOS 26/iPad checks. Failed or unverified required poses block publication. Simulator results do not establish physical-device performance or editor recognition.
 

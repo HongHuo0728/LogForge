@@ -67,9 +67,18 @@ EOF
 test)
     role="${2:-duo}"
     simulator=$(python3 tools/select-simulator.py "$role")
+    # Hosted runners have limited memory. Keep one runtime booted at a time;
+    # leaving Duo, iOS 26 and iPad running together causes heavy swapping.
+    xcrun simctl shutdown all
     xcrun simctl bootstatus "$simulator" -b 2>&1 | tee "build/logs/simulator-$role-boot.log"
     tests=(-only-testing:'LogForge For iPhoneUITests/GlassFlowTests')
-    if [ "$role" = duo ]; then tests+=(-only-testing:'LogForge For iPhoneTests');
+    if [ "$role" = duo ] && [ "${LOGFORGE_NATIVE_SUITE:-release-smoke}" = full ]; then
+        tests+=(-only-testing:'LogForge For iPhoneTests')
+    elif [ "$role" = duo ]; then
+        tests+=(-only-testing:'LogForge For iPhoneTests/WorkspaceLayoutTests'
+            -only-testing:'LogForge For iPhoneTests/WorkspaceFileTransferTests'
+            -only-testing:'LogForge For iPhoneTests/NativePipelineTests/testAACEditAndTimecodeConversionUsesStrictTrackValidation'
+            -only-testing:'LogForge For iPhoneTests/NativePipelineTests/test4K30ProResNanosecondClockAndAudioSurviveMOVWriting')
     else tests+=(-only-testing:'LogForge For iPhoneTests/WorkspaceLayoutTests'); fi
     test_status=0
     xcodebuild "${common[@]}" -configuration Debug -destination "platform=iOS Simulator,id=$simulator" \

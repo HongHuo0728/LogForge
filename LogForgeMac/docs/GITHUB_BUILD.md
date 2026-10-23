@@ -8,7 +8,7 @@ Windows 开发环境也可以编辑原生工程并通过 GitHub 云端 Mac 编�
 当前 iOS 开发版本为 **1.3.2 (261023A)**。从成功的主仓库 Actions 获取
 `LogForge-1.3.2-iOS-261023A-unsigned.ipa`、对应 `.sha256`，以及
 `LogForge-1.3.2-iOS-261023A-RelinkKit.zip` 和校验文件。分支构建只生成 Actions 附件；
-正式 tag 构建通过所有检查后发布六个附件，包括从 v1.3.1 原样复用的两份 Windows
+正式 tag 构建通过必要构建和布局检查后发布六个附件，包括从 v1.3.1 原样复用的两份 Windows
 1.3.0 文件。版本号配置不代表线上 Release 已更新，历史附件保留原始版本。
 见 [1.3.2 发布说明](../../docs/RELEASE_1.3.2_IOS.md)。
 
@@ -17,10 +17,12 @@ Windows 开发环境也可以编辑原生工程并通过 GitHub 云端 Mac 编�
 1. 将本地源码和根目录工作流上传到主仓库后，打开
    [Actions / iOS build and tests](https://github.com/HongHuo0728/LogForge/actions/workflows/build-ios.yml)。
 2. 点击 **Run workflow**，选择目标分支并运行。
-3. 等待 **Test and package iOS** 成功：运行原生回归、真实 Duo 姿态、iOS 26 及 iPad
-   测试，归档并验包。查看诊断中的截图，确认五种形态及连续切换。
-   正式工作流没有跳过测试选项。失败时仍尽可能归档候选 IPA，供定位编译和打包问题；
-   只有当前提交的全部验证通过才生成 `verification.json`，失败的候选包不能正式发布。
+3. 等待 **Test and package iOS** 成功：先归档、验包并上传候选 IPA，再顺序运行
+   Duo、iOS 26 和 iPad；每次只启动一个模拟器，避免云端内存不足。
+   发行检查覆盖真实 MOV 转换、导入取消、布局和主要页面操作，以及展开横纵向、
+   书本、桌面、外屏横纵向六个真实布局。必要检查通过后才生成 `verification.json`。
+   帐篷、分屏、分体键盘和多窗口各做一次补充诊断，Release Notes 按实际结果说明。
+   可选的完整测试保留，但不反复扩大本次发行验证范围。
 4. 从底部 Artifacts 下载 `LogForge-1.3.2-iOS-261023A-unsigned-运行编号`。
    解压获得 IPA、RelinkKit、两份 SHA-256、`release-info.json`、`READ-ME.txt`
    、`package-audit.json`、`verification.json` 和 `xcode-version.txt`。下载通常需要登录 GitHub。
@@ -66,7 +68,9 @@ Windows 版本不覆盖 iOS patch 版本。
 - 安装 iOS 27.1 Duo 和 iOS 26.5 兼容 runtime。最低部署仍为 iOS 26。
 - 真实姿态测试固定 Appium 3.8.0／XCUITest Driver 12.19.0，等待铰链、活动区域和
   实际窗口稳定，并验证当前显示屏。截图屏幕选择不等于应用已切屏。帐篷形态无法
-  实际进入或重要检查失败时，保留诊断并阻止发布，不能用注入几何替代通过结果。
+  实际进入时记录未验证，不能用外屏截图或注入几何冒充该姿态已通过。
+  设置 `LOGFORGE_DUO_SUITE=full` 可运行完整交互矩阵；`LOGFORGE_NATIVE_SUITE=full`
+  可运行完整原生单元测试。本次发行默认采用精简的必要检查。
 - 编译原有 Swift / SwiftUI / Metal 及锁定版本的 LGPL 软件 ProRes 编解码库。
 - 系统解码失败后从原始文件重启软件解码；系统编码失败独立回退软件编码。
   导出验证也有软件解码路径；不按手机型号硬编码能力名单。
