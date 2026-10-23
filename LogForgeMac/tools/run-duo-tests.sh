@@ -3,6 +3,12 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 mkdir -p build/logs/duo
 test -d 'build/DerivedData/Build/Products/Debug-iphonesimulator/LogForge For iPhone.app'
+# The Xcode image does not include the host ffmpeg executable. This tool creates
+# test media only; it is never linked into or bundled with the iOS application.
+if ! command -v ffmpeg >/dev/null 2>&1; then
+    HOMEBREW_NO_AUTO_UPDATE=1 brew install ffmpeg 2>&1 | tee build/logs/duo/ffmpeg-install.log
+fi
+ffmpeg -version > build/logs/duo/ffmpeg-version.txt
 # Capture available Apple controls as diagnostics for unsupported simulator poses.
 xcrun devicectl help device settings > build/logs/duo/device-settings-help.txt 2>&1 || true
 xcrun simctl help ui > build/logs/duo/simulator-ui-help.txt 2>&1 || true

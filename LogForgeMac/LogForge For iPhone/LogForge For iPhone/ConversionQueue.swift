@@ -20,10 +20,12 @@ enum ImportStorage {
     /// Copy inside that handler, before handing the URL to the asynchronous queue.
     static func receiveMovie(_ provider: NSItemProvider) async throws -> URL {
         try await withCheckedThrowingContinuation { continuation in
-            let receive: (URL?, Error?) -> Void = { source, error in
+            let receive: @Sendable (URL?, Error?) -> Void = { source, error in
                 do {
                     if let error { throw error }
                     guard let source, source.isFileURL else { throw NativeFailure("error.input") }
+                    let access = source.startAccessingSecurityScopedResource()
+                    defer { if access { source.stopAccessingSecurityScopedResource() } }
                     let values = try source.resourceValues(forKeys:[.isRegularFileKey,.isSymbolicLinkKey])
                     guard values.isRegularFile == true, values.isSymbolicLink != true else { throw NativeFailure("error.input") }
                     continuation.resume(returning:try copy(source))

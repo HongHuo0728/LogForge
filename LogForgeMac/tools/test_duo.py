@@ -452,6 +452,8 @@ def main():
     try:
         until(lambda: driver.request('GET', '/status'), timeout=60)
         device = subprocess.check_output(['python3', 'tools/select-simulator.py', 'duo'], cwd=ROOT, text=True).strip()
+        (OUTPUT / 'simulator-displays.txt').write_text(subprocess.check_output(
+            ['xcrun','simctl','io',device,'enumerate'], text=True), encoding='utf-8')
         app = ROOT / 'build/DerivedData/Build/Products/Debug-iphonesimulator/LogForge For iPhone.app'
         assert app.is_dir()
         result = driver.request('POST', '/session', {'capabilities':{'alwaysMatch':{
