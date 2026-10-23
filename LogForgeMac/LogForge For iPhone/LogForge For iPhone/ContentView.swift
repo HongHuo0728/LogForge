@@ -66,7 +66,7 @@ struct ContentView: View {
                     ToolbarItem(placement:.topBarTrailing) {
                         WorkspaceWindowMenu { showWindowUnavailable = true }
                             .frame(width:44,height:44)
-                    }.workspacePriority(primary:false)
+                    }.workspaceVerticalItem().workspacePriority(primary:false)
                 }
                 ToolbarItem(placement:.topBarLeading) {
                     Button(L10n.text("language"), systemImage:"globe") {
@@ -353,6 +353,11 @@ struct ContentView: View {
 }
 
 private extension ToolbarContent {
+    @ToolbarContentBuilder
+    func workspaceVerticalItem() -> some ToolbarContent {
+        if #available(iOS 27.1, *) { self.axisBehavior(.verticalPreferred) }
+        else { self }
+    }
     @ToolbarContentBuilder
     func workspacePriority(primary: Bool) -> some ToolbarContent {
         if #available(iOS 27.0, *) { self.visibilityPriority(primary ? .high : .low) }

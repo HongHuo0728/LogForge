@@ -42,9 +42,9 @@ final class GlassFlowTests: XCTestCase {
                 "label CONTAINS %@", "GNU LESSER GENERAL PUBLIC LICENSE")).firstMatch.exists)
             app.scrollViews["licenseDocument"].swipeUp()
             // Duo's native back button belongs to the side toolbar, not a NavigationBar.
-            let back = app.buttons.matching(NSPredicate(format:
-                "label == 'Back' OR label == 'Settings' OR identifier == 'BackButton'")).firstMatch
-            XCTAssertTrue(back.waitForExistence(timeout: 5), app.debugDescription)
+            let back = try XCTUnwrap(app.buttons.matching(NSPredicate(format:
+                "identifier == 'BackButton' OR label == 'Back' OR label == 'Settings'"))
+                .allElementsBoundByIndex.first(where: { $0.isHittable }), app.debugDescription)
             back.tap()
             XCTAssertTrue(app.scrollViews["settingsContent"].waitForExistence(timeout: 5))
         }
