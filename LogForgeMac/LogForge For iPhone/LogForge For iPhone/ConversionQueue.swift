@@ -74,6 +74,9 @@ struct QueueEntry: Identifiable, Codable {
 
 @MainActor
 final class ConversionQueue: ObservableObject {
+    #if DEBUG
+    var didConfigureUITests = false
+    #endif
     @Published var entries: [QueueEntry] = []
     @Published var messages: [String] = []
     @Published var importing = false

@@ -5,26 +5,31 @@ Windows 开发环境也可以编辑原生工程并通过 GitHub 云端 Mac 编�
 
 ## 获取正式版
 
-当前 iOS 开发版本为 **1.3.1 (26107B)**。从成功的主仓库 Actions 获取
-`LogForge-1.3.1-iOS-26107B-unsigned.ipa`、对应 `.sha256`，以及
-`LogForge-1.3.1-iOS-26107B-RelinkKit.zip` 和校验文件。构建成功后仍需维护者发布附件；
-版本号配置不代表线上 Release 已更新。历史 v1.3.0 附件保留原始版本。
-见 [1.3.1 发布说明](../../docs/RELEASE_1.3.1_IOS.md)。
+当前 iOS 开发版本为 **1.3.2 (261023A)**。从成功的主仓库 Actions 获取
+`LogForge-1.3.2-iOS-261023A-unsigned.ipa`、对应 `.sha256`，以及
+`LogForge-1.3.2-iOS-261023A-RelinkKit.zip` 和校验文件。分支构建只生成 Actions 附件；
+正式 tag 构建通过所有检查后发布六个附件，包括从 v1.3.1 原样复用的两份 Windows
+1.3.0 文件。版本号配置不代表线上 Release 已更新，历史附件保留原始版本。
+见 [1.3.2 发布说明](../../docs/RELEASE_1.3.2_IOS.md)。
 
 ## 运行 Actions
 
 1. 将本地源码和根目录工作流上传到主仓库后，打开
    [Actions / iOS build and tests](https://github.com/HongHuo0728/LogForge/actions/workflows/build-ios.yml)。
 2. 点击 **Run workflow**，选择目标分支并运行。
-3. 等待 **Test and package iOS** 成功：先运行模拟器回归，再归档并打包真机应用。
-   正式工作流没有跳过测试选项，测试失败不产生新的 IPA。
-4. 从底部 Artifacts 下载 `LogForge-1.3.1-iOS-26107B-unsigned-运行编号`。
+3. 等待 **Test and package iOS** 成功：运行原生回归、真实 Duo 姿态、iOS 26 及 iPad
+   测试，归档并验包。查看诊断中的截图，确认五种形态及连续切换。
+   正式工作流没有跳过测试选项。失败时仍尽可能归档候选 IPA，供定位编译和打包问题；
+   只有当前提交的全部验证通过才生成 `verification.json`，失败的候选包不能正式发布。
+4. 从底部 Artifacts 下载 `LogForge-1.3.2-iOS-261023A-unsigned-运行编号`。
    解压获得 IPA、RelinkKit、两份 SHA-256、`release-info.json`、`READ-ME.txt`
-   和 `xcode-version.txt`。下载通常需要登录 GitHub。
+   、`package-audit.json`、`verification.json` 和 `xcode-version.txt`。下载通常需要登录 GitHub。
 
-`main` 的相关修改及 `v*` tag 会触发构建；iOS 工作流的 tag 检查对应 Xcode 版本（如 `v1.3.1`），不是 Windows CMake 版本。
-工作流使用只读仓库权限，**不创建或编辑 GitHub Release**。Actions 附件保留 14 天；
-作为正式版保存时，由维护者将所需文件上传到现有 Release。
+`main` 的相关修改及 `v*` tag 会触发构建；iOS 工作流的 tag 检查对应 Xcode 版本（如 `v1.3.2`），不是 Windows CMake 版本。
+构建 job 使用只读仓库权限。完成分支构建、截图和产物检查后，将新 `v1.3.2` tag
+指向已验证的最终提交。tag 构建重新执行验证，仅发布 job 有写入 Release 的权限。
+发布先创建草稿，核对六个附件上传后的字节和 SHA-256，再公开；失败保留草稿。
+不得用旧提交的验证记录替代当前产物验证。Actions 诊断保留 14 天。
 
 根目录工作流：`.github/workflows/build-ios.yml`。运行目录：`LogForgeMac`。
 构建脚本：`LogForgeMac/tools/build-ios.sh`。子目录内旧的 `.github` 配置不作为
@@ -42,20 +47,26 @@ App Store/TestFlight 还需要开发者账号和 App Store Connect 配置，目�
 
 ## 版本与报告
 
-应用首页和设置页显示 `1.3.1 (26107B)`。发行构建号为 `26107B`。
-`CFBundleShortVersionString` 为 `1.3.1`；`CFBundleVersion` 保持数字，
+应用首页和设置页显示 `1.3.2 (261023A)`。发行构建号为 `261023A`。
+`CFBundleShortVersionString` 为 `1.3.2`；`CFBundleVersion` 保持数字，
 以 Actions 运行编号标识具体构建，仅用于内部诊断。
 脚本从原生 Xcode 工程读取 iOS 版本，在打包前核验实际应用 Info.plist。
 Windows 版本不覆盖 iOS patch 版本。
 独立打开原生工程时使用 Xcode 项目中的版本默认值。
 
-成功转换报告包含 `appVersion`、`releaseBuild`（`26107B`）、内部 `bundleBuild` 和轨道表恢复状态。
+成功转换报告包含 `appVersion`、`releaseBuild`（`261023A`）、内部 `bundleBuild` 和轨道表恢复状态。
 批量报告只记录每条视频最后一次尝试的版本；旧任务缺少新增字段时保留 `unknown`，
 不会自动冒充新版测试。安装后可重试失败视频生成新的记录。
 
 ## 编译和故障定位
 
-- 使用 `macos-26` 和云端 Xcode，脚本要求 iOS SDK 至少为 26。
+- 使用 GitHub 官方 `xcode-27` 镜像，明确选择 `/Applications/Xcode_27.1.app`，核验
+  Xcode **27.1 (27A9275)**、iOS **27.1 SDK** 和 Metal 工具链。缺少组件时通过
+  `xcodebuild -downloadComponent metalToolchain`、`-downloadPlatform iOS` 官方命令补齐。
+- 安装 iOS 27.1 Duo 和 iOS 26.5 兼容 runtime。最低部署仍为 iOS 26。
+- 真实姿态测试固定 Appium 3.8.0／XCUITest Driver 12.19.0，等待铰链、活动区域和
+  实际窗口稳定，并验证当前显示屏。截图屏幕选择不等于应用已切屏。帐篷形态无法
+  实际进入或重要检查失败时，保留诊断并阻止发布，不能用注入几何替代通过结果。
 - 编译原有 Swift / SwiftUI / Metal 及锁定版本的 LGPL 软件 ProRes 编解码库。
 - 系统解码失败后从原始文件重启软件解码；系统编码失败独立回退软件编码。
   导出验证也有软件解码路径；不按手机型号硬编码能力名单。
@@ -71,9 +82,12 @@ Windows 版本不覆盖 iOS patch 版本。
 - 输入仍要求 ProRes 422/HQ BT.2020 HLG MOV，没有扩展到 HEVC、PQ、SDR 或损坏/加密视频。
 
 失败时查看日志中的 `error:`。无论成功与否，工作流尽可能上传
-`LogForge-iOS-diagnostics-运行编号`，包含测试/归档日志和 `.xcresult`。
+`LogForge-iOS-diagnostics-运行编号`，包含测试/归档日志、`.xcresult`、Duo 截图、
+可访问性树、角度／显示屏／几何记录与 `results.json`。`verification.json` 汇总
+当前提交的真实姿态及 XCTest 结果；`package-audit.json` 记录实际产物身份和哈希。
 系统硬件能力、液态玻璃对比度、触感、老设备耗时/温度和编辑器识别仍需真机检查。
-此前 27 项模拟器测试通过，不代表本次未上传的修改已编译，也不替代用户原视频测试。
+各次执行的数量以对应 `.xcresult` 和验证清单为准，旧提交通过不代表新修改已验证，
+也不替代用户原视频测试。Duo 接口使用及验证范围见 [Duo 适配清单](DUO_SUPPORT.md)。
 
 Apple 文档：[原始样本读取](https://developer.apple.com/documentation/avfoundation/avassetreadertrackoutput/outputsettings)、
 [样本 duration](https://developer.apple.com/documentation/coremedia/cmsamplebuffergetduration(_:))、

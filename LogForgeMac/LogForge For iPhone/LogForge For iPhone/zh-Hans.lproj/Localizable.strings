@@ -126,3 +126,5 @@
 
 "version.title" = "版本信息";
 "version.build" = "构建号 %@";
+"window.new" = "新建工作区窗口";
+"window.unavailable" = "当前视图无法打开新窗口。";

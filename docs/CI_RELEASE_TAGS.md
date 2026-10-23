@@ -1,7 +1,7 @@
 # Platform release tags
 
 Windows and iOS have independent release versions. Windows remains **1.3.0
-(26929A)**. **1.3.1 (26107B) is an iOS-only release**; Windows skips 1.3.1.
+(26929A)**. **1.3.2 (261023A) is an iOS-only update**; Windows skips its build.
 
 Both workflows first run `.github/scripts/release_target.py` on a small Linux
 runner, before allocating a Windows or macOS build runner. The selector reads
@@ -16,11 +16,25 @@ application's version or release build.
 - Branch, pull-request and manual builds continue to build the selected platform.
   They do not require its version to match the other platform.
 
-Consequently, with the current source, `v1.3.1` runs the iOS tests/archive and
+Consequently, with the current source, `v1.3.2` runs the iOS tests/archive and
 skips the Windows compiler/tests/package job. `v1.3.0` selects Windows instead.
 The existing per-platform tag checks, tests, package audits and checksums remain
 enabled whenever that platform is selected. Nothing relabels a Windows 1.3.0
-binary as 1.3.1.
+binary as 1.3.2.
+
+After a successful main-branch run and screenshot/package review, create the new
+tag on that exact commit. The tag reruns required verification. Only the tag's
+publication job has `contents: write`; builds retain read-only permissions.
+`.github/scripts/publish_ios_release.py` creates a draft, uploads the four new
+iOS files, downloads the original Windows ZIP and SHA-256 from **v1.3.1**, checks
+their pinned digests, and uploads them without renaming or rebuilding. It downloads
+all six draft attachments and compares their hashes before publishing. A failure
+leaves the draft unpublished. It never replaces an already published release.
+
+The artifact's `verification.json` and `package-audit.json` must match the tag's
+commit and workflow run. All required real Duo poses, native tests, iOS 26 and iPad
+UI checks must pass. A geometric test cannot satisfy the real posture gate.
+Do not create a new tag to bypass a failed run, or replace a historical tag.
 
 Run `python tests/release_target.py` to exercise the routing contract, including
 the iOS-only tag, shared-version releases, invalid tags, independent branch

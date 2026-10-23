@@ -1,5 +1,25 @@
 # Changelog
 
+## 1.3.2 — iOS (261023A)
+
+- Adapt the native workspace to Duo inner/outer displays, unfolded landscape and
+  portrait, book and tabletop layouts using iOS 27.1 arrangements and reserved
+  regions. Keep iOS 26 geometry/size-class fallbacks and root-owned task/draft state.
+- Replace page-level floating actions with adaptive native toolbars, including
+  import, conversion, language, settings and settings save/cancel actions.
+- Remove the main fixed-width/bottom spacer and fixed import-sheet height; reflow
+  parameter controls and long filenames while retaining Liquid Glass and localization.
+- Support native Split View, shared-queue multiple windows, a system scene activation
+  action, hinge/lifecycle checkpoints and file URL drops. Check actual system split
+  keyboard entry and resizing through the native Files picker.
+- Set iOS identity to `1.3.2 (261023A)` without changing the media pipeline, report
+  schema or Windows `1.3.0 (26929A)` identity. Accept both historical five-digit
+  and six-digit release-build codes; retain numeric Apple bundle builds.
+- Pin Xcode 27.1, install Duo and iOS 26 runtimes, add real posture/state tests and
+  package audits, and block publication when required verification is incomplete.
+- Publish four new iOS assets plus the exact two Windows 1.3.0 assets from v1.3.1,
+  checking all six files after draft upload before making the release public.
+
 ## 1.3.1 — iOS (26107B)
 
 - Fix AAC and timecode passthrough changes by restoring original stored chunks,

@@ -6,7 +6,7 @@ Native **Windows and iOS** applications that convert **BT.2020 HLG ProRes** into
 
 LogForge changes the pixels using published color mathematics. It does not restore clipped highlights, crushed shadows, tone-mapped-away detail, or information lost in a camera's ISP. It cannot turn processed phone footage into the original sensor capture.
 
-**Windows 1.3.0 (26929A) · iOS 1.3.1 (26107B).** Windows exports ProRes 422 HQ; iOS offers ProRes 422 and 422 HQ. Output uses **Apple Log / Rec.2020 with Video levels**. The identification fields were **verified in the Windows 1.1.0 release with DaVinci Resolve Studio 20.3.2.9**, using DaVinci YRGB Color Managed. The Windows verification scope is recorded in [VALIDATION](docs/VALIDATION.md); this historical evidence does not verify a new iOS editor import. This is Apple Log, not Apple Log 2 / Apple Wide Gamut. See the [native-reference and real-import evidence](docs/APPLE_LOG_IDENTIFICATION.md).
+**Windows 1.3.0 (26929A) · iOS 1.3.2 (261023A).** Windows exports ProRes 422 HQ; iOS offers ProRes 422 and 422 HQ. Output uses **Apple Log / Rec.2020 with Video levels**. The identification fields were **verified in the Windows 1.1.0 release with DaVinci Resolve Studio 20.3.2.9**, using DaVinci YRGB Color Managed. The Windows verification scope is recorded in [VALIDATION](docs/VALIDATION.md); this historical evidence does not verify a new iOS editor import. This is Apple Log, not Apple Log 2 / Apple Wide Gamut. See the [native-reference and real-import evidence](docs/APPLE_LOG_IDENTIFICATION.md).
 
 ## Platforms
 
@@ -20,23 +20,26 @@ LogForge changes the pixels using published color mathematics. It does not resto
 | Interface languages | English, Simplified Chinese | English, Simplified Chinese, Traditional Chinese, French, Spanish |
 | Distribution | Portable Windows ZIP | iPhone arm64 IPA; signing required |
 
-Both platforms belong to the main [LogForge repository](https://github.com/HongHuo0728/LogForge). Windows remains 1.3.0; the current iOS patch version is 1.3.1. Availability depends on the assets uploaded to [Releases](https://github.com/HongHuo0728/LogForge/releases/tag/v1.3.0); a prepared release configuration does not mean its IPA has already been published. macOS and Linux applications are not provided.
+Both platforms belong to the main [LogForge repository](https://github.com/HongHuo0728/LogForge). This update targets iOS 1.3.2; the included Windows version remains 1.3.0. The release workflow copies its existing ZIP and checksum unchanged from v1.3.1. Availability depends on the assets uploaded to [Releases](https://github.com/HongHuo0728/LogForge/releases); a source version change does not mean its IPA has already been published. macOS and Linux applications are not provided.
 
-## iOS 1.3.1
+## iOS 1.3.2
 
+- Adaptive Duo workspace: queue/progress/results and conversion parameters split across the inner display or fold, with a complete compact workspace on the outer display. Root-owned queue and drafts survive resizing.
+- Native system toolbars adapt to side placement where appropriate; import sheets and parameter rows resize for available space and larger text. iOS 26 retains the compatible layout path.
+- Duo Split View and multiple windows use the same shared conversion queue with independent settings drafts. Files search retains the system split keyboard; file URL drops use the existing import pipeline. See the [Duo API and test matrix](LogForgeMac/docs/DUO_SUPPORT.md).
 - Native transparent Liquid Glass interface, layered glass icon, accessibility contrast handling and haptic feedback.
 - Import from Photos, files or folders; choose an export directory, process a queue, cancel and retry failed videos.
 - Automatically fall back from unavailable system ProRes decoding/encoding to the embedded software codecs. CPU color processing and Metal color processing remain selectable.
 - Convert supported **ProRes 422 / 422 HQ, BT.2020 HLG MOV** footage to Apple Log; HEVC, PQ, SDR and other ProRes profiles are not accepted by the current input contract. A phone's camera-recording capability is separate from software conversion capability.
 - Preserve and independently validate frame timing, audio, auxiliary tracks and display rotation. iOS accepts valid variable frame timing; the Windows fixed-cadence requirement below applies to Windows.
-- Open the app's Apple Settings page with the top-left language button. Select English, Simplified Chinese, Traditional Chinese, French or Spanish when the system exposes the preferred-language setting.
-- Show `1.3.1 (26107B)` in the app; reports retain each conversion attempt’s version, release build and internal diagnostics.
+- Open the app's Apple Settings page with the toolbar language action (or its overflow item). Select English, Simplified Chinese, Traditional Chinese, French or Spanish when the system exposes the preferred-language setting.
+- Show `1.3.2 (261023A)` in the app; reports retain each conversion attempt’s version, release build and internal diagnostics.
 
 Download the iOS IPA and matching RelinkKit from the main release when uploaded. The provided build pipeline produces an **unsigned** IPA: sign it with your own valid Apple identity and provisioning profile before installation. No App Store or TestFlight release is configured. Keep the corresponding source, license and relink material when distributing the app.
 
 For cloud builds, use **iOS build and tests** in the main repository's [Actions](https://github.com/HongHuo0728/LogForge/actions/workflows/build-ios.yml). Simulator tests must pass before the iPhone archive is packaged. See the [iOS build and installation guide](https://github.com/HongHuo0728/LogForge/blob/main/LogForgeMac/docs/GITHUB_BUILD.md).
 
-iOS 1.3.1 fixes AAC/timecode track preservation and improves license navigation. [Release details](https://github.com/HongHuo0728/LogForge/blob/main/docs/RELEASE_1.3.1_IOS.md) distinguish regressions, cloud builds and device verification. The user's original video has not been supplied; simulator results do not establish physical-device performance or editor recognition.
+iOS 1.3.2 focuses on Duo layouts and toolbars, retaining the AAC/timecode fixes from 1.3.1. [Release details](docs/RELEASE_1.3.2_IOS.md) describe the required Xcode 27.1, real Duo posture and iOS 26/iPad checks. Failed or unverified required poses block publication. Simulator results do not establish physical-device performance or editor recognition.
 
 ![LogForge Windows interface](docs/images/LogForge.png)
 

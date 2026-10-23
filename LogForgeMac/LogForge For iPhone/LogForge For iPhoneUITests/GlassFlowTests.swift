@@ -41,9 +41,11 @@ final class GlassFlowTests: XCTestCase {
             XCTAssertTrue(app.staticTexts.containing(NSPredicate(format:
                 "label CONTAINS %@", "GNU LESSER GENERAL PUBLIC LICENSE")).firstMatch.exists)
             app.scrollViews["licenseDocument"].swipeUp()
-            let back = app.buttons["Settings"]
-            if back.isHittable { back.tap() }
-            else { app.navigationBars.buttons.firstMatch.tap() }
+            // Duo's native back button belongs to the side toolbar, not a NavigationBar.
+            let back = app.buttons.matching(NSPredicate(format:
+                "label == 'Back' OR label == 'Settings' OR identifier == 'BackButton'")).firstMatch
+            XCTAssertTrue(back.waitForExistence(timeout: 5), app.debugDescription)
+            back.tap()
             XCTAssertTrue(app.scrollViews["settingsContent"].waitForExistence(timeout: 5))
         }
     }
@@ -66,7 +68,7 @@ final class GlassFlowTests: XCTestCase {
         let app = launch()
         tap("conversionSettings", in: app)
         tap("option-exposure", in: app)
-        app.buttons["1 EV"].tap()
+        tap("option-exposure-choice-1", in: app)
         XCUIDevice.shared.orientation = .landscapeLeft
         defer { XCUIDevice.shared.orientation = .portrait }
         XCTAssertTrue(app.buttons["saveSettings"].waitForExistence(timeout: 5))
@@ -75,7 +77,7 @@ final class GlassFlowTests: XCTestCase {
         tap("conversionSettings", in: app)
         XCTAssertTrue(app.buttons["option-exposure"].label.contains("1 EV"))
         tap("option-exposure", in: app)
-        app.buttons["0 EV"].tap()
+        tap("option-exposure-choice-0", in: app)
         tap("saveSettings", in: app)
     }
 

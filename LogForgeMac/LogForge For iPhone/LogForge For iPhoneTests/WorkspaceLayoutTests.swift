@@ -29,6 +29,25 @@ final class WorkspaceLayoutTests: XCTestCase {
         XCTAssertEqual(layout(0, 0), .single)
     }
 
+    func testMultitaskingWindowSizesDoNotInheritFullScreenColumns() {
+        // A fold at the edge belongs to the neighboring app, not a second pane.
+        for width in [CGFloat(280), 320, 400, 480] {
+            for height in [CGFloat(360), 600, 900] {
+                XCTAssertEqual(layout(width, height, divisions: [
+                    CGRect(x: width-8, y: 0, width: 16, height: height)
+                ]), .single)
+            }
+        }
+        XCTAssertEqual(layout(900, 280), .single) // Video + app stacked multitasking.
+        XCTAssertEqual(layout(900, 600), .horizontal) // Return to full width.
+    }
+
+    func testKeyboardReducedWindowKeepsParameterRegionAccessible() {
+        XCTAssertEqual(layout(860, 240), .single)
+        XCTAssertEqual(layout(400, 240, regular: false), .single)
+        XCTAssertEqual(layout(860, 600), .horizontal)
+    }
+
     private func layout(_ width: CGFloat, _ height: CGFloat, regular: Bool = true,
                         largeText: Bool = false, divisions: [CGRect] = []) -> WorkspaceLayout {
         WorkspaceLayout.resolve(size: CGSize(width: width, height: height), regularWidth: regular,

@@ -1,4 +1,46 @@
 import SwiftUI
+import UIKit
+
+/// A system scene action respects Duo's dynamic new-window availability. It
+/// requests another view of the shared work queue, never a duplicate conversion.
+struct WorkspaceWindowMenu: UIViewRepresentable {
+    static let activityType = "Shizhihe.LogForge.workspace"
+    let unavailable: () -> Void
+    func makeUIView(context: Context) -> UIButton {
+        let button = UIButton(type:.system)
+        button.setImage(UIImage(systemName:"rectangle.badge.plus"),for:.normal)
+        button.accessibilityLabel = L10n.text("window.new")
+        button.accessibilityIdentifier = "newWorkspace"
+        button.showsMenuAsPrimaryAction = true
+        configure(button)
+        return button
+    }
+    func updateUIView(_ button: UIButton, context: Context) { configure(button) }
+    private func configure(_ button: UIButton) {
+        let fallback = UIAction(title:L10n.text("window.unavailable")) { _ in unavailable() }
+        let action = UIWindowScene.ActivationAction(title:L10n.text("window.new"),
+            image:UIImage(systemName:"rectangle.badge.plus"), alternate:fallback) { _ in
+            let activity = NSUserActivity(activityType:Self.activityType)
+            activity.title = "LogForge"
+            activity.targetContentIdentifier = UUID().uuidString
+            return UIWindowScene.ActivationConfiguration(userActivity:activity)
+        }
+        action.accessibilityIdentifier = "newWorkspaceAction"
+        button.menu = UIMenu(children:[action])
+    }
+}
+
+/// Hinge events checkpoint state at transitions; layout continues to use geometry.
+struct WorkspaceContinuity: ViewModifier {
+    @ObservedObject var queue: ConversionQueue
+    @ViewBuilder func body(content: Content) -> some View {
+        if #available(iOS 27.1, *) {
+            content.onHingeChange { previous, current in
+                if previous.hinge?.status != current.hinge?.status { queue.persist() }
+            }
+        } else { content }
+    }
+}
 
 /// Decisions use the local container, never a device model, screen or hinge angle.
 enum WorkspaceLayout: String {

@@ -3,7 +3,7 @@ import PhotosUI
 import UniformTypeIdentifiers
 
 struct ContentView: View {
-    @StateObject private var queue = ConversionQueue()
+    @EnvironmentObject private var queue: ConversionQueue
     @AppStorage("proResQuality") private var quality: ProResQuality = .proRes422HQ
     @State private var options = ConversionOptions()
     @State private var draft = ConversionOptions()
@@ -21,6 +21,12 @@ struct ContentView: View {
     @AppStorage("appearance") private var appearance = "system"
     @AppStorage("hapticsEnabled") private var haptics = true
     @Environment(\.colorScheme) private var scheme
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+    @Environment(\.supportsMultipleWindows) private var supportsMultipleWindows
+    @Environment(\.scenePhase) private var scenePhase
+    #if DEBUG
+    @State private var testSceneID = UUID()
+    #endif
     private enum PickerPurpose { case files, folder, destination }
     private var busy: Bool { queue.running || queue.importing }
     private var appBackground: some View {
@@ -49,7 +55,19 @@ struct ContentView: View {
                     }
                 }
             }
+            .dropDestination(for: URL.self) { urls, _ in
+                guard !busy, !urls.isEmpty, urls.allSatisfy(\.isFileURL) else { return false }
+                queue.importURLs(urls, recursive:false)
+                Haptics.play(.medium)
+                return true
+            }
             .toolbar {
+                if supportsMultipleWindows {
+                    ToolbarItem(placement:.topBarTrailing) {
+                        WorkspaceWindowMenu { queue.messages.append(L10n.text("window.unavailable")) }
+                            .frame(width:44,height:44)
+                    }.workspacePriority(primary:false)
+                }
                 ToolbarItem(placement:.topBarLeading) {
                     Button(L10n.text("language"), systemImage:"globe") {
                         LanguageManager.shared.openSettings(); Haptics.play(.small)
@@ -77,6 +95,8 @@ struct ContentView: View {
             }
         }
         .preferredColorScheme(appearance == "system" ? nil : appearance == "dark" ? .dark : .light)
+        .modifier(WorkspaceContinuity(queue:queue))
+        .onChange(of:scenePhase) { _, phase in if phase != .active { queue.persist() } }
         .task {
             guard !initialized else { return }
             initialized = true
@@ -88,6 +108,12 @@ struct ContentView: View {
             await queue.assess()
         }
         .onChange(of:options) { _, value in savedOptions = (try? JSONEncoder().encode(value)) ?? Data() }
+        .onChange(of:savedOptions) { _, data in
+            // Keep saved defaults consistent between windows without overwriting an
+            // open sheet's independent draft. Running conversions already hold options.
+            if let restored = try? JSONDecoder().decode(ConversionOptions.self,from:data),
+               (try? restored.validate()) != nil, restored != options { options = restored }
+        }
         .photosPicker(isPresented:$showPhotos,selection:$photos,matching:.videos,preferredItemEncoding:.current)
         .onChange(of:photos) { _, values in if !values.isEmpty { queue.importPhotos(values); photos = [] } }
         .fileImporter(isPresented:$showFiles,allowedContentTypes:picker == .files ? [.movie] : [.folder],allowsMultipleSelection:picker == .files) { result in
@@ -120,6 +146,14 @@ struct ContentView: View {
             }.presentationDetents([.medium,.large]).presentationBackground { appBackground }
         }
         .sheet(isPresented:$showSettings) { settings }
+        #if DEBUG
+        .overlay(alignment:.topLeading) {
+            if ProcessInfo.processInfo.arguments.contains("--ui-testing") {
+                Text(uiTestState).font(.system(size:1)).frame(width:1,height:1).clipped()
+                    .accessibilityIdentifier("workspaceState").allowsHitTesting(false)
+            }
+        }
+        #endif
     }
     private var header: some View {
         GlassCard("") {
@@ -190,6 +224,7 @@ struct ContentView: View {
                         if !entry.detail.isEmpty { Text(entry.detail).font(.footnote).textSelection(.enabled) }
                         if let output = entry.output {
                             ShareLink(item:output) { Label(L10n.text("share"),systemImage:"square.and.arrow.up") }.buttonStyle(GlassActionStyle())
+                                .accessibilityIdentifier("shareVideo-\(entry.id.uuidString)")
                                 .simultaneousGesture(TapGesture().onEnded { Haptics.play(.medium) })
                             ShareLink(item:output.appendingPathExtension("json")) { Label(L10n.text("report"),systemImage:"doc.text") }.buttonStyle(GlassActionStyle())
                                 .simultaneousGesture(TapGesture().onEnded { Haptics.play(.small) })
@@ -198,7 +233,7 @@ struct ContentView: View {
                         .accessibilityIdentifier("queueEntry-\(entry.id.uuidString)")
                 }
                 if queue.entries.contains(where:{ $0.status == .failed }) {
-                    Button { queue.retryFailures(); Haptics.play(.medium) } label: { Text(L10n.text("retry")) }.buttonStyle(GlassActionStyle()).disabled(busy)
+                    Button { queue.retryFailures(); Haptics.play(.medium) } label: { Text(L10n.text("retry")) }.buttonStyle(GlassActionStyle()).disabled(busy).accessibilityIdentifier("retryFailed")
                 }
                 if let report = queue.batchReport, !busy {
                     ShareLink(item:report) { Label(L10n.text("report.batch"),systemImage:"doc.text") }.buttonStyle(GlassActionStyle())
@@ -269,15 +304,34 @@ struct ContentView: View {
     private func optionMenu(_ key: String, value: Binding<Float>, choices: [Float], percentage: Bool) -> some View {
         func label(_ v: Float) -> String { percentage ? "\(Int((v*100).rounded()))%" : String(format:"%g EV",v) }
         return AdaptiveControlRow(L10n.text(key)) {
-            Menu { ForEach(choices,id:\.self) { v in Button(label(v)) { value.wrappedValue = v; Haptics.play(.small) } } } label: { Label(label(value.wrappedValue),systemImage:"chevron.down").padding(14).clearGlass(interactive:true,radius:18) }
+            Menu {
+                ForEach(choices,id:\.self) { v in
+                    Button(label(v)) { value.wrappedValue = v; Haptics.play(.small) }
+                        .accessibilityIdentifier("option-\(key)-choice-\(String(format:"%g",v))")
+                }
+            } label: { Label(label(value.wrappedValue),systemImage:"chevron.down").padding(14).clearGlass(interactive:true,radius:18) }
                 .accessibilityIdentifier("option-\(key)")
         }
     }
 
     #if DEBUG
+    private var uiTestState: String {
+        let state: [String:Any] = ["ids":queue.entries.map { $0.id.uuidString },
+            "statuses":queue.entries.map { $0.status.rawValue },"running":queue.running,
+            "importing":queue.importing,"exposure":options.exposure,
+            "sources":queue.entries.map { $0.source.path },"frames":queue.frameCount,
+            "outputs":queue.entries.compactMap { $0.output?.path },
+            "reduceTransparency":reduceTransparency, "scene":testSceneID.uuidString,
+            "queueInstance":String(describing:ObjectIdentifier(queue)),
+            "supportsMultipleWindows":supportsMultipleWindows]
+        guard let data = try? JSONSerialization.data(withJSONObject:state,options:.sortedKeys),
+              let string = String(data:data,encoding:.utf8) else { return "{}" }
+        return string
+    }
     private func configureUITestScenario() {
         let arguments = ProcessInfo.processInfo.arguments
-        guard arguments.contains("--ui-testing") else { return }
+        guard arguments.contains("--ui-testing"), !queue.didConfigureUITests else { return }
+        queue.didConfigureUITests = true
         queue.entries = []; queue.messages = []; queue.batchReport = nil
         if arguments.contains("--ui-queue") {
             for number in 1...8 {

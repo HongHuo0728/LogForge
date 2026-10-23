@@ -126,3 +126,5 @@
 
 "version.title" = "Version";
 "version.build" = "Numéro de build %@";
+"window.new" = "Nouvelle fenêtre de travail";
+"window.unavailable" = "Une nouvelle fenêtre est indisponible dans la vue actuelle.";

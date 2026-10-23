@@ -126,3 +126,5 @@
 
 "version.title" = "Versión";
 "version.build" = "Número de compilación %@";
+"window.new" = "Nueva ventana de trabajo";
+"window.unavailable" = "No se puede abrir otra ventana en la vista actual.";

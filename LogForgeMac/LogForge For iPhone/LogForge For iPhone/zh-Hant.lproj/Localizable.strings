@@ -126,3 +126,5 @@
 
 "version.title" = "版本資訊";
 "version.build" = "組建編號 %@";
+"window.new" = "新增工作區視窗";
+"window.unavailable" = "目前檢視無法開啟新視窗。";

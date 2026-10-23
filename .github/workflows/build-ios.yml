@@ -9,6 +9,7 @@ on:
       - 'CMakeLists.txt'
       - '.github/workflows/build-ios.yml'
       - '.github/scripts/release_target.py'
+      - '.github/scripts/publish_ios_release.py'
       - 'tests/release_target.py'
   pull_request:
     paths:
@@ -16,6 +17,7 @@ on:
       - 'CMakeLists.txt'
       - '.github/workflows/build-ios.yml'
       - '.github/scripts/release_target.py'
+      - '.github/scripts/publish_ios_release.py'
       - 'tests/release_target.py'
   workflow_dispatch:
 
@@ -43,7 +45,9 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Test platform release routing
-        run: python3 tests/release_target.py
+        run: |
+          python3 tests/release_target.py
+          python3 LogForgeMac/tools/test_package_audit.py
       - name: Select release platform
         id: release
         run: python3 .github/scripts/release_target.py --platform ios
@@ -54,11 +58,14 @@ jobs:
     name: Test and package iOS
     runs-on: xcode-27
     timeout-minutes: 120
+    outputs:
+      artifact: ${{ steps.identity.outputs.artifact }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Select Xcode 27.1 and install required simulator runtimes
         run: bash tools/prepare-xcode.sh
       - name: Check release identity and tag
+        id: identity
         run: |
           python3 tools/test_release_info.py
           version=$(python3 tools/release-info.py)
@@ -68,15 +75,30 @@ jobs:
             exit 1
           fi
           printf 'LOGFORGE_ARTIFACT=LogForge-%s-iOS-%s-unsigned-%s\n' "$version" "$release_build" "$GITHUB_RUN_NUMBER" >> "$GITHUB_ENV"
+          printf 'artifact=LogForge-%s-iOS-%s-unsigned-%s\n' "$version" "$release_build" "$GITHUB_RUN_NUMBER" >> "$GITHUB_OUTPUT"
       - name: Duo simulator regression tests
+        id: duo
         run: bash tools/build-ios.sh test duo
+      - name: Real Duo poses and state continuity
+        if: ${{ !cancelled() && steps.duo.outcome == 'success' }}
+        run: bash tools/run-duo-tests.sh
       - name: iOS 26 compatibility regression tests
+        if: ${{ !cancelled() }}
         run: bash tools/build-ios.sh test phone26
       - name: iPad regression tests
+        if: ${{ !cancelled() }}
         run: bash tools/build-ios.sh test ipad
       - name: Archive and package iPhone release
+        id: archive
+        if: ${{ !cancelled() }}
         run: bash tools/build-ios.sh archive
+      - name: Audit release bytes and collect required verification
+        if: ${{ !cancelled() && steps.archive.outcome == 'success' }}
+        run: |
+          python3 tools/audit-package.py build/artifacts
+          python3 tools/collect-verification.py
       - name: Upload IPA, checksums and relink sources
+        if: ${{ !cancelled() && steps.archive.outcome == 'success' }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: ${{ env.LOGFORGE_ARTIFACT }}
@@ -93,3 +115,26 @@ jobs:
             LogForgeMac/build/*.xcresult
           if-no-files-found: warn
           retention-days: 14
+
+  publish:
+    name: Publish verified iOS release with original Windows 1.3.0 assets
+    needs: iphone
+    if: github.ref_type == 'tag' && startsWith(github.ref_name, 'v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: read
+    defaults:
+      run:
+        working-directory: .
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Download verified packages from this run
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ARTIFACT: ${{ needs.iphone.outputs.artifact }}
+        run: gh run download "$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY" --name "$ARTIFACT" --dir release-artifacts
+      - name: Verify, upload to draft, read back all six assets, then publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 .github/scripts/publish_ios_release.py release-artifacts

@@ -71,11 +71,17 @@ test)
     tests=(-only-testing:'LogForge For iPhoneUITests/GlassFlowTests')
     if [ "$role" = duo ]; then tests+=(-only-testing:'LogForge For iPhoneTests');
     else tests+=(-only-testing:'LogForge For iPhoneTests/WorkspaceLayoutTests'); fi
+    test_status=0
     xcodebuild "${common[@]}" -configuration Debug -destination "platform=iOS Simulator,id=$simulator" \
         -parallel-testing-enabled NO "${tests[@]}" \
         -test-timeouts-enabled YES -default-test-execution-time-allowance 120 \
         -maximum-test-execution-time-allowance 180 \
-        -resultBundlePath "$root/build/Tests-$role.xcresult" test 2>&1 | tee "build/logs/tests-$role.log"
+        -resultBundlePath "$root/build/Tests-$role.xcresult" test 2>&1 | tee "build/logs/tests-$role.log" || test_status=$?
+    if [ -d "build/Tests-$role.xcresult" ]; then
+        xcrun xcresulttool export attachments --path "build/Tests-$role.xcresult" \
+            --output-path "build/logs/attachments-$role" > "build/logs/attachments-$role.log" 2>&1 || true
+    fi
+    exit "$test_status"
     ;;
 *) echo "Usage: $0 archive|test [duo|phone26|ipad]" >&2; exit 2 ;;
 esac

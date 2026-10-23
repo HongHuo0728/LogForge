@@ -126,3 +126,5 @@
 
 "version.title" = "Version";
 "version.build" = "Build %@";
+"window.new" = "New workspace window";
+"window.unavailable" = "A new window is unavailable in the current view.";
