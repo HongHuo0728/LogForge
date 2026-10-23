@@ -20,7 +20,27 @@ export APPIUM_HOME="${RUNNER_TEMP:-$PWD/build}/logforge-appium-home"
 prefix="${RUNNER_TEMP:-$PWD/build}/logforge-appium"
 npm install --prefix "$prefix" --no-audit --no-fund appium@3.8.0
 appium="$prefix/node_modules/.bin/appium"
+# Driver 12.19.0 pins WDA 16.16.2, whose XCTest rotation path does not rotate
+# Duo scenes. Use the released upstream fix, without patching the application.
+python3 - <<'PY'
+import json, os
+from pathlib import Path
+path = Path(os.environ['APPIUM_HOME']) / 'package.json'
+path.parent.mkdir(parents=True, exist_ok=True)
+data = json.loads(path.read_text()) if path.exists() else {'private': True}
+data.setdefault('overrides', {})['appium-webdriveragent'] = '16.17.3'
+path.write_text(json.dumps(data, indent=2))
+PY
 "$appium" driver install --source=npm appium-xcuitest-driver@12.19.0
+node - <<'JS' > build/logs/duo/automation-versions.json
+const {createRequire} = require('node:module');
+const driverPath = require.resolve('appium-xcuitest-driver/package.json', {paths:[process.env.APPIUM_HOME]});
+const driverRequire = createRequire(driverPath);
+const driver = require(driverPath).version;
+const wda = driverRequire('appium-webdriveragent/package.json').version;
+if (driver !== '12.19.0' || wda !== '16.17.3') throw Error(`Unexpected automation versions: ${driver}, ${wda}`);
+console.log(JSON.stringify({appium:'3.8.0',xcuitest:driver,webdriveragent:wda}, null, 2));
+JS
 "$appium" --address 127.0.0.1 --port 4723 --log-timestamp \
     > build/logs/duo/appium.log 2>&1 &
 server=$!

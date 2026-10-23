@@ -41,11 +41,19 @@ The explicit reserved-region query is for custom two-region fold layout.
 
 ## Evidence and release gate
 
-`tools/test_duo.py` runs Appium 3.8.0 / XCUITest Driver 12.19.0 against the actual
-iOS 27.1 Duo simulator. Each scenario records actual hinge angles, selected display,
+`tools/test_duo.py` runs Appium 3.8.0 / XCUITest Driver 12.19.0, with its
+WebDriverAgent dependency pinned to the released 16.17.3, against the actual
+iOS 27.1 Duo simulator. WDA 16.16.2 changes XCTest's orientation value without
+rotating Duo scenes; 16.17.3 includes the upstream rotation fix. Each scenario records actual hinge angles, selected display,
 accessibility trees and PNG screenshots. Screen selection only controls capture
 and input; it cannot prove that the app moved screens. Tent mode passes only when
 the app's real window occupies the outer display in that posture.
+The optional FaceDown/tent diagnostic uses the simulator-only `duoctl` helper at
+commit `efd5e3d62fd85f555057b429deafcc9c81123454`, downloaded with a pinned SHA-256.
+This external test helper uses simulator HID controls and never enters the app,
+IPA or RelinkKit. Dispatch alone does not pass a pose: actual app geometry and
+display identity must still match. XCTest may round odd inner-panel pixel sizes
+down by one pixel; screenshot checks allow only that one-pixel rounding.
 
 Geometric unit cases use synthetic dimensions and are labeled separately. They do
 not stand in for a simulator Split View, keyboard split, hinge pose or second scene.
@@ -79,3 +87,5 @@ rebuild or repeat simulator checks solely because the tag was pushed.
 - [Apple Support: Duo Split View](https://support.apple.com/guide/iphone/open-two-apps-in-split-view-on-iphone-duo-iphrj13y9uxz/ios)
 - [Apple Support: System split keyboard](https://support.apple.com/guide/iphone/type-with-the-onscreen-keyboard-iph3c50f96e/ios)
 - [Appium: Real Duo simulator control](https://appium.github.io/appium-xcuitest-driver/12.19/guides/duo/)
+- [Appium: Released Duo rotation fix](https://github.com/appium/appium-ios/pull/81)
+- [duoctl: Simulator control helper](https://github.com/skarol/duoctl/tree/efd5e3d62fd85f555057b429deafcc9c81123454)

@@ -60,9 +60,13 @@ time, and checks have bounded timeouts.
 After the main build succeeds, the version tag promotes its exact artifacts;
 publication rechecks source provenance and hashes without rebuilding or repeating
 the simulator suite.
-Appium **3.8.0** with XCUITest Driver **12.19.0** records screenshots, accessibility
+Appium **3.8.0** with XCUITest Driver **12.19.0** and WebDriverAgent **16.17.3**
+records screenshots, accessibility
 trees, hinge angle, display identity and actual window geometry. Injected geometry
 unit cases are separate evidence and never substitute for simulator posture tests.
+The pinned WDA release includes the upstream Duo scene-rotation fix. A separately
+pinned simulator-only helper attempts FaceDown for the optional tent diagnostic;
+neither automation component is included in the application packages.
 
 The published release adds the exact run link, commit, test counts and checksums
 below. A source checkout or workflow configuration alone does not establish that
