@@ -35,6 +35,11 @@ class ReleaseTargetTests(unittest.TestCase):
         for platform in release.PLATFORMS:
             self.assertTrue(release.select_target(platform, 'tag', 'v2.0.0', lambda _: '2.0.0')[0])
 
+    def test_ios_132_reuses_windows_130_without_rebuilding_it(self):
+        versions = lambda platform: {'ios':'1.3.2', 'windows':'1.3.0'}[platform]
+        self.assertTrue(release.select_target('ios', 'tag', 'v1.3.2', versions)[0])
+        self.assertFalse(release.select_target('windows', 'tag', 'v1.3.2', versions)[0])
+
     def test_unknown_release_version_is_an_error(self):
         for platform in release.PLATFORMS:
             with self.assertRaisesRegex(ValueError, 'matches neither'):

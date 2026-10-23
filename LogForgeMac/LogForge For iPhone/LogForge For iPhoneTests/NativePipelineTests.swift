@@ -545,7 +545,7 @@ final class NativePipelineTests: XCTestCase {
         XCTAssertEqual(report?["decoding"] as? String,result.diagnostics.decodingBackend)
         XCTAssertEqual(report?["appVersion"] as? String,AppBuild.version)
         XCTAssertEqual(report?["releaseBuild"] as? String,AppBuild.releaseBuild)
-        XCTAssertEqual(AppBuild.releaseBuild,"26107B")
+        XCTAssertEqual(AppBuild.releaseBuild,"261023A")
         XCTAssertEqual(report?["bundleBuild"] as? String,AppBuild.buildNumber)
         XCTAssertTrue(["AVFoundation","prores"].contains(report?["validationDecoding"] as? String ?? ""))
     }

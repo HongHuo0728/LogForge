@@ -1,5 +1,5 @@
 #!/bin/bash
-# Run on macOS with Xcode 26 or newer. No signing secrets are needed.
+# Run on macOS with Xcode 27.1. Deployment remains iOS 26; no signing secrets.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 root="$PWD"
@@ -14,8 +14,8 @@ relink_name="LogForge-${version}-iOS-${release_build}-RelinkKit.zip"
 mkdir -p build/logs build/artifacts
 xcodebuild -version | tee build/logs/xcode-version.txt
 sdk_version=$(xcrun --sdk iphoneos --show-sdk-version)
-if [ "${sdk_version%%.*}" -lt 26 ]; then
-    echo "An iOS 26 or newer SDK is required, found $sdk_version" >&2
+if [ "$sdk_version" != 27.1 ]; then
+    echo "The iOS 27.1 SDK is required for this release, found $sdk_version" >&2
     exit 1
 fi
 common=(-project "$project" -scheme "$scheme" -derivedDataPath "$root/build/DerivedData"
@@ -65,35 +65,17 @@ EOF
     fi
     ;;
 test)
-    xcrun simctl list devices available --json > build/logs/simulators.json
-    simulator_info=$(python3 - <<'PY'
-import json
-with open('build/logs/simulators.json') as f:
-    devices = json.load(f)['devices']
-for runtime, items in sorted(devices.items(), reverse=True):
-    if '.iOS-' not in runtime:
-        continue
-    version = int(runtime.split('.iOS-')[-1].split('-')[0])
-    if version < 26:
-        continue
-    for item in items:
-        if item['name'].startswith('iPhone') and item.get('isAvailable', False):
-            print(item['udid'], item['state'])
-            raise SystemExit(0)
-raise SystemExit('No available iPhone simulator with iOS 26 or newer')
-PY
-    )
-    read -r simulator simulator_state <<< "$simulator_info"
-    # Start booting while Xcode compiles, avoiding a serial cold-boot delay.
-    if [ "$simulator_state" != Booted ]; then
-        xcrun simctl boot "$simulator" 2>&1 | tee build/logs/simulator-boot.log
-    fi
+    role="${2:-duo}"
+    simulator=$(python3 tools/select-simulator.py "$role")
+    xcrun simctl bootstatus "$simulator" -b 2>&1 | tee "build/logs/simulator-$role-boot.log"
+    tests=(-only-testing:'LogForge For iPhoneUITests/GlassFlowTests')
+    if [ "$role" = duo ]; then tests+=(-only-testing:'LogForge For iPhoneTests');
+    else tests+=(-only-testing:'LogForge For iPhoneTests/WorkspaceLayoutTests'); fi
     xcodebuild "${common[@]}" -configuration Debug -destination "platform=iOS Simulator,id=$simulator" \
-        -parallel-testing-enabled NO -only-testing:'LogForge For iPhoneTests' \
-        -only-testing:'LogForge For iPhoneUITests/GlassFlowTests/testLicenseNavigationKeepsSettingsAndVersion' \
+        -parallel-testing-enabled NO "${tests[@]}" \
         -test-timeouts-enabled YES -default-test-execution-time-allowance 120 \
         -maximum-test-execution-time-allowance 180 \
-        -resultBundlePath "$root/build/Tests.xcresult" test 2>&1 | tee build/logs/tests.log
+        -resultBundlePath "$root/build/Tests-$role.xcresult" test 2>&1 | tee "build/logs/tests-$role.log"
     ;;
-*) echo "Usage: $0 archive|test" >&2; exit 2 ;;
+*) echo "Usage: $0 archive|test [duo|phone26|ipad]" >&2; exit 2 ;;
 esac

@@ -15,6 +15,7 @@ struct ContentView: View {
     @State private var showPhotos = false
     @State private var showFiles = false
     @State private var showSettings = false
+    @State private var initialized = false
     @State private var photos: [PhotosPickerItem] = []
     @State private var picker: PickerPurpose = .files
     @AppStorage("appearance") private var appearance = "system"
@@ -29,42 +30,63 @@ struct ContentView: View {
         NavigationStack {
             ZStack {
                 appBackground
-                ScrollView {
-                    GlassEffectContainer(spacing:12) {
-                        VStack(spacing:18) {
-                            header
-                            importButton
-                            conversionCard
-                            activityCard
-                            queueCard
-                            noticesCard
-                        }.padding(.horizontal,20).padding(.top,16).padding(.bottom,110).frame(maxWidth:900)
-                    }.frame(maxWidth:.infinity)
+                AdaptiveWorkspace {
+                    workspaceScroll("queueWorkspace") {
+                        header
+                        activityCard
+                        queueCard
+                        noticesCard
+                    }
+                } secondary: {
+                    workspaceScroll("conversionWorkspace") { conversionCard }
+                } compact: {
+                    workspaceScroll("compactWorkspace") {
+                        header
+                        activityCard
+                        conversionCard
+                        queueCard
+                        noticesCard
+                    }
                 }
             }
             .toolbar {
                 ToolbarItem(placement:.topBarLeading) {
-                    Button { LanguageManager.shared.openSettings(); Haptics.play(.small) } label: { Image(systemName:"globe") }
-                        .buttonStyle(GlassActionStyle(compact:true))
-                        .accessibilityLabel(L10n.text("language")).accessibilityIdentifier("languageSettings")
-                }.sharedBackgroundVisibility(.hidden)
+                    Button(L10n.text("language"), systemImage:"globe") {
+                        LanguageManager.shared.openSettings(); Haptics.play(.small)
+                    }.accessibilityIdentifier("languageSettings")
+                }.workspacePriority(primary: false)
                 ToolbarItem(placement:.topBarTrailing) {
-                    Button { draft = options; draftAppearance = appearance; draftHaptics = haptics; showSettings = true; Haptics.play(.small) } label: { Image(systemName:"slider.horizontal.3") }
-                        .buttonStyle(GlassActionStyle(compact:true))
-                        .disabled(busy).accessibilityLabel(L10n.text("settings")).accessibilityIdentifier("conversionSettings")
-                }.sharedBackgroundVisibility(.hidden)
-            }
-            .safeAreaInset(edge:.bottom) {
-                if !busy {
-                    Button { queue.start(quality:quality,options:options); Haptics.play(.large) } label: {
-                        Label(L10n.text("convert"),systemImage:"arrow.triangle.2.circlepath").font(.headline).frame(maxWidth:.infinity)
-                    }.buttonStyle(GlassActionStyle()).disabled(!queue.entries.contains(where:{ $0.status == .queued }))
-                        .padding(.horizontal,20).padding(.bottom,10).frame(maxWidth:900)
-                }
+                    Button(L10n.text("settings"), systemImage:"slider.horizontal.3") {
+                        draft = options; draftAppearance = appearance; draftHaptics = haptics
+                        showSettings = true; Haptics.play(.small)
+                    }.disabled(busy).accessibilityIdentifier("conversionSettings")
+                }.workspacePriority(primary: false)
+                ToolbarItem(placement:.bottomBar) {
+                    Button(L10n.text("import.title"), systemImage:"video.badge.plus") {
+                        showSources = true; Haptics.play(.large)
+                    }.disabled(busy).accessibilityIdentifier("importVideo")
+                }.workspacePriority(primary: true)
+                ToolbarItem(placement: prominentActionPlacement) {
+                    Button(L10n.text(busy ? "cancel" : "convert"),
+                           systemImage: busy ? "xmark.circle" : "arrow.triangle.2.circlepath") {
+                        if busy { queue.cancel(); Haptics.play(.medium) }
+                        else { queue.start(quality:quality,options:options); Haptics.play(.large) }
+                    }.disabled(!busy && !queue.entries.contains(where:{ $0.status == .queued }))
+                        .accessibilityIdentifier("conversionAction")
+                }.workspacePriority(primary: true)
             }
         }
         .preferredColorScheme(appearance == "system" ? nil : appearance == "dark" ? .dark : .light)
-        .task { if let restored = try? JSONDecoder().decode(ConversionOptions.self,from:savedOptions), (try? restored.validate()) != nil { options = restored }; await queue.assess() }
+        .task {
+            guard !initialized else { return }
+            initialized = true
+            if let restored = try? JSONDecoder().decode(ConversionOptions.self,from:savedOptions),
+               (try? restored.validate()) != nil { options = restored }
+            #if DEBUG
+            configureUITestScenario()
+            #endif
+            await queue.assess()
+        }
         .onChange(of:options) { _, value in savedOptions = (try? JSONEncoder().encode(value)) ?? Data() }
         .photosPicker(isPresented:$showPhotos,selection:$photos,matching:.videos,preferredItemEncoding:.current)
         .onChange(of:photos) { _, values in if !values.isEmpty { queue.importPhotos(values); photos = [] } }
@@ -79,15 +101,23 @@ struct ContentView: View {
         .sheet(isPresented:$showSources,onDismiss:{
             let action = pendingSourceAction; pendingSourceAction = nil; action?()
         }) {
-            GlassEffectContainer(spacing:12) {
-                VStack(spacing:16) {
-                    Text(L10n.text("import.title")).font(.headline)
-                    sourceButton("import.photos","photo.on.rectangle") { showPhotos = true }
-                    sourceButton("import.files","doc") { picker = .files; showFiles = true }
-                    sourceButton("import.folder","folder") { picker = .folder; showFiles = true }
-                    sourceButton("cancel","xmark") {}
-                }.padding(24).clearGlass().padding(16)
-            }.presentationDetents([.height(380)]).presentationBackground(.clear)
+            NavigationStack {
+                workspaceScroll("importSources") {
+                    GlassCard(L10n.text("import.hint")) {
+                        sourceButton("import.photos","photo.on.rectangle") { showPhotos = true }
+                        sourceButton("import.files","doc") { picker = .files; showFiles = true }
+                        sourceButton("import.folder","folder") { picker = .folder; showFiles = true }
+                    }
+                }.navigationTitle(L10n.text("import.title"))
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        ToolbarItem(placement:.cancellationAction) {
+                            Button(L10n.text("cancel"),systemImage:"xmark") {
+                                showSources = false; Haptics.play(.small)
+                            }.accessibilityIdentifier("cancelImport")
+                        }
+                    }
+            }.presentationDetents([.medium,.large]).presentationBackground { appBackground }
         }
         .sheet(isPresented:$showSettings) { settings }
     }
@@ -97,35 +127,38 @@ struct ContentView: View {
             Text(AppBuild.label).font(.caption).foregroundStyle(.secondary).accessibilityIdentifier("appBuild")
             Text(L10n.text("subtitle")).font(.subheadline)
             Text(queue.capability).font(.footnote).foregroundStyle(.secondary).accessibilityIdentifier("capability")
+            if queue.entries.isEmpty { Text(L10n.text("import.hint")).font(.footnote) }
         }
     }
-    private var importButton: some View {
-        Button { Haptics.play(.large); showSources = true } label: {
-            VStack(spacing:12) {
-                Image(systemName:"video.badge.plus").font(.system(size:36,weight:.light))
-                Text(L10n.text("import.title")).font(.headline)
-                Text(L10n.text("import.hint")).font(.footnote)
-            }.frame(maxWidth:.infinity).padding(.vertical,18)
-        }.buttonStyle(GlassActionStyle()).disabled(busy).accessibilityIdentifier("importVideo")
+    private var prominentActionPlacement: ToolbarItemPlacement {
+        if #available(iOS 27.0, *) { return .topBarPinnedTrailing }
+        return .primaryAction
+    }
+    private func workspaceScroll<Content: View>(_ identifier: String,
+                                               @ViewBuilder content: () -> Content) -> some View {
+        ScrollView {
+            GlassEffectContainer(spacing:12) {
+                VStack(alignment:.leading,spacing:18) { content() }
+                    .frame(maxWidth:.infinity,alignment:.leading).padding(16)
+            }
+        }.frame(maxWidth:.infinity,maxHeight:.infinity)
+            .accessibilityIdentifier(identifier)
     }
     private var conversionCard: some View {
         GlassCard(L10n.text("conversion.title")) {
-            HStack {
-                Text(L10n.text("quality")); Spacer()
+            AdaptiveControlRow(L10n.text("quality")) {
                 Menu { ForEach(ProResQuality.allCases) { q in Button(q.displayName) { quality = q; Haptics.play(.small) } } } label: { Label(quality.displayName,systemImage:"chevron.down").padding(12).clearGlass(interactive:true,radius:16) }
             }
-            HStack {
-                Text(L10n.text("backend")); Spacer()
+            AdaptiveControlRow(L10n.text("backend")) {
                 Menu { ForEach(ColorBackend.allCases) { b in Button(b.title) { options.backend = b; Haptics.play(.small) } } } label: { Label(options.backend.title,systemImage:"chevron.down").padding(12).clearGlass(interactive:true,radius:16) }
             }
             Text(L10n.text("encoding.autoHint")).font(.footnote).foregroundStyle(.secondary)
-            HStack {
-                Text(L10n.text("destination")); Spacer()
+            AdaptiveControlRow(L10n.text("destination")) {
                 Button { picker = .destination; showFiles = true; Haptics.play(.medium) } label: {
                     Label(queue.destination?.lastPathComponent ?? L10n.text("destination.default"),systemImage:"folder")
                 }.buttonStyle(GlassActionStyle())
             }
-        }.disabled(busy)
+        }.disabled(busy).accessibilityIdentifier("conversionParameters")
     }
     @ViewBuilder
     private var activityCard: some View {
@@ -136,7 +169,6 @@ struct ContentView: View {
                     Text("\(Int(queue.progress*100))% · \(queue.frameCount) " + L10n.text("frames")).monospacedDigit()
                     if let remaining = queue.remaining { Text(L10n.text("remaining")+" "+Duration.seconds(remaining).formatted(.time(pattern:.minuteSecond))).font(.footnote).monospacedDigit() }
                 }
-                Button { queue.cancel(); Haptics.play(.medium) } label: { Label(L10n.text("cancel"),systemImage:"xmark") }.buttonStyle(GlassActionStyle())
             }
         }
     }
@@ -147,7 +179,7 @@ struct ContentView: View {
                 ForEach(queue.entries) { entry in
                     VStack(alignment:.leading,spacing:10) {
                         HStack {
-                            Text(entry.source.lastPathComponent).font(.headline).lineLimit(3); Spacer()
+                            Text(entry.source.lastPathComponent).font(.headline).fixedSize(horizontal:false,vertical:true); Spacer(minLength:8)
                             if !busy {
                                 Button { queue.remove(entry.id); Haptics.play(.small) } label: { Image(systemName:"minus.circle") }
                                     .buttonStyle(GlassActionStyle()).accessibilityLabel(L10n.text("remove"))
@@ -163,6 +195,7 @@ struct ContentView: View {
                                 .simultaneousGesture(TapGesture().onEnded { Haptics.play(.small) })
                         }
                     }.frame(maxWidth:.infinity,alignment:.leading).padding(16).clearGlass(radius:18)
+                        .accessibilityIdentifier("queueEntry-\(entry.id.uuidString)")
                 }
                 if queue.entries.contains(where:{ $0.status == .failed }) {
                     Button { queue.retryFailures(); Haptics.play(.medium) } label: { Text(L10n.text("retry")) }.buttonStyle(GlassActionStyle()).disabled(busy)
@@ -213,21 +246,59 @@ struct ContentView: View {
                         }
                         NavigationLink { LicenseView() } label: { Label(L10n.text("licenses"),systemImage:"doc.text") }.buttonStyle(GlassActionStyle()).accessibilityIdentifier("openSourceLicenses")
                             .simultaneousGesture(TapGesture().onEnded { Haptics.play(.small) })
-                        HStack {
-                            Button { showSettings = false; Haptics.play(.medium) } label: { Text(L10n.text("cancel")) }.buttonStyle(GlassActionStyle()); Spacer()
-                            Button { options = draft; savedOptions = (try? JSONEncoder().encode(draft)) ?? Data(); appearance = draftAppearance; haptics = draftHaptics; showSettings = false; Haptics.play(.medium) } label: { Text(L10n.text("save")) }.buttonStyle(GlassActionStyle())
-                        }
-                    }.padding(20).frame(maxWidth:700)
+                    }.padding(16).frame(maxWidth:.infinity)
                 }.frame(maxWidth:.infinity)
-            }.navigationTitle(L10n.text("settings"))
+            }.accessibilityIdentifier("settingsContent").navigationTitle(L10n.text("settings"))
+                .toolbar {
+                    ToolbarItem(placement:.cancellationAction) {
+                        Button(L10n.text("cancel"),systemImage:"xmark") {
+                            showSettings = false; Haptics.play(.medium)
+                        }.accessibilityIdentifier("cancelSettings")
+                    }.workspacePriority(primary:true)
+                    ToolbarItem(placement:.confirmationAction) {
+                        Button(L10n.text("save"),systemImage:"checkmark") {
+                            options = draft
+                            savedOptions = (try? JSONEncoder().encode(draft)) ?? Data()
+                            appearance = draftAppearance; haptics = draftHaptics
+                            showSettings = false; Haptics.play(.medium)
+                        }.accessibilityIdentifier("saveSettings")
+                    }.workspacePriority(primary:true)
+                }
         }.presentationBackground { appBackground }
     }
     private func optionMenu(_ key: String, value: Binding<Float>, choices: [Float], percentage: Bool) -> some View {
         func label(_ v: Float) -> String { percentage ? "\(Int((v*100).rounded()))%" : String(format:"%g EV",v) }
-        return HStack {
-            Text(L10n.text(key)); Spacer()
+        return AdaptiveControlRow(L10n.text(key)) {
             Menu { ForEach(choices,id:\.self) { v in Button(label(v)) { value.wrappedValue = v; Haptics.play(.small) } } } label: { Label(label(value.wrappedValue),systemImage:"chevron.down").padding(14).clearGlass(interactive:true,radius:18) }
+                .accessibilityIdentifier("option-\(key)")
         }
+    }
+
+    #if DEBUG
+    private func configureUITestScenario() {
+        let arguments = ProcessInfo.processInfo.arguments
+        guard arguments.contains("--ui-testing") else { return }
+        queue.entries = []; queue.messages = []; queue.batchReport = nil
+        if arguments.contains("--ui-queue") {
+            for number in 1...8 {
+                queue.entries.append(QueueEntry(id:UUID(),
+                    source:URL(fileURLWithPath:"/UITest/\(number)-Long-camera-recording-跨屏状态保留-ABCDEFGHIJKLMNOPQRSTUVWXYZ.mov"),
+                    sourceKey:"ui-\(number)",info:"3840 × 2160 · ProRes 422 HQ · 29.97 fps · 10 s"))
+            }
+        }
+        if let index = arguments.firstIndex(of:"--ui-import"), arguments.indices.contains(index+1) {
+            let documents = FileManager.default.urls(for:.documentDirectory,in:.userDomainMask)[0]
+            queue.importURLs([documents.appendingPathComponent(arguments[index+1])],recursive:false)
+        }
+    }
+    #endif
+}
+
+private extension ToolbarContent {
+    @ToolbarContentBuilder
+    func workspacePriority(primary: Bool) -> some ToolbarContent {
+        if #available(iOS 27.0, *) { self.visibilityPriority(primary ? .high : .low) }
+        else { self }
     }
 }
 

@@ -71,7 +71,7 @@ def main():
             if objects[phase]['isa'] == 'PBXSourcesBuildPhase':
                 source_members += [references[objects[b]['fileRef']] for b in objects[phase]['files']]
         name = target['name']
-        expected = 25 if name == 'LogForge For iPhone' else 2 if name.endswith('Tests') and not name.endswith('UITests') else 3
+        expected = 26 if name == 'LogForge For iPhone' else 3 if name.endswith('Tests') and not name.endswith('UITests') else 3
         assert len(source_members) == expected, f'Sources in {name}: {len(source_members)}'
         if name == 'LogForge For iPhone':
             assert not any('Tests' in str(p.relative_to(root)) for p in source_members)

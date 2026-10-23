@@ -28,6 +28,16 @@ class ReleaseIdentityTests(unittest.TestCase):
         self.assertEqual(release_identity(self.native), '1.3.1')
         self.assertEqual(release_build(self.native), '26107B')
 
+    def test_six_digit_date_build_and_legacy_builds(self):
+        project = self.native / 'LogForge For iPhone/LogForge For iPhone.xcodeproj/project.pbxproj'
+        for build in ('261023A', '26107B', '26929A'):
+            project.write_text(f'MARKETING_VERSION = 1.3.2;\nLOGFORGE_RELEASE_BUILD = {build};\n', encoding='utf-8')
+            self.assertEqual(release_build(self.native), build)
+        for build in ('261023', '261023a', '261023AA', '2610230A', '1023A'):
+            project.write_text(f'MARKETING_VERSION = 1.3.2;\nLOGFORGE_RELEASE_BUILD = {build};\n', encoding='utf-8')
+            with self.subTest(build=build), self.assertRaises(ValueError):
+                release_build(self.native)
+
     def test_ios_patch_version_is_independent_of_windows(self):
         (self.main / 'CMakeLists.txt').write_text('project(LogForge VERSION 1.4.0 LANGUAGES CXX)', encoding='utf-8')
         self.assertEqual(release_identity(self.native), '1.3.1')

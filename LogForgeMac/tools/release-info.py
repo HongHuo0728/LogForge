@@ -23,7 +23,7 @@ def release_build(native_root):
     assignments = re.findall(r'\bLOGFORGE_RELEASE_BUILD\s*=\s*([^;]+);', text)
     versions = re.findall(r'\bMARKETING_VERSION\s*=\s*([^;]+);', text)
     values = {value.strip() for value in assignments}
-    if len(assignments) != len(versions) or len(values) != 1 or any(not re.fullmatch(r'[0-9]{5}[A-Z]', value) for value in values):
+    if len(assignments) != len(versions) or len(values) != 1 or any(not re.fullmatch(r'[0-9]{5,6}[A-Z]', value) for value in values):
         raise ValueError('Xcode targets must share one valid iOS release build')
     return values.pop()
 

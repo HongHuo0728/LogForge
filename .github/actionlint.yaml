@@ -1,0 +1,5 @@
+# actionlint 1.7.x predates GitHub's xcode-27 hosted preview label.
+# This extends lint's label allowlist; the workflow still uses GitHub-hosted runners.
+self-hosted-runner:
+  labels:
+    - xcode-27
