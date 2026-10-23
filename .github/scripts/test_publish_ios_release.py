@@ -45,6 +45,7 @@ class PublicationTests(unittest.TestCase):
         self.mutations = []
         self.corrupt_readback = False
         self.already_public = False
+        self.draft_created = False
         self.tag_commit = self.commit
         self.source_corrupt = False
         self.build_commit = self.commit
@@ -64,14 +65,17 @@ class PublicationTests(unittest.TestCase):
         if route == 'releases/tags/v1.3.1':
             return {'draft':False,'assets':[{'name':name} for name in self.windows]}
         if route == 'releases/tags/v1.3.2':
+            self.assertTrue(self.already_public, 'Draft releases cannot be fetched by tag')
             return {'draft':not self.already_public, 'assets':[{'name':name} for name in self.uploaded],
                     'html_url':'https://example.invalid/verified-release'}
         raise AssertionError(route)
 
     def gh(self, *arguments):
         if arguments[:3] == ('api','--paginate','--slurp'):
-            return json.dumps([[{'tag_name':'v1.3.2','draft':False,'target_commitish':self.commit}]
-                               if self.already_public else []])
+            return json.dumps([[{'tag_name':'v1.3.2','draft':not self.already_public,
+                                'target_commitish':self.commit,
+                                'assets':[{'name':name} for name in self.uploaded]}]
+                               if self.already_public or self.draft_created else []])
         if arguments[:2] == ('release','download'):
             target = Path(arguments[arguments.index('--dir')+1])
             if arguments[2] == 'v1.3.1':
@@ -84,6 +88,7 @@ class PublicationTests(unittest.TestCase):
         if arguments[:2] == ('release','create'):
             self.assertIn('--draft',arguments)
             self.mutations.append('create-draft')
+            self.draft_created = True
             return ''
         if arguments[:2] == ('release','upload'):
             path = Path(arguments[3])

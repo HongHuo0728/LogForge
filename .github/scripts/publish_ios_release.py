@@ -31,6 +31,12 @@ def api(path):
     return json.loads(gh('api', f'repos/{REPO}/{path}'))
 
 
+def find_release(tag):
+    # The tag endpoint only resolves published releases; listing includes drafts.
+    pages = json.loads(gh('api', '--paginate', '--slurp', f'repos/{REPO}/releases?per_page=100'))
+    return next((release for page in pages for release in page if release['tag_name'] == tag), None)
+
+
 def download_verified(directory):
     runs = api('actions/workflows/build-ios.yml/runs?event=push&branch=main&status=success&per_page=100')
     run = next((r for r in runs['workflow_runs'] if r['head_sha'] == os.environ['GITHUB_SHA']), None)
@@ -120,8 +126,7 @@ def main(directory):
         notes_file = work / 'notes.md'
         notes_file.write_text(notes, encoding='utf-8')
         # A retry may complete our existing draft, but never edits a public release.
-        releases = json.loads(gh('api', '--paginate', '--slurp', f'repos/{REPO}/releases?per_page=100'))
-        existing = next((r for page in releases for r in page if r['tag_name'] == tag), None)
+        existing = find_release(tag)
         if existing:
             audit.require(existing['draft'] and existing['target_commitish'] == commit,
                           'Refusing to replace an existing published release or unrelated draft')
@@ -129,7 +134,9 @@ def main(directory):
         else:
             gh('release', 'create', tag, '--repo', REPO, '--verify-tag', '--target', commit,
                '--title', tag, '--notes-file', str(notes_file), '--draft')
-        release = api('releases/tags/' + tag)
+        release = find_release(tag)
+        audit.require(release is not None and release['draft']
+                      and release['target_commitish'] == commit, 'Release draft was not confirmed')
         uploaded = {a['name'] for a in release['assets']}
         audit.require(uploaded <= expected_assets.keys(), 'Draft contains unexpected assets')
         for path in files:
