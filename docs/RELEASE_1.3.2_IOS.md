@@ -27,7 +27,8 @@ controls in the left app. Multiple LogForge windows share one conversion queue
 and running task; each window keeps its own settings draft. The native new-window
 action respects the system's changing availability on the inner and outer displays.
 Hinge state transitions checkpoint the queue without using angle thresholds to
-choose layouts. File URL drops enter the existing validated import pipeline.
+choose layouts. Movie and file-URL drops enter the existing validated import
+pipeline; completed movies can be dragged out using a native file representation.
 
 Text entry in the Files picker uses the system keyboard, including Duo's split
 keyboard. Native sheets and keyboard avoidance keep search and cancellation

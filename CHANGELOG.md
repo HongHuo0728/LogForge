@@ -10,7 +10,8 @@
 - Remove the main fixed-width/bottom spacer and fixed import-sheet height; reflow
   parameter controls and long filenames while retaining Liquid Glass and localization.
 - Support native Split View, shared-queue multiple windows, a system scene activation
-  action, hinge/lifecycle checkpoints and file URL drops. Check actual system split
+  action, hinge/lifecycle checkpoints, movie/file URL drops and draggable completed
+  movies. Copy provider-owned files before their callbacks return. Check actual system split
   keyboard entry and resizing through the native Files picker.
 - Set iOS identity to `1.3.2 (261023A)` without changing the media pipeline, report
   schema or Windows `1.3.0 (26929A)` identity. Accept both historical five-digit

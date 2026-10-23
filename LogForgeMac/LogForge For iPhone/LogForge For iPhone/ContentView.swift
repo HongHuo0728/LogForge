@@ -9,6 +9,7 @@ struct ContentView: View {
     @State private var draft = ConversionOptions()
     @State private var draftAppearance = "system"
     @State private var draftHaptics = true
+    @State private var showWindowUnavailable = false
     @AppStorage("conversionOptions") private var savedOptions = Data()
     @State private var showSources = false
     @State private var pendingSourceAction: (() -> Void)? = nil
@@ -55,16 +56,15 @@ struct ContentView: View {
                     }
                 }
             }
-            .dropDestination(for: URL.self) { urls, _ in
-                guard !busy, !urls.isEmpty, urls.allSatisfy(\.isFileURL) else { return false }
-                queue.importURLs(urls, recursive:false)
+            .onDrop(of:[UTType.movie, .fileURL],isTargeted:nil) { providers in
+                guard queue.importDroppedMovies(providers) else { return false }
                 Haptics.play(.medium)
                 return true
             }
             .toolbar {
                 if supportsMultipleWindows {
                     ToolbarItem(placement:.topBarTrailing) {
-                        WorkspaceWindowMenu { queue.messages.append(L10n.text("window.unavailable")) }
+                        WorkspaceWindowMenu { showWindowUnavailable = true }
                             .frame(width:44,height:44)
                     }.workspacePriority(primary:false)
                 }
@@ -146,6 +146,9 @@ struct ContentView: View {
             }.presentationDetents([.medium,.large]).presentationBackground { appBackground }
         }
         .sheet(isPresented:$showSettings) { settings }
+        .alert(L10n.text("window.unavailable"),isPresented:$showWindowUnavailable) {
+            Button(L10n.text("dismiss"),role:.cancel) {}
+        }
         #if DEBUG
         .overlay(alignment:.topLeading) {
             if ProcessInfo.processInfo.arguments.contains("--ui-testing") {
@@ -225,6 +228,7 @@ struct ContentView: View {
                         if let output = entry.output {
                             ShareLink(item:output) { Label(L10n.text("share"),systemImage:"square.and.arrow.up") }.buttonStyle(GlassActionStyle())
                                 .accessibilityIdentifier("shareVideo-\(entry.id.uuidString)")
+                                .draggable(ImportedMovie(url:output))
                                 .simultaneousGesture(TapGesture().onEnded { Haptics.play(.medium) })
                             ShareLink(item:output.appendingPathExtension("json")) { Label(L10n.text("report"),systemImage:"doc.text") }.buttonStyle(GlassActionStyle())
                                 .simultaneousGesture(TapGesture().onEnded { Haptics.play(.small) })

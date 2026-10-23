@@ -15,8 +15,8 @@ what was actually verified. A source change alone does not mark a row as passed.
 | Multiple LogForge windows | `UIApplicationSupportsMultipleScenes`, WindowGroup, app-owned shared ConversionQueue, independent root sheet/draft state. `UIWindowScene.ActivationAction` and system window availability handle opening additional scenes. | Two native scenes must report distinct scene identities and the same queue identity; fold to the outer screen without replacing the queue. |
 | Hinge changes and scene lifecycle | `onHingeChange` on iOS 27.1 checkpoints on hinge status transitions; scene inactivity checkpoints too. Layout never branches on hinge angles. | Real task identity/progress while folding; continue and complete an actual ProRes conversion. |
 | System split keyboard | Files search remains native; no custom input view or keyboard extension. Native presentation respects keyboard-safe areas. Split/Full selection belongs to the user/system keyboard. | Activate Split through the real keyboard menu; inspect separated key frames, enter text, fold/rotate and cancel without losing queue state. |
-| Cross-app file import | Native Files/Photos pickers remain available in resized panes. File URL drops route to the existing import contract and managed copying; busy queues reject new drops. | Real import/conversion plus a cross-app drop check. Dropping unsupported media must not expand the accepted media contract. |
-| Sharing results | System ShareLink for converted MOV files and reports adapts its presentation to the active scene and available region. | Complete actual conversion, open the system share sheet and inspect it. |
+| Cross-app file import | Native Files/Photos pickers remain available in resized panes. Movie/file-URL drops use NSItemProvider and copy inside its temporary-file callback before applying the existing input contract; busy queues reject new drops. | Actual Photos-to-LogForge drop in Split View; native provider-lifetime/busy-queue tests. Unsupported media does not expand the media contract. |
+| Sharing results | System ShareLink for converted MOV files and reports adapts to the active scene; completed movies also export a draggable FileRepresentation. | Complete actual conversion, open the system share sheet and inspect it; inspect the exported file representation. |
 | Dynamic Type, appearance and transparency | Reflowing label/control rows, standard environment values, existing Liquid Glass and five languages. | Largest accessibility text, light/dark and Reduce Transparency screenshots; all five languages. |
 
 ## Scope decisions
@@ -49,7 +49,7 @@ the app's real window occupies the outer display in that posture.
 
 Geometric unit cases use synthetic dimensions and are labeled separately. They do
 not stand in for a simulator Split View, keyboard split, hinge pose or second scene.
-Independent UI scenarios restart between tests; continuity assertions occur inside
+Independent UI scenarios reinstall the test app between tests; continuity assertions occur inside
 each scenario without restarting the app. Diagnostics are retained even on failure.
 Required failures prevent `verification.json` and formal publication. A candidate
 archive may still be uploaded for diagnosis and must not be described as a release.

@@ -16,6 +16,27 @@ struct ImportedMovie: Transferable {
 }
 
 enum ImportStorage {
+    /// NSItemProvider's temporary URL expires after its completion handler returns.
+    /// Copy inside that handler, before handing the URL to the asynchronous queue.
+    static func receiveMovie(_ provider: NSItemProvider) async throws -> URL {
+        try await withCheckedThrowingContinuation { continuation in
+            let receive: (URL?, Error?) -> Void = { source, error in
+                do {
+                    if let error { throw error }
+                    guard let source, source.isFileURL else { throw NativeFailure("error.input") }
+                    continuation.resume(returning:try copy(source))
+                } catch { continuation.resume(throwing:error) }
+            }
+            if provider.hasItemConformingToTypeIdentifier(UTType.movie.identifier) {
+                provider.loadFileRepresentation(forTypeIdentifier:UTType.movie.identifier,completionHandler:receive)
+            } else {
+                provider.loadItem(forTypeIdentifier:UTType.fileURL.identifier,options:nil) { item, error in
+                    let url = (item as? URL) ?? (item as? Data).flatMap { URL(dataRepresentation:$0,relativeTo:nil) }
+                    receive(url,error)
+                }
+            }
+        }
+    }
     static func copy(_ source: URL) throws -> URL {
         let fm = FileManager.default
         let root = fm.urls(for:.documentDirectory,in:.userDomainMask)[0].appendingPathComponent("Imports/\(UUID())",isDirectory:true)
@@ -182,6 +203,28 @@ final class ConversionQueue: ObservableObject {
                 } catch { messages.append(error.localizedDescription) }
             }
         }
+    }
+    @discardableResult
+    func importDroppedMovies(_ providers: [NSItemProvider]) -> Bool {
+        let movies = providers.filter {
+            $0.hasItemConformingToTypeIdentifier(UTType.movie.identifier) ||
+            $0.hasItemConformingToTypeIdentifier(UTType.fileURL.identifier)
+        }
+        guard !running, !importing, !movies.isEmpty else { return false }
+        importing = true
+        importTask = Task {
+            defer { importing = false; importTask = nil; persist() }
+            for provider in movies {
+                if Task.isCancelled { break }
+                do {
+                    let url = try await ImportStorage.receiveMovie(provider)
+                    // admit checks cancellation and the unchanged ProRes/HLG contract,
+                    // and removes the owned copy if it cannot enter the queue.
+                    await admit(url,key:"drop:"+UUID().uuidString)
+                } catch { messages.append(error.localizedDescription) }
+            }
+        }
+        return true
     }
     private func admit(_ url: URL, key: String) async {
         do {

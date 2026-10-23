@@ -101,7 +101,8 @@ class Driver:
 
     def states(self):
         elements = self.call('POST', '/elements', {'using':'accessibility id', 'value':'workspaceState'})
-        return [json.loads(self.call('GET', '/element/'+e[ELEMENT]+'/attribute/label')) for e in elements]
+        return [json.loads(self.call('GET', '/element/'+e[ELEMENT]+'/attribute/label')) for e in elements
+                if self.call('GET','/element/'+e[ELEMENT]+'/attribute/visible') in ('true',True)]
 
     def capture(self, name, expected_display=None):
         png = base64.b64decode(self.call('GET', '/screenshot'))
@@ -152,7 +153,7 @@ class Driver:
             # Verify the app's real window occupies the selected display. Selecting a
             # screenshot display alone does NOT move the application onto that display.
             source = ET.fromstring(self.call('GET', '/source'))
-            windows = list(source.iter('XCUIElementTypeWindow'))
+            windows = [w for w in source.iter('XCUIElementTypeWindow') if w.get('visible') != 'false']
             points = sorted((display['metrics']['widthPixels']/display['metrics']['density'],
                              display['metrics']['heightPixels']/display['metrics']['density']))
             assert any(all(abs(a-b) < 3 for a,b in zip(sorted((float(w.get('width',0)),
@@ -191,7 +192,10 @@ def test_split_view(driver, report):
     assert driver.state()['ids'] == baseline['ids']
     assert driver.state()['exposure'] == baseline['exposure']
     driver.capture('split-view-right')
-    driver.drag_home(full['x']+full['width']/2, full['y']+full['height']/2)
+    # Move the divider to the far left to expand the right-hand LogForge app.
+    driver.mobile('dragFromToForDuration',duration=0.5,
+        fromX=full['x']+full['width']/2,fromY=full['y']+full['height']/2,
+        toX=full['x']+2,toY=full['y']+full['height']/2)
     until(lambda: abs(driver.window()['width']-full['width']) < 3)
     assert driver.state()['ids'] == baseline['ids']
     driver.capture('split-view-restored')
@@ -297,6 +301,42 @@ def test_multi_window(driver, report):
     driver.capture('multi-window-to-outer')
     report['multiWindow'].update(passed=True, scenes=[s['scene'] for s in states])
     report['checks'].append('two real LogForge scenes share the queue and preserve it on the outer display')
+
+
+def test_file_drop(driver, device, report):
+    driver.launch([])
+    driver.pose(180, 'LANDSCAPE', 'inner', 'horizontal')
+    baseline = driver.state()
+    assert not baseline['ids']
+    full = driver.window()
+    driver.drag_home(full['x']+8, full['y']+full['height']/2)
+    driver.call('POST','/appium/settings',{'settings':{'defaultActiveApplication':BUNDLE}})
+    until(lambda: driver.window()['width'] < full['width']*0.75)
+    destination = driver.window()
+    subprocess.run(['xcrun','simctl','addmedia',device,os.environ['LOGFORGE_DUO_FIXTURE']],check=True)
+    driver.mobile('activateApp',bundleId='com.apple.mobileslideshow')
+    driver.call('POST','/appium/settings',{'settings':{'defaultActiveApplication':'com.apple.mobileslideshow'}})
+    for label in ('Continue', 'Not Now', 'Library'):
+        buttons = driver.call('POST','/elements',{'using':'accessibility id','value':label})
+        if buttons:
+            driver.call('POST','/element/'+buttons[0][ELEMENT]+'/click',{})
+    driver.capture('drop-source-photos')
+    cells = until(lambda: driver.call('POST','/elements',{'using':'-ios predicate string',
+        'value':"type == 'XCUIElementTypeCell' AND visible == true AND (label CONTAINS[c] 'video' OR label CONTAINS '1:00')"}))
+    frame = driver.call('GET','/element/'+cells[0][ELEMENT]+'/rect')
+    driver.mobile('dragFromToForDuration',duration=1.5,
+        fromX=frame['x']+frame['width']/2,fromY=frame['y']+frame['height']/2,
+        toX=destination['x']+destination['width']/2,toY=destination['y']+destination['height']/2)
+    driver.call('POST','/appium/settings',{'settings':{'defaultActiveApplication':BUNDLE}})
+    def admitted():
+        state = driver.state()
+        return state if not state['importing'] and len(state['ids']) == 1 else None
+    state = until(admitted,timeout=120)
+    assert state['statuses'] == ['queued'] and state['queueInstance'] == baseline['queueInstance']
+    assert Path(state['sources'][0]).is_file(), 'Dropped file was not retained in the app container'
+    driver.capture('drop-admitted-in-split-view')
+    report['fileDrop'] = {'passed':True,'syntheticLayout':False,'source':'Photos','ids':state['ids']}
+    report['checks'].append('actual ProRes video dragged from Photos into the split LogForge workspace')
 
 
 def test_settings_and_appearance(driver, report):
@@ -442,11 +482,17 @@ def main():
         # Independent scenarios restart only BETWEEN tests. A reset cannot serve
         # as evidence of continuity inside an individual scenario.
         for name, operation in [('splitView',test_split_view), ('keyboard',test_system_keyboard),
-                                ('appearance',test_settings_and_appearance), ('multiWindow',test_multi_window),
+                                ('appearance',test_settings_and_appearance),
+                                ('fileDrop',lambda d,r:test_file_drop(d,device,r)), ('multiWindow',test_multi_window),
                                 ('conversion',lambda d,r:test_conversion(d,device,r))]:
             try:
                 driver.call('POST','/appium/settings',{'settings':{'defaultActiveApplication':'auto'}})
                 driver.mobile('setContentSize',size='large')
+                # Remove restored scenes and sheet state between independent scenarios.
+                # The Photos library survives; only this test app is reinstalled.
+                driver.mobile('terminateApp',bundleId=BUNDLE)
+                driver.mobile('removeApp',bundleId=BUNDLE)
+                driver.mobile('installApp',app=str(app))
                 driver.launch(['--ui-queue'])
                 operation(driver, report)
                 report.setdefault(name,{})['passed'] = True

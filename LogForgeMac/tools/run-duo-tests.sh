@@ -5,6 +5,8 @@ mkdir -p build/logs/duo
 # Capture available Apple controls as diagnostics for unsupported simulator poses.
 xcrun devicectl help device settings > build/logs/duo/device-settings-help.txt 2>&1 || true
 xcrun simctl help ui > build/logs/duo/simulator-ui-help.txt 2>&1 || true
+xcrun simctl help > build/logs/duo/simulator-help.txt 2>&1 || true
+xcrun simctl help io > build/logs/duo/simulator-io-help.txt 2>&1 || true
 export APPIUM_HOME="${RUNNER_TEMP:-$PWD/build}/logforge-appium-home"
 prefix="${RUNNER_TEMP:-$PWD/build}/logforge-appium"
 npm install --prefix "$prefix" --no-audit --no-fund appium@3.8.0

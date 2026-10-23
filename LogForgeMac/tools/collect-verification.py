@@ -11,7 +11,7 @@ if (pose.get('passed') is not True or pose.get('syntheticLayout') is not False
     or pose.get('commit') != os.environ['GITHUB_SHA']
     or {p['name'] for p in pose['poses'] if p.get('passed')} != expected):
     raise SystemExit('Required real simulator poses have not all passed on this commit')
-for scenario in ('splitView', 'keyboard', 'multiWindow', 'appearance', 'conversion'):
+for scenario in ('splitView', 'keyboard', 'multiWindow', 'appearance', 'fileDrop', 'conversion'):
     if pose.get(scenario, {}).get('passed') is not True:
         raise SystemExit('Required Duo scenario has not passed: ' + scenario)
 if pose['keyboard'].get('splitVerified') is not True:

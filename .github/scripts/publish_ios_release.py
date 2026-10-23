@@ -50,7 +50,7 @@ def main(directory):
                   and pose.get('commit') == commit
                   and {p['name'] for p in pose['poses'] if p.get('passed')} == expected_poses,
                   'Required real Duo posture evidence missing')
-    for scenario in ('splitView', 'keyboard', 'multiWindow', 'appearance', 'conversion'):
+    for scenario in ('splitView', 'keyboard', 'multiWindow', 'appearance', 'fileDrop', 'conversion'):
         audit.require(pose.get(scenario, {}).get('passed') is True,
                       'Required Duo scenario evidence missing: ' + scenario)
     audit.require(pose['keyboard'].get('splitVerified') is True, 'Split keyboard evidence missing')

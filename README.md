@@ -26,7 +26,7 @@ Both platforms belong to the main [LogForge repository](https://github.com/HongH
 
 - Adaptive Duo workspace: queue/progress/results and conversion parameters split across the inner display or fold, with a complete compact workspace on the outer display. Root-owned queue and drafts survive resizing.
 - Native system toolbars adapt to side placement where appropriate; import sheets and parameter rows resize for available space and larger text. iOS 26 retains the compatible layout path.
-- Duo Split View and multiple windows use the same shared conversion queue with independent settings drafts. Files search retains the system split keyboard; file URL drops use the existing import pipeline. See the [Duo API and test matrix](LogForgeMac/docs/DUO_SUPPORT.md).
+- Duo Split View and multiple windows use the same shared conversion queue with independent settings drafts. Files search retains the system split keyboard; drop videos into the queue or drag completed movies to another app. See the [Duo API and test matrix](LogForgeMac/docs/DUO_SUPPORT.md).
 - Native transparent Liquid Glass interface, layered glass icon, accessibility contrast handling and haptic feedback.
 - Import from Photos, files or folders; choose an export directory, process a queue, cancel and retry failed videos.
 - Automatically fall back from unavailable system ProRes decoding/encoding to the embedded software codecs. CPU color processing and Metal color processing remain selectable.

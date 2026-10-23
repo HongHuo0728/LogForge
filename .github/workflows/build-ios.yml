@@ -10,6 +10,7 @@ on:
       - '.github/workflows/build-ios.yml'
       - '.github/scripts/release_target.py'
       - '.github/scripts/publish_ios_release.py'
+      - '.github/scripts/test_publish_ios_release.py'
       - 'tests/release_target.py'
   pull_request:
     paths:
@@ -18,6 +19,7 @@ on:
       - '.github/workflows/build-ios.yml'
       - '.github/scripts/release_target.py'
       - '.github/scripts/publish_ios_release.py'
+      - '.github/scripts/test_publish_ios_release.py'
       - 'tests/release_target.py'
   workflow_dispatch:
 
@@ -48,6 +50,7 @@ jobs:
         run: |
           python3 tests/release_target.py
           python3 LogForgeMac/tools/test_package_audit.py
+          python3 .github/scripts/test_publish_ios_release.py
       - name: Select release platform
         id: release
         run: python3 .github/scripts/release_target.py --platform ios
