@@ -24,6 +24,8 @@ enum ImportStorage {
                 do {
                     if let error { throw error }
                     guard let source, source.isFileURL else { throw NativeFailure("error.input") }
+                    let values = try source.resourceValues(forKeys:[.isRegularFileKey,.isSymbolicLinkKey])
+                    guard values.isRegularFile == true, values.isSymbolicLink != true else { throw NativeFailure("error.input") }
                     continuation.resume(returning:try copy(source))
                 } catch { continuation.resume(throwing:error) }
             }
