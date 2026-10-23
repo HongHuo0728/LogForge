@@ -19,6 +19,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--parser-root')
     parser.add_argument('--report')
+    parser.add_argument('--checkout-only', action='store_true',
+                        help='Check tracked project files without requiring personal xcuserdata')
     args = parser.parse_args()
     if args.parser_root:
         sys.path.insert(0, args.parser_root)
@@ -148,11 +150,14 @@ def main():
         assert not re.search(r'\.(?:thinMaterial|ultraThinMaterial|regularMaterial|thickMaterial)',(app/filename).read_text(encoding='utf-8'))
     findings.append('Per-frame pool allocation, independent media clocks and bounded MOV clock, synchronous codec threading and clear glass source constraints inspected')
     baseline = json.loads((root.parent/'docs/STATIC_AUDIT_2026-10-04.json').read_text(encoding='utf-8'))['inventory']
+    if args.checkout_only:
+        baseline = [item for item in baseline if 'xcuserdata' not in Path(item['path']).parts]
     for item in baseline:
         assert (root/item['path']).is_file(), f'Original file removed: {item["path"]}'
     original_icon = next(i for i in baseline if i['path'].endswith('.PNG'))
     assert hashlib.sha256((root/original_icon['path']).read_bytes()).hexdigest() == original_icon['sha256']
-    findings.append(f'All {len(baseline)} original paths and original raster icon retained')
+    findings.append(f'All {len(baseline)} original paths and original raster icon retained'
+                    + ('; personal Xcode xcuserdata excluded for clean checkouts' if args.checkout_only else ''))
     report = {'generated_at_utc':datetime.now(timezone.utc).isoformat(),'checks':findings,'apple_platform_execution':False,'swift_type_checking':False,
               'unverified':['Xcode build','FFmpeg iOS linking','Metal execution','media integration tests','Icon Composer compilation','Liquid Glass contrast on device','haptics','editor Apple Log recognition'],
               'files':[{'path':str(path.relative_to(root)),'sha256':hashlib.sha256(path.read_bytes()).hexdigest()} for path in sorted(root.rglob('*')) if path.is_file() and '__MACOSX' not in path.parts]}

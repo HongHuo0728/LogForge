@@ -64,7 +64,7 @@ jobs:
       - name: Check Swift source, project membership and localization
         run: |
           python3 -m pip install --target "$RUNNER_TEMP/logforge-static" -r LogForgeMac/tools/requirements-static.txt
-          python3 LogForgeMac/tools/static_check.py --parser-root "$RUNNER_TEMP/logforge-static" --report "$RUNNER_TEMP/static-validation.json"
+          python3 LogForgeMac/tools/static_check.py --checkout-only --parser-root "$RUNNER_TEMP/logforge-static" --report "$RUNNER_TEMP/static-validation.json"
       - name: Select release platform
         id: release
         run: python3 .github/scripts/release_target.py --platform ios
