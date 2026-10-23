@@ -37,9 +37,38 @@ Both platforms belong to the main [LogForge repository](https://github.com/HongH
 
 Download the iOS IPA and matching RelinkKit from the main release when uploaded. The provided build pipeline produces an **unsigned** IPA: sign it with your own valid Apple identity and provisioning profile before installation. No App Store or TestFlight release is configured. Keep the corresponding source, license and relink material when distributing the app.
 
-For cloud builds, use **iOS build and tests** in the main repository's [Actions](https://github.com/HongHuo0728/LogForge/actions/workflows/build-ios.yml). It packages a candidate first, then requires focused build, native UI/conversion and inner/outer layout checks before publication. Additional Duo diagnostics are reported individually. See the [iOS build and installation guide](https://github.com/HongHuo0728/LogForge/blob/main/LogForgeMac/docs/GITHUB_BUILD.md).
+For cloud builds, use **iOS build and tests** in the main repository's [Actions](https://github.com/HongHuo0728/LogForge/actions/workflows/build-ios.yml). Ordinary commits run source/release checks, a real Xcode archive, package auditing and nine layout/import unit tests. Duo UI, media conversion and posture checks run only when the manual `duo_checks` option is selected; `extended_checks` adds the full suites and iOS 26/iPad checks. A core-only success is not release posture evidence. Changes limited to iOS and documentation do not trigger Windows builds. See the [iOS build and installation guide](https://github.com/HongHuo0728/LogForge/blob/main/LogForgeMac/docs/GITHUB_BUILD.md).
 
 iOS 1.3.2 focuses on Duo layouts and toolbars, retaining the AAC/timecode fixes from 1.3.1. [Release details](docs/RELEASE_1.3.2_IOS.md) describe the required Xcode 27.1 build and actual inner/outer Duo layout checks. Extended native, iOS 26 and iPad regressions remain available through the manual workflow's `extended_checks` option. Failed or unverified required poses block publication. Simulator results do not establish physical-device performance or editor recognition.
+
+## iPhone Duo screenshots
+
+Actual **iOS 1.3.2 (261023A)** screenshots from the Xcode 27.1 / iOS 27.1 Duo simulator. Queue filenames are layout test data. [ Build and verification ](https://github.com/HongHuo0728/LogForge/actions/runs/40015290057) · [Image provenance and checksums](docs/images/duo/provenance.json).
+
+| Unfolded landscape | Book mode · 120° |
+| --- | --- |
+| ![Unfolded landscape](docs/images/duo/open-landscape.png) | ![Book mode · 120°](docs/images/duo/book.png) |
+
+| Unfolded portrait | Tabletop mode · 90° |
+| --- | --- |
+| ![Unfolded portrait](docs/images/duo/open-portrait.png) | ![Tabletop mode · 90°](docs/images/duo/tabletop.png) |
+
+| Outer display · portrait | Outer display · landscape |
+| --- | --- |
+| ![Outer display · portrait](docs/images/duo/closed-outer.png) | ![Outer display · landscape](docs/images/duo/closed-outer-landscape.png) |
+
+<details>
+<summary>View Split View and split keyboard</summary>
+
+| Split View · LogForge and Safari | Split keyboard · Files search |
+| --- | --- |
+| ![Split View · LogForge and Safari](docs/images/duo/split-view-left.png) | ![Split keyboard · Files search](docs/images/duo/book-split-keyboard.png) |
+
+</details>
+
+The six layouts, left-side system Split View and split keyboard passed this run. Tent posture and two simultaneous LogForge windows were not confirmed by the automation.
+
+### Windows interface
 
 ![LogForge Windows interface](docs/images/LogForge.png)
 

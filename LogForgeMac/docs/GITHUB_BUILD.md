@@ -8,7 +8,7 @@ Windows 开发环境也可以编辑原生工程并通过 GitHub 云端 Mac 编�
 当前 iOS 开发版本为 **1.3.2 (261023A)**。从成功的主仓库 Actions 获取
 `LogForge-1.3.2-iOS-261023A-unsigned.ipa`、对应 `.sha256`，以及
 `LogForge-1.3.2-iOS-261023A-RelinkKit.zip` 和校验文件。分支构建只生成 Actions 附件；
-正式 tag 从同一提交已成功的 main 构建取回产物，复核来源和哈希后发布六个附件，
+正式 tag 从同一提交已完成姿态验证的 main 构建取回产物，复核来源和哈希后发布六个附件，
 不会再次构建或重复模拟器测试；其中包括从 v1.3.1 原样复用的两份 Windows
 1.3.0 文件。版本号配置不代表线上 Release 已更新，历史附件保留原始版本。
 见 [1.3.2 发布说明](../../docs/RELEASE_1.3.2_IOS.md)。
@@ -17,22 +17,27 @@ Windows 开发环境也可以编辑原生工程并通过 GitHub 云端 Mac 编�
 
 1. 将本地源码和根目录工作流上传到主仓库后，打开
    [Actions / iOS build and tests](https://github.com/HongHuo0728/LogForge/actions/workflows/build-ios.yml)。
-2. 点击 **Run workflow**，选择目标分支并运行。
-   正式发布前必须有同一提交的 main push 构建成功；随后推送版本 tag 即可发布该产物。
-3. 等待 **Test and package iOS** 成功：先归档、验包并上传候选 IPA，再运行 Duo
-   必要检查；手动勾选 `extended_checks` 时才增加完整原生／交互、iOS 26 和 iPad
-   检查。每次只启动一个模拟器，避免云端内存不足。
-   发行检查覆盖真实 MOV 转换、导入取消、布局和主要页面操作，以及展开横纵向、
-   书本、桌面、外屏横纵向六个真实布局。必要检查通过后才生成 `verification.json`。
+2. 点击 **Run workflow**，选择目标分支并运行。普通提交及未勾选选项的手动运行，
+   只做源码／发布脚本检查、Xcode 归档、验包和 9 项布局／文件导入单元测试。
+   它们不安装 Appium，也不跑 UI、媒体转换和姿态矩阵。
+3. 等待 **Build, audit and core tests** 成功。正式发布新版本前，在同一提交的
+   `main` 手动勾选 `duo_checks`，执行 14 项原生／UI 检查及六种真实姿态；
+   `extended_checks` 额外启用完整原生／交互、iOS 26 和 iPad 检查。
+   每次只启动一个模拟器。发布检查覆盖真实 MOV 转换、导入取消、布局和主要
+   页面操作，以及展开横纵向、书本、桌面、外屏横纵向六个真实布局。
    帐篷、分屏、分体键盘和多窗口各做一次补充诊断，Release Notes 按实际结果说明。
-   可选的完整测试保留，但不反复扩大本次发行验证范围。
-4. 从底部 Artifacts 下载 `LogForge-1.3.2-iOS-261023A-unsigned-运行编号`。
+   可选的完整测试保留，普通提交不运行姿态矩阵。
+4. 从底部 Artifacts 下载 `LogForge-1.3.2-iOS-261023A-core-运行编号`；完成
+   `duo_checks`／`extended_checks` 的产物才命名为 `unsigned-运行编号`。
    解压获得 IPA、RelinkKit、两份 SHA-256、`release-info.json`、`READ-ME.txt`
-   、`package-audit.json`、`verification.json` 和 `xcode-version.txt`。下载通常需要登录 GitHub。
+   、`package-audit.json`、`verification.json` 和 `xcode-version.txt`。精简 CI 的
+   验证记录明确为 `scope: core`、`releaseReady: false`，姿态状态为 `not_run`，
+   不作为可发布证据。下载通常需要登录 GitHub。
 
 `main` 的相关修改及 `v*` tag 会触发构建；iOS 工作流的 tag 检查对应 Xcode 版本（如 `v1.3.2`），不是 Windows CMake 版本。
 构建 job 使用只读仓库权限。完成分支构建、截图和产物检查后，将新 `v1.3.2` tag
-指向已验证的最终提交。tag 构建重新执行验证，仅发布 job 有写入 Release 的权限。
+指向已验证的最终提交。tag 只复核该提交的成功 main push 或手动运行产物，
+不重复构建／测试；仅发布 job 有写入 Release 的权限。
 发布先创建草稿，核对六个附件上传后的字节和 SHA-256，再公开；失败保留草稿。
 不得用旧提交的验证记录替代当前产物验证。Actions 诊断保留 14 天。
 

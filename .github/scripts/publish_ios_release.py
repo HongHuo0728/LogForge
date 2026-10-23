@@ -38,12 +38,21 @@ def find_release(tag):
 
 
 def download_verified(directory):
-    runs = api('actions/workflows/build-ios.yml/runs?event=push&branch=main&status=success&per_page=100')
-    run = next((r for r in runs['workflow_runs'] if r['head_sha'] == os.environ['GITHUB_SHA']), None)
-    audit.require(run is not None, 'No successful main build exists for this exact release commit')
+    runs = api('actions/workflows/build-ios.yml/runs?branch=main&status=success&per_page=100')
     version = audit.identity.release_identity(ROOT / 'LogForgeMac')
     build = audit.identity.release_build(ROOT / 'LogForgeMac')
-    artifact = f'LogForge-{version}-iOS-{build}-unsigned-{run["run_number"]}'
+    run = None
+    for candidate in runs['workflow_runs']:
+        if (candidate['head_sha'] != os.environ['GITHUB_SHA']
+            or candidate.get('event') not in ('push', 'workflow_dispatch')):
+            continue
+        artifact = f'LogForge-{version}-iOS-{build}-unsigned-{candidate["run_number"]}'
+        assets = api(f'actions/runs/{candidate["id"]}/artifacts?per_page=100')['artifacts']
+        if any(a['name'] == artifact and not a.get('expired') for a in assets):
+            run = candidate
+            break
+    audit.require(run is not None,
+                  'No release-verified build for this commit; run main with duo_checks before tagging')
     directory.mkdir(parents=True, exist_ok=True)
     gh('run', 'download', str(run['id']), '--repo', REPO, '--name', artifact, '--dir', str(directory))
     os.environ['LOGFORGE_VERIFIED_RUN'] = str(run['id'])
@@ -58,7 +67,7 @@ def main(directory):
     evidence_run = os.environ.get('LOGFORGE_VERIFIED_RUN', os.environ['GITHUB_RUN_ID'])
     source_run = api('actions/runs/' + evidence_run)
     audit.require(source_run.get('head_sha') == commit and source_run.get('conclusion') == 'success'
-                  and source_run.get('event') == 'push' and source_run.get('head_branch') == 'main'
+                  and source_run.get('event') in ('push', 'workflow_dispatch') and source_run.get('head_branch') == 'main'
                   and source_run.get('path') == '.github/workflows/build-ios.yml'
                   and source_run.get('head_repository', {}).get('full_name') == REPO,
                   'Build evidence must be a successful main workflow for this exact release commit')
@@ -68,6 +77,8 @@ def main(directory):
         audit.require(report.get('passed') is True and report.get('commit') == commit
                       and str(report.get('run')) == evidence_run,
                       'Evidence must come from this tag, commit and workflow run')
+    audit.require(verification.get('releaseReady') is not False,
+                  'Core-only CI does not provide release posture evidence')
     audit.require(previous_audit['assets'] == package['assets'], 'Package changed after validation')
     expected_poses = {'open-landscape', 'open-portrait', 'book', 'tabletop', 'closed-outer',
                       'closed-outer-landscape'}

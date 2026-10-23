@@ -23,6 +23,10 @@ on:
       - 'tests/release_target.py'
   workflow_dispatch:
     inputs:
+      duo_checks:
+        description: Run Duo UI and posture checks required for a new release
+        type: boolean
+        default: false
       extended_checks:
         description: Run the optional full native, compatibility and interaction suites
         type: boolean
@@ -56,6 +60,11 @@ jobs:
           python3 tests/release_target.py
           python3 LogForgeMac/tools/test_package_audit.py
           python3 .github/scripts/test_publish_ios_release.py
+          python3 LogForgeMac/tools/test_collect_verification.py
+      - name: Check Swift source, project membership and localization
+        run: |
+          python3 -m pip install --target "$RUNNER_TEMP/logforge-static" -r LogForgeMac/tools/requirements-static.txt
+          python3 LogForgeMac/tools/static_check.py --parser-root "$RUNNER_TEMP/logforge-static" --report "$RUNNER_TEMP/static-validation.json"
       - name: Select release platform
         id: release
         run: python3 .github/scripts/release_target.py --platform ios
@@ -63,11 +72,11 @@ jobs:
   iphone:
     needs: release-target
     if: needs.release-target.outputs.should_build == 'true' && github.ref_type != 'tag'
-    name: Test and package iOS
+    name: Build, audit and core tests
     runs-on: xcode-27
     timeout-minutes: 120
     env:
-      LOGFORGE_NATIVE_SUITE: ${{ inputs.extended_checks && 'full' || 'release-smoke' }}
+      LOGFORGE_NATIVE_SUITE: ${{ inputs.extended_checks && 'full' || inputs.duo_checks && 'release-smoke' || 'core' }}
       LOGFORGE_DUO_SUITE: ${{ inputs.extended_checks && 'full' || 'release-smoke' }}
       LOGFORGE_COMPAT_SUITE: ${{ inputs.extended_checks && 'full' || 'release-smoke' }}
     outputs:
@@ -77,6 +86,7 @@ jobs:
       - name: Select Xcode 27.1 and install required simulator runtimes
         run: bash tools/prepare-xcode.sh
       - name: Prepare and verify Duo automation versions
+        if: inputs.duo_checks || inputs.extended_checks
         id: automation
         timeout-minutes: 5
         run: bash tools/run-duo-tests.sh prepare
@@ -90,8 +100,11 @@ jobs:
             echo 'Tag and iOS project version differ' >&2
             exit 1
           fi
-          printf 'LOGFORGE_ARTIFACT=LogForge-%s-iOS-%s-unsigned-%s\n' "$version" "$release_build" "$GITHUB_RUN_NUMBER" >> "$GITHUB_ENV"
-          printf 'artifact=LogForge-%s-iOS-%s-unsigned-%s\n' "$version" "$release_build" "$GITHUB_RUN_NUMBER" >> "$GITHUB_OUTPUT"
+          artifact_kind=core
+          if [[ "$LOGFORGE_NATIVE_SUITE" != core ]]; then artifact_kind=unsigned; fi
+          artifact="LogForge-$version-iOS-$release_build-$artifact_kind-$GITHUB_RUN_NUMBER"
+          printf 'LOGFORGE_ARTIFACT=%s\n' "$artifact" >> "$GITHUB_ENV"
+          printf 'artifact=%s\n' "$artifact" >> "$GITHUB_OUTPUT"
       - name: Archive and package iPhone release
         id: archive
         timeout-minutes: 25
@@ -108,9 +121,8 @@ jobs:
             LogForgeMac/build/logs/package-audit.log
           if-no-files-found: error
           retention-days: 14
-      - name: Duo simulator regression tests
+      - name: Native core tests (UI and media tests only when requested)
         id: duo
-        if: ${{ !cancelled() && steps.automation.outcome == 'success' }}
         timeout-minutes: 25
         run: bash tools/build-ios.sh test duo
       - name: Upload Duo regression logs and screenshots immediately
@@ -124,11 +136,11 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
       - name: Real Duo poses and state continuity
-        if: ${{ !cancelled() && steps.automation.outcome == 'success' }}
+        if: ${{ !cancelled() && (inputs.duo_checks || inputs.extended_checks) && steps.automation.outcome == 'success' }}
         timeout-minutes: 30
         run: bash tools/run-duo-tests.sh
       - name: Upload Duo interaction diagnostics immediately
-        if: always()
+        if: ${{ always() && (inputs.duo_checks || inputs.extended_checks) }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: LogForge-Duo-interactions-${{ github.run_number }}
@@ -143,9 +155,13 @@ jobs:
         if: ${{ !cancelled() && inputs.extended_checks }}
         timeout-minutes: 15
         run: bash tools/build-ios.sh test ipad
-      - name: Collect required release verification
-        if: ${{ !cancelled() && steps.archive.outcome == 'success' }}
-        run: python3 tools/collect-verification.py
+      - name: Record the checks actually performed
+        run: |
+          if [[ "$LOGFORGE_NATIVE_SUITE" == core ]]; then
+            python3 tools/collect-verification.py --core-only
+          else
+            python3 tools/collect-verification.py
+          fi
       - name: Upload IPA, checksums and relink sources
         if: ${{ !cancelled() && steps.archive.outcome == 'success' }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

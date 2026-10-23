@@ -49,6 +49,7 @@ class PublicationTests(unittest.TestCase):
         self.tag_commit = self.commit
         self.source_corrupt = False
         self.build_commit = self.commit
+        self.build_event = 'push'
         self.write_evidence()
 
     def write_evidence(self):
@@ -57,7 +58,7 @@ class PublicationTests(unittest.TestCase):
 
     def api(self, route):
         if route == 'actions/runs/42':
-            return {'head_sha':self.build_commit, 'conclusion':'success', 'event':'push',
+            return {'head_sha':self.build_commit, 'conclusion':'success', 'event':self.build_event,
                     'head_branch':'main', 'path':'.github/workflows/build-ios.yml',
                     'head_repository':{'full_name':publisher.REPO}}
         if route == 'git/ref/tags/v1.3.2':
@@ -169,6 +170,41 @@ class PublicationTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,'existing published release'):
             self.run_publisher()
         self.assertEqual(self.mutations,[])
+
+    def test_core_only_success_cannot_publish(self):
+        self.evidence['releaseReady'] = False
+        self.write_evidence()
+        with self.assertRaisesRegex(ValueError, 'Core-only CI'):
+            self.run_publisher()
+        self.assertEqual(self.mutations, [])
+
+    def test_verified_manual_main_run_can_publish(self):
+        self.build_event = 'workflow_dispatch'
+        self.run_publisher()
+        self.assertEqual(self.mutations[-1], 'publish')
+
+    def test_pull_request_run_cannot_publish(self):
+        self.build_event = 'pull_request'
+        with self.assertRaisesRegex(ValueError, 'successful main workflow'):
+            self.run_publisher()
+        self.assertEqual(self.mutations, [])
+
+    def test_download_chooses_verified_manual_run_over_newer_core_run(self):
+        def response(route):
+            if route.startswith('actions/workflows/'):
+                return {'workflow_runs':[
+                    {'id':43, 'run_number':43, 'event':'push', 'head_sha':self.commit},
+                    {'id':42, 'run_number':42, 'event':'workflow_dispatch', 'head_sha':self.commit}]}
+            if route == 'actions/runs/43/artifacts?per_page=100':
+                return {'artifacts':[{'name':'LogForge-1.3.2-iOS-261023A-core-43'}]}
+            if route == 'actions/runs/42/artifacts?per_page=100':
+                return {'artifacts':[{'name':'LogForge-1.3.2-iOS-261023A-unsigned-42'}]}
+            raise AssertionError(route)
+        with patch.dict(os.environ, self.environment), patch.object(publisher, 'api', response), \
+             patch.object(publisher, 'gh', return_value='') as command:
+            publisher.download_verified(self.directory)
+            self.assertEqual(os.environ['LOGFORGE_VERIFIED_RUN'], '42')
+            self.assertEqual(command.call_args.args[:3], ('run', 'download', '42'))
 
 
 if __name__ == '__main__':

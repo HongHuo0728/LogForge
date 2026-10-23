@@ -4,7 +4,23 @@ on:
   push:
     branches: ['**']
     tags: ['v*']
+    paths-ignore:
+      - 'LogForgeMac/**'
+      - 'docs/**'
+      - 'AcademicPapers/**'
+      - '*.md'
+      - '.github/workflows/build-ios.yml'
+      - '.github/scripts/publish_ios_release.py'
+      - '.github/scripts/test_publish_ios_release.py'
   pull_request:
+    paths-ignore:
+      - 'LogForgeMac/**'
+      - 'docs/**'
+      - 'AcademicPapers/**'
+      - '*.md'
+      - '.github/workflows/build-ios.yml'
+      - '.github/scripts/publish_ios_release.py'
+      - '.github/scripts/test_publish_ios_release.py'
   workflow_dispatch:
 
 permissions:

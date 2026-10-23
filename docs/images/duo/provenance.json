@@ -1,0 +1,74 @@
+{
+  "version": "1.3.2",
+  "releaseBuild": "261023A",
+  "sourceCommit": "81231bc29c89d725384ef539e8026262a861c36d",
+  "workflowRun": "https://github.com/HongHuo0728/LogForge/actions/runs/40015290057",
+  "capture": "Xcode 27.1 / iOS 27.1 iPhone Duo simulator",
+  "queueData": "Synthetic filenames for layout coverage; UI and screen geometry are native simulator output.",
+  "images": [
+    {
+      "file": "open-landscape.png",
+      "sha256": "6ebd074c77951539767b69ff02dde9a6d63812e8f6981b792ca4c4ed54b01e55",
+      "pixels": [
+        2852,
+        2006
+      ]
+    },
+    {
+      "file": "open-portrait.png",
+      "sha256": "939a038a95e56058239d2d22e0a35ae879d9772278a5148ad910b7be5b2795f0",
+      "pixels": [
+        2006,
+        2852
+      ]
+    },
+    {
+      "file": "book.png",
+      "sha256": "5ebf16e787e72c8dd408a626f72ece90ac5a0f4c24a48e5b5023f138c4b0d27b",
+      "pixels": [
+        2852,
+        2006
+      ]
+    },
+    {
+      "file": "tabletop.png",
+      "sha256": "56f3e570f3106eb05b86cfbc6b3e8edf6b4b9a2d63843f7d607200717059c6c7",
+      "pixels": [
+        2006,
+        2852
+      ]
+    },
+    {
+      "file": "closed-outer.png",
+      "sha256": "74dc0c21fed130b8a4affc2b27e3a822f0c74ceede27433a7ab74228da646180",
+      "pixels": [
+        1398,
+        2034
+      ]
+    },
+    {
+      "file": "closed-outer-landscape.png",
+      "sha256": "c730758d0f4ae5a00b0f93b884c107cc834a654e52669d1c1905ff1a0421beed",
+      "pixels": [
+        2034,
+        1398
+      ]
+    },
+    {
+      "file": "split-view-left.png",
+      "sha256": "0f07c9e0f244c39cde5d0084b0d6dbf5940e7d4db808a8051d9cc11b4a3bd23f",
+      "pixels": [
+        2852,
+        2006
+      ]
+    },
+    {
+      "file": "book-split-keyboard.png",
+      "sha256": "517d05a7e0b9325ec31a584961d66c9be52cde38f6cf27c775b5c499d90134a3",
+      "pixels": [
+        2852,
+        2006
+      ]
+    }
+  ]
+}

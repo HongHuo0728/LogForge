@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased — CI and documentation
+
+- Run ordinary iOS CI with source/release checks, a device archive, package auditing
+  and nine layout/import unit tests. Move Duo UI/media/posture checks to manual
+  `duo_checks`, with full and compatibility suites under `extended_checks`.
+- Label core-only evidence explicitly and keep it separate from publishable
+  artifacts. Accept a verified manual main run when promoting a future release.
+- Skip Windows builds for changes limited to iOS and documentation. Add eight
+  original Duo simulator screenshots and their provenance to both READMEs.
+
 ## 1.3.2 — iOS (261023A)
 
 - Adapt the native workspace to Duo inner/outer displays, unfolded landscape and

@@ -73,11 +73,15 @@ allowance in run 19 with unchanged application sources. Its failure is retained
 at https://github.com/HongHuo0728/LogForge/actions/runs/40011526515 and it remains
 in the optional full native suite. The focused suite retains 14 checks, including
 the real 4K ProRes MOV/audio test, instead of repeatedly running that long test.
-The manual workflow's `extended_checks` option also enables iOS 26/iPad runtime
-regressions; the default release run stays focused on Duo. Minimum deployment
+Ordinary commits now run nine layout/import unit tests with `LOGFORGE_NATIVE_SUITE=core`,
+plus source checks, archive and package audit. These runs omit UI, media and posture
+matrices and explicitly record `releaseReady: false`; they are not release evidence.
+The manual workflow's `duo_checks` option runs the 14 focused checks and actual
+poses. `extended_checks` also enables full suites and iOS 26/iPad runtime
+regressions. Minimum deployment
 remains iOS 26, with SDK availability checks and adaptive fallback source retained.
 A candidate archive is uploaded before simulator checks and is labeled as a candidate.
-The version tag promotes artifacts from a successful main push of the exact same
+The version tag promotes release-verified artifacts from a successful main push or manual run of the exact same
 commit. The publisher verifies the run's repository, branch, workflow, status,
 commit and package hashes, then reads back all six uploaded assets. It does not
 rebuild or repeat simulator checks solely because the tag was pushed.

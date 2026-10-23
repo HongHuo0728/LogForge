@@ -39,7 +39,36 @@ LogForge 使用公开的色彩数学改变像素。它无法恢复已裁切的�
 
 云端构建使用主仓库 [Actions](https://github.com/HongHuo0728/LogForge/actions/workflows/build-ios.yml) 中的 **iOS build and tests**。先打包候选应用，再通过必要的原生 UI／转换和内外屏布局检查后发布；其他 Duo 诊断按实际结果单独说明。详见 [iOS 构建与安装指南](https://github.com/HongHuo0728/LogForge/blob/main/LogForgeMac/docs/GITHUB_BUILD.md)。
 
-iOS 1.3.2 主要更新 Duo 布局与工具栏，保留 1.3.1 的 AAC／时码修复。[本次发布说明](docs/RELEASE_1.3.2_IOS.md)列出 Xcode 27.1 构建和真实内外屏布局验证范围；完整原生回归、iOS 26／iPad 兼容性检查可通过手动工作流的 `extended_checks` 选项启用。必要构建或核心布局失败时阻止正式发布，补充诊断不冒充通过。模拟器结果不能证明真机性能或编辑器识别。
+iOS 1.3.2 主要更新 Duo 布局与工具栏，保留 1.3.1 的 AAC／时码修复。普通提交仅运行源码／发布脚本检查、Xcode 归档、验包，以及 9 项布局／文件导入单元测试；手动勾选 `duo_checks` 才运行 Duo UI、媒体转换与姿态检查，`extended_checks` 额外启用完整原生回归及 iOS 26／iPad 检查。仅涉及 iOS 和文档的修改不触发 Windows 构建。[本次发布说明](docs/RELEASE_1.3.2_IOS.md)记录已发布版本的实际验证范围；精简 CI 通过不代表所有姿态已验证。新版本发布仍需要对应提交的真实姿态记录，模拟器结果不能证明真机性能或编辑器识别。
+
+## iPhone Duo 实际运行截图
+
+以下是 **iOS 1.3.2（261023A）** 在 Xcode 27.1 / iOS 27.1 的 Duo 模拟器中的实际截图。队列文件名为排版测试数据。 [ 构建与验证记录 ](https://github.com/HongHuo0728/LogForge/actions/runs/40015290057) · [原图来源与校验值](docs/images/duo/provenance.json).
+
+| 完全展开 · 横向 | 书本模式 · 120° |
+| --- | --- |
+| ![完全展开 · 横向](docs/images/duo/open-landscape.png) | ![书本模式 · 120°](docs/images/duo/book.png) |
+
+| 完全展开 · 纵向 | 桌面模式 · 90° |
+| --- | --- |
+| ![完全展开 · 纵向](docs/images/duo/open-portrait.png) | ![桌面模式 · 90°](docs/images/duo/tabletop.png) |
+
+| 外屏 · 纵向 | 外屏 · 横向 |
+| --- | --- |
+| ![外屏 · 纵向](docs/images/duo/closed-outer.png) | ![外屏 · 横向](docs/images/duo/closed-outer-landscape.png) |
+
+<details>
+<summary>查看系统分屏与分离键盘</summary>
+
+| 系统分屏 · LogForge 与 Safari | 分离键盘 · Files 搜索 |
+| --- | --- |
+| ![系统分屏 · LogForge 与 Safari](docs/images/duo/split-view-left.png) | ![分离键盘 · Files 搜索](docs/images/duo/book-split-keyboard.png) |
+
+</details>
+
+六种布局、系统左侧分屏及分离键盘已通过该轮检查；帐篷姿态和同时打开两个 LogForge 窗口尚未获自动化确认。
+
+### Windows 界面
 
 ![LogForge Windows 界面](docs/images/LogForge.png)
 
