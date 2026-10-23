@@ -80,6 +80,8 @@ test)
     if [ -d "build/Tests-$role.xcresult" ]; then
         xcrun xcresulttool export attachments --path "build/Tests-$role.xcresult" \
             --output-path "build/logs/attachments-$role" > "build/logs/attachments-$role.log" 2>&1 || true
+        xcrun xcresulttool get test-results summary --path "build/Tests-$role.xcresult" \
+            > "build/logs/tests-$role-summary.json" 2> "build/logs/tests-$role-summary-error.log" || true
     fi
     exit "$test_status"
     ;;

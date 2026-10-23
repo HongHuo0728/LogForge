@@ -2,6 +2,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 mkdir -p build/logs/duo
+test -d 'build/DerivedData/Build/Products/Debug-iphonesimulator/LogForge For iPhone.app'
 # Capture available Apple controls as diagnostics for unsupported simulator poses.
 xcrun devicectl help device settings > build/logs/duo/device-settings-help.txt 2>&1 || true
 xcrun simctl help ui > build/logs/duo/simulator-ui-help.txt 2>&1 || true

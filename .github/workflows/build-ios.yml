@@ -82,9 +82,27 @@ jobs:
       - name: Duo simulator regression tests
         id: duo
         run: bash tools/build-ios.sh test duo
+      - name: Upload Duo regression logs and screenshots immediately
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: LogForge-Duo-regression-${{ github.run_number }}
+          path: |
+            LogForgeMac/build/logs/tests-duo*
+            LogForgeMac/build/logs/attachments-duo/
+          if-no-files-found: warn
+          retention-days: 14
       - name: Real Duo poses and state continuity
-        if: ${{ !cancelled() && steps.duo.outcome == 'success' }}
+        if: ${{ !cancelled() }}
         run: bash tools/run-duo-tests.sh
+      - name: Upload Duo interaction diagnostics immediately
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: LogForge-Duo-interactions-${{ github.run_number }}
+          path: LogForgeMac/build/logs/duo/
+          if-no-files-found: warn
+          retention-days: 14
       - name: iOS 26 compatibility regression tests
         if: ${{ !cancelled() }}
         run: bash tools/build-ios.sh test phone26
