@@ -47,6 +47,7 @@ class PublicationTests(unittest.TestCase):
         self.already_public = False
         self.tag_commit = self.commit
         self.source_corrupt = False
+        self.build_commit = self.commit
         self.write_evidence()
 
     def write_evidence(self):
@@ -54,6 +55,10 @@ class PublicationTests(unittest.TestCase):
         (self.directory/'verification.json').write_text(json.dumps(self.evidence))
 
     def api(self, route):
+        if route == 'actions/runs/42':
+            return {'head_sha':self.build_commit, 'conclusion':'success', 'event':'push',
+                    'head_branch':'main', 'path':'.github/workflows/build-ios.yml',
+                    'head_repository':{'full_name':publisher.REPO}}
         if route == 'git/ref/tags/v1.3.2':
             return {'object':{'type':'commit','sha':self.tag_commit}}
         if route == 'releases/tags/v1.3.1':
@@ -145,6 +150,12 @@ class PublicationTests(unittest.TestCase):
     def test_moved_tag_cannot_create_a_release(self):
         self.tag_commit = 'b'*40
         with self.assertRaisesRegex(ValueError,'Release tag moved'):
+            self.run_publisher()
+        self.assertEqual(self.mutations,[])
+
+    def test_another_commits_build_cannot_be_promoted(self):
+        self.build_commit = 'b'*40
+        with self.assertRaisesRegex(ValueError,'successful main workflow'):
             self.run_publisher()
         self.assertEqual(self.mutations,[])
 

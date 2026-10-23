@@ -37,9 +37,9 @@ LogForge 使用公开的色彩数学改变像素。它无法恢复已裁切的�
 
 正式附件上传后，从主仓库 Release 下载 iOS IPA 及匹配的 RelinkKit。构建流程生成的是**未签名 IPA**，安装前需使用自己的有效 Apple 签名和 provisioning profile。当前没有配置 App Store 或 TestFlight 发布。分发应用时，请保留对应源码、许可及重新链接材料。
 
-云端构建使用主仓库 [Actions](https://github.com/HongHuo0728/LogForge/actions/workflows/build-ios.yml) 中的 **iOS build and tests**。先打包候选应用，再通过必要的原生 UI／转换、内外屏布局和兼容性检查后发布；其他 Duo 诊断按实际结果单独说明。详见 [iOS 构建与安装指南](https://github.com/HongHuo0728/LogForge/blob/main/LogForgeMac/docs/GITHUB_BUILD.md)。
+云端构建使用主仓库 [Actions](https://github.com/HongHuo0728/LogForge/actions/workflows/build-ios.yml) 中的 **iOS build and tests**。先打包候选应用，再通过必要的原生 UI／转换和内外屏布局检查后发布；其他 Duo 诊断按实际结果单独说明。详见 [iOS 构建与安装指南](https://github.com/HongHuo0728/LogForge/blob/main/LogForgeMac/docs/GITHUB_BUILD.md)。
 
-iOS 1.3.2 主要更新 Duo 布局与工具栏，保留 1.3.1 的 AAC／时码修复。[本次发布说明](docs/RELEASE_1.3.2_IOS.md)列出 Xcode 27.1、真实内外屏布局和 iOS 26／iPad 验证范围；必要构建或核心布局失败时阻止正式发布，补充诊断不冒充通过。模拟器结果不能证明真机性能或编辑器识别。
+iOS 1.3.2 主要更新 Duo 布局与工具栏，保留 1.3.1 的 AAC／时码修复。[本次发布说明](docs/RELEASE_1.3.2_IOS.md)列出 Xcode 27.1 构建和真实内外屏布局验证范围；完整原生回归、iOS 26／iPad 兼容性检查可通过手动工作流的 `extended_checks` 选项启用。必要构建或核心布局失败时阻止正式发布，补充诊断不冒充通过。模拟器结果不能证明真机性能或编辑器识别。
 
 ![LogForge Windows 界面](docs/images/LogForge.png)
 

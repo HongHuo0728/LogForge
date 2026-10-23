@@ -10,7 +10,10 @@ mkdir -p "$4"
 destination=$(cd "$4" && pwd)
 mkdir -p "$destination/AppObjects" "$destination/Source" "$destination/Libraries"
 cp -R "$temporary/Objects-normal/" "$destination/AppObjects/"
-cp -R "$products/LogForgeCodec/" "$destination/Libraries/"
+# macOS cp treats a trailing source slash as a request to copy the directory's
+# contents. Keep the named directory required by RELINK.txt and the package audit.
+cp -R "$products/LogForgeCodec" "$destination/Libraries/"
+test -s "$destination/Libraries/LogForgeCodec/lib/libLogForgeFFmpeg.a"
 cp -R "$project/NativeCodec" "$destination/Source/"
 cp "$project/LogForge For iPhone/SoftwareCodec-LICENSE.txt" "$destination/"
 cp "$project/LogForge For iPhone.xcodeproj/project.pbxproj" "$destination/Source/"

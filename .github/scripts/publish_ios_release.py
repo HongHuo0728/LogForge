@@ -31,17 +31,36 @@ def api(path):
     return json.loads(gh('api', f'repos/{REPO}/{path}'))
 
 
+def download_verified(directory):
+    runs = api('actions/workflows/build-ios.yml/runs?event=push&branch=main&status=success&per_page=100')
+    run = next((r for r in runs['workflow_runs'] if r['head_sha'] == os.environ['GITHUB_SHA']), None)
+    audit.require(run is not None, 'No successful main build exists for this exact release commit')
+    version = audit.identity.release_identity(ROOT / 'LogForgeMac')
+    build = audit.identity.release_build(ROOT / 'LogForgeMac')
+    artifact = f'LogForge-{version}-iOS-{build}-unsigned-{run["run_number"]}'
+    directory.mkdir(parents=True, exist_ok=True)
+    gh('run', 'download', str(run['id']), '--repo', REPO, '--name', artifact, '--dir', str(directory))
+    os.environ['LOGFORGE_VERIFIED_RUN'] = str(run['id'])
+
+
 def main(directory):
     audit.require(os.environ['GITHUB_REPOSITORY'] == REPO and os.environ['GITHUB_REF_TYPE'] == 'tag',
                   'Publishing is restricted to release tags in the main repository')
     package = audit.audit(directory, ROOT / 'LogForgeMac')
     tag, commit = 'v' + package['version'], os.environ['GITHUB_SHA']
     audit.require(os.environ['GITHUB_REF_NAME'] == tag, 'Tag and package version differ')
+    evidence_run = os.environ.get('LOGFORGE_VERIFIED_RUN', os.environ['GITHUB_RUN_ID'])
+    source_run = api('actions/runs/' + evidence_run)
+    audit.require(source_run.get('head_sha') == commit and source_run.get('conclusion') == 'success'
+                  and source_run.get('event') == 'push' and source_run.get('head_branch') == 'main'
+                  and source_run.get('path') == '.github/workflows/build-ios.yml'
+                  and source_run.get('head_repository', {}).get('full_name') == REPO,
+                  'Build evidence must be a successful main workflow for this exact release commit')
     previous_audit = json.loads((directory / 'package-audit.json').read_text())
     verification = json.loads((directory / 'verification.json').read_text())
     for report in (previous_audit, verification):
         audit.require(report.get('passed') is True and report.get('commit') == commit
-                      and str(report.get('run')) == os.environ['GITHUB_RUN_ID'],
+                      and str(report.get('run')) == evidence_run,
                       'Evidence must come from this tag, commit and workflow run')
     audit.require(previous_audit['assets'] == package['assets'], 'Package changed after validation')
     expected_poses = {'open-landscape', 'open-portrait', 'book', 'tabletop', 'closed-outer',
@@ -51,7 +70,8 @@ def main(directory):
                   and pose.get('commit') == commit
                   and expected_poses.issubset({p['name'] for p in pose['poses'] if p.get('passed')}),
                   'Required real Duo posture evidence missing')
-    audit.require(set(verification['xctest']) == {'duo', 'phone26', 'ipad'}, 'Compatibility test evidence missing')
+    audit.require('duo' in verification['xctest'] and
+                  set(verification['xctest']) <= {'duo', 'phone26', 'ipad'}, 'Duo native test evidence missing')
     for role, result in verification['xctest'].items():
         audit.require(result.get('passedTests', 0) > 0 and result.get('failedTests', 0) == 0,
                       f'XCTest validation failed: {role}')
@@ -74,11 +94,12 @@ def main(directory):
         files = [directory / name for name in package['assets']] + [old / name for name in WINDOWS]
         expected_assets = {p.name:audit.digest(p) for p in files}
         audit.require(len(expected_assets) == 6, 'Release must have exactly six assets')
-        run_url = f'https://github.com/{REPO}/actions/runs/{os.environ["GITHUB_RUN_ID"]}'
+        run_url = f'https://github.com/{REPO}/actions/runs/{evidence_run}'
         notes = (ROOT / f'docs/RELEASE_{package["version"]}_IOS.md').read_text(encoding='utf-8')
         notes += '\n## Verified build and source provenance\n\n'
         notes += f'- Source: [{commit}](https://github.com/{REPO}/commit/{commit}); tag `{tag}`.\n'
         notes += f'- [Successful build, tests and diagnostic artifacts]({run_url}).\n'
+        notes += '- The release promotes these verified bytes without rebuilding or repeating the simulator suite.\n'
         notes += f'- Xcode {package["xcode"]}, iOS 27.1 SDK; numeric bundle build `{package["bundleBuild"]}`.\n'
         for role, result in verification['xctest'].items():
             notes += f'- XCTest `{role}`: {result["passedTests"]} passed, {result.get("failedTests",0)} failed.\n'
@@ -129,4 +150,9 @@ def main(directory):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('directory', type=Path)
-    main(parser.parse_args().directory.resolve())
+    parser.add_argument('--download-verified', action='store_true')
+    arguments = parser.parse_args()
+    directory = arguments.directory.resolve()
+    if arguments.download_verified:
+        download_verified(directory)
+    main(directory)

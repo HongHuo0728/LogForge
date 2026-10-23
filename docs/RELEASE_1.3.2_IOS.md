@@ -53,9 +53,13 @@ conversion pipeline and report structure are unchanged.
 The release pipeline pins Xcode **27.1 (27A9275)** and the iOS **27.1 SDK**, while
 retaining an iOS **26.0** deployment target. Its focused release checks cover real
 MOV conversion, import ownership/cancellation, layout, toolbar/import/settings/license
-operations, iOS 26/iPad compatibility, and six actual inner/outer simulator layouts.
+operations and six actual inner/outer Duo simulator layouts. iOS 26/iPad runtime
+regressions remain available as optional compatibility checks.
 The device archive is built and checked first. Only one simulator is booted at a
 time, and checks have bounded timeouts.
+After the main build succeeds, the version tag promotes its exact artifacts;
+publication rechecks source provenance and hashes without rebuilding or repeating
+the simulator suite.
 Appium **3.8.0** with XCUITest Driver **12.19.0** records screenshots, accessibility
 trees, hinge angle, display identity and actual window geometry. Injected geometry
 unit cases are separate evidence and never substitute for simulator posture tests.
@@ -66,7 +70,8 @@ all tests passed. Failed core layout or build checks block formal publication.
 Tent, Split View, split keyboard and multiple-window diagnostics are attempted once
 and reported individually; an unverified diagnostic is not presented as a pass.
 The longer appearance/file-drop/conversion-transition suite remains available with
-`LOGFORGE_DUO_SUITE=full`, but is not part of this focused release run.
+`LOGFORGE_DUO_SUITE=full`, but is not part of this focused release run. A manual
+workflow run can enable `extended_checks` to run the full suites and iOS 26/iPad checks.
 Diagnostic artifacts are retained for 14 days. Simulator verification does not
 establish physical-device performance, thermal behavior, haptics or editor recognition.
 

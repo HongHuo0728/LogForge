@@ -8,7 +8,8 @@ Windows 开发环境也可以编辑原生工程并通过 GitHub 云端 Mac 编�
 当前 iOS 开发版本为 **1.3.2 (261023A)**。从成功的主仓库 Actions 获取
 `LogForge-1.3.2-iOS-261023A-unsigned.ipa`、对应 `.sha256`，以及
 `LogForge-1.3.2-iOS-261023A-RelinkKit.zip` 和校验文件。分支构建只生成 Actions 附件；
-正式 tag 构建通过必要构建和布局检查后发布六个附件，包括从 v1.3.1 原样复用的两份 Windows
+正式 tag 从同一提交已成功的 main 构建取回产物，复核来源和哈希后发布六个附件，
+不会再次构建或重复模拟器测试；其中包括从 v1.3.1 原样复用的两份 Windows
 1.3.0 文件。版本号配置不代表线上 Release 已更新，历史附件保留原始版本。
 见 [1.3.2 发布说明](../../docs/RELEASE_1.3.2_IOS.md)。
 
@@ -17,8 +18,10 @@ Windows 开发环境也可以编辑原生工程并通过 GitHub 云端 Mac 编�
 1. 将本地源码和根目录工作流上传到主仓库后，打开
    [Actions / iOS build and tests](https://github.com/HongHuo0728/LogForge/actions/workflows/build-ios.yml)。
 2. 点击 **Run workflow**，选择目标分支并运行。
-3. 等待 **Test and package iOS** 成功：先归档、验包并上传候选 IPA，再顺序运行
-   Duo、iOS 26 和 iPad；每次只启动一个模拟器，避免云端内存不足。
+   正式发布前必须有同一提交的 main push 构建成功；随后推送版本 tag 即可发布该产物。
+3. 等待 **Test and package iOS** 成功：先归档、验包并上传候选 IPA，再运行 Duo
+   必要检查；手动勾选 `extended_checks` 时才增加完整原生／交互、iOS 26 和 iPad
+   检查。每次只启动一个模拟器，避免云端内存不足。
    发行检查覆盖真实 MOV 转换、导入取消、布局和主要页面操作，以及展开横纵向、
    书本、桌面、外屏横纵向六个真实布局。必要检查通过后才生成 `verification.json`。
    帐篷、分屏、分体键盘和多窗口各做一次补充诊断，Release Notes 按实际结果说明。
@@ -65,7 +68,7 @@ Windows 版本不覆盖 iOS patch 版本。
 - 使用 GitHub 官方 `xcode-27` 镜像，明确选择 `/Applications/Xcode_27.1.app`，核验
   Xcode **27.1 (27A9275)**、iOS **27.1 SDK** 和 Metal 工具链。缺少组件时通过
   `xcodebuild -downloadComponent metalToolchain`、`-downloadPlatform iOS` 官方命令补齐。
-- 安装 iOS 27.1 Duo 和 iOS 26.5 兼容 runtime。最低部署仍为 iOS 26。
+- 安装 iOS 27.1 Duo runtime；扩展检查另外安装 iOS 26.5 runtime。最低部署仍为 iOS 26。
 - 真实姿态测试固定 Appium 3.8.0／XCUITest Driver 12.19.0，等待铰链、活动区域和
   实际窗口稳定，并验证当前显示屏。截图屏幕选择不等于应用已切屏。帐篷形态无法
   实际进入时记录未验证，不能用外屏截图或注入几何冒充该姿态已通过。

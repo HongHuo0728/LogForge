@@ -52,7 +52,7 @@ not stand in for a simulator Split View, keyboard split, hinge pose or second sc
 Independent UI scenarios reinstall the test app between tests; continuity assertions occur inside
 each scenario without restarting the app. Diagnostics are retained even on failure.
 The focused release gate requires a successful device archive/package audit, native
-import/layout/UI checks and real MOV conversion, iOS 26/iPad compatibility, plus
+import/layout/UI checks and real MOV conversion on Duo, plus
 unfolded landscape/portrait, book, tabletop and closed outer portrait/landscape.
 Tent, Split View, split keyboard and multiple windows are each attempted once as
 additional diagnostics. Their actual outcomes are retained in `verification.json`
@@ -60,7 +60,14 @@ and release notes; an unavailable simulator posture is never recorded as a pass.
 Use `LOGFORGE_DUO_SUITE=full` for the extended appearance, cross-app drop and running
 conversion transitions, and `LOGFORGE_NATIVE_SUITE=full` for the full native test suite.
 These extended suites are not repeatedly run as part of the focused release.
+The manual workflow's `extended_checks` option also enables iOS 26/iPad runtime
+regressions; the default release run stays focused on Duo. Minimum deployment
+remains iOS 26, with SDK availability checks and adaptive fallback source retained.
 A candidate archive is uploaded before simulator checks and is labeled as a candidate.
+The version tag promotes artifacts from a successful main push of the exact same
+commit. The publisher verifies the run's repository, branch, workflow, status,
+commit and package hashes, then reads back all six uploaded assets. It does not
+rebuild or repeat simulator checks solely because the tag was pushed.
 
 ## Primary references
 

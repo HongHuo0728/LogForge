@@ -21,7 +21,8 @@
   one simulator at a time. Preserve optional extended diagnostics and report their
   actual status; core build/layout failures still prevent publication.
 - Publish four new iOS assets plus the exact two Windows 1.3.0 assets from v1.3.1,
-  checking all six files after draft upload before making the release public.
+  promoting the successful main build for the exact tagged commit without repeating
+  simulator checks. Verify all six files after draft upload before making the release public.
 
 ## 1.3.1 — iOS (26107B)
 

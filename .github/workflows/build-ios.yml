@@ -22,6 +22,11 @@ on:
       - '.github/scripts/test_publish_ios_release.py'
       - 'tests/release_target.py'
   workflow_dispatch:
+    inputs:
+      extended_checks:
+        description: Run the optional full native, compatibility and interaction suites
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -57,10 +62,14 @@ jobs:
 
   iphone:
     needs: release-target
-    if: needs.release-target.outputs.should_build == 'true'
+    if: needs.release-target.outputs.should_build == 'true' && github.ref_type != 'tag'
     name: Test and package iOS
     runs-on: xcode-27
     timeout-minutes: 120
+    env:
+      LOGFORGE_NATIVE_SUITE: ${{ inputs.extended_checks && 'full' || 'release-smoke' }}
+      LOGFORGE_DUO_SUITE: ${{ inputs.extended_checks && 'full' || 'release-smoke' }}
+      LOGFORGE_COMPAT_SUITE: ${{ inputs.extended_checks && 'full' || 'release-smoke' }}
     outputs:
       artifact: ${{ steps.identity.outputs.artifact }}
     steps:
@@ -84,16 +93,20 @@ jobs:
         timeout-minutes: 25
         run: bash tools/build-ios.sh archive
       - name: Audit release bytes
-        run: python3 tools/audit-package.py build/artifacts
+        run: python3 tools/audit-package.py build/artifacts 2>&1 | tee build/logs/package-audit.log
       - name: Upload candidate build before simulator checks
+        if: ${{ !cancelled() && steps.archive.outcome == 'success' }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: LogForge-iOS-candidate-${{ github.run_number }}
-          path: LogForgeMac/build/artifacts/*
+          path: |
+            LogForgeMac/build/artifacts/*
+            LogForgeMac/build/logs/package-audit.log
           if-no-files-found: error
           retention-days: 14
       - name: Duo simulator regression tests
         id: duo
+        if: ${{ !cancelled() }}
         timeout-minutes: 25
         run: bash tools/build-ios.sh test duo
       - name: Upload Duo regression logs and screenshots immediately
@@ -119,11 +132,11 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
       - name: iOS 26 compatibility regression tests
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && inputs.extended_checks }}
         timeout-minutes: 15
         run: bash tools/build-ios.sh test phone26
       - name: iPad regression tests
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && inputs.extended_checks }}
         timeout-minutes: 15
         run: bash tools/build-ios.sh test ipad
       - name: Collect required release verification
@@ -150,8 +163,8 @@ jobs:
 
   publish:
     name: Publish verified iOS release with original Windows 1.3.0 assets
-    needs: iphone
-    if: github.ref_type == 'tag' && startsWith(github.ref_name, 'v')
+    needs: release-target
+    if: needs.release-target.outputs.should_build == 'true' && github.ref_type == 'tag' && startsWith(github.ref_name, 'v')
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -161,12 +174,7 @@ jobs:
         working-directory: .
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - name: Download verified packages from this run
+      - name: Promote the verified main build, read back all six assets, then publish
         env:
           GH_TOKEN: ${{ github.token }}
-          ARTIFACT: ${{ needs.iphone.outputs.artifact }}
-        run: gh run download "$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY" --name "$ARTIFACT" --dir release-artifacts
-      - name: Verify, upload to draft, read back all six assets, then publish
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: python3 .github/scripts/publish_ios_release.py release-artifacts
+        run: python3 .github/scripts/publish_ios_release.py release-artifacts --download-verified

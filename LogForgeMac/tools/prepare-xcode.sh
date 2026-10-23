@@ -14,7 +14,9 @@ if ! xcrun --sdk iphoneos metal --version > build/logs/metal-version.txt 2>&1; t
     xcodebuild -downloadComponent metalToolchain 2>&1 | tee build/logs/metal-install.log
     xcrun --sdk iphoneos metal --version > build/logs/metal-version.txt
 fi
-for version in 27.1 26.5; do
+versions=(27.1)
+if [ "${LOGFORGE_COMPAT_SUITE:-release-smoke}" = full ]; then versions+=(26.5); fi
+for version in "${versions[@]}"; do
     if ! xcrun simctl list runtimes --json | python3 -c \
         'import json,sys; v=sys.argv[1]; sys.exit(not any(r["version"]==v and r.get("isAvailable") for r in json.load(sys.stdin)["runtimes"]))' "$version"; then
         xcodebuild -downloadPlatform iOS -buildVersion "$version" -architectureVariant arm64 \
@@ -23,5 +25,7 @@ for version in 27.1 26.5; do
 done
 xcrun simctl list --json > build/logs/simulator-inventory.json
 python3 tools/select-simulator.py duo > build/logs/duo-device.txt
-python3 tools/select-simulator.py phone26 > build/logs/phone26-device.txt
-python3 tools/select-simulator.py ipad > build/logs/ipad-device.txt
+if [ "${LOGFORGE_COMPAT_SUITE:-release-smoke}" = full ]; then
+    python3 tools/select-simulator.py phone26 > build/logs/phone26-device.txt
+    python3 tools/select-simulator.py ipad > build/logs/ipad-device.txt
+fi

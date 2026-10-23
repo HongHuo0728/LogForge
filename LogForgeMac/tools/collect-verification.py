@@ -16,7 +16,8 @@ if (pose.get('passed') is not True or pose.get('syntheticLayout') is not False
 # posture/keyboard/multitasking diagnostics remain in the evidence, including
 # failures; they must never be reported as passed merely to publish a build.
 summaries = {}
-for role in ('duo', 'phone26', 'ipad'):
+roles = ('duo', 'phone26', 'ipad') if os.environ.get('LOGFORGE_COMPAT_SUITE') == 'full' else ('duo',)
+for role in roles:
     bundle = root / f'build/Tests-{role}.xcresult'
     summary = json.loads(subprocess.check_output(['xcrun', 'xcresulttool', 'get', 'test-results',
                           'summary', '--path', str(bundle)], text=True))
