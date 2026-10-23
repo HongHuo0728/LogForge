@@ -40,10 +40,12 @@ def until(operation, timeout=45):
 class Driver:
     def __init__(self):
         self.session = ''
+        self.orientation_warnings = []
+        self.last_pose_details = {}
 
-    def request(self, method, route, data=None, timeout=180):
+    def request(self, method, route, data=None, timeout=180, server='http://127.0.0.1:4723'):
         payload = None if data is None else json.dumps(data).encode()
-        request = urllib.request.Request('http://127.0.0.1:4723' + route,
+        request = urllib.request.Request(server + route,
             data=payload, headers={'Content-Type':'application/json'}, method=method)
         try:
             with urllib.request.urlopen(request, timeout=timeout) as response:
@@ -70,8 +72,11 @@ class Driver:
     def tap(self, identifier):
         try:
             element = self.element(identifier)
-            if not self.call('GET', '/element/' + element + '/attribute/visible') in ('true', True):
-                raise RuntimeError('Element is not visible')
+            # WDA can report visible=false for a Duo toolbar item whose native
+            # hit point is valid. XCTest tap and the resulting screen are the
+            # interaction check; the visibility attribute is not a prerequisite.
+            self.call('POST', '/element/' + element + '/click', {})
+            return
         except RuntimeError:
             more = self.call('POST', '/elements', {'using':'-ios predicate string',
                 'value':"label == 'More' OR label == 'More Actions' OR name == 'ToolbarOverflowMenu'"})
@@ -114,9 +119,37 @@ class Driver:
 
     def launch(self, arguments, language='en'):
         self.mobile('terminateApp', bundleId=BUNDLE)
-        self.mobile('launchApp', bundleId=BUNDLE, arguments=['-AppleLanguages',f'({language})',
-            '-AppleLocale','en_US','--ui-testing',*arguments])
+        # Simulator installation can finish before FrontBoard registers the app.
+        until(lambda: self.mobile('launchApp', bundleId=BUNDLE, arguments=[
+            '-AppleLanguages',f'({language})','-AppleLocale','en_US','--ui-testing',*arguments])
+            is None, timeout=30)
         return until(self.state)
+
+    def rotate(self, orientation):
+        try:
+            self.call('POST', '/orientation', {'orientation':orientation})
+        except RuntimeError as error:
+            if 'Unable To Rotate Device' not in str(error):
+                raise
+            # WDA compares device and application interface orientations. Duo's
+            # panels need not share that mapping. The caller must still verify
+            # the actual window aspect and reserved regions before it can pass.
+            self.orientation_warnings.append({'requested':orientation,'message':'Unable To Rotate Device'})
+
+    def physical_orientation(self):
+        return self.request('GET', '/wda/deviceOrientation', server='http://127.0.0.1:8100')
+
+    def face_down(self):
+        # WDA's public rotation route maps x=270 to XCUIDevice.orientation =
+        # UIDeviceOrientationFaceDown. Its orientation route exposes only four
+        # cardinal positions. Verify the device value and outer app window too.
+        try:
+            self.request('POST', '/rotation', {'x':270,'y':0,'z':0}, server='http://127.0.0.1:8100')
+        except RuntimeError as error:
+            if 'The current rotation cannot be set' not in str(error):
+                raise
+            self.orientation_warnings.append({'requested':'faceDown','message':str(error)[:300]})
+        until(lambda: self.physical_orientation() == 'UIDeviceOrientationFaceDown')
 
     def state(self):
         return json.loads(self.text('workspaceState'))
@@ -142,6 +175,7 @@ class Driver:
     def window(self):
         source = ET.fromstring(self.call('GET', '/source'))
         windows = [w for w in source.iter('XCUIElementTypeWindow') if w.get('visible') != 'false']
+        assert windows, 'Application window is not available yet'
         window = max(windows, key=lambda w:float(w.get('width',0))*float(w.get('height',0)))
         return {key:float(window.get(key,0)) for key in ('x','y','width','height')}
 
@@ -158,9 +192,8 @@ class Driver:
                 {'type':'pointerMove','duration':650,'x':round(destination_x),'y':round(destination_y)},
                 {'type':'pause','duration':250}, {'type':'pointerUp','button':0}]}]})
 
-    def pose(self, angle, orientation, screen, layout, divided=False):
+    def pose(self, angle, orientation, screen, layout, divided=False, face_down=False):
         self.mobile('setSimulatedHingeAngle', angle=angle)
-        self.call('POST', '/orientation', {'orientation':orientation})
         until(lambda: abs(float(self.mobile('getSimulatedHingeAngle')) - angle) < 1)
         displays = self.mobile('listDisplays')
         (OUTPUT / 'displays-latest.json').write_text(json.dumps(displays, indent=2), encoding='utf-8')
@@ -176,7 +209,33 @@ class Driver:
         assert len(displays) == 2, displays
         displays = sorted(displays, key=lambda d:d['metrics']['widthPixels'] * d['metrics']['heightPixels'])
         display = displays[0] if screen == 'outer' else displays[-1]
-        self.call('POST', '/appium/settings', {'settings':{'currentDisplayId':display['id']}})
+        active = displays[-1] if face_down else display
+        self.call('POST', '/appium/settings', {'settings':{'currentDisplayId':active['id']}})
+
+        def display_window(panel):
+            window = self.window()
+            points = sorted((panel['metrics']['widthPixels']/panel['metrics']['density'],
+                             panel['metrics']['heightPixels']/panel['metrics']['density']))
+            assert all(abs(a-b) < 3 for a,b in zip(sorted((window['width'],window['height'])), points)), \
+                'App window is on the wrong display'
+            return window
+
+        # Folding is asynchronous. Wait for the app to reach its active panel
+        # before rotating; rotating during screen migration can be discarded.
+        until(lambda: display_window(active))
+        self.rotate(orientation)
+        wanted_wide = layout == 'horizontal' if layout in ('horizontal','vertical') else orientation != 'PORTRAIT'
+        def requested_aspect():
+            window = display_window(active)
+            return (window['width'] > window['height']) == wanted_wide
+        try:
+            until(requested_aspect, timeout=8)
+        except AssertionError:
+            self.rotate('PORTRAIT' if orientation == 'LANDSCAPE' else 'LANDSCAPE')
+        if face_down:
+            self.face_down()
+            self.call('POST', '/appium/settings', {'settings':{'currentDisplayId':display['id']}})
+
         def geometry():
             values = self.text('workspaceGeometry').split('|') if layout else []
             if layout:
@@ -184,23 +243,13 @@ class Driver:
                 assert int(values[3]) > 0 if divided else int(values[3]) == 0, values
             # Verify the app's real window occupies the selected display. Selecting a
             # screenshot display alone does NOT move the application onto that display.
-            source = ET.fromstring(self.call('GET', '/source'))
-            windows = [w for w in source.iter('XCUIElementTypeWindow') if w.get('visible') != 'false']
-            points = sorted((display['metrics']['widthPixels']/display['metrics']['density'],
-                             display['metrics']['heightPixels']/display['metrics']['density']))
-            assert any(all(abs(a-b) < 3 for a,b in zip(sorted((float(w.get('width',0)),
-                       float(w.get('height',0)))), points)) for w in windows), 'App window is on the wrong display'
+            window = display_window(display)
+            assert (window['width'] > window['height']) == wanted_wide, 'Window has the wrong aspect'
             return values or ['presented']
-        # A physical device rotation does not have the same aspect on both
-        # panels. Choose the actual requested window aspect, not an assumed
-        # correspondence between UIDeviceOrientation and the inner screen.
-        if layout in ('horizontal', 'vertical'):
-            values = until(lambda: self.text('workspaceGeometry').split('|'))
-            wanted_wide = layout == 'horizontal'
-            if (float(values[1]) > float(values[2])) != wanted_wide:
-                self.call('POST', '/orientation', {'orientation':
-                    'PORTRAIT' if orientation == 'LANDSCAPE' else 'LANDSCAPE'})
         values = until(geometry)
+        self.last_pose_details = {'actualWindow':self.window(),
+                                  'physicalOrientation':self.physical_orientation(),
+                                  'measuredAngle':self.mobile('getSimulatedHingeAngle')}
         return display, values
 
 
@@ -297,8 +346,8 @@ def test_system_keyboard(driver, report):
     until(lambda: driver.call('GET','/element/'+search+'/attribute/value') == entered)
     # Keep the document picker and its real system keyboard alive while rotating/folding.
     driver.mobile('setSimulatedHingeAngle', angle=90)
-    driver.call('POST', '/orientation', {'orientation':'PORTRAIT'})
     until(lambda: abs(float(driver.mobile('getSimulatedHingeAngle'))-90) < 1)
+    driver.rotate('PORTRAIT')
     keyboards = until(lambda: driver.call('POST','/elements',
         {'using':'class name','value':'XCUIElementTypeKeyboard'}))
     assert keyboards, 'Keyboard disappeared during fold'
@@ -601,6 +650,7 @@ def main():
             except Exception: pass
         raise
     finally:
+        report['orientationWarnings'] = driver.orientation_warnings
         (OUTPUT / 'results.json').write_text(json.dumps(report, indent=2), encoding='utf-8')
         if driver.session:
             try: driver.call('DELETE','')
@@ -608,7 +658,8 @@ def main():
 
 
 def test_pose(driver, report, baseline, name, angle, orientation, screen, layout, divided):
-    display, geometry = driver.pose(angle, orientation, screen, layout, divided)
+    display, geometry = driver.pose(angle, orientation, screen, layout, divided, face_down=name=='tent-outer')
+    measured = dict(driver.last_pose_details)
     state = driver.state()
     assert state['ids'] == baseline['ids'], 'Queue identity changed during folding'
     assert state['statuses'] == baseline['statuses']
@@ -617,13 +668,15 @@ def test_pose(driver, report, baseline, name, angle, orientation, screen, layout
     until(lambda: driver.element('Choose Files'))
     driver.capture(name+'-import', display)
     driver.tap('cancelImport')
+    until(lambda: not driver.call('POST','/elements',{'using':'accessibility id','value':'cancelImport'}))
     driver.tap('conversionSettings')
     until(lambda: driver.text('settingsVersion') == '1.3.2 (261023A)')
     driver.capture(name+'-settings', display)
     driver.tap('cancelSettings')
+    until(lambda: not driver.call('POST','/elements',{'using':'accessibility id','value':'cancelSettings'}))
     until(driver.state)
     report['poses'].append({'name':name, 'angle':angle, 'orientation':orientation,
-        'screen':screen, 'display':display, 'geometry':geometry, 'passed':True, **shot})
+        'screen':screen, 'display':display, 'geometry':geometry, 'passed':True, **measured, **shot})
     print('PASS pose:', name, flush=True)
 
 
